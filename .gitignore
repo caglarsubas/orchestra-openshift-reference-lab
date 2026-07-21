@@ -1,0 +1,36 @@
+# Terraform state and generated plans
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Live environment inputs and credentials
+*.auto.tfvars
+*.auto.tfvars.json
+*.kubeconfig
+auth/
+restricted/
+install-dir/
+install-config.yaml
+metadata.json
+terraform.tfvars
+
+# Evidence and generated campaign material
+evidence/
+artifacts/
+campaigns/live/
+
+# Local tooling
+.DS_Store
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
