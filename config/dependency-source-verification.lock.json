@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "verificationId": "orchestra-dependency-source-verification-2026-07-21.1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
+  },
+  "observationWindow": {
+    "observedAt": "2026-07-21T17:10:00Z",
+    "validUntil": "2026-07-28T17:10:00Z",
+    "maxAgeDays": 7
+  },
+  "observer": {
+    "executionClass": "developer-workstation",
+    "tool": "cosign",
+    "toolVersion": "v3.1.1",
+    "toolCommit": "7914231b348c4057891edeb321772aad3ed04fce",
+    "platform": "darwin/arm64",
+    "trustRootSource": "sigstore-tuf-default",
+    "trustRootDigest": "sha256:6494e21ea73fa7ee769f85f57d5a3e6a08725eae1e38c755fc3517c9e6bc0b66",
+    "evidenceOrigin": "source-intake-non-campaign"
+  },
+  "claim": {
+    "registrySubjectsObserved": 11,
+    "signedSubjectsCryptographicallyVerified": 3,
+    "unsignedSubjectsObserved": 8,
+    "exceptionsApproved": 0,
+    "signedRunnerReverified": false,
+    "allSubjectsSourceAdmitted": false,
+    "mirroringAuthorized": false,
+    "campaignEvidence": false
+  },
+  "verifiedSubjects": [
+    {
+      "id": "cloudnative-pg-operator",
+      "subject": "ghcr.io/cloudnative-pg/cloudnative-pg@sha256:a2701eb97cdd2a34b1fdb2cb51987f544b706e40bec72ae7146cd8580efefebb",
+      "signatureType": "sigstore-keyless",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "certificateIdentity": "https://github.com/cloudnative-pg/cloudnative-pg/.github/workflows/release-publish.yml@refs/tags/v1.30.0",
+      "bundleFormat": "sigstore-bundle-v3",
+      "bundleDigest": "sha256:1a77d3f82f521663ed8ac25ebbd0d3da0d8081336b83651a714474ac5b30e360",
+      "transparencyLog": {
+        "logIndex": "2011068540",
+        "integratedAt": "2026-06-29T16:41:11Z"
+      },
+      "checks": {
+        "subjectDigest": true,
+        "certificateIdentity": true,
+        "oidcIssuer": true,
+        "certificateChain": true,
+        "transparencyLog": true,
+        "claims": true
+      },
+      "sourceAdmissionState": "observed-verified-runner-reverification-required",
+      "reasonCodes": [
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "cloudnative-pg-postgresql-16",
+      "subject": "ghcr.io/cloudnative-pg/postgresql@sha256:26e146bc71ebfc2a3937f729a15161a7fb6cd7c8a0b0007ad60cb53d2371b3fc",
+      "signatureType": "sigstore-keyless",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "certificateIdentity": "https://github.com/cloudnative-pg/postgres-containers/.github/workflows/bake_targets.yml@refs/heads/main",
+      "bundleFormat": "legacy-cosign-bundle",
+      "bundleDigest": "sha256:d5e82b8d056dd99b36b4eaed3213d831ab8699caba78214f2cc526de9d25eae8",
+      "transparencyLog": {
+        "logIndex": "701956974",
+        "integratedAt": "2025-11-15T07:46:58Z"
+      },
+      "checks": {
+        "subjectDigest": true,
+        "certificateIdentity": true,
+        "oidcIssuer": true,
+        "certificateChain": true,
+        "transparencyLog": true,
+        "claims": true
+      },
+      "sourceAdmissionState": "observed-verified-runner-reverification-required",
+      "reasonCodes": [
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "external-secrets-controller",
+      "subject": "ghcr.io/external-secrets/external-secrets@sha256:24c0dd3699e0988520afd2218612758cd97d1f702757b5b4fcf89adaa33ef679",
+      "signatureType": "sigstore-keyless",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "certificateIdentity": "https://github.com/external-secrets/external-secrets/.github/workflows/release.yml@refs/heads/main",
+      "bundleFormat": "legacy-cosign-bundle",
+      "bundleDigest": "sha256:06996e714e21e1d60f715d839545b307122cb624cd74372784e93f8339090ca9",
+      "transparencyLog": {
+        "logIndex": "2193530102",
+        "integratedAt": "2026-07-18T05:38:26Z"
+      },
+      "checks": {
+        "subjectDigest": true,
+        "certificateIdentity": true,
+        "oidcIssuer": true,
+        "certificateChain": true,
+        "transparencyLog": true,
+        "claims": true
+      },
+      "sourceAdmissionState": "observed-verified-runner-reverification-required",
+      "reasonCodes": [
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    }
+  ],
+  "exceptionRequiredSubjects": [
+    {
+      "id": "barman-cloud-controller",
+      "subject": "ghcr.io/cloudnative-pg/plugin-barman-cloud@sha256:71589dbac582333442812b07b31f7ea4d00324a8358aac7ca507dabf9f4b6c96",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "barman-cloud-sidecar",
+      "subject": "ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar@sha256:990361af3319f9e23aafa0f6d7981f99bf1f69b4e6a85cf1bc7d71d6f09bb288",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "clickhouse-operator",
+      "subject": "docker.io/altinity/clickhouse-operator@sha256:a802b3a19d2011f672c32cea6733e573e004938ff463d1c3ab4ac0b16b9877dd",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "clickhouse-metrics-exporter",
+      "subject": "docker.io/altinity/metrics-exporter@sha256:5523d83190ad1560051f19fe6daa00876436f12cf833a506731ed6226192193f",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "clickhouse-server-lts",
+      "subject": "docker.io/clickhouse/clickhouse-server@sha256:a9d328123ff8a61bf6b16448528b577d59deb85758172e13b09054b0727f8adf",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "nats-server",
+      "subject": "docker.io/library/nats@sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "nats-config-reloader",
+      "subject": "docker.io/natsio/nats-server-config-reloader@sha256:64cb6c858e794906d3167378e02b7e0feb83c4e14c07b371eb8d921ef8c4a60b",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    },
+    {
+      "id": "vault-server",
+      "subject": "docker.io/hashicorp/vault@sha256:a296a888b118615dc01d5f1a6846e6d4a7277946caaed5b447008fff5fe06b54",
+      "observation": "no-cosign-signature-at-locked-index",
+      "exception": {
+        "status": "required-not-approved",
+        "exceptionId": null,
+        "approvedByIdentityDigests": [],
+        "approvedAt": null,
+        "expiresAt": null,
+        "riskReviewDigest": null,
+        "licenseReviewDigest": null,
+        "vulnerabilityReportDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_EXCEPTION_REQUIRED"
+      ]
+    }
+  ],
+  "admission": {
+    "status": "blocked",
+    "requiredExceptionCount": 8,
+    "approvedExceptionCount": 0,
+    "requiredEvidence": [
+      "signed-certification-runner-reverification",
+      "time-bounded-two-person-exceptions",
+      "license-review-digests",
+      "vulnerability-report-digests",
+      "compensating-control-digests"
+    ],
+    "reasonCodes": [
+      "SIGNED_RUNNER_REVERIFICATION_REQUIRED",
+      "UPSTREAM_SIGNATURE_EXCEPTIONS_MISSING",
+      "SOURCE_ADMISSION_INCOMPLETE",
+      "MIRRORING_NOT_AUTHORIZED"
+    ]
+  }
+}

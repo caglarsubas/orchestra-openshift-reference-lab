@@ -6,6 +6,7 @@ import unittest
 from scripts.validate_dependency_gitops import (
     EXPECTED_RENDERED_COUNTS,
     GITOPS_ROOT,
+    SOURCE_VERIFICATION_DIGEST,
     validate_project,
     validate_rendered,
 )
@@ -23,6 +24,12 @@ class DependencyGitOpsTests(unittest.TestCase):
             "blocked",
         )
         self.assertFalse(self.project["spec"]["syncWindows"][0]["manualSync"])
+        self.assertEqual(
+            self.project["metadata"]["annotations"][
+                "orchestra.prometa.ai/dependency-source-verification-digest"
+            ],
+            SOURCE_VERIFICATION_DIGEST,
+        )
 
     def test_sync_window_cannot_be_relaxed_in_foundation(self) -> None:
         changed = copy.deepcopy(self.project)

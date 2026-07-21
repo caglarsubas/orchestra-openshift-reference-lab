@@ -22,6 +22,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | OpenShift `4.20.27` cluster | No | N/A | No | No | No |
 | Immutable dependency source/BOM lock | Yes | Yes | No | No | No |
 | Source-resolved dependency image admission lock | Yes | Yes | No | No | No |
+| Bounded source-signature observation | Yes | Yes | No | Partial | No |
+| Empty mirror-receipt intake contract | Yes | Yes | No | No | No |
 | Dependency topology/security/backup contracts | Yes | Yes | No | No | No |
 | Dependency GitOps namespace/default-deny/project floor | Yes | Yes | No | No | No |
 | Dependency operator Applications and admitted image locks | No | N/A | No | No | No |
@@ -39,13 +41,17 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Reference verification BOM | No | N/A | No | No | No |
 
 The dependency source catalog, fail-closed GitOps floor, eleven exact AMD64
-source image identities, and six detailed service contracts are now declared.
-No upstream verification, destination mirror, lab signature, live identity,
-backup target, server-side dry run, or approval is claimed. ClickHouse backup
-selection and compatibility proofs remain explicit blockers. External Secrets
-is correctly assigned to OpenShift while Vault remains in the GKE services
-plane. The next dependency increment is signed source intake, Artifact
-Registry/Harbor mirror receipts, and executable operator/service overlays.
+source image identities, and six detailed service contracts are declared. A
+seven-day, non-campaign workstation observation cryptographically verified
+three exact keyless subjects and found no attached signature for eight. It did
+not approve an exception or authorize mirroring; signed-runner replay remains
+required. The checked-in mirror intake is intentionally empty. No destination
+mirror, lab signature, live identity, backup target, server-side dry run, or
+approval is claimed. ClickHouse backup selection and compatibility proofs
+remain explicit blockers. External Secrets is correctly assigned to OpenShift
+while Vault remains in the GKE services plane. The next dependency increment
+is reviewed source exceptions plus signed-runner replay, followed by live
+Artifact Registry/Harbor receipts and executable operator/service overlays.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

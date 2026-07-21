@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "targetClass": "vendor-reference-lab",
+  "executionMode": "live",
+  "intakeId": "orchestra-dependency-mirror-intake-template-v1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89"
+  },
+  "claim": {
+    "sourceAdmissionComplete": false,
+    "artifactRegistryReady": false,
+    "harborReady": false,
+    "allSubjectsMirrored": false,
+    "allSubjectsLabSigned": false,
+    "privatePullVerified": false,
+    "twoPersonApproved": false,
+    "activationAuthorized": false,
+    "applied": false,
+    "campaignEvidence": false
+  },
+  "destinations": {
+    "artifactRegistry": {
+      "registry": "europe-west1-docker.pkg.dev",
+      "repository": null,
+      "registryIdentityDigest": null,
+      "tlsPolicyDigest": null,
+      "ready": false
+    },
+    "harbor": {
+      "registry": "harbor.services.ocp-lab.prometa.ai",
+      "repository": null,
+      "registryIdentityDigest": null,
+      "tlsPolicyDigest": null,
+      "ready": false
+    }
+  },
+  "subjects": [
+    {
+      "id": "cloudnative-pg-operator",
+      "sourceSubject": "ghcr.io/cloudnative-pg/cloudnative-pg@sha256:a2701eb97cdd2a34b1fdb2cb51987f544b706e40bec72ae7146cd8580efefebb",
+      "sourceAdmissionState": "runner-reverification-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "cloudnative-pg-postgresql-16",
+      "sourceSubject": "ghcr.io/cloudnative-pg/postgresql@sha256:26e146bc71ebfc2a3937f729a15161a7fb6cd7c8a0b0007ad60cb53d2371b3fc",
+      "sourceAdmissionState": "runner-reverification-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "barman-cloud-controller",
+      "sourceSubject": "ghcr.io/cloudnative-pg/plugin-barman-cloud@sha256:71589dbac582333442812b07b31f7ea4d00324a8358aac7ca507dabf9f4b6c96",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "barman-cloud-sidecar",
+      "sourceSubject": "ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar@sha256:990361af3319f9e23aafa0f6d7981f99bf1f69b4e6a85cf1bc7d71d6f09bb288",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "clickhouse-operator",
+      "sourceSubject": "docker.io/altinity/clickhouse-operator@sha256:a802b3a19d2011f672c32cea6733e573e004938ff463d1c3ab4ac0b16b9877dd",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "clickhouse-metrics-exporter",
+      "sourceSubject": "docker.io/altinity/metrics-exporter@sha256:5523d83190ad1560051f19fe6daa00876436f12cf833a506731ed6226192193f",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "clickhouse-server-lts",
+      "sourceSubject": "docker.io/clickhouse/clickhouse-server@sha256:a9d328123ff8a61bf6b16448528b577d59deb85758172e13b09054b0727f8adf",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "nats-server",
+      "sourceSubject": "docker.io/library/nats@sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "nats-config-reloader",
+      "sourceSubject": "docker.io/natsio/nats-server-config-reloader@sha256:64cb6c858e794906d3167378e02b7e0feb83c4e14c07b371eb8d921ef8c4a60b",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "vault-server",
+      "sourceSubject": "docker.io/hashicorp/vault@sha256:a296a888b118615dc01d5f1a6846e6d4a7277946caaed5b447008fff5fe06b54",
+      "sourceAdmissionState": "exception-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    },
+    {
+      "id": "external-secrets-controller",
+      "sourceSubject": "ghcr.io/external-secrets/external-secrets@sha256:24c0dd3699e0988520afd2218612758cd97d1f702757b5b4fcf89adaa33ef679",
+      "sourceAdmissionState": "runner-reverification-required",
+      "artifactRegistry": {"reference": null, "digest": null, "objectGeneration": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "harbor": {"reference": null, "digest": null, "actorIdentityDigest": null, "receiptDigest": null},
+      "labSignature": {"bundleDigest": null, "signerIdentityDigest": null, "policyDigest": null, "verified": false},
+      "privatePull": {"gke": false, "openshift": false}
+    }
+  ],
+  "approvals": {
+    "requiredReviewers": 2,
+    "reviewerIdentityDigests": [],
+    "approvedAt": null,
+    "approvalDigest": null
+  },
+  "admission": {
+    "status": "blocked",
+    "reasonCodes": [
+      "SOURCE_ADMISSION_INCOMPLETE",
+      "DESTINATION_REGISTRIES_UNBOUND",
+      "MIRROR_RECEIPTS_MISSING",
+      "LAB_SIGNATURES_MISSING",
+      "PRIVATE_PULL_PROOFS_MISSING",
+      "TWO_PERSON_APPROVAL_MISSING"
+    ]
+  }
+}

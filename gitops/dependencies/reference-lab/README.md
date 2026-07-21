@@ -25,6 +25,12 @@ It binds eleven exact source image indexes and linux/amd64 manifests plus six
 service contracts. All upstream verification, mirror, lab-signature, live
 binding, dry-run, and approval fields remain blocked.
 
+The project also binds the bounded source-verification observation digest
+`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+Three exact subjects verified cryptographically, while eight require reviewed
+exceptions. The observation is not signed-runner evidence and does not remove
+the deny window. The mirror-intake template remains completely empty.
+
 ## Why there are no Applications yet
 
 A chart version does not bind all images rendered by that chart. Creating an

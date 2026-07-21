@@ -12,6 +12,7 @@ authorization digest, independent timing, and cleanup verification.
 | Private OpenShift installation | Template delivered; live procedure pending gates |
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract implemented; live mirror intake pending |
+| Dependency supply-chain intake | Bounded signature observation implemented; runner replay, exceptions, and mirror receipts pending |
 | Release-validation receiver | Procedure implemented; publication and live rehearsal pending |
 | Synthetic tenant and MCP surfaces | Procedure implemented; publication and live rehearsal pending |
 | Upgrade and rollback | Pending immutable release publication |
