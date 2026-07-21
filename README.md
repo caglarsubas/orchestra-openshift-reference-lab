@@ -66,6 +66,11 @@ It locks eleven upstream chart packages and accounts for every declared
 dependency, while keeping activation blocked until image-level mirror intake,
 Secret references, and unresolved provider decisions are closed.
 
+Lab-owned service admission is locked separately in
+[`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
+release-validation receiver remains `source-only`: it has no release, image,
+or GitOps reference until publication and live prerequisites are complete.
+
 ## Layout
 
 | Path | Ownership |
@@ -77,6 +82,7 @@ Secret references, and unresolved provider decisions are closed.
 | `gitops/` | Cluster declarations; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
 | `scripts/` | Local/CI validation and rendering tools |
+| `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |
 
 The current proof-state matrix is maintained in

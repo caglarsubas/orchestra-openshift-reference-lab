@@ -42,6 +42,9 @@
 | Accidental irreversible bucket lock | Certification-mode precondition plus exact lock acknowledgement and review runbook |
 | Terraform drift during soak | GitOps/Terraform drift checks; material changes cancel the campaign |
 | Automated rollback gains deployment authority | External receiver and Argo CD own action; Orchestra sends signed recommendation only |
+| Webhook replay or state regression | Raw-body HMAC with bounded age, event/header binding, PostgreSQL event idempotency, and monotonic validation heads |
+| Receiver crash silently repeats a GitOps action | Transactional inbox/outbox, stable event id, expired claims become `INDETERMINATE`, and evidence-bound operator reconciliation |
+| GitHub App crosses tenant or repository boundary | Single synthetic repository installation, short-lived installation tokens, bounded dispatch payload, and no OpenShift credential |
 
 ## Explicit residual risks
 
@@ -61,3 +64,9 @@
 - The first-party Valkey chart does not currently satisfy the locked Sentinel
   topology. Selecting a third-party operator or changing topology requires a
   reviewed architecture decision and a new dependency BOM.
+- GitHub `repository_dispatch` has no provider-side idempotency guarantee. The
+  tenant workflow must durably deduplicate the stable event id; ambiguous
+  dispatches remain blocked until reconciliation.
+- The receiver source has not yet been published, mirrored, admitted, deployed,
+  restored, fault-tested, or soaked. CI and a successful image build are not
+  live reference-lab evidence.

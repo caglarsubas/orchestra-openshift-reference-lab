@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools==80.10.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orchestra-reference-lab-release-receiver"
+version = "0.1.0"
+description = "Durable tenant-owned receiver for Orchestra release-validation recommendations"
+requires-python = ">=3.12"
+dependencies = [
+  "cryptography==49.0.0",
+  "gunicorn==26.0.0",
+  "psycopg[binary]==3.3.4",
+  "psycopg-pool==3.3.1",
+]
+
+[project.optional-dependencies]
+dev = ["ruff==0.14.14"]
+
+[project.scripts]
+orchestra-release-receiver-migrate = "orchestra_receiver.migrate:main"
+orchestra-release-receiver-worker = "orchestra_receiver.worker:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+orchestra_receiver = ["migrations/*.sql"]

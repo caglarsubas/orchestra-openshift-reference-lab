@@ -13,6 +13,7 @@ from scripts.validate_repository import (
     canonical_digest,
     load_json,
     validate_lock,
+    validate_lab_services,
     validate_prerequisites,
 )
 
@@ -20,9 +21,8 @@ from scripts.validate_repository import (
 class ContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.lock = load_json(ROOT / "config" / "lab.lock.json")
-        self.prerequisites = load_json(
-            ROOT / "config" / "prerequisites.example.json"
-        )
+        self.prerequisites = load_json(ROOT / "config" / "prerequisites.example.json")
+        self.services = load_json(ROOT / "config" / "lab-services.lock.json")
 
     def test_locked_topology_is_valid_and_stable(self) -> None:
         validate_lock(self.lock)
@@ -41,6 +41,20 @@ class ContractTests(unittest.TestCase):
                 "contractualSla": False,
             },
         )
+
+    def test_lab_receiver_remains_source_only(self) -> None:
+        validate_lab_services(self.services)
+        receiver = self.services["services"][0]
+        self.assertEqual(receiver["activation"], "source-only")
+        self.assertIsNone(receiver["image"])
+        self.assertFalse(receiver["gitOpsReferenced"])
+
+    def test_lab_receiver_cannot_activate_without_publication(self) -> None:
+        changed = copy.deepcopy(self.services)
+        changed["services"][0]["activation"] = "active"
+        changed["services"][0]["gitOpsReferenced"] = True
+        with self.assertRaisesRegex(ValueError, "lab_service_activation_invalid"):
+            validate_lab_services(changed)
 
     def test_topology_drift_is_rejected(self) -> None:
         changed = copy.deepcopy(self.lock)
