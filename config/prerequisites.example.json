@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "targetClass": "vendor-reference-lab",
+  "executionMode": "live",
+  "gates": {
+    "redHatEntitlement": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "openshiftPullSecret": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "openshiftInstaller": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "gcpBillingAndQuotas": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "targetProject": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "servicesEvidenceProject": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "dnsDelegation": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "shortLivedIdentityFederation": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "certificationRunner": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    },
+    "crossPlaneReleaseSet": {
+      "status": "missing",
+      "evidenceDigest": null,
+      "verifiedAt": null,
+      "verifiedByIdentityDigest": null
+    }
+  }
+}

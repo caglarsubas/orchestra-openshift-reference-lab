@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "claim": {
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false
+  },
+  "location": {
+    "cloud": "gcp",
+    "region": "europe-west1",
+    "zones": [
+      "europe-west1-b",
+      "europe-west1-c",
+      "europe-west1-d"
+    ],
+    "dnsZone": "ocp-lab.prometa.ai"
+  },
+  "projects": {
+    "count": 2,
+    "roles": [
+      "target",
+      "services-evidence"
+    ],
+    "mustBeDistinct": true,
+    "connectivity": "private-vpc-peering"
+  },
+  "openshift": {
+    "distribution": "OpenShift Container Platform",
+    "version": "4.20.27",
+    "architecture": "linux/amd64",
+    "installation": "installer-provisioned-existing-vpc",
+    "publish": "Internal",
+    "cni": "OVN-Kubernetes",
+    "controlPlane": {
+      "count": 3,
+      "machineType": "n2-standard-4",
+      "diskType": "pd-ssd",
+      "diskSizeGB": 256
+    },
+    "workers": {
+      "count": 3,
+      "machineType": "n2-standard-8",
+      "diskType": "pd-ssd",
+      "diskSizeGB": 256,
+      "preemptible": false
+    }
+  },
+  "dependencyPlane": {
+    "platform": "gke",
+    "mode": "private-regional",
+    "nodeCount": 3,
+    "machineType": "n2-standard-8",
+    "preemptible": false,
+    "dependencies": [
+      { "kind": "postgresql-platform", "instances": 3 },
+      { "kind": "postgresql-infrastructure", "instances": 3 },
+      { "kind": "clickhouse", "replicas": 3, "shards": 1 },
+      { "kind": "clickhouse-keeper", "instances": 3 },
+      { "kind": "jetstream", "instances": 3 },
+      { "kind": "valkey", "primaries": 1, "replicas": 2, "sentinels": 3 },
+      { "kind": "vault", "instances": 3, "storage": "raft" },
+      { "kind": "harbor", "availability": "ha" },
+      { "kind": "keycloak", "instances": 2 },
+      { "kind": "model-backend", "instances": 2 },
+      { "kind": "embedding-model", "instances": 1 },
+      { "kind": "synthetic-mcp", "mode": "read-only" }
+    ]
+  },
+  "access": {
+    "api": "private",
+    "routes": "private",
+    "administration": "iap-bastion",
+    "identity": "short-lived",
+    "publicAdministrativeEndpoints": false
+  },
+  "storage": {
+    "applicationClass": "regional-pd-csi",
+    "applicationDiskType": "pd-ssd",
+    "volumeBindingMode": "WaitForFirstConsumer",
+    "allowExpansion": true,
+    "encryptedAtRest": true
+  },
+  "evidence": {
+    "signedRetentionDays": 400,
+    "signedRetentionLocked": true,
+    "rawRetentionDays": 90,
+    "cmekRequired": true,
+    "externalProbeRunners": 2,
+    "probeRunnerZonesMustDiffer": true
+  },
+  "availability": {
+    "soakMinutes": 43200,
+    "minimumPerJourneyPercent": 99.9,
+    "maximumDowntimeMinutes": 43.2,
+    "maximumProbeGapMinutes": 5,
+    "rpoMinutes": 15,
+    "rtoMinutes": 60
+  },
+  "deploymentAuthority": {
+    "owner": "openshift-gitops",
+    "orchestraHasCredentials": false,
+    "orchestraMayRecommend": true
+  },
+  "bootstrapReleaseCandidates": {
+    "platform": "platform-v0.1.0-rc.4",
+    "runtime": "v0.18.2",
+    "modelPlane": "v0.1.9"
+  }
+}

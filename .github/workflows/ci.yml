@@ -1,0 +1,70 @@
+name: reference-lab-foundation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reference-lab-foundation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: contracts, safety, GitOps, and Terraform
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate locked topology and repository safety
+        run: python3 scripts/validate_repository.py
+
+      - name: Run contract tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Set up kubectl for deterministic Kustomize rendering
+        uses: azure/setup-kubectl@c0c8b32d33a5244f1e5947304550403b63930415 # v4
+
+      - name: Validate GitOps security floor
+        run: kubectl kustomize gitops/clusters/reference-lab | python3 scripts/validate_rendered_gitops.py
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "1.14.6"
+          terraform_wrapper: false
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: Validate bootstrap module
+        working-directory: infra/terraform/bootstrap
+        run: |
+          terraform init -backend=false -input=false -lockfile=readonly
+          terraform validate
+
+      - name: Validate foundation module
+        working-directory: infra/terraform/foundation
+        run: |
+          terraform init -backend=false -input=false -lockfile=readonly
+          terraform validate
+
+      - name: Prove fixture prerequisites cannot enter ready state
+        run: |
+          if python3 scripts/validate_repository.py \
+            --prerequisites config/prerequisites.example.json \
+            --require-ready; then
+            echo "fixture prerequisites unexpectedly passed" >&2
+            exit 1
+          fi

@@ -1,0 +1,20 @@
+PYTHON ?= python3
+TERRAFORM ?= terraform
+
+.PHONY: validate test terraform-fmt terraform-validate
+
+validate:
+	$(PYTHON) scripts/validate_repository.py
+	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
+
+test:
+	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
+
+terraform-fmt:
+	$(TERRAFORM) fmt -check -recursive infra/terraform
+
+terraform-validate:
+	$(TERRAFORM) -chdir=infra/terraform/bootstrap init -backend=false -input=false
+	$(TERRAFORM) -chdir=infra/terraform/bootstrap validate
+	$(TERRAFORM) -chdir=infra/terraform/foundation init -backend=false -input=false
+	$(TERRAFORM) -chdir=infra/terraform/foundation validate

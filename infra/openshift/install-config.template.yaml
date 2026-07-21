@@ -1,0 +1,54 @@
+apiVersion: v1
+baseDomain: ocp-lab.prometa.ai
+metadata:
+  name: orchestra
+compute:
+  - architecture: amd64
+    hyperthreading: Enabled
+    name: worker
+    replicas: 3
+    platform:
+      gcp:
+        osDisk:
+          diskSizeGB: 256
+          diskType: pd-ssd
+        type: n2-standard-8
+        zones:
+          - europe-west1-b
+          - europe-west1-c
+          - europe-west1-d
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+  platform:
+    gcp:
+      osDisk:
+        diskSizeGB: 256
+        diskType: pd-ssd
+      type: n2-standard-4
+      zones:
+        - europe-west1-b
+        - europe-west1-c
+        - europe-west1-d
+networking:
+  clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+  machineNetwork:
+    - cidr: ${OCP_MACHINE_CIDR}
+  networkType: OVNKubernetes
+  serviceNetwork:
+    - 172.30.0.0/16
+platform:
+  gcp:
+    computeSubnet: ${OCP_COMPUTE_SUBNET}
+    controlPlaneSubnet: ${OCP_CONTROL_PLANE_SUBNET}
+    network: ${OCP_NETWORK_NAME}
+    projectID: ${TARGET_PROJECT_ID}
+    region: europe-west1
+fips: false
+publish: Internal
+pullSecret: '${PULL_SECRET_JSON}'
+sshKey: '${SSH_PUBLIC_KEY}'
