@@ -17,7 +17,7 @@ from typing import Any, NoReturn
 ROOT = Path(__file__).resolve().parents[1]
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 ACTION_PIN = re.compile(r"^\s*-?\s*uses:\s*[^@\s]+@[a-f0-9]{40}(?:\s+#.*)?$")
-EXPECTED_TOPOLOGY_DIGEST = "sha256:d9c321565437b2797d44d8664749c286721b882e2357c247096ce69f5f313934"
+EXPECTED_TOPOLOGY_DIGEST = "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 MAX_PREREQUISITE_AGE = timedelta(days=30)
 EXPECTED_GATES = {
     "redHatEntitlement",
@@ -48,8 +48,9 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def canonical_digest(value: Any) -> str:
-    encoded = json.dumps(
-        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    # Match prometa-platform's cross-plane canonical JSON exactly.
+    encoded = (
+        json.dumps(value, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
     ).encode("ascii")
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
 
@@ -68,7 +69,6 @@ def validate_lock(value: dict[str, Any]) -> None:
         "evidence",
         "availability",
         "deploymentAuthority",
-        "bootstrapReleaseCandidates",
     }:
         fail("lab_lock_keys_invalid")
     if value["schemaVersion"] != 1 or value["profileId"] != "orchestra-ocp-4.20-amd64-v1":

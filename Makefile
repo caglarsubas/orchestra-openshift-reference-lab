@@ -5,7 +5,9 @@ TERRAFORM ?= terraform
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
+	$(PYTHON) scripts/validate_release_set.py
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
+	kubectl kustomize gitops/products/reference-lab | $(PYTHON) scripts/validate_product_gitops.py
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v

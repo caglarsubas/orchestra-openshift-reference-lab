@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestra-platform-trusted-ca
+  namespace: orchestra-platform
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestra-runtime-trusted-ca
+  namespace: orchestra-runtime
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestra-model-trusted-ca
+  namespace: orchestra-model
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"

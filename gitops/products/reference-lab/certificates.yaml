@@ -1,0 +1,53 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: orchestra-runtime-server
+  namespace: orchestra-runtime
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  secretName: orchestra-runtime-server-tls
+  duration: 24h
+  renewBefore: 8h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    - server auth
+  dnsNames:
+    - orchestra-runtime
+    - orchestra-runtime.orchestra-runtime
+    - orchestra-runtime.orchestra-runtime.svc
+    - orchestra-runtime.orchestra-runtime.svc.cluster.local
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: orchestra-vault-pki
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: orchestra-model-server
+  namespace: orchestra-model
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+spec:
+  secretName: orchestra-model-server-tls
+  duration: 24h
+  renewBefore: 8h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    - server auth
+  dnsNames:
+    - orchestra-model-plane
+    - orchestra-model-plane.orchestra-model
+    - orchestra-model-plane.orchestra-model.svc
+    - orchestra-model-plane.orchestra-model.svc.cluster.local
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: orchestra-vault-pki

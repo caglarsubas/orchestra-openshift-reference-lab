@@ -3,10 +3,13 @@
 This tree is reconciled by OpenShift GitOps/Argo CD. It contains no Secret
 values and grants Orchestra no Argo CD credential.
 
-The initial overlay creates only the namespace, quota, storage-class, and
-default-deny floor. Product applications enter in later pull requests after
-their immutable image/chart/release-set digests exist. External Secrets may
-reference Vault objects, but charts and GitOps never create credential values.
+The `clusters/reference-lab` overlay creates only the namespace, quota,
+storage-class, and default-deny floor. The independently applied
+`products/reference-lab` overlay contains the digest-bound Argo Applications,
+ExternalSecret references, cert-manager Certificates, and migration policy.
+Separating them prevents a foundation apply from activating workloads before
+release mirroring and prerequisite admission pass. Charts and GitOps never
+create credential values.
 
 Manual workload edits are prohibited. Before a frozen campaign, the lab is
 destroyed and reconstructed from reviewed declarations, then Argo CD drift

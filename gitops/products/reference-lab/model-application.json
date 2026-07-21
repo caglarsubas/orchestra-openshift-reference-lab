@@ -1,0 +1,228 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "name": "orchestra-model-plane",
+    "namespace": "openshift-gitops",
+    "annotations": {
+      "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/source-revision": "87f7a64e963842e3350504e305b569f1dea2ed5b",
+      "orchestra.prometa.ai/source-chart-digest": "sha256:20b39c55eb0ebe6a71369be98fb84782476f8b2c30266c393cca7d67347a6cde"
+    }
+  },
+  "spec": {
+    "project": "orchestra-reference-lab",
+    "source": {
+      "repoURL": "harbor.services.ocp-lab.prometa.ai/orchestra/charts",
+      "chart": "orchestra-inference-engine",
+      "targetRevision": "0.1.2",
+      "helm": {
+        "releaseName": "orchestra-model-plane",
+        "valuesObject": {
+          "productionProfile": {
+            "enabled": true,
+            "profileId": "orchestra-ocp-4.20-amd64-v1",
+            "imageFlavor": "ubi9",
+            "namespaceDefaultDenyAcknowledged": true
+          },
+          "workloadSurface": {
+            "profileId": "orchestra-model-plane-workload-v1"
+          },
+          "fullnameOverride": "orchestra-model-plane",
+          "image": {
+            "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/model/inference-engine-ubi",
+            "tag": "",
+            "digest": "sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
+            "pullPolicy": "IfNotPresent",
+            "pullSecrets": [{ "name": "orchestra-registry" }]
+          },
+          "replicaCount": 2,
+          "deploymentId": "reference-lab-tenant-alpha-model",
+          "targetEnvironment": "prod",
+          "rolloutId": "release-set-7be0106f",
+          "serverTls": {
+            "enabled": true,
+            "existingSecret": "orchestra-model-server-tls",
+            "certificateKey": "tls.crt",
+            "privateKeyKey": "tls.key",
+            "clientCaKey": "ca.crt",
+            "requireClientCertificate": false,
+            "rolloutId": "release-set-7be0106f"
+          },
+          "auth": {
+            "enabled": true,
+            "existingSecretName": "orchestra-model-auth",
+            "keysKey": "auth_keys.json"
+          },
+          "routing": {
+            "enabled": true,
+            "policyRequired": true,
+            "artifactsSecretName": "orchestra-model-routing",
+            "policyKey": "model_routing_policy.json",
+            "trustStoreKey": "model_routing_trust.json",
+            "pricingKey": "model_routing_pricing.json",
+            "expectedAudience": "orchestra-model-plane",
+            "expectedOrgId": "tenant-alpha",
+            "rateLimitScope": "deployment-shared",
+            "sharedRateLimit": {
+              "backend": "sentinel",
+              "existingSecretName": "orchestra-model-rate-limit",
+              "sentinelConfigKey": "sentinel-config.json",
+              "allowInsecureRedis": false,
+              "networkPolicyEgress": [
+                {
+                  "to": [
+                    { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                    { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                    { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                  ],
+                  "ports": [{ "protocol": "TCP", "port": 6379 }]
+                }
+              ]
+            }
+          },
+          "modelBackends": {
+            "mode": "remote",
+            "networkPolicyEgress": [
+              {
+                "to": [
+                  { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                  { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                  { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                ],
+                "ports": [{ "protocol": "TCP", "port": 443 }]
+              }
+            ]
+          },
+          "observation": {
+            "enabled": true,
+            "version": 2,
+            "endpoint": "https://platform.apps.ocp-lab.prometa.ai/api/model-routing-observations",
+            "apiKeySecretName": "orchestra-model-observation",
+            "apiKeySecretKey": "api-key"
+          },
+          "otel": {
+            "enabled": true,
+            "endpoint": "https://otel.services.ocp-lab.prometa.ai:4317",
+            "serviceName": "orchestra-model-plane"
+          },
+          "persistence": {
+            "enabled": true,
+            "storage": "10Gi",
+            "storageClassName": "orchestra-regional-ssd",
+            "accessModes": ["ReadWriteOnce"],
+            "externalBackupAcknowledged": true
+          },
+          "trustedCA": {
+            "enabled": true,
+            "configMapName": "orchestra-model-trusted-ca",
+            "key": "ca-bundle.crt"
+          },
+          "service": { "type": "ClusterIP" },
+          "serviceAccount": {
+            "create": true,
+            "name": "orchestra-model-plane",
+            "automountServiceAccountToken": false
+          },
+          "securityContextMode": "openshift",
+          "containerSecurityContext": {
+            "runAsNonRoot": true,
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true,
+            "capabilities": { "drop": ["ALL"] },
+            "seccompProfile": { "type": "RuntimeDefault" }
+          },
+          "podDisruptionBudget": { "enabled": true, "minAvailable": 1 },
+          "networkPolicy": {
+            "enabled": true,
+            "dns": { "provider": "openshift" },
+            "runtimeIngressFrom": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "orchestra-runtime"
+                  }
+                }
+              }
+            ],
+            "monitoringIngressFrom": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "orchestra-observability"
+                  }
+                }
+              }
+            ],
+            "observationEgress": [
+              {
+                "to": [
+                  {
+                    "namespaceSelector": {
+                      "matchLabels": {
+                        "kubernetes.io/metadata.name": "openshift-ingress"
+                      }
+                    }
+                  }
+                ],
+                "ports": [{ "protocol": "TCP", "port": 443 }]
+              }
+            ],
+            "otelEgress": [
+              {
+                "to": [
+                  { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                  { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                  { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                ],
+                "ports": [{ "protocol": "TCP", "port": 4317 }]
+              }
+            ],
+            "extraIngressFrom": [],
+            "extraEgress": []
+          },
+          "metrics": {
+            "serviceMonitor": {
+              "enabled": true,
+              "interval": "30s",
+              "scrapeTimeout": "10s",
+              "tls": {
+                "serverName": "orchestra-model-plane.orchestra-model.svc.cluster.local",
+                "caSecretName": "orchestra-model-server-tls",
+                "caKey": "ca.crt",
+                "clientCertificateSecretName": "",
+                "clientCertificateKey": "tls.crt",
+                "clientPrivateKeyKey": "tls.key"
+              }
+            }
+          },
+          "topologySpread": {
+            "enabled": true,
+            "maxSkew": 1,
+            "topologyKey": "kubernetes.io/hostname",
+            "whenUnsatisfiable": "DoNotSchedule"
+          }
+        }
+      }
+    },
+    "destination": {
+      "server": "https://kubernetes.default.svc",
+      "namespace": "orchestra-model"
+    },
+    "syncPolicy": {
+      "automated": { "prune": true, "selfHeal": true },
+      "syncOptions": [
+        "CreateNamespace=false",
+        "ServerSideApply=true"
+      ],
+      "retry": {
+        "limit": 3,
+        "backoff": {
+          "duration": "10s",
+          "factor": 2,
+          "maxDuration": "3m"
+        }
+      }
+    }
+  }
+}

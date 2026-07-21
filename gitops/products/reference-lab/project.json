@@ -1,0 +1,48 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "AppProject",
+  "metadata": {
+    "name": "orchestra-reference-lab",
+    "namespace": "openshift-gitops",
+    "annotations": {
+      "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/activation": "blocked-until-live-prerequisites-and-mirror-intake-pass"
+    }
+  },
+  "spec": {
+    "description": "Digest-bound Orchestra vendor reference-lab product planes",
+    "sourceRepos": [
+      "harbor.services.ocp-lab.prometa.ai/orchestra/charts"
+    ],
+    "destinations": [
+      {
+        "namespace": "orchestra-platform",
+        "server": "https://kubernetes.default.svc"
+      },
+      {
+        "namespace": "orchestra-runtime",
+        "server": "https://kubernetes.default.svc"
+      },
+      {
+        "namespace": "orchestra-model",
+        "server": "https://kubernetes.default.svc"
+      }
+    ],
+    "clusterResourceWhitelist": [],
+    "namespaceResourceWhitelist": [
+      { "group": "", "kind": "ConfigMap" },
+      { "group": "", "kind": "PersistentVolumeClaim" },
+      { "group": "", "kind": "Service" },
+      { "group": "", "kind": "ServiceAccount" },
+      { "group": "apps", "kind": "Deployment" },
+      { "group": "apps", "kind": "StatefulSet" },
+      { "group": "autoscaling", "kind": "HorizontalPodAutoscaler" },
+      { "group": "batch", "kind": "CronJob" },
+      { "group": "batch", "kind": "Job" },
+      { "group": "monitoring.coreos.com", "kind": "ServiceMonitor" },
+      { "group": "networking.k8s.io", "kind": "NetworkPolicy" },
+      { "group": "policy", "kind": "PodDisruptionBudget" },
+      { "group": "route.openshift.io", "kind": "Route" }
+    ]
+  }
+}

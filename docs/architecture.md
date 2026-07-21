@@ -63,3 +63,9 @@ flowchart LR
 Changing a product-owned behavior here is prohibited. A product fix creates a
 new immutable artifact in its owning repository, updates the cross-plane
 release set, and reruns affected evidence.
+
+The topology and release set are separate canonical inputs. Campaigns bind the
+topology digest, release-set digest, and dependency BOM digest independently;
+none can be inferred from another. Mirroring an accepted release into Harbor
+records destination digests and lab signatures as deployment evidence without
+rewriting the source release set.

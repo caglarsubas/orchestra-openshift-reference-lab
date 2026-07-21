@@ -20,10 +20,11 @@ does not enable platform production tool execution.
 
 ## Current state
 
-This repository contains the source-controlled foundation only. It does not
-contain a kubeconfig, provider identity, OpenShift pull secret, live campaign,
-evidence report, or completed soak. The reference profile is therefore not
-verified yet.
+This repository contains the source-controlled infrastructure foundation,
+immutable cross-plane release intake, and a gate-controlled three-plane Argo
+CD overlay. It does not contain a kubeconfig, provider identity, OpenShift pull
+secret, live campaign, evidence report, or completed soak. No declaration has
+been applied to a target, so the reference profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -45,14 +46,24 @@ verified.
   restricted raw-artifact retention.
 - GitOps/Argo CD owns rollout. Orchestra emits recommendations only.
 
-The full machine-readable contract is
-[`config/lab.lock.json`](config/lab.lock.json).
+The full machine-readable topology contract is
+[`config/lab.lock.json`](config/lab.lock.json). It deliberately contains no
+product versions. The independently digested
+[`config/cross-plane-release-set.lock.json`](config/cross-plane-release-set.lock.json)
+binds the platform, runtime, model plane, charts, and certification runner.
+Every campaign binds both digests so an artifact update cannot masquerade as a
+topology change or combine evidence from different release sets.
+
+The current canonical release-set digest is
+`sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635`.
+It records published artifacts only; it is not deployment, drill, soak, or
+verification evidence.
 
 ## Layout
 
 | Path | Ownership |
 |---|---|
-| `config/` | Locked topology and prerequisite gates |
+| `config/` | Independently locked topology, release set, and prerequisite gates |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
@@ -73,6 +84,14 @@ make validate
 make test
 make terraform-fmt
 ```
+
+`make validate` checks both the topology and immutable cross-plane release
+set. It rejects mutable tags, missing planes, an unbound runner, or release
+subjects that do not match the owning repository and UBI deployment role.
+It also renders the product overlay and proves that the Argo Applications use
+the matching source revisions, chart digests, mirrored repositories, image
+digests, profile, and control-plane boundary. Only ExternalSecret and
+cert-manager references may create credential or certificate objects.
 
 Terraform validation downloads pinned providers but uses no credentials and
 does not contact a target project:
