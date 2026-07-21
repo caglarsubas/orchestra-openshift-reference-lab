@@ -87,6 +87,43 @@ jobs:
           orchestra-release-validation-receiver:ci
           -c 'import orchestra_receiver.app, orchestra_receiver.worker'
 
+      - name: Install synthetic tenant kit
+        run: python3 -m pip install './services/synthetic-tenant-kit[dev]'
+
+      - name: Lint and format-check synthetic tenant kit
+        run: |
+          ruff check services/synthetic-tenant-kit/src services/synthetic-tenant-kit/tests
+          ruff format --check services/synthetic-tenant-kit/src services/synthetic-tenant-kit/tests
+
+      - name: Test synthetic tenant and official MCP surfaces
+        run: >-
+          python3 -m unittest discover
+          -s services/synthetic-tenant-kit/tests
+          -t services/synthetic-tenant-kit
+          -p 'test_*.py' -v
+
+      - name: Audit lab-owned image dependency locks
+        run: |
+          python3 -m pip install pip-audit==2.10.1
+          python3 -m pip_audit -r services/release-validation-receiver/requirements-linux-amd64.lock --disable-pip
+          python3 -m pip_audit -r services/synthetic-tenant-kit/requirements-linux-amd64.lock --disable-pip
+
+      - name: Build pinned UBI synthetic tenant image
+        run: >-
+          docker build --platform linux/amd64
+          -t orchestra-synthetic-tenant-kit:ci
+          -f services/synthetic-tenant-kit/Containerfile
+          services/synthetic-tenant-kit
+
+      - name: Verify arbitrary-UID read-only synthetic tenant image
+        run: >-
+          docker run --rm --platform linux/amd64
+          --user 1001230000 --read-only
+          --tmpfs /tmp:rw,noexec,nosuid,size=16m
+          --entrypoint python
+          orchestra-synthetic-tenant-kit:ci
+          -c 'import orchestra_synthetic.gateway, orchestra_synthetic.mcp_surface, orchestra_synthetic.server'
+
       - name: Set up kubectl for deterministic Kustomize rendering
         uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4
 

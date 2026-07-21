@@ -33,12 +33,21 @@ EXPECTED_GATES = {
     "certificationRunner",
     "crossPlaneReleaseSet",
 }
-EXPECTED_LAB_SERVICE_BLOCKERS = [
+EXPECTED_RECEIVER_BLOCKERS = [
     "published-signed-image",
     "mirror-admission",
     "external-postgresql",
     "vault-external-secrets",
     "github-app-installation",
+    "live-campaign",
+]
+EXPECTED_SYNTHETIC_BLOCKERS = [
+    "published-signed-image",
+    "mirror-admission",
+    "vault-external-secrets",
+    "keycloak-identity",
+    "runtime-host-tls",
+    "lab-pki",
     "live-campaign",
 ]
 
@@ -242,47 +251,56 @@ def validate_lab_services(value: dict[str, Any]) -> None:
     if set(value) != {"schemaVersion", "services"} or value["schemaVersion"] != 1:
         fail("lab_services_shape_invalid")
     services = value["services"]
-    if not isinstance(services, list) or len(services) != 1:
+    if not isinstance(services, list) or len(services) != 2:
         fail("lab_services_inventory_invalid")
-    receiver = services[0]
-    if not isinstance(receiver, dict) or set(receiver) != {
-        "id",
-        "owner",
-        "sourcePath",
-        "activation",
-        "release",
-        "image",
-        "gitOpsReferenced",
-        "deploymentAuthority",
-        "platformHasDeploymentCredentials",
-        "blockedOn",
-    }:
-        fail("lab_service_shape_invalid")
-    if receiver != {
-        "id": "release-validation-receiver",
-        "owner": "tenant-ci-cd-or-gitops",
-        "sourcePath": "services/release-validation-receiver",
-        "activation": "source-only",
-        "release": None,
-        "image": None,
-        "gitOpsReferenced": False,
-        "deploymentAuthority": "openshift-gitops",
-        "platformHasDeploymentCredentials": False,
-        "blockedOn": EXPECTED_LAB_SERVICE_BLOCKERS,
-    }:
-        fail("lab_service_activation_invalid")
-    if not (ROOT / receiver["sourcePath"] / "Containerfile").is_file():
-        fail("lab_service_source_missing")
-    for directory in (
-        ROOT / "gitops" / "clusters",
-        ROOT / "gitops" / "dependencies",
-        ROOT / "gitops" / "products",
+    expected = [
+        {
+            "id": "release-validation-receiver",
+            "owner": "tenant-ci-cd-or-gitops",
+            "sourcePath": "services/release-validation-receiver",
+            "activation": "source-only",
+            "release": None,
+            "image": None,
+            "gitOpsReferenced": False,
+            "deploymentAuthority": "openshift-gitops",
+            "platformHasDeploymentCredentials": False,
+            "blockedOn": EXPECTED_RECEIVER_BLOCKERS,
+        },
+        {
+            "id": "synthetic-tenant-kit",
+            "owner": "reference-lab-operator",
+            "sourcePath": "services/synthetic-tenant-kit",
+            "activation": "source-only",
+            "release": None,
+            "image": None,
+            "gitOpsReferenced": False,
+            "deploymentAuthority": "openshift-gitops",
+            "platformHasDeploymentCredentials": False,
+            "blockedOn": EXPECTED_SYNTHETIC_BLOCKERS,
+        },
+    ]
+    required_keys = set(expected[0])
+    if any(
+        not isinstance(service, dict) or set(service) != required_keys
+        for service in services
     ):
-        for path in directory.rglob("*"):
-            if path.is_file() and receiver["id"] in path.read_text(encoding="utf-8"):
-                fail(
-                    f"lab_service_unpublished_gitops_reference:{path.relative_to(ROOT)}"
-                )
+        fail("lab_service_shape_invalid")
+    if services != expected:
+        fail("lab_service_activation_invalid")
+    for service in services:
+        if not (ROOT / service["sourcePath"] / "Containerfile").is_file():
+            fail("lab_service_source_missing")
+        for directory in (
+            ROOT / "gitops" / "clusters",
+            ROOT / "gitops" / "dependencies",
+            ROOT / "gitops" / "products",
+        ):
+            for path in directory.rglob("*"):
+                if path.is_file() and service["id"] in path.read_text(encoding="utf-8"):
+                    fail(
+                        "lab_service_unpublished_gitops_reference:"
+                        f"{path.relative_to(ROOT)}"
+                    )
 
 
 def tracked_files() -> list[Path]:

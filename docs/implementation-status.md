@@ -29,7 +29,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Runtime/model Secret-backed server TLS declarations | Yes | Yes | No | No | No |
 | Platform router-to-pod TLS | Yes | Yes | No | No | No |
 | Durable release-validation receiver and GitHub App executor | Yes | Yes | No | No | No |
-| Synthetic tenant/MCP/model surfaces | No | N/A | No | No | No |
+| Synthetic tenant gateway and read-only MCP fault surfaces | Yes | Yes | No | No | No |
+| Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
 | 30-day soak | No | N/A | No | No | No |
@@ -44,7 +45,10 @@ OpenShift service-serving certificate and re-encrypt Route. The durable
 release-validation receiver now has a strict signed-event parser,
 transactional PostgreSQL inbox/outbox, monotonic admission, GitHub App
 dispatcher, indeterminate-delivery reconciliation, pinned UBI build, and
-disposable PostgreSQL tests. It has no published or mirrored image and is not
-referenced by the GitOps root. Live activation remains behind Red Hat, GCP,
-DNS, and short-lived identity gates; no dependency or product declaration has
-been applied.
+disposable PostgreSQL tests. The synthetic tenant kit now has strict Keycloak
+JWT/JWKS verification, an HTTPS-only runtime proxy, official read-only MCP
+Streamable HTTP behavior, and normal/slow/unavailable/wrong-tenant fault
+lanes. Both services have hash-locked UBI AMD64 builds, but neither has a
+published or mirrored image or GitOps reference. Live activation remains
+behind Red Hat, GCP, DNS, PKI, Keycloak, and short-lived identity gates; no
+dependency or product declaration has been applied.

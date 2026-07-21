@@ -19,6 +19,26 @@
         "github-app-installation",
         "live-campaign"
       ]
+    },
+    {
+      "id": "synthetic-tenant-kit",
+      "owner": "reference-lab-operator",
+      "sourcePath": "services/synthetic-tenant-kit",
+      "activation": "source-only",
+      "release": null,
+      "image": null,
+      "gitOpsReferenced": false,
+      "deploymentAuthority": "openshift-gitops",
+      "platformHasDeploymentCredentials": false,
+      "blockedOn": [
+        "published-signed-image",
+        "mirror-admission",
+        "vault-external-secrets",
+        "keycloak-identity",
+        "runtime-host-tls",
+        "lab-pki",
+        "live-campaign"
+      ]
     }
   ]
 }

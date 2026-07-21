@@ -1,0 +1,6 @@
+cryptography==49.0.0
+httpx==0.28.1
+mcp==1.28.1
+PyJWT==2.13.0
+setuptools==83.0.0
+uvicorn==0.41.0

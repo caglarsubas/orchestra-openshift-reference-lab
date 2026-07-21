@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orchestra-reference-lab-synthetic-tenant-kit"
+version = "0.1.0"
+description = "Customer-like tenant gateway and read-only MCP fault surfaces for the Orchestra reference lab"
+requires-python = ">=3.12"
+dependencies = [
+  "cryptography==49.0.0",
+  "httpx==0.28.1",
+  "mcp==1.28.1",
+  "PyJWT==2.13.0",
+  "uvicorn==0.41.0",
+]
+
+[project.optional-dependencies]
+dev = ["ruff==0.14.14"]
+
+[project.scripts]
+orchestra-synthetic-service = "orchestra_synthetic.server:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

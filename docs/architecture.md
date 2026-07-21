@@ -8,12 +8,15 @@ flowchart LR
     IAP["IAP bastion"]
     OCP["Private OCP 4.20.27"]
     PLATFORM["Orchestra control plane"]
+    GATEWAY["Synthetic tenant gateway"]
     RUNTIME["Tenant runtime host"]
-    MODEL["Model-plane client"]
+    MODEL["Model plane"]
     IAP --> OCP
     OCP --> PLATFORM
+    OCP --> GATEWAY
     OCP --> RUNTIME
     OCP --> MODEL
+    GATEWAY -->|"JWT-authenticated tenant request"| RUNTIME
   end
 
   subgraph GCP_SERVICES["GCP services and evidence project"]
@@ -33,6 +36,7 @@ flowchart LR
   end
 
   OCP <-->|"Private VPC peering and explicit firewall"| GKE
+  SECURITY -->|"OIDC JWKS and synthetic identities"| GATEWAY
   RUNTIME -->|"Model and read-only MCP only"| SYNTHETIC
   PLATFORM -->|"Receipts and telemetry; no deployment credential"| EVIDENCE
   ARGO["OpenShift GitOps / Argo CD"] -->|"Sole workload rollout authority"| OCP
@@ -59,6 +63,13 @@ flowchart LR
 8. The dependency AppProject remains continuously denied until a reviewed
    image-level admission overlay is committed. A source chart lock is not an
    executable deployment approval.
+9. The synthetic tenant gateway may contact Keycloak and the runtime host only.
+   Its runtime credential is tenant-owned, and it has no platform API key or
+   deployment credential. Tenant-beta identities are adversarial inputs, not a
+   second certified tenant.
+10. Synthetic MCP deployments expose one read-only, idempotent tool. Slow,
+    unavailable, wrong-tenant, and untrusted-certificate lanes are separate
+    immutable deployments; none may enable write or destructive behavior.
 
 ## Source-of-truth split
 
