@@ -12,12 +12,13 @@ EXPECTED_NAMESPACES = {
     "orchestra-runtime",
     "orchestra-model",
     "orchestra-synthetic",
+    "orchestra-external-secrets",
     "orchestra-observability",
 }
 EXPECTED_COUNTS = {
-    "Namespace": 5,
-    "NetworkPolicy": 5,
-    "ResourceQuota": 5,
+    "Namespace": 6,
+    "NetworkPolicy": 6,
+    "ResourceQuota": 6,
     "StorageClass": 1,
 }
 
@@ -29,7 +30,9 @@ def field(document: str, name: str) -> str | None:
 
 def main() -> int:
     content = sys.stdin.read()
-    documents = [item.strip() for item in re.split(r"(?m)^---\s*$", content) if item.strip()]
+    documents = [
+        item.strip() for item in re.split(r"(?m)^---\s*$", content) if item.strip()
+    ]
     if len(documents) != sum(EXPECTED_COUNTS.values()):
         raise ValueError("gitops_document_count_invalid")
 
@@ -52,7 +55,11 @@ def main() -> int:
                 if f"pod-security.kubernetes.io/{level}: restricted" not in document:
                     raise ValueError(f"gitops_namespace_psa_missing:{level}")
         if kind == "NetworkPolicy":
-            if "podSelector: {}" not in document or "- Egress" not in document or "- Ingress" not in document:
+            if (
+                "podSelector: {}" not in document
+                or "- Egress" not in document
+                or "- Ingress" not in document
+            ):
                 raise ValueError("gitops_default_deny_invalid")
         if kind == "StorageClass":
             required = (
@@ -67,7 +74,7 @@ def main() -> int:
 
     if counts != EXPECTED_COUNTS or namespaces != EXPECTED_NAMESPACES:
         raise ValueError("gitops_inventory_invalid")
-    print("gitops_render_valid documents=16 defaultDenyNamespaces=5")
+    print("gitops_render_valid documents=19 defaultDenyNamespaces=6")
     return 0
 
 

@@ -21,6 +21,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Namespace/restricted/default-deny/quota/storage floor | Yes | Yes | No | No | No |
 | OpenShift `4.20.27` cluster | No | N/A | No | No | No |
 | Immutable dependency source/BOM lock | Yes | Yes | No | No | No |
+| Source-resolved dependency image admission lock | Yes | Yes | No | No | No |
+| Dependency topology/security/backup contracts | Yes | Yes | No | No | No |
 | Dependency GitOps namespace/default-deny/project floor | Yes | Yes | No | No | No |
 | Dependency operator Applications and admitted image locks | No | N/A | No | No | No |
 | Dependency service CRs/values | No | N/A | No | No | No |
@@ -36,11 +38,16 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | 30-day soak | No | N/A | No | No | No |
 | Reference verification BOM | No | N/A | No | No | No |
 
-The dependency source catalog and fail-closed GitOps floor are now declared.
-The next dependency increment is image-level mirror admission plus reviewed
-service contracts for PostgreSQL, ClickHouse/Keeper, JetStream, Vault, and
-External Secrets. Valkey/Sentinel, Keycloak Operator, and standalone Thanos
-remain named design decisions. Platform backend TLS is now declared with an
+The dependency source catalog, fail-closed GitOps floor, eleven exact AMD64
+source image identities, and six detailed service contracts are now declared.
+No upstream verification, destination mirror, lab signature, live identity,
+backup target, server-side dry run, or approval is claimed. ClickHouse backup
+selection and compatibility proofs remain explicit blockers. External Secrets
+is correctly assigned to OpenShift while Vault remains in the GKE services
+plane. The next dependency increment is signed source intake, Artifact
+Registry/Harbor mirror receipts, and executable operator/service overlays.
+Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
+decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable
 release-validation receiver now has a strict signed-event parser,
 transactional PostgreSQL inbox/outbox, monotonic admission, GitHub App

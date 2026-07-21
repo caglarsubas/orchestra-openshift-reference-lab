@@ -1,9 +1,13 @@
 # Dependency-plane admission floor
 
-This overlay is intentionally non-activatable. It creates the twelve
+This overlay is intentionally non-activatable. It creates the eleven
 services-plane namespaces, applies default-deny ingress and egress to each,
 and creates an Argo CD `AppProject` with a continuous deny window. It contains
 zero `Application`, `ApplicationSet`, or `Secret` objects.
+
+External Secrets runs in OpenShift and reaches the private Vault service over
+the peered network. Its namespace and security floor therefore live in the
+OpenShift cluster overlay, not in this GKE services-plane project.
 
 The immutable source catalog is
 [`config/dependency-bom.lock.json`](../../../config/dependency-bom.lock.json).
@@ -12,6 +16,14 @@ Its current digest is
 That lock records downloaded upstream chart package digests; it does not claim
 that upstream signatures, chart images, or destination mirrors have been
 verified.
+
+The source-resolved dependency admission candidate is
+[`config/dependency-admission.lock.json`](../../../config/dependency-admission.lock.json),
+digest
+`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+It binds eleven exact source image indexes and linux/amd64 manifests plus six
+service contracts. All upstream verification, mirror, lab-signature, live
+binding, dry-run, and approval fields remain blocked.
 
 ## Why there are no Applications yet
 

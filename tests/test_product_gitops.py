@@ -4,6 +4,7 @@ import copy
 import unittest
 
 from scripts.validate_product_gitops import (
+    DEPENDENCY_ADMISSION_DIGEST,
     DEPENDENCY_BOM_DIGEST,
     EXPECTED_RENDERED_COUNTS,
     PRODUCT_ROOT,
@@ -38,6 +39,35 @@ class ProductGitOpsTests(unittest.TestCase):
                 ],
                 DEPENDENCY_BOM_DIGEST,
             )
+
+    def test_applications_bind_the_blocked_dependency_admission(self) -> None:
+        for filename in (
+            "platform-application.json",
+            "runtime-application.json",
+            "model-application.json",
+        ):
+            application = load_json(PRODUCT_ROOT / filename)
+            self.assertEqual(
+                application["metadata"]["annotations"][
+                    "orchestra.prometa.ai/dependency-admission-digest"
+                ],
+                DEPENDENCY_ADMISSION_DIGEST,
+            )
+
+    def test_product_project_has_an_enforced_continuous_deny_window(self) -> None:
+        project = load_json(PRODUCT_ROOT / "project.json")
+        self.assertEqual(
+            project["spec"]["syncWindows"],
+            [
+                {
+                    "kind": "deny",
+                    "schedule": "0 0 * * *",
+                    "duration": "24h",
+                    "applications": ["*"],
+                    "manualSync": False,
+                }
+            ],
+        )
 
     def test_changed_release_digest_is_rejected(self) -> None:
         changed = copy.deepcopy(self.release_set)

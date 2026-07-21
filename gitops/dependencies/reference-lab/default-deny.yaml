@@ -65,15 +65,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-all
-  namespace: orchestra-external-secrets
-spec:
-  podSelector: {}
-  policyTypes: [Ingress, Egress]
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: default-deny-all
   namespace: orchestra-harbor
 spec:
   podSelector: {}

@@ -22,7 +22,6 @@ NAMESPACES = {
     "orchestra-jetstream",
     "orchestra-valkey",
     "orchestra-vault",
-    "orchestra-external-secrets",
     "orchestra-harbor",
     "orchestra-keycloak",
     "orchestra-observability",
@@ -62,6 +61,8 @@ def validate_project(project: dict[str, Any]) -> None:
         or annotations.get("orchestra.prometa.ai/activation") != "blocked"
         or annotations.get("orchestra.prometa.ai/dependency-bom")
         != "orchestra-dependencies-2026-07-21.1"
+        or annotations.get("orchestra.prometa.ai/dependency-admission-digest")
+        != "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
         or spec.get("sourceRepos") != [BOOTSTRAP_REPOSITORY]
         or spec.get("syncWindows")
         != [
@@ -77,12 +78,16 @@ def validate_project(project: dict[str, Any]) -> None:
     ):
         fail("dependency_gitops_project_contract_invalid")
     destinations = spec.get("destinations")
-    if not isinstance(destinations, list) or {
-        item.get("namespace")
-        for item in destinations
-        if isinstance(item, dict)
-        and item.get("server") == "https://kubernetes.default.svc"
-    } != DESTINATION_NAMESPACES:
+    if (
+        not isinstance(destinations, list)
+        or {
+            item.get("namespace")
+            for item in destinations
+            if isinstance(item, dict)
+            and item.get("server") == "https://kubernetes.default.svc"
+        }
+        != DESTINATION_NAMESPACES
+    ):
         fail("dependency_gitops_project_destinations_invalid")
 
 
@@ -92,20 +97,23 @@ def field(document: str, name: str) -> str | None:
 
 
 def metadata_name(document: str) -> str | None:
-    match = re.search(r"(?m)^metadata:\s*\n(?:^[ \t]+[^\n]+\n)*?^[ \t]+name:\s*([^\n]+)$", document)
+    match = re.search(
+        r"(?m)^metadata:\s*\n(?:^[ \t]+[^\n]+\n)*?^[ \t]+name:\s*([^\n]+)$", document
+    )
     return match.group(1).strip() if match else None
 
 
 def metadata_namespace(document: str) -> str | None:
-    match = re.search(r"(?m)^metadata:\s*\n(?:^[ \t]+[^\n]+\n)*?^[ \t]+namespace:\s*([^\n]+)$", document)
+    match = re.search(
+        r"(?m)^metadata:\s*\n(?:^[ \t]+[^\n]+\n)*?^[ \t]+namespace:\s*([^\n]+)$",
+        document,
+    )
     return match.group(1).strip() if match else None
 
 
 def validate_rendered(content: str) -> None:
     documents = [
-        item.strip()
-        for item in re.split(r"(?m)^---\s*$", content)
-        if item.strip()
+        item.strip() for item in re.split(r"(?m)^---\s*$", content) if item.strip()
     ]
     counts: dict[str, int] = {}
     namespace_names: set[str] = set()

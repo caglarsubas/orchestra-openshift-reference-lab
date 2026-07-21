@@ -7,6 +7,7 @@
     "annotations": {
       "orchestra.prometa.ai/release-set-digest": "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
       "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
+      "orchestra.prometa.ai/dependency-admission-digest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
       "orchestra.prometa.ai/source-revision": "889f7b805ab19cc9a433115319f2e952c5f95f1b",
       "orchestra.prometa.ai/source-chart-digest": "sha256:4d9bb26e7d146961b7095a16c1151cd67a6a6c8eeece76f7abd0f73f3922cd5b"
     }
