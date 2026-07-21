@@ -19,6 +19,7 @@ except ModuleNotFoundError:
 
 PRODUCT_ROOT = ROOT / "gitops" / "products" / "reference-lab"
 MIRROR_CHART_REPOSITORY = "harbor.services.ocp-lab.prometa.ai/orchestra/charts"
+DEPENDENCY_BOM_DIGEST = "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
 APPLICATION_CONTRACTS = {
     "platform": {
         "file": "platform-application.json",
@@ -137,6 +138,8 @@ def validate_common_application(
         or metadata.get("namespace") != "openshift-gitops"
         or annotations.get("orchestra.prometa.ai/release-set-digest")
         != release_set_digest
+        or annotations.get("orchestra.prometa.ai/dependency-bom-digest")
+        != DEPENDENCY_BOM_DIGEST
         or annotations.get("orchestra.prometa.ai/source-revision")
         != plane["source"]["revision"]
         or annotations.get("orchestra.prometa.ai/source-chart-digest")
@@ -161,6 +164,28 @@ def validate_common_application(
     ):
         fail(f"product_gitops_application_contract_invalid:{plane_name}")
     return values
+
+
+def validate_project(release_set_digest: str) -> None:
+    project = load_json(PRODUCT_ROOT / "project.json")
+    metadata = object_value(
+        project.get("metadata"), "product_gitops_project_metadata_invalid"
+    )
+    annotations = object_value(
+        metadata.get("annotations"), "product_gitops_project_annotations_invalid"
+    )
+    if (
+        project.get("apiVersion") != "argoproj.io/v1alpha1"
+        or project.get("kind") != "AppProject"
+        or metadata.get("name") != "orchestra-reference-lab"
+        or annotations.get("orchestra.prometa.ai/release-set-digest")
+        != release_set_digest
+        or annotations.get("orchestra.prometa.ai/dependency-bom-digest")
+        != DEPENDENCY_BOM_DIGEST
+        or annotations.get("orchestra.prometa.ai/activation")
+        != "blocked-until-live-prerequisites-and-mirror-intake-pass"
+    ):
+        fail("product_gitops_project_contract_invalid")
 
 
 def validate_platform(values: dict[str, Any]) -> None:
@@ -227,6 +252,7 @@ def validate_model(values: dict[str, Any]) -> None:
 
 def validate_applications(release_set: dict[str, Any]) -> str:
     release_set_digest = validate_release_set(release_set)
+    validate_project(release_set_digest)
     for plane_name, contract in APPLICATION_CONTRACTS.items():
         application = load_json(PRODUCT_ROOT / contract["file"])
         values = validate_common_application(

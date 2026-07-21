@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "bomId": "orchestra-dependencies-2026-07-21.1",
+  "claim": {
+    "declared": true,
+    "applied": false,
+    "liveTested": false,
+    "campaignEvidence": false
+  },
+  "target": {
+    "projectRole": "services-evidence",
+    "cluster": "orchestra-dependencies",
+    "platform": "gke",
+    "mode": "private-regional",
+    "gitOpsController": "argocd"
+  },
+  "bootstrapRegistry": {
+    "provider": "gcp-artifact-registry",
+    "repositoryId": "orchestra-bootstrap",
+    "format": "oci-over-docker",
+    "immutableTags": true,
+    "purpose": "pre-harbor-seed",
+    "retirementCondition": "harbor-mirror-rollback-proven"
+  },
+  "chartPackages": [
+    {
+      "id": "argocd",
+      "repository": "https://argoproj.github.io/argo-helm",
+      "chart": "argo-cd",
+      "chartVersion": "10.1.4",
+      "appVersion": "v3.4.5",
+      "packageDigest": "sha256:142d2eaaa2adf9051c109c396c5fe3af742674011a5837df262bd6f8f2991d2c",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/argo-cd"
+    },
+    {
+      "id": "cert-manager",
+      "repository": "https://charts.jetstack.io",
+      "chart": "cert-manager",
+      "chartVersion": "v1.21.0",
+      "appVersion": "v1.21.0",
+      "packageDigest": "sha256:9c2c6fabf3cf8fe14dacb016f37c819b66bc2c79e8b7acde4573d45ec141fb97",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/cert-manager"
+    },
+    {
+      "id": "cloudnative-pg",
+      "repository": "https://cloudnative-pg.github.io/charts",
+      "chart": "cloudnative-pg",
+      "chartVersion": "0.29.0",
+      "appVersion": "1.30.0",
+      "packageDigest": "sha256:668e065ff53508d58238788fd35b355a925060843629a951df0e6a9362e6d32f",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/cloudnative-pg"
+    },
+    {
+      "id": "clickhouse-operator",
+      "repository": "https://helm.altinity.com",
+      "chart": "altinity-clickhouse-operator",
+      "chartVersion": "0.27.1",
+      "appVersion": "0.27.1",
+      "packageDigest": "sha256:716fd37d87bce19e15b42b207db5b0363f61d4f7b546413935d9a2ed9144401e",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/altinity-clickhouse-operator"
+    },
+    {
+      "id": "nats",
+      "repository": "https://nats-io.github.io/k8s/helm/charts/",
+      "chart": "nats",
+      "chartVersion": "2.14.2",
+      "appVersion": "2.14.2",
+      "packageDigest": "sha256:86e0fbfe000b6d7fe70a3032ad3a667252f2d3dd2022e95f7330704d947d0f84",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/nats"
+    },
+    {
+      "id": "vault",
+      "repository": "https://helm.releases.hashicorp.com",
+      "chart": "vault",
+      "chartVersion": "0.34.0",
+      "appVersion": "2.0.3",
+      "packageDigest": "sha256:a716f4fa8bb80e450ce7c0f9de7b475183c47437a162eee744cd40bf991244e9",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/vault"
+    },
+    {
+      "id": "external-secrets",
+      "repository": "https://charts.external-secrets.io",
+      "chart": "external-secrets",
+      "chartVersion": "2.8.0",
+      "appVersion": "v2.8.0",
+      "packageDigest": "sha256:251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/external-secrets"
+    },
+    {
+      "id": "harbor",
+      "repository": "https://helm.goharbor.io",
+      "chart": "harbor",
+      "chartVersion": "1.19.1",
+      "appVersion": "2.15.1",
+      "packageDigest": "sha256:593f47e1ff6cdb58bd571708535ccef436f44ccf842c5f7925cd7b03e827edc1",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/harbor"
+    },
+    {
+      "id": "kube-prometheus-stack",
+      "repository": "https://prometheus-community.github.io/helm-charts",
+      "chart": "kube-prometheus-stack",
+      "chartVersion": "87.17.0",
+      "appVersion": "v0.92.1",
+      "packageDigest": "sha256:e9d625daece8804bfa82959296e59cf146756d9aa638f207ebe20e01d6d75514",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/kube-prometheus-stack"
+    },
+    {
+      "id": "blackbox-exporter",
+      "repository": "https://prometheus-community.github.io/helm-charts",
+      "chart": "prometheus-blackbox-exporter",
+      "chartVersion": "11.15.1",
+      "appVersion": "v0.28.0",
+      "packageDigest": "sha256:4e8e45b8a6fbec4168d9b3e772a0219afec09b61c545af5f01395de363e30b5e",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/prometheus-blackbox-exporter"
+    },
+    {
+      "id": "valkey",
+      "repository": "https://valkey.io/valkey-helm/",
+      "chart": "valkey",
+      "chartVersion": "0.10.0",
+      "appVersion": "9.1.0",
+      "packageDigest": "sha256:6497e784e1b707c303e358f6f9d6f82f931618f4b1e5a7aeb0946df51a081fe6",
+      "upstreamSignatureStatus": "unverified",
+      "mirrorPath": "charts/valkey"
+    }
+  ],
+  "serviceContracts": [
+    {
+      "id": "services-gitops",
+      "provider": "argocd",
+      "stage": "bootstrap",
+      "desired": { "availability": "ha" },
+      "activationState": "blocked",
+      "reasonCodes": ["IMAGE_INVENTORY_MISSING", "EXTERNAL_IDENTITY_MISSING"]
+    },
+    {
+      "id": "cert-manager",
+      "provider": "cert-manager",
+      "stage": "security-foundation",
+      "desired": { "availability": "ha" },
+      "activationState": "blocked",
+      "reasonCodes": ["IMAGE_INVENTORY_MISSING", "MIRROR_BINDING_MISSING"]
+    },
+    {
+      "id": "postgresql-platform",
+      "provider": "cloudnative-pg",
+      "stage": "data-foundation",
+      "desired": { "instances": 3 },
+      "activationState": "blocked",
+      "reasonCodes": ["CLUSTER_SPEC_MISSING", "BACKUP_TARGET_MISSING"]
+    },
+    {
+      "id": "postgresql-infrastructure",
+      "provider": "cloudnative-pg",
+      "stage": "data-foundation",
+      "desired": { "instances": 3 },
+      "activationState": "blocked",
+      "reasonCodes": ["CLUSTER_SPEC_MISSING", "BACKUP_TARGET_MISSING"]
+    },
+    {
+      "id": "clickhouse",
+      "provider": "clickhouse-operator",
+      "stage": "data-foundation",
+      "desired": { "shards": 1, "replicas": 3 },
+      "activationState": "blocked",
+      "reasonCodes": ["CLUSTER_SPEC_MISSING", "IMAGE_INVENTORY_MISSING"]
+    },
+    {
+      "id": "clickhouse-keeper",
+      "provider": "clickhouse-operator",
+      "stage": "data-foundation",
+      "desired": { "instances": 3 },
+      "activationState": "blocked",
+      "reasonCodes": ["KEEPER_SPEC_MISSING", "BACKUP_TARGET_MISSING"]
+    },
+    {
+      "id": "jetstream",
+      "provider": "nats",
+      "stage": "data-foundation",
+      "desired": { "instances": 3, "tls": true, "authentication": true },
+      "activationState": "blocked",
+      "reasonCodes": ["SERVICE_VALUES_MISSING", "CERTIFICATE_BINDING_MISSING"]
+    },
+    {
+      "id": "valkey",
+      "provider": "valkey",
+      "stage": "data-foundation",
+      "desired": { "primaries": 1, "replicas": 2, "sentinels": 3 },
+      "activationState": "blocked",
+      "reasonCodes": ["VALKEY_SENTINEL_PROVIDER_UNRESOLVED"]
+    },
+    {
+      "id": "vault",
+      "provider": "vault",
+      "stage": "security-foundation",
+      "desired": { "instances": 3, "storage": "raft", "autoUnseal": "gcp-kms" },
+      "activationState": "blocked",
+      "reasonCodes": ["SERVICE_VALUES_MISSING", "KMS_BINDING_MISSING"]
+    },
+    {
+      "id": "external-secrets",
+      "provider": "external-secrets",
+      "stage": "security-foundation",
+      "desired": { "availability": "ha", "backend": "vault" },
+      "activationState": "blocked",
+      "reasonCodes": ["VAULT_NOT_READY", "WORKLOAD_IDENTITY_MISSING"]
+    },
+    {
+      "id": "harbor",
+      "provider": "harbor",
+      "stage": "supply-chain",
+      "desired": { "availability": "ha", "externalDatabase": true, "externalCache": true },
+      "activationState": "blocked",
+      "reasonCodes": ["INFRASTRUCTURE_DATABASE_NOT_READY", "VALKEY_SENTINEL_PROVIDER_UNRESOLVED"]
+    },
+    {
+      "id": "keycloak",
+      "provider": "keycloak-operator",
+      "stage": "identity",
+      "desired": { "instances": 2 },
+      "activationState": "blocked",
+      "reasonCodes": ["KEYCLOAK_OPERATOR_SOURCE_NOT_LOCKED", "INFRASTRUCTURE_DATABASE_NOT_READY"]
+    },
+    {
+      "id": "prometheus-thanos",
+      "provider": "kube-prometheus-stack",
+      "stage": "evidence",
+      "desired": { "prometheusReplicas": 2, "thanosObjectStorage": "gcs" },
+      "activationState": "blocked",
+      "reasonCodes": ["THANOS_DEPLOYMENT_CONTRACT_UNRESOLVED", "OBJECT_STORE_BINDING_MISSING"]
+    },
+    {
+      "id": "blackbox-probes",
+      "provider": "blackbox-exporter",
+      "stage": "evidence",
+      "desired": { "replicas": 2 },
+      "activationState": "blocked",
+      "reasonCodes": ["PROBE_POLICY_MISSING", "IMAGE_INVENTORY_MISSING"]
+    },
+    {
+      "id": "model-backend",
+      "provider": "unselected",
+      "stage": "synthetic-surfaces",
+      "desired": { "instances": 2 },
+      "activationState": "blocked",
+      "reasonCodes": ["MODEL_ARTIFACT_CONTRACT_MISSING"]
+    },
+    {
+      "id": "embedding-model",
+      "provider": "unselected",
+      "stage": "synthetic-surfaces",
+      "desired": { "instances": 1 },
+      "activationState": "blocked",
+      "reasonCodes": ["MODEL_ARTIFACT_CONTRACT_MISSING"]
+    },
+    {
+      "id": "synthetic-mcp",
+      "provider": "lab-owned",
+      "stage": "synthetic-surfaces",
+      "desired": { "mode": "read-only" },
+      "activationState": "blocked",
+      "reasonCodes": ["SYNTHETIC_SERVICE_RELEASE_MISSING"]
+    }
+  ],
+  "admission": {
+    "activation": "blocked",
+    "requiredForActivation": [
+      "live-prerequisites",
+      "upstream-signature-or-reviewed-exception",
+      "source-package-digest",
+      "complete-image-inventory",
+      "destination-mirror-digests",
+      "lab-kms-signatures",
+      "secret-reference-bindings",
+      "server-side-dry-run",
+      "two-person-approval"
+    ],
+    "unresolvedDecisions": [
+      "VALKEY_SENTINEL_PROVIDER_UNRESOLVED",
+      "THANOS_DEPLOYMENT_CONTRACT_UNRESOLVED",
+      "KEYCLOAK_OPERATOR_SOURCE_NOT_LOCKED"
+    ]
+  }
+}

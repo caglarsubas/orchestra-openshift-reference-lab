@@ -21,10 +21,11 @@ does not enable platform production tool execution.
 ## Current state
 
 This repository contains the source-controlled infrastructure foundation,
-immutable cross-plane release intake, and a gate-controlled three-plane Argo
-CD overlay. It does not contain a kubeconfig, provider identity, OpenShift pull
-secret, live campaign, evidence report, or completed soak. No declaration has
-been applied to a target, so the reference profile is not verified.
+immutable cross-plane release intake, immutable dependency source catalog,
+and gate-controlled product and dependency GitOps floors. It does not contain
+a kubeconfig, provider identity, OpenShift pull secret, live campaign,
+evidence report, or completed soak. No declaration has been applied to a
+target, so the reference profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -59,11 +60,17 @@ The current canonical release-set digest is
 It records published artifacts only; it is not deployment, drill, soak, or
 verification evidence.
 
+The independently locked dependency BOM digest is
+`sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
+It locks eleven upstream chart packages and accounts for every declared
+dependency, while keeping activation blocked until image-level mirror intake,
+Secret references, and unresolved provider decisions are closed.
+
 ## Layout
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, and prerequisite gates |
+| `config/` | Independently locked topology, release set, dependency BOM, and prerequisite gates |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
@@ -85,13 +92,16 @@ make test
 make terraform-fmt
 ```
 
-`make validate` checks both the topology and immutable cross-plane release
-set. It rejects mutable tags, missing planes, an unbound runner, or release
-subjects that do not match the owning repository and UBI deployment role.
+`make validate` checks the topology, immutable cross-plane release set, and
+dependency BOM. It rejects mutable product tags, missing planes, an unbound
+runner, changed chart packages, silently omitted dependencies, or any attempt
+to mark the dependency plane active.
 It also renders the product overlay and proves that the Argo Applications use
 the matching source revisions, chart digests, mirrored repositories, image
 digests, profile, and control-plane boundary. Only ExternalSecret and
 cert-manager references may create credential or certificate objects.
+The dependency overlay is checked separately and must contain zero
+Applications and Secrets while its deny window is in force.
 
 Terraform validation downloads pinned providers but uses no credentials and
 does not contact a target project:

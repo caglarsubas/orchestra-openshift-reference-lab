@@ -10,6 +10,7 @@ output "topology" {
     target_machine_cidr      = local.target_machine_cidr
     services_network         = google_compute_network.services.name
     dependency_cluster       = google_container_cluster.dependencies.name
+    bootstrap_oci_repository = google_artifact_registry_repository.bootstrap.name
     signed_evidence_bucket   = google_storage_bucket.signed_evidence.name
     raw_evidence_bucket      = google_storage_bucket.raw_evidence.name
     evidence_kms_key         = google_kms_crypto_key.evidence.id
@@ -43,4 +44,8 @@ output "probe_service_accounts" {
 
 output "evidence_writer_service_account" {
   value = google_service_account.evidence_writer.email
+}
+
+output "artifact_mirror_service_account" {
+  value = google_service_account.artifact_mirror.email
 }

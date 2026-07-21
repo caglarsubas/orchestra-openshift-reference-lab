@@ -14,3 +14,9 @@ create credential values.
 Manual workload edits are prohibited. Before a frozen campaign, the lab is
 destroyed and reconstructed from reviewed declarations, then Argo CD drift
 must remain zero for the 72-hour burn-in and 30-day soak.
+
+The separate `dependencies/reference-lab` overlay targets the private GKE
+services plane. It currently creates only namespaces, default-deny policies,
+and a continuously denied AppProject. It contains no dependency Applications
+until a complete image/mirror/Secret admission lock is reviewed. Services-plane
+Argo CD cannot reconcile OpenShift product namespaces.
