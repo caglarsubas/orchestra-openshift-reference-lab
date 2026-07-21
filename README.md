@@ -22,12 +22,13 @@ does not enable platform production tool execution.
 
 This repository contains the source-controlled infrastructure foundation,
 immutable cross-plane release intake, immutable dependency source catalog,
-source-resolved dependency admission contract, gate-controlled product and
+source-resolved dependency admission contract, bounded source-signature
+observation, empty mirror-intake contract, gate-controlled product and
 dependency GitOps floors, a source-only durable release-validation receiver,
 and a source-only synthetic tenant kit. It does not contain a kubeconfig,
-provider identity, OpenShift pull secret, live campaign, evidence report, or
-completed soak. No declaration has been applied to a target, so the reference
-profile is not verified.
+provider identity, OpenShift pull secret, live campaign, campaign evidence
+report, or completed soak. No declaration has been applied to a target, so the
+reference profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -77,6 +78,16 @@ signature, destination mirror, lab signature, live identity, backup target,
 dry run, and approval remains blocked. Source resolution is not mirror
 admission.
 
+The bounded source-verification digest is
+`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+It records exact keyless verification for three subjects and explicit
+signature absence for eight subjects during a seven-day developer-workstation
+observation. The latter require reviewed exceptions, and all eleven require a
+signed certification-runner replay before source admission. Its empty mirror
+intake digest is
+`sha256:fe357261b272cd8fb4d6917e55453b613967fe5557616550c49591d035a5fc21`.
+No destination, receipt, lab signature, pull proof, or approval is populated.
+
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
 release-validation receiver and synthetic tenant kit remain `source-only`:
@@ -87,7 +98,7 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, dependency BOM/admission, and prerequisite gates |
+| `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, empty mirror intake, and prerequisite gates |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
@@ -107,13 +118,15 @@ boundaries and residual risks are in
 ```bash
 make validate
 make test
+make verify-dependency-sources
 make terraform-fmt
 ```
 
 `make validate` checks the topology, immutable cross-plane release set,
-dependency BOM, and fail-closed dependency admission. It rejects mutable
-product tags, missing planes, an unbound runner, changed chart or image
-subjects, silently omitted dependencies, populated mirror claims, or any
+dependency BOM, fail-closed dependency admission, bounded signature
+observation, and empty mirror intake. It rejects mutable product tags, missing
+planes, an unbound runner, changed chart or image subjects, wildcard signing
+identities, silently omitted dependencies, populated mirror claims, or any
 attempt to mark the dependency plane active.
 It also renders the product overlay and proves that the Argo Applications use
 the matching source revisions, chart digests, mirrored repositories, image
@@ -121,6 +134,10 @@ digests, profile, and control-plane boundary. Only ExternalSecret and
 cert-manager references may create credential or certificate objects.
 The dependency overlay is checked separately and must contain zero
 Applications and Secrets while its deny window is in force.
+
+`make verify-dependency-sources` is networked and time-bounded. It re-resolves
+the locked image/manifests and reproduces the signature observation, but it
+does not approve exceptions or authorize mirroring.
 
 Terraform validation downloads pinned providers but uses no credentials and
 does not contact a target project:

@@ -23,6 +23,10 @@ update and cannot silently reuse a prior deployment declaration.
 
 The Applications and AppProject also bind dependency admission
 `sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+They additionally bind source-verification observation
+`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+That observation is partial and non-campaign: three subjects verified and
+eight still need exceptions, while signed-runner replay remains outstanding.
 The AppProject has an enforced continuous deny window with manual sync
 disabled. Removing that window is a reviewed activation change after mirror,
 identity, storage, dry-run, and approval evidence exists; the activation

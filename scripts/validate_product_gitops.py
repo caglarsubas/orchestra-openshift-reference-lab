@@ -9,10 +9,18 @@ from typing import Any, NoReturn
 
 try:
     from scripts.validate_dependency_admission import validate_admission
+    from scripts.validate_dependency_supply_chain import (
+        EXPECTED_SOURCE_VERIFICATION_DIGEST,
+        validate_source_verification,
+    )
     from scripts.validate_release_set import validate_release_set
     from scripts.validate_repository import ROOT, load_json
 except ModuleNotFoundError:
     from validate_dependency_admission import validate_admission
+    from validate_dependency_supply_chain import (
+        EXPECTED_SOURCE_VERIFICATION_DIGEST,
+        validate_source_verification,
+    )
     from validate_release_set import validate_release_set
     from validate_repository import ROOT, load_json
 
@@ -25,6 +33,7 @@ DEPENDENCY_BOM_DIGEST = (
 DEPENDENCY_ADMISSION_DIGEST = (
     "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
 )
+DEPENDENCY_SOURCE_VERIFICATION_DIGEST = EXPECTED_SOURCE_VERIFICATION_DIGEST
 APPLICATION_CONTRACTS = {
     "platform": {
         "file": "platform-application.json",
@@ -143,6 +152,8 @@ def validate_common_application(
         != DEPENDENCY_BOM_DIGEST
         or annotations.get("orchestra.prometa.ai/dependency-admission-digest")
         != DEPENDENCY_ADMISSION_DIGEST
+        or annotations.get("orchestra.prometa.ai/dependency-source-verification-digest")
+        != DEPENDENCY_SOURCE_VERIFICATION_DIGEST
         or annotations.get("orchestra.prometa.ai/source-revision")
         != plane["source"]["revision"]
         or annotations.get("orchestra.prometa.ai/source-chart-digest")
@@ -188,6 +199,8 @@ def validate_project(release_set_digest: str) -> None:
         != DEPENDENCY_BOM_DIGEST
         or annotations.get("orchestra.prometa.ai/dependency-admission-digest")
         != DEPENDENCY_ADMISSION_DIGEST
+        or annotations.get("orchestra.prometa.ai/dependency-source-verification-digest")
+        != DEPENDENCY_SOURCE_VERIFICATION_DIGEST
         or annotations.get("orchestra.prometa.ai/activation")
         != "blocked-until-live-prerequisites-and-mirror-intake-pass"
         or spec.get("syncWindows")
@@ -292,13 +305,22 @@ def validate_model(values: dict[str, Any]) -> None:
 
 def validate_applications(release_set: dict[str, Any]) -> str:
     release_set_digest = validate_release_set(release_set)
+    dependency_admission = load_json(ROOT / "config" / "dependency-admission.lock.json")
+    topology = load_json(ROOT / "config" / "lab.lock.json")
     dependency_admission_digest = validate_admission(
-        load_json(ROOT / "config" / "dependency-admission.lock.json"),
+        dependency_admission,
         load_json(ROOT / "config" / "dependency-bom.lock.json"),
-        load_json(ROOT / "config" / "lab.lock.json"),
+        topology,
     )
     if dependency_admission_digest != DEPENDENCY_ADMISSION_DIGEST:
         fail("product_gitops_dependency_admission_digest_invalid")
+    source_verification_digest = validate_source_verification(
+        load_json(ROOT / "config" / "dependency-source-verification.lock.json"),
+        dependency_admission,
+        topology,
+    )
+    if source_verification_digest != DEPENDENCY_SOURCE_VERIFICATION_DIGEST:
+        fail("product_gitops_dependency_source_verification_digest_invalid")
     validate_project(release_set_digest)
     for plane_name, contract in APPLICATION_CONTRACTS.items():
         application = load_json(PRODUCT_ROOT / contract["file"])

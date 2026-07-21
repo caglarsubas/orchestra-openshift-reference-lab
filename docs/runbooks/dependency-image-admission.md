@@ -4,6 +4,10 @@ This procedure turns the source-resolved dependency candidate into a separate,
 reviewed deployment candidate. It does not authorize provisioning and cannot
 produce campaign evidence without the live prerequisite gate.
 
+The bounded signature observation, exception requirements, and empty mirror
+receipt contract are maintained in
+[`dependency-supply-chain-intake.md`](dependency-supply-chain-intake.md).
+
 The immutable input is
 `config/dependency-admission.lock.json`, digest
 `sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.

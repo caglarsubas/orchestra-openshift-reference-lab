@@ -6,6 +6,7 @@ import unittest
 from scripts.validate_product_gitops import (
     DEPENDENCY_ADMISSION_DIGEST,
     DEPENDENCY_BOM_DIGEST,
+    DEPENDENCY_SOURCE_VERIFICATION_DIGEST,
     EXPECTED_RENDERED_COUNTS,
     PRODUCT_ROOT,
     validate_applications,
@@ -52,6 +53,20 @@ class ProductGitOpsTests(unittest.TestCase):
                     "orchestra.prometa.ai/dependency-admission-digest"
                 ],
                 DEPENDENCY_ADMISSION_DIGEST,
+            )
+
+    def test_applications_bind_the_source_verification_observation(self) -> None:
+        for filename in (
+            "platform-application.json",
+            "runtime-application.json",
+            "model-application.json",
+        ):
+            application = load_json(PRODUCT_ROOT / filename)
+            self.assertEqual(
+                application["metadata"]["annotations"][
+                    "orchestra.prometa.ai/dependency-source-verification-digest"
+                ],
+                DEPENDENCY_SOURCE_VERIFICATION_DIGEST,
             )
 
     def test_product_project_has_an_enforced_continuous_deny_window(self) -> None:

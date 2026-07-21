@@ -37,6 +37,9 @@ BOOTSTRAP_REPOSITORY = (
     "oci://europe-west1-docker.pkg.dev/"
     "ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/charts"
 )
+SOURCE_VERIFICATION_DIGEST = (
+    "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89"
+)
 
 
 def fail(code: str) -> NoReturn:
@@ -63,6 +66,8 @@ def validate_project(project: dict[str, Any]) -> None:
         != "orchestra-dependencies-2026-07-21.1"
         or annotations.get("orchestra.prometa.ai/dependency-admission-digest")
         != "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
+        or annotations.get("orchestra.prometa.ai/dependency-source-verification-digest")
+        != SOURCE_VERIFICATION_DIGEST
         or spec.get("sourceRepos") != [BOOTSTRAP_REPOSITORY]
         or spec.get("syncWindows")
         != [
