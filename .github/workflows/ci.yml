@@ -51,6 +51,9 @@ jobs:
       - name: Validate immutable dependency BOM
         run: python3 scripts/validate_dependency_bom.py
 
+      - name: Validate fail-closed dependency admission
+        run: python3 scripts/validate_dependency_admission.py
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

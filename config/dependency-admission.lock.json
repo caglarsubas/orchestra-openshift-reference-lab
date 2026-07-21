@@ -1,0 +1,694 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "admissionId": "orchestra-dependency-admission-2026-07-21.1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "dependencyBomDigest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
+  },
+  "claim": {
+    "sourceImagesResolved": true,
+    "serviceContractsDeclared": true,
+    "upstreamSignaturesVerified": false,
+    "mirrored": false,
+    "labSigned": false,
+    "serverDryRunPassed": false,
+    "twoPersonApproved": false,
+    "activated": false,
+    "applied": false,
+    "liveTested": false,
+    "campaignEvidence": false
+  },
+  "architecture": "linux/amd64",
+  "images": [
+    {
+      "id": "cloudnative-pg-operator",
+      "owners": ["cloudnative-pg"],
+      "purpose": "operator",
+      "source": {
+        "reference": "ghcr.io/cloudnative-pg/cloudnative-pg:1.30.0",
+        "indexDigest": "sha256:a2701eb97cdd2a34b1fdb2cb51987f544b706e40bec72ae7146cd8580efefebb",
+        "platformDigest": "sha256:091d306935cfdf646debfe78010d59ebfb572150eb6eb922b0203873c0c68841",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "sigstore-keyless",
+        "identityPolicy": "cloudnative-pg-github-actions"
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "cloudnative-pg-postgresql-16",
+      "owners": ["postgresql-platform", "postgresql-infrastructure"],
+      "purpose": "database",
+      "source": {
+        "reference": "ghcr.io/cloudnative-pg/postgresql:16.10-system-trixie",
+        "indexDigest": "sha256:26e146bc71ebfc2a3937f729a15161a7fb6cd7c8a0b0007ad60cb53d2371b3fc",
+        "platformDigest": "sha256:dea92d39d38abf4d87c0b0bd43cbf956dc2de03db3a78b5829ac629ef296b8e1",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "sigstore-keyless",
+        "identityPolicy": "cloudnative-pg-postgres-containers-github-actions"
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "barman-cloud-controller",
+      "owners": ["postgresql-platform", "postgresql-infrastructure"],
+      "purpose": "backup-controller",
+      "source": {
+        "reference": "ghcr.io/cloudnative-pg/plugin-barman-cloud:v0.13.0",
+        "indexDigest": "sha256:71589dbac582333442812b07b31f7ea4d00324a8358aac7ca507dabf9f4b6c96",
+        "platformDigest": "sha256:417449fe4f6f0a56acdeb30e4131930815f2b46b9afeb808059b57aa8b4c2ef5",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "sigstore-keyless",
+        "identityPolicy": "cloudnative-pg-plugin-barman-cloud-github-actions"
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "barman-cloud-sidecar",
+      "owners": ["postgresql-platform", "postgresql-infrastructure"],
+      "purpose": "backup-sidecar",
+      "source": {
+        "reference": "ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar:v0.13.0",
+        "indexDigest": "sha256:990361af3319f9e23aafa0f6d7981f99bf1f69b4e6a85cf1bc7d71d6f09bb288",
+        "platformDigest": "sha256:15cb1a01e7c5235eedac2061cab8208e5f7c39dbda292f9c2d4ddaa0c1f211e6",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "sigstore-keyless",
+        "identityPolicy": "cloudnative-pg-plugin-barman-cloud-github-actions"
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "clickhouse-operator",
+      "owners": ["clickhouse", "clickhouse-keeper"],
+      "purpose": "operator",
+      "source": {
+        "reference": "docker.io/altinity/clickhouse-operator:0.27.1",
+        "indexDigest": "sha256:a802b3a19d2011f672c32cea6733e573e004938ff463d1c3ab4ac0b16b9877dd",
+        "platformDigest": "sha256:678ea8ebc4f68eb6fef14e1461c2109cb8d9d135c0f2d4119a46141d54fa0930",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_OR_EXCEPTION_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "clickhouse-metrics-exporter",
+      "owners": ["clickhouse", "clickhouse-keeper"],
+      "purpose": "metrics-exporter",
+      "source": {
+        "reference": "docker.io/altinity/metrics-exporter:0.27.1",
+        "indexDigest": "sha256:5523d83190ad1560051f19fe6daa00876436f12cf833a506731ed6226192193f",
+        "platformDigest": "sha256:ca56a26fda49da1a5938e5532b6f0ead71726af38d5dd88810fc0cd4123ef113",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_OR_EXCEPTION_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "clickhouse-server-lts",
+      "owners": ["clickhouse", "clickhouse-keeper"],
+      "purpose": "database-and-keeper",
+      "source": {
+        "reference": "docker.io/clickhouse/clickhouse-server:25.8.28.1",
+        "indexDigest": "sha256:a9d328123ff8a61bf6b16448528b577d59deb85758172e13b09054b0727f8adf",
+        "platformDigest": "sha256:cb75da0e596b8115d10bea34cef1414eafebfbcb5f5136c03e022c7b525899b3",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_OR_EXCEPTION_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "nats-server",
+      "owners": ["jetstream"],
+      "purpose": "event-bus",
+      "source": {
+        "reference": "docker.io/library/nats:2.14.2-alpine",
+        "indexDigest": "sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32",
+        "platformDigest": "sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_OR_EXCEPTION_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "nats-config-reloader",
+      "owners": ["jetstream"],
+      "purpose": "configuration-reloader",
+      "source": {
+        "reference": "docker.io/natsio/nats-server-config-reloader:0.23.0",
+        "indexDigest": "sha256:64cb6c858e794906d3167378e02b7e0feb83c4e14c07b371eb8d921ef8c4a60b",
+        "platformDigest": "sha256:1418d42cea39ea729c1d34ca26ba33d967abdf040bad45ec1314c807bfacc56f",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_OR_EXCEPTION_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "vault-server",
+      "owners": ["vault"],
+      "purpose": "secret-authority",
+      "source": {
+        "reference": "docker.io/hashicorp/vault:2.0.3",
+        "indexDigest": "sha256:a296a888b118615dc01d5f1a6846e6d4a7277946caaed5b447008fff5fe06b54",
+        "platformDigest": "sha256:db6a5f78749204d0a8d002be1cc6e9a2a6de53dffce41a894c4a06d309dca360",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_OR_EXCEPTION_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    },
+    {
+      "id": "external-secrets-controller",
+      "owners": ["external-secrets"],
+      "purpose": "secret-projection-controller",
+      "source": {
+        "reference": "ghcr.io/external-secrets/external-secrets:v2.8.0",
+        "indexDigest": "sha256:24c0dd3699e0988520afd2218612758cd97d1f702757b5b4fcf89adaa33ef679",
+        "platformDigest": "sha256:02259bfd212de0b563b1eb9065e85e816bfec13d1aec84ee4e1a48cfed228b40",
+        "platform": "linux/amd64"
+      },
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "sigstore-keyless",
+        "identityPolicy": "external-secrets-github-actions"
+      },
+      "mirrors": {
+        "artifactRegistry": {"reference": null, "digest": null},
+        "harbor": {"reference": null, "digest": null}
+      },
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING"
+      ]
+    }
+  ],
+  "sourceArtifacts": [
+    {
+      "id": "barman-cloud-manifest",
+      "type": "release-manifest",
+      "sourceUrl": "https://github.com/cloudnative-pg/plugin-barman-cloud/releases/download/v0.13.0/manifest.yaml",
+      "sourceDigest": "sha256:d2e71e7b06822448f1a421f05781846cfdb9cc621e7ef32eef5e20c5133213b0",
+      "upstreamVerificationStatus": "pending",
+      "artifactRegistryDigest": null,
+      "harborDigest": null,
+      "labSignatureBundleDigest": null,
+      "activationState": "blocked",
+      "reasonCodes": [
+        "UPSTREAM_SIGNATURE_PENDING",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "MANIFEST_HARDENING_PATCH_REQUIRED"
+      ]
+    }
+  ],
+  "serviceContracts": [
+    {
+      "id": "postgresql-platform",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-postgres",
+      "provider": "cloudnative-pg",
+      "activationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ],
+      "images": [
+        "cloudnative-pg-operator",
+        "cloudnative-pg-postgresql-16",
+        "barman-cloud-controller",
+        "barman-cloud-sidecar"
+      ],
+      "availability": {
+        "instances": 3,
+        "synchronousStandbyReplicas": 1,
+        "podDisruptionBudgetMinAvailable": 2,
+        "zoneSpread": "required"
+      },
+      "storage": {
+        "class": "orchestra-regional-rwo",
+        "dataGi": 500,
+        "walGi": 100,
+        "volumeMode": "Filesystem",
+        "allowExpansion": true
+      },
+      "security": {
+        "tls": "required",
+        "tlsSecretRefs": [
+          "postgresql-platform-server-tls",
+          "postgresql-platform-client-ca"
+        ],
+        "bootstrapSecretRef": "postgresql-platform-bootstrap",
+        "workloadIdentityRef": "postgresql-platform-backup-gsa",
+        "superuserAccess": false
+      },
+      "backup": {
+        "provider": "barman-cloud",
+        "objectStoreRef": "postgresql-platform-gcs",
+        "targetRef": "POSTGRES_PLATFORM_BACKUP_BUCKET_REQUIRED",
+        "credentialMode": "gke-workload-identity",
+        "pitr": true,
+        "retentionDays": 35,
+        "schedule": "15 1 * * *"
+      },
+      "network": {
+        "allowedClientIdentities": [
+          "orchestra-platform",
+          "orchestra-runtime",
+          "certification-runner"
+        ],
+        "publicEndpoint": false,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "postgresql-infrastructure",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-postgres",
+      "provider": "cloudnative-pg",
+      "activationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ],
+      "images": [
+        "cloudnative-pg-operator",
+        "cloudnative-pg-postgresql-16",
+        "barman-cloud-controller",
+        "barman-cloud-sidecar"
+      ],
+      "availability": {
+        "instances": 3,
+        "synchronousStandbyReplicas": 1,
+        "podDisruptionBudgetMinAvailable": 2,
+        "zoneSpread": "required"
+      },
+      "storage": {
+        "class": "orchestra-regional-rwo",
+        "dataGi": 300,
+        "walGi": 75,
+        "volumeMode": "Filesystem",
+        "allowExpansion": true
+      },
+      "security": {
+        "tls": "required",
+        "tlsSecretRefs": [
+          "postgresql-infrastructure-server-tls",
+          "postgresql-infrastructure-client-ca"
+        ],
+        "bootstrapSecretRef": "postgresql-infrastructure-bootstrap",
+        "workloadIdentityRef": "postgresql-infrastructure-backup-gsa",
+        "superuserAccess": false
+      },
+      "backup": {
+        "provider": "barman-cloud",
+        "objectStoreRef": "postgresql-infrastructure-gcs",
+        "targetRef": "POSTGRES_INFRASTRUCTURE_BACKUP_BUCKET_REQUIRED",
+        "credentialMode": "gke-workload-identity",
+        "pitr": true,
+        "retentionDays": 35,
+        "schedule": "45 1 * * *"
+      },
+      "network": {
+        "allowedClientIdentities": [
+          "orchestra-vault",
+          "orchestra-harbor",
+          "orchestra-keycloak",
+          "release-validation-receiver",
+          "certification-runner"
+        ],
+        "publicEndpoint": false,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "clickhouse-and-keeper",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-clickhouse",
+      "provider": "altinity-clickhouse-operator",
+      "activationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "CLICKHOUSE_BACKUP_CONTRACT_PENDING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ],
+      "images": [
+        "clickhouse-operator",
+        "clickhouse-metrics-exporter",
+        "clickhouse-server-lts"
+      ],
+      "availability": {
+        "shards": 1,
+        "replicas": 3,
+        "keeperInstances": 3,
+        "podDisruptionBudgetMinAvailable": 2,
+        "zoneSpread": "required"
+      },
+      "storage": {
+        "class": "orchestra-regional-rwo",
+        "dataGiPerReplica": 1000,
+        "keeperGiPerInstance": 50,
+        "volumeMode": "Filesystem",
+        "allowExpansion": true
+      },
+      "security": {
+        "tls": "required",
+        "tlsSecretRefs": [
+          "clickhouse-server-tls",
+          "clickhouse-client-ca",
+          "clickhouse-keeper-tls"
+        ],
+        "bootstrapSecretRef": "clickhouse-bootstrap",
+        "workloadIdentityRef": null,
+        "superuserAccess": false
+      },
+      "backup": {
+        "provider": "decision-pending",
+        "objectStoreRef": null,
+        "targetRef": null,
+        "credentialMode": "gke-workload-identity",
+        "pitr": false,
+        "retentionDays": 35,
+        "schedule": null
+      },
+      "network": {
+        "allowedClientIdentities": [
+          "orchestra-platform",
+          "certification-runner"
+        ],
+        "publicEndpoint": false,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "jetstream",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-jetstream",
+      "provider": "nats-helm",
+      "activationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ],
+      "images": ["nats-server", "nats-config-reloader"],
+      "availability": {
+        "instances": 3,
+        "streamReplicaPolicy": 3,
+        "podDisruptionBudgetMinAvailable": 2,
+        "zoneSpread": "required"
+      },
+      "storage": {
+        "class": "orchestra-regional-rwo",
+        "dataGiPerInstance": 500,
+        "memoryStoreGiPerInstance": 2,
+        "volumeMode": "Filesystem",
+        "allowExpansion": true
+      },
+      "security": {
+        "tls": "mutual-required",
+        "tlsSecretRefs": [
+          "jetstream-server-tls",
+          "jetstream-route-tls",
+          "jetstream-client-ca"
+        ],
+        "bootstrapSecretRef": "jetstream-accounts",
+        "workloadIdentityRef": "jetstream-backup-gsa",
+        "superuserAccess": false
+      },
+      "backup": {
+        "provider": "jetstream-snapshot-api",
+        "objectStoreRef": "jetstream-gcs",
+        "targetRef": "JETSTREAM_BACKUP_BUCKET_REQUIRED",
+        "credentialMode": "gke-workload-identity",
+        "pitr": false,
+        "retentionDays": 35,
+        "schedule": "15 */6 * * *"
+      },
+      "network": {
+        "allowedClientIdentities": [
+          "orchestra-platform",
+          "certification-runner"
+        ],
+        "publicEndpoint": false,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "vault",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-vault",
+      "provider": "vault-helm",
+      "activationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_KMS_BINDING_MISSING",
+        "LIVE_PKI_BINDING_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ],
+      "images": ["vault-server"],
+      "availability": {
+        "instances": 3,
+        "raft": true,
+        "podDisruptionBudgetMinAvailable": 2,
+        "zoneSpread": "required"
+      },
+      "storage": {
+        "class": "orchestra-regional-rwo",
+        "dataGiPerInstance": 100,
+        "auditGiPerInstance": 50,
+        "volumeMode": "Filesystem",
+        "allowExpansion": true
+      },
+      "security": {
+        "tls": "required",
+        "tlsSecretRefs": ["vault-server-tls", "vault-client-ca"],
+        "bootstrapSecretRef": null,
+        "workloadIdentityRef": "vault-kms-gsa",
+        "superuserAccess": false
+      },
+      "backup": {
+        "provider": "vault-raft-snapshot",
+        "objectStoreRef": "vault-gcs",
+        "targetRef": "VAULT_BACKUP_BUCKET_REQUIRED",
+        "credentialMode": "gke-workload-identity",
+        "pitr": false,
+        "retentionDays": 35,
+        "schedule": "45 */6 * * *"
+      },
+      "network": {
+        "allowedClientIdentities": [
+          "orchestra-external-secrets",
+          "certification-runner",
+          "vault-operator"
+        ],
+        "publicEndpoint": false,
+        "defaultDeny": true
+      }
+    },
+    {
+      "id": "external-secrets",
+      "targetCluster": "openshift",
+      "namespace": "orchestra-external-secrets",
+      "provider": "external-secrets-helm",
+      "activationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "VAULT_NOT_READY",
+        "LIVE_PKI_BINDING_MISSING",
+        "OPENSHIFT_SERVER_DRY_RUN_MISSING"
+      ],
+      "images": ["external-secrets-controller"],
+      "availability": {
+        "instances": 2,
+        "leaderElection": true,
+        "podDisruptionBudgetMinAvailable": 1,
+        "zoneSpread": "required"
+      },
+      "storage": null,
+      "security": {
+        "tls": "required",
+        "tlsSecretRefs": ["vault-client-ca", "external-secrets-webhook-tls"],
+        "bootstrapSecretRef": null,
+        "workloadIdentityRef": "external-secrets-vault-auth",
+        "superuserAccess": false
+      },
+      "backup": null,
+      "network": {
+        "allowedClientIdentities": ["openshift-kube-apiserver"],
+        "publicEndpoint": false,
+        "defaultDeny": true
+      }
+    }
+  ],
+  "admission": {
+    "activation": "blocked",
+    "requiredEvidence": [
+      "live-prerequisites",
+      "upstream-signature-or-reviewed-exception",
+      "artifact-registry-mirror-digests",
+      "harbor-mirror-digests",
+      "lab-kms-signature-bundles",
+      "live-secret-and-identity-bindings",
+      "storage-and-backup-bindings",
+      "product-compatibility-results",
+      "server-side-dry-runs",
+      "two-person-approval"
+    ],
+    "unresolvedReasonCodes": [
+      "UPSTREAM_SIGNATURES_PENDING",
+      "DESTINATION_MIRRORS_MISSING",
+      "LAB_SIGNATURES_MISSING",
+      "LIVE_IDENTITIES_MISSING",
+      "LIVE_BACKUP_TARGETS_MISSING",
+      "CLICKHOUSE_BACKUP_CONTRACT_PENDING",
+      "PRODUCT_COMPATIBILITY_PROOFS_MISSING",
+      "SERVER_SIDE_DRY_RUNS_MISSING",
+      "TWO_PERSON_APPROVAL_MISSING"
+    ]
+  }
+}

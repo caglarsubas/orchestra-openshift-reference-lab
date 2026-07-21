@@ -22,11 +22,12 @@ does not enable platform production tool execution.
 
 This repository contains the source-controlled infrastructure foundation,
 immutable cross-plane release intake, immutable dependency source catalog,
-gate-controlled product and dependency GitOps floors, a source-only durable
-release-validation receiver, and a source-only synthetic tenant kit. It does
-not contain a kubeconfig, provider identity, OpenShift pull secret, live
-campaign, evidence report, or completed soak. No declaration has been applied
-to a target, so the reference profile is not verified.
+source-resolved dependency admission contract, gate-controlled product and
+dependency GitOps floors, a source-only durable release-validation receiver,
+and a source-only synthetic tenant kit. It does not contain a kubeconfig,
+provider identity, OpenShift pull secret, live campaign, evidence report, or
+completed soak. No declaration has been applied to a target, so the reference
+profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -67,6 +68,15 @@ It locks eleven upstream chart packages and accounts for every declared
 dependency, while keeping activation blocked until image-level mirror intake,
 Secret references, and unresolved provider decisions are closed.
 
+The dependency admission digest is
+`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+It locks eleven exact source image indexes and linux/amd64 manifests, the
+Barman Cloud release manifest, and service contracts for PostgreSQL,
+ClickHouse/Keeper, JetStream, Vault, and External Secrets. Every source
+signature, destination mirror, lab signature, live identity, backup target,
+dry run, and approval remains blocked. Source resolution is not mirror
+admission.
+
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
 release-validation receiver and synthetic tenant kit remain `source-only`:
@@ -77,7 +87,7 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, dependency BOM, and prerequisite gates |
+| `config/` | Independently locked topology, release set, dependency BOM/admission, and prerequisite gates |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
@@ -100,10 +110,11 @@ make test
 make terraform-fmt
 ```
 
-`make validate` checks the topology, immutable cross-plane release set, and
-dependency BOM. It rejects mutable product tags, missing planes, an unbound
-runner, changed chart packages, silently omitted dependencies, or any attempt
-to mark the dependency plane active.
+`make validate` checks the topology, immutable cross-plane release set,
+dependency BOM, and fail-closed dependency admission. It rejects mutable
+product tags, missing planes, an unbound runner, changed chart or image
+subjects, silently omitted dependencies, populated mirror claims, or any
+attempt to mark the dependency plane active.
 It also renders the product overlay and proves that the Argo Applications use
 the matching source revisions, chart digests, mirrored repositories, image
 digests, profile, and control-plane boundary. Only ExternalSecret and

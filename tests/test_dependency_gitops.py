@@ -19,9 +19,7 @@ class DependencyGitOpsTests(unittest.TestCase):
     def test_project_is_permanently_denied_until_admitted_overlay(self) -> None:
         validate_project(self.project)
         self.assertEqual(
-            self.project["metadata"]["annotations"][
-                "orchestra.prometa.ai/activation"
-            ],
+            self.project["metadata"]["annotations"]["orchestra.prometa.ai/activation"],
             "blocked",
         )
         self.assertFalse(self.project["spec"]["syncWindows"][0]["manualSync"])
@@ -42,7 +40,7 @@ class DependencyGitOpsTests(unittest.TestCase):
     def test_rendered_inventory_is_explicit(self) -> None:
         self.assertEqual(
             EXPECTED_RENDERED_COUNTS,
-            {"AppProject": 1, "Namespace": 12, "NetworkPolicy": 12},
+            {"AppProject": 1, "Namespace": 11, "NetworkPolicy": 11},
         )
 
 

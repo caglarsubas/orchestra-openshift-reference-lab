@@ -3,23 +3,28 @@
 
 from __future__ import annotations
 
-import json
 import re
 import sys
-from pathlib import Path
 from typing import Any, NoReturn
 
 try:
+    from scripts.validate_dependency_admission import validate_admission
     from scripts.validate_release_set import validate_release_set
     from scripts.validate_repository import ROOT, load_json
 except ModuleNotFoundError:
+    from validate_dependency_admission import validate_admission
     from validate_release_set import validate_release_set
     from validate_repository import ROOT, load_json
 
 
 PRODUCT_ROOT = ROOT / "gitops" / "products" / "reference-lab"
 MIRROR_CHART_REPOSITORY = "harbor.services.ocp-lab.prometa.ai/orchestra/charts"
-DEPENDENCY_BOM_DIGEST = "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
+DEPENDENCY_BOM_DIGEST = (
+    "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
+)
+DEPENDENCY_ADMISSION_DIGEST = (
+    "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
+)
 APPLICATION_CONTRACTS = {
     "platform": {
         "file": "platform-application.json",
@@ -114,15 +119,11 @@ def validate_common_application(
     spec = object_value(application.get("spec"), "product_gitops_spec_invalid")
     source = object_value(spec.get("source"), "product_gitops_source_invalid")
     helm = object_value(source.get("helm"), "product_gitops_helm_invalid")
-    values = object_value(
-        helm.get("valuesObject"), "product_gitops_values_invalid"
-    )
+    values = object_value(helm.get("valuesObject"), "product_gitops_values_invalid")
     destination = object_value(
         spec.get("destination"), "product_gitops_destination_invalid"
     )
-    sync = object_value(
-        spec.get("syncPolicy"), "product_gitops_sync_policy_invalid"
-    )
+    sync = object_value(spec.get("syncPolicy"), "product_gitops_sync_policy_invalid")
     automated = object_value(
         sync.get("automated"), "product_gitops_automated_sync_invalid"
     )
@@ -140,6 +141,8 @@ def validate_common_application(
         != release_set_digest
         or annotations.get("orchestra.prometa.ai/dependency-bom-digest")
         != DEPENDENCY_BOM_DIGEST
+        or annotations.get("orchestra.prometa.ai/dependency-admission-digest")
+        != DEPENDENCY_ADMISSION_DIGEST
         or annotations.get("orchestra.prometa.ai/source-revision")
         != plane["source"]["revision"]
         or annotations.get("orchestra.prometa.ai/source-chart-digest")
@@ -174,6 +177,7 @@ def validate_project(release_set_digest: str) -> None:
     annotations = object_value(
         metadata.get("annotations"), "product_gitops_project_annotations_invalid"
     )
+    spec = object_value(project.get("spec"), "product_gitops_project_spec_invalid")
     if (
         project.get("apiVersion") != "argoproj.io/v1alpha1"
         or project.get("kind") != "AppProject"
@@ -182,8 +186,20 @@ def validate_project(release_set_digest: str) -> None:
         != release_set_digest
         or annotations.get("orchestra.prometa.ai/dependency-bom-digest")
         != DEPENDENCY_BOM_DIGEST
+        or annotations.get("orchestra.prometa.ai/dependency-admission-digest")
+        != DEPENDENCY_ADMISSION_DIGEST
         or annotations.get("orchestra.prometa.ai/activation")
         != "blocked-until-live-prerequisites-and-mirror-intake-pass"
+        or spec.get("syncWindows")
+        != [
+            {
+                "kind": "deny",
+                "schedule": "0 0 * * *",
+                "duration": "24h",
+                "applications": ["*"],
+                "manualSync": False,
+            }
+        ]
     ):
         fail("product_gitops_project_contract_invalid")
 
@@ -196,9 +212,7 @@ def validate_platform(values: dict[str, Any]) -> None:
         backend_tls.get("serviceServingCertificate"),
         "product_gitops_platform_service_certificate_invalid",
     )
-    route = object_value(
-        values.get("route"), "product_gitops_platform_route_invalid"
-    )
+    route = object_value(values.get("route"), "product_gitops_platform_route_invalid")
     if (
         values.get("agentQuerying") != {"enabled": False}
         or values.get("toolExecution") != {"enabled": False}
@@ -216,11 +230,9 @@ def validate_platform(values: dict[str, Any]) -> None:
         or values.get("secret", {}).get("create") is not False
         or backend_tls.get("enabled") is not True
         or backend_tls.get("port") != 3443
-        or backend_tls.get("existingSecret")
-        != "orchestra-platform-backend-tls"
+        or backend_tls.get("existingSecret") != "orchestra-platform-backend-tls"
         or backend_tls.get("rolloutId") != "release-set-ec705bcc"
-        or backend_tls.get("serverName")
-        != "orchestra-platform.orchestra-platform.svc"
+        or backend_tls.get("serverName") != "orchestra-platform.orchestra-platform.svc"
         or service_certificate
         != {
             "enabled": True,
@@ -257,7 +269,9 @@ def validate_runtime(values: dict[str, Any]) -> None:
 
 def validate_model(values: dict[str, Any]) -> None:
     tls = object_value(values.get("serverTls"), "product_gitops_model_tls_invalid")
-    routing = object_value(values.get("routing"), "product_gitops_model_routing_invalid")
+    routing = object_value(
+        values.get("routing"), "product_gitops_model_routing_invalid"
+    )
     if (
         values.get("workloadSurface", {}).get("profileId")
         != "orchestra-model-plane-workload-v1"
@@ -271,14 +285,20 @@ def validate_model(values: dict[str, Any]) -> None:
         or not tls.get("rolloutId")
         or values.get("modelBackends", {}).get("mode") != "remote"
         or values.get("otel", {}).get("enabled") is not True
-        or values.get("persistence", {}).get("externalBackupAcknowledged")
-        is not True
+        or values.get("persistence", {}).get("externalBackupAcknowledged") is not True
     ):
         fail("product_gitops_model_boundary_invalid")
 
 
 def validate_applications(release_set: dict[str, Any]) -> str:
     release_set_digest = validate_release_set(release_set)
+    dependency_admission_digest = validate_admission(
+        load_json(ROOT / "config" / "dependency-admission.lock.json"),
+        load_json(ROOT / "config" / "dependency-bom.lock.json"),
+        load_json(ROOT / "config" / "lab.lock.json"),
+    )
+    if dependency_admission_digest != DEPENDENCY_ADMISSION_DIGEST:
+        fail("product_gitops_dependency_admission_digest_invalid")
     validate_project(release_set_digest)
     for plane_name, contract in APPLICATION_CONTRACTS.items():
         application = load_json(PRODUCT_ROOT / contract["file"])
@@ -301,9 +321,7 @@ def field(document: str, name: str) -> str | None:
 
 def validate_rendered(content: str) -> None:
     documents = [
-        item.strip()
-        for item in re.split(r"(?m)^---\s*$", content)
-        if item.strip()
+        item.strip() for item in re.split(r"(?m)^---\s*$", content) if item.strip()
     ]
     counts: dict[str, int] = {}
     for document in documents:

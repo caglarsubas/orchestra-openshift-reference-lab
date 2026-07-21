@@ -11,6 +11,7 @@ flowchart LR
     GATEWAY["Synthetic tenant gateway"]
     RUNTIME["Tenant runtime host"]
     MODEL["Model plane"]
+    ESO["External Secrets Operator"]
     IAP --> OCP
     OCP --> PLATFORM
     OCP --> GATEWAY
@@ -37,6 +38,7 @@ flowchart LR
 
   OCP <-->|"Private VPC peering and explicit firewall"| GKE
   SECURITY -->|"OIDC JWKS and synthetic identities"| GATEWAY
+  SECURITY -->|"Private Vault API with TLS and bounded auth"| ESO
   RUNTIME -->|"Model and read-only MCP only"| SYNTHETIC
   PLATFORM -->|"Receipts and telemetry; no deployment credential"| EVIDENCE
   ARGO["OpenShift GitOps / Argo CD"] -->|"Sole workload rollout authority"| OCP
@@ -70,6 +72,9 @@ flowchart LR
 10. Synthetic MCP deployments expose one read-only, idempotent tool. Slow,
     unavailable, wrong-tenant, and untrusted-certificate lanes are separate
     immutable deployments; none may enable write or destructive behavior.
+11. External Secrets is an OpenShift controller. It consumes the private Vault
+    service in GKE through explicit peering, TLS, and a bounded Kubernetes auth
+    role; services-plane Argo CD never installs it into GKE.
 
 ## Source-of-truth split
 

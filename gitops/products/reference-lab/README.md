@@ -21,6 +21,13 @@ Every Application also binds dependency BOM
 Changing the dependency catalog therefore requires a reviewed product-overlay
 update and cannot silently reuse a prior deployment declaration.
 
+The Applications and AppProject also bind dependency admission
+`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+The AppProject has an enforced continuous deny window with manual sync
+disabled. Removing that window is a reviewed activation change after mirror,
+identity, storage, dry-run, and approval evidence exists; the activation
+annotation alone is not treated as enforcement.
+
 ## Activation order
 
 1. Pass every live prerequisite gate with at least two independent verifier

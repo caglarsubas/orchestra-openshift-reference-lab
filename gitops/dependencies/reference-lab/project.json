@@ -6,7 +6,8 @@
     "namespace": "orchestra-services-gitops",
     "annotations": {
       "orchestra.prometa.ai/activation": "blocked",
-      "orchestra.prometa.ai/dependency-bom": "orchestra-dependencies-2026-07-21.1"
+      "orchestra.prometa.ai/dependency-bom": "orchestra-dependencies-2026-07-21.1",
+      "orchestra.prometa.ai/dependency-admission-digest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
     }
   },
   "spec": {
@@ -21,7 +22,6 @@
       { "server": "https://kubernetes.default.svc", "namespace": "orchestra-jetstream" },
       { "server": "https://kubernetes.default.svc", "namespace": "orchestra-valkey" },
       { "server": "https://kubernetes.default.svc", "namespace": "orchestra-vault" },
-      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-external-secrets" },
       { "server": "https://kubernetes.default.svc", "namespace": "orchestra-harbor" },
       { "server": "https://kubernetes.default.svc", "namespace": "orchestra-keycloak" },
       { "server": "https://kubernetes.default.svc", "namespace": "orchestra-observability" },
