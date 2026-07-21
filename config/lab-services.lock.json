@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "services": [
+    {
+      "id": "release-validation-receiver",
+      "owner": "tenant-ci-cd-or-gitops",
+      "sourcePath": "services/release-validation-receiver",
+      "activation": "source-only",
+      "release": null,
+      "image": null,
+      "gitOpsReferenced": false,
+      "deploymentAuthority": "openshift-gitops",
+      "platformHasDeploymentCredentials": false,
+      "blockedOn": [
+        "published-signed-image",
+        "mirror-admission",
+        "external-postgresql",
+        "vault-external-secrets",
+        "github-app-installation",
+        "live-campaign"
+      ]
+    }
+  ]
+}

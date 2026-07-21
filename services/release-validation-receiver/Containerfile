@@ -1,0 +1,19 @@
+FROM registry.access.redhat.com/ubi9/python-312@sha256:5249b450c7b674c38d8611af2a74b48e288277bf36c77ec02bdfd3373fb9932b
+
+USER 0
+WORKDIR /opt/app-root/src
+
+COPY pyproject.toml ./
+COPY src ./src
+RUN python -m pip install --no-cache-dir --disable-pip-version-check . \
+    && python -m pip check \
+    && rm -rf /root/.cache
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+USER 1001
+EXPOSE 8080
+
+ENTRYPOINT ["gunicorn"]
+CMD ["--config=python:orchestra_receiver.gunicorn_config", "orchestra_receiver.app:application"]

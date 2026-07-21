@@ -11,6 +11,7 @@ authorization digest, independent timing, and cleanup verification.
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
 | Private OpenShift installation | Template delivered; live procedure pending gates |
 | GitOps bootstrap | Pending Wave 1 operator installation |
+| Release-validation receiver | Procedure implemented; publication and live rehearsal pending |
 | Upgrade and rollback | Pending immutable release publication |
 | Backup and restore | Pending dependency operators and backup targets |
 | Credential/certificate rotation | Pending Vault/ESO deployment |

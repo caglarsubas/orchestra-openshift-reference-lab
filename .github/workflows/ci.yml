@@ -18,6 +18,21 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
+    services:
+      receiver-postgres:
+        image: postgres:16-alpine@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
+        env:
+          POSTGRES_DB: receiver_ci
+          POSTGRES_USER: receiver_ci
+          POSTGRES_PASSWORD: receiver_ci_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U receiver_ci -d receiver_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -38,6 +53,39 @@ jobs:
 
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Install durable receiver
+        run: python3 -m pip install './services/release-validation-receiver[dev]'
+
+      - name: Lint and format-check durable receiver
+        run: |
+          ruff check services/release-validation-receiver/src services/release-validation-receiver/tests
+          ruff format --check services/release-validation-receiver/src services/release-validation-receiver/tests
+
+      - name: Test durable receiver with PostgreSQL
+        env:
+          RECEIVER_TEST_DATABASE_URL: postgresql://receiver_ci:receiver_ci_only@127.0.0.1:5432/receiver_ci
+        run: >-
+          python3 -m unittest discover
+          -s services/release-validation-receiver/tests
+          -t services/release-validation-receiver
+          -p 'test_*.py' -v
+
+      - name: Build pinned UBI receiver image
+        run: >-
+          docker build --platform linux/amd64
+          -t orchestra-release-validation-receiver:ci
+          -f services/release-validation-receiver/Containerfile
+          services/release-validation-receiver
+
+      - name: Verify arbitrary-UID read-only receiver image
+        run: >-
+          docker run --rm --platform linux/amd64
+          --user 1001230000 --read-only
+          --tmpfs /tmp:rw,noexec,nosuid,size=16m
+          --entrypoint python
+          orchestra-release-validation-receiver:ci
+          -c 'import orchestra_receiver.app, orchestra_receiver.worker'
 
       - name: Set up kubectl for deterministic Kustomize rendering
         uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4

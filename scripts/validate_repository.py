@@ -17,7 +17,9 @@ from typing import Any, NoReturn
 ROOT = Path(__file__).resolve().parents[1]
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 ACTION_PIN = re.compile(r"^\s*-?\s*uses:\s*[^@\s]+@[a-f0-9]{40}(?:\s+#.*)?$")
-EXPECTED_TOPOLOGY_DIGEST = "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+EXPECTED_TOPOLOGY_DIGEST = (
+    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+)
 MAX_PREREQUISITE_AGE = timedelta(days=30)
 EXPECTED_GATES = {
     "redHatEntitlement",
@@ -31,6 +33,14 @@ EXPECTED_GATES = {
     "certificationRunner",
     "crossPlaneReleaseSet",
 }
+EXPECTED_LAB_SERVICE_BLOCKERS = [
+    "published-signed-image",
+    "mirror-admission",
+    "external-postgresql",
+    "vault-external-secrets",
+    "github-app-installation",
+    "live-campaign",
+]
 
 
 def fail(code: str) -> NoReturn:
@@ -71,7 +81,10 @@ def validate_lock(value: dict[str, Any]) -> None:
         "deploymentAuthority",
     }:
         fail("lab_lock_keys_invalid")
-    if value["schemaVersion"] != 1 or value["profileId"] != "orchestra-ocp-4.20-amd64-v1":
+    if (
+        value["schemaVersion"] != 1
+        or value["profileId"] != "orchestra-ocp-4.20-amd64-v1"
+    ):
         fail("lab_lock_identity_invalid")
     if value["claim"] != {
         "referenceProfileVerified": False,
@@ -225,6 +238,53 @@ def validate_prerequisites(
             fail("prerequisite_projects_not_distinct")
 
 
+def validate_lab_services(value: dict[str, Any]) -> None:
+    if set(value) != {"schemaVersion", "services"} or value["schemaVersion"] != 1:
+        fail("lab_services_shape_invalid")
+    services = value["services"]
+    if not isinstance(services, list) or len(services) != 1:
+        fail("lab_services_inventory_invalid")
+    receiver = services[0]
+    if not isinstance(receiver, dict) or set(receiver) != {
+        "id",
+        "owner",
+        "sourcePath",
+        "activation",
+        "release",
+        "image",
+        "gitOpsReferenced",
+        "deploymentAuthority",
+        "platformHasDeploymentCredentials",
+        "blockedOn",
+    }:
+        fail("lab_service_shape_invalid")
+    if receiver != {
+        "id": "release-validation-receiver",
+        "owner": "tenant-ci-cd-or-gitops",
+        "sourcePath": "services/release-validation-receiver",
+        "activation": "source-only",
+        "release": None,
+        "image": None,
+        "gitOpsReferenced": False,
+        "deploymentAuthority": "openshift-gitops",
+        "platformHasDeploymentCredentials": False,
+        "blockedOn": EXPECTED_LAB_SERVICE_BLOCKERS,
+    }:
+        fail("lab_service_activation_invalid")
+    if not (ROOT / receiver["sourcePath"] / "Containerfile").is_file():
+        fail("lab_service_source_missing")
+    for directory in (
+        ROOT / "gitops" / "clusters",
+        ROOT / "gitops" / "dependencies",
+        ROOT / "gitops" / "products",
+    ):
+        for path in directory.rglob("*"):
+            if path.is_file() and receiver["id"] in path.read_text(encoding="utf-8"):
+                fail(
+                    f"lab_service_unpublished_gitops_reference:{path.relative_to(ROOT)}"
+                )
+
+
 def tracked_files() -> list[Path]:
     result = subprocess.run(
         ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
@@ -277,8 +337,10 @@ def main(argv: list[str] | None = None) -> int:
         fail("prerequisites_required_for_ready_check")
 
     lock = load_json(ROOT / "config" / "lab.lock.json")
+    services = load_json(ROOT / "config" / "lab-services.lock.json")
     policy = load_json(ROOT / "policies" / "repository-policy.json")
     validate_lock(lock)
+    validate_lab_services(services)
     if policy.get("requiredClaim") != lock["claim"]:
         fail("repository_policy_claim_mismatch")
     validate_repository_safety(policy)
