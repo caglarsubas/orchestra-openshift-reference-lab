@@ -22,7 +22,7 @@ IMMUTABLE_REF = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
 REVISION = re.compile(r"^[a-f0-9]{40}$")
 RELEASE_SET_ID = re.compile(r"^orchestra-reference-lab-[a-z0-9][a-z0-9.-]*$")
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
-PROFILE_DIGEST = "sha256:6778ce06451fdde0f3c49bce15fb610919b3fc2f3d9f7a4854640d64d448b6c4"
+PROFILE_DIGEST = "sha256:6ff6819336b882180565a0a07049e8251faae0ab58e7ed4cef838700956b1d80"
 CONTRACTS = {
     "modelWorkloadSurface": "orchestra-model-plane-workload-v1",
     "runtimeEdgeOverload": "orchestra-runtime-edge-overload-v1",

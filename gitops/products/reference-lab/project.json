@@ -5,7 +5,7 @@
     "name": "orchestra-reference-lab",
     "namespace": "openshift-gitops",
     "annotations": {
-      "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/release-set-digest": "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
       "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
       "orchestra.prometa.ai/activation": "blocked-until-live-prerequisites-and-mirror-intake-pass"
     }
