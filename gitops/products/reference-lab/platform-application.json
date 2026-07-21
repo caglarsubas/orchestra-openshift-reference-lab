@@ -6,6 +6,7 @@
     "namespace": "openshift-gitops",
     "annotations": {
       "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
       "orchestra.prometa.ai/source-revision": "0d1ffe501a29b2dc45d5a08fb716db1c7dc0736e",
       "orchestra.prometa.ai/source-chart-digest": "sha256:27306e67b631a3fe358e45185c4bfe73aec50efb81dad8e487302776db7c4fb4"
     }

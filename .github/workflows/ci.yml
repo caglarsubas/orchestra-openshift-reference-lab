@@ -33,6 +33,9 @@ jobs:
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 
+      - name: Validate immutable dependency BOM
+        run: python3 scripts/validate_dependency_bom.py
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
@@ -41,6 +44,9 @@ jobs:
 
       - name: Validate GitOps security floor
         run: kubectl kustomize gitops/clusters/reference-lab | python3 scripts/validate_rendered_gitops.py
+
+      - name: Validate blocked dependency-plane GitOps floor
+        run: kubectl kustomize gitops/dependencies/reference-lab | python3 scripts/validate_dependency_gitops.py
 
       - name: Validate digest-bound product GitOps
         run: kubectl kustomize gitops/products/reference-lab | python3 scripts/validate_product_gitops.py

@@ -20,10 +20,14 @@ flowchart LR
     GKE["Private regional GKE"]
     DATA["PostgreSQL, ClickHouse, JetStream, Valkey"]
     SECURITY["Vault, Harbor, Keycloak"]
+    SEED["Immutable Artifact Registry bootstrap seed"]
+    SARGO["Services-plane Argo CD"]
     SYNTHETIC["Synthetic MCP and model backends"]
     EVIDENCE["Probes, Thanos, immutable GCS"]
     GKE --> DATA
     GKE --> SECURITY
+    SEED --> SARGO
+    SARGO --> GKE
     GKE --> SYNTHETIC
     GKE --> EVIDENCE
   end
@@ -49,6 +53,12 @@ flowchart LR
    approve or sign certification results. Reviewers cannot execute drills.
 6. Generated Secret values are never stored in Git. External Secrets resolves
    Vault references at runtime.
+7. OpenShift GitOps owns tenant-plane product rollout. A separate
+   services-plane Argo CD instance owns GKE dependencies, starts from the
+   immutable Artifact Registry seed, and cannot mutate OpenShift products.
+8. The dependency AppProject remains continuously denied until a reviewed
+   image-level admission overlay is committed. A source chart lock is not an
+   executable deployment approval.
 
 ## Source-of-truth split
 
@@ -64,8 +74,8 @@ Changing a product-owned behavior here is prohibited. A product fix creates a
 new immutable artifact in its owning repository, updates the cross-plane
 release set, and reruns affected evidence.
 
-The topology and release set are separate canonical inputs. Campaigns bind the
-topology digest, release-set digest, and dependency BOM digest independently;
+The topology, release set, and dependency BOM are separate canonical inputs.
+Campaigns bind their digests independently;
 none can be inferred from another. Mirroring an accepted release into Harbor
 records destination digests and lab signatures as deployment evidence without
 rewriting the source release set.

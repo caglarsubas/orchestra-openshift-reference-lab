@@ -36,10 +36,29 @@
    `lock_signed_evidence_bucket=false`.
 4. Apply the reviewed plan, then prove no VM has an external IP, both flow-log
    sinks receive traffic, the two probes are in distinct zones, GKE has
-   exactly three standard nodes, and peering is active in both directions.
+   exactly three standard nodes, the immutable `orchestra-bootstrap` Artifact
+   Registry repository exists, and peering is active in both directions.
 5. Exercise backup/export access before considering the retention lock.
 6. In a separately approved change, set certification mode and the exact lock
    acknowledgement. Confirm the 400-day lock is irreversible before apply.
+
+## Dependency source intake
+
+1. Re-download every chart version in `config/dependency-bom.lock.json` from
+   its declared HTTPS repository and verify the package digest independently.
+2. Record upstream signature verification. When an upstream does not publish
+   a usable signature, stop for a named security exception; a package hash by
+   itself is not publisher identity.
+3. Render each chart offline, enumerate every image, resolve each image to a
+   digest, scan it, and verify its upstream signature or approved exception.
+4. Mirror charts and images into the immutable Artifact Registry seed with the
+   dedicated short-lived mirror identity. Apply the lab KMS signature and
+   record source-to-destination bindings without rewriting the source BOM.
+5. Bootstrap services-plane Argo CD only from that admitted inventory. The
+   tracked AppProject remains deny-all and contains no Applications at this
+   stage.
+6. Promote the same admitted subjects into Harbor after Harbor is healthy.
+   Keep the bootstrap seed until Harbor loss and rollback are proven.
 
 ## Failure handling
 

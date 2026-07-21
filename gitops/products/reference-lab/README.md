@@ -16,6 +16,11 @@ each destination chart/version and image digest is the verified source
 subject, then record destination repository and digest bindings as deployment
 evidence. A matching version string alone is insufficient.
 
+Every Application also binds dependency BOM
+`sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
+Changing the dependency catalog therefore requires a reviewed product-overlay
+update and cannot silently reuse a prior deployment declaration.
+
 ## Activation order
 
 1. Pass every live prerequisite gate with at least two independent verifier

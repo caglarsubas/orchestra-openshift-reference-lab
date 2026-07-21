@@ -536,6 +536,56 @@ resource "google_container_node_pool" "dependencies" {
   depends_on = [google_project_iam_member.gke_nodes]
 }
 
+# Harbor cannot mirror the charts and images needed to install Harbor itself.
+# This immutable Artifact Registry repository is the bounded bootstrap source;
+# the campaign records promotion into Harbor as a separate supply-chain edge.
+resource "google_artifact_registry_repository" "bootstrap" {
+  provider = google.services
+
+  project       = var.services_project_id
+  location      = local.region
+  repository_id = "orchestra-bootstrap"
+  description   = "Immutable pre-Harbor OCI seed for the Orchestra reference lab"
+  format        = "DOCKER"
+  mode          = "STANDARD_REPOSITORY"
+
+  docker_config {
+    immutable_tags = true
+  }
+
+  cleanup_policy_dry_run = true
+  labels                 = local.platform_labels
+}
+
+resource "google_service_account" "artifact_mirror" {
+  provider = google.services
+
+  project      = var.services_project_id
+  account_id   = "orchestra-artifact-mirror"
+  display_name = "Orchestra bootstrap artifact mirror"
+  description  = "Supply-chain intake identity; receives short-lived credentials only."
+}
+
+resource "google_artifact_registry_repository_iam_member" "artifact_mirror_writer" {
+  provider = google.services
+
+  project    = var.services_project_id
+  location   = google_artifact_registry_repository.bootstrap.location
+  repository = google_artifact_registry_repository.bootstrap.name
+  role       = "roles/artifactregistry.writer"
+  member     = "serviceAccount:${google_service_account.artifact_mirror.email}"
+}
+
+resource "google_artifact_registry_repository_iam_member" "gitops_bootstrap_reader" {
+  provider = google.services
+
+  project    = var.services_project_id
+  location   = google_artifact_registry_repository.bootstrap.location
+  repository = google_artifact_registry_repository.bootstrap.name
+  role       = "roles/artifactregistry.reader"
+  member     = "serviceAccount:${google_service_account.separated_operator["gitops-executor"].email}"
+}
+
 resource "google_kms_key_ring" "evidence" {
   provider = google.services
 

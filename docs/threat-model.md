@@ -37,6 +37,7 @@
 | Evidence tampering or run mixing | Canonical digests, object generations, CMEK, retention lock, campaign/topology edges |
 | Reviewer substitution | Different identity and key digests, post-window attestations, two-person closure |
 | Supply-chain substitution | Immutable image refs, mirrored signature verification, admission policy, release-set binding |
+| Harbor bootstrap cycle bypasses admission | Immutable Artifact Registry seed, distinct mirror identity, source/destination digest edge, deny-all dependency AppProject |
 | Secret/payload leakage | No Secret values in Git, payload-free reports, raw/reports split, content scanning |
 | Accidental irreversible bucket lock | Certification-mode precondition plus exact lock acknowledgement and review runbook |
 | Terraform drift during soak | GitOps/Terraform drift checks; material changes cancel the campaign |
@@ -54,3 +55,9 @@
 - The repository has no live SAML certification; synthetic OIDC/SCIM is the
   identity target until strict SAML validation is shipped in the product.
 - No control here proves Red Hat supportability or customer certification.
+- Several upstream charts do not yet have verified publisher signatures in
+  the dependency BOM. They cannot be activated until verification or a named,
+  time-bounded security exception is recorded.
+- The first-party Valkey chart does not currently satisfy the locked Sentinel
+  topology. Selecting a third-party operator or changing topology requires a
+  reviewed architecture decision and a new dependency BOM.

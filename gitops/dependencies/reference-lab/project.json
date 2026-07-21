@@ -1,0 +1,52 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "AppProject",
+  "metadata": {
+    "name": "orchestra-dependencies",
+    "namespace": "orchestra-services-gitops",
+    "annotations": {
+      "orchestra.prometa.ai/activation": "blocked",
+      "orchestra.prometa.ai/dependency-bom": "orchestra-dependencies-2026-07-21.1"
+    }
+  },
+  "spec": {
+    "description": "Fail-closed dependency-plane project; activation requires a separate admitted overlay.",
+    "sourceRepos": [
+      "oci://europe-west1-docker.pkg.dev/ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/charts"
+    ],
+    "destinations": [
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-cert-manager" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-postgres" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-clickhouse" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-jetstream" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-valkey" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-vault" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-external-secrets" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-harbor" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-keycloak" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-observability" },
+      { "server": "https://kubernetes.default.svc", "namespace": "orchestra-synthetic" }
+    ],
+    "clusterResourceWhitelist": [
+      { "group": "apiextensions.k8s.io", "kind": "CustomResourceDefinition" },
+      { "group": "rbac.authorization.k8s.io", "kind": "ClusterRole" },
+      { "group": "rbac.authorization.k8s.io", "kind": "ClusterRoleBinding" },
+      { "group": "admissionregistration.k8s.io", "kind": "MutatingWebhookConfiguration" },
+      { "group": "admissionregistration.k8s.io", "kind": "ValidatingWebhookConfiguration" },
+      { "group": "apiregistration.k8s.io", "kind": "APIService" }
+    ],
+    "namespaceResourceWhitelist": [
+      { "group": "*", "kind": "*" }
+    ],
+    "syncWindows": [
+      {
+        "kind": "deny",
+        "schedule": "0 0 * * *",
+        "duration": "24h",
+        "applications": ["*"],
+        "manualSync": false
+      }
+    ],
+    "orphanedResources": { "warn": true }
+  }
+}

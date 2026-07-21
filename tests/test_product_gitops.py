@@ -4,6 +4,7 @@ import copy
 import unittest
 
 from scripts.validate_product_gitops import (
+    DEPENDENCY_BOM_DIGEST,
     EXPECTED_RENDERED_COUNTS,
     PRODUCT_ROOT,
     validate_applications,
@@ -24,6 +25,20 @@ class ProductGitOpsTests(unittest.TestCase):
             "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
         )
 
+    def test_applications_bind_the_dependency_bom(self) -> None:
+        for filename in (
+            "platform-application.json",
+            "runtime-application.json",
+            "model-application.json",
+        ):
+            application = load_json(PRODUCT_ROOT / filename)
+            self.assertEqual(
+                application["metadata"]["annotations"][
+                    "orchestra.prometa.ai/dependency-bom-digest"
+                ],
+                DEPENDENCY_BOM_DIGEST,
+            )
+
     def test_changed_release_digest_is_rejected(self) -> None:
         changed = copy.deepcopy(self.release_set)
         changed["planes"][1]["deploymentImage"] = changed["planes"][1][
@@ -32,7 +47,7 @@ class ProductGitOpsTests(unittest.TestCase):
         changed["planes"][1]["subjects"][0]["ref"] = changed["planes"][1][
             "deploymentImage"
         ]
-        with self.assertRaisesRegex(ValueError, "application_contract_invalid"):
+        with self.assertRaisesRegex(ValueError, "project_contract_invalid"):
             validate_applications(changed)
 
     def test_platform_keeps_active_execution_disabled(self) -> None:
