@@ -22,10 +22,11 @@ does not enable platform production tool execution.
 
 This repository contains the source-controlled infrastructure foundation,
 immutable cross-plane release intake, immutable dependency source catalog,
-and gate-controlled product and dependency GitOps floors. It does not contain
-a kubeconfig, provider identity, OpenShift pull secret, live campaign,
-evidence report, or completed soak. No declaration has been applied to a
-target, so the reference profile is not verified.
+gate-controlled product and dependency GitOps floors, a source-only durable
+release-validation receiver, and a source-only synthetic tenant kit. It does
+not contain a kubeconfig, provider identity, OpenShift pull secret, live
+campaign, evidence report, or completed soak. No declaration has been applied
+to a target, so the reference profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -68,8 +69,9 @@ Secret references, and unresolved provider decisions are closed.
 
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
-release-validation receiver remains `source-only`: it has no release, image,
-or GitOps reference until publication and live prerequisites are complete.
+release-validation receiver and synthetic tenant kit remain `source-only`:
+neither has a release, image, or GitOps reference until publication and live
+prerequisites are complete.
 
 ## Layout
 

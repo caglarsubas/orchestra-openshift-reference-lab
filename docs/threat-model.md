@@ -45,6 +45,10 @@
 | Webhook replay or state regression | Raw-body HMAC with bounded age, event/header binding, PostgreSQL event idempotency, and monotonic validation heads |
 | Receiver crash silently repeats a GitOps action | Transactional inbox/outbox, stable event id, expired claims become `INDETERMINATE`, and evidence-bound operator reconciliation |
 | GitHub App crosses tenant or repository boundary | Single synthetic repository installation, short-lived installation tokens, bounded dispatch payload, and no OpenShift credential |
+| Forged or replayed synthetic tenant identity | Exact RS256 issuer/audience/tenant/scope/time checks, strict JWT JSON, bounded JWKS cache, unknown-key refresh, and fail-closed expiry |
+| Tenant gateway becomes an Orchestra proxy | Gateway egress is limited to Keycloak and runtime; it receives no platform credential and exposes only the runtime execute contract |
+| Synthetic MCP accepts cross-tenant or side-effecting calls | Constant-time bearer and tenant binding, one read-only/idempotent tool, protocol-level annotations, and separate failure deployments |
+| Runtime silently trusts an invalid MCP certificate | Vault PKI trust is explicit; the untrusted-certificate lane uses a separate CA absent from the runtime bundle and must fail before MCP |
 
 ## Explicit residual risks
 
@@ -70,3 +74,7 @@
 - The receiver source has not yet been published, mirrored, admitted, deployed,
   restored, fault-tested, or soaked. CI and a successful image build are not
   live reference-lab evidence.
+- The synthetic tenant kit source has not yet been published, mirrored,
+  admitted, deployed, connected to Keycloak/runtime, fault-tested, or soaked.
+  Its local OIDC and official MCP tests are not live identity, PKI, network, or
+  tenant-isolation evidence.

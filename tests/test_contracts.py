@@ -49,6 +49,14 @@ class ContractTests(unittest.TestCase):
         self.assertIsNone(receiver["image"])
         self.assertFalse(receiver["gitOpsReferenced"])
 
+    def test_synthetic_tenant_kit_remains_source_only(self) -> None:
+        validate_lab_services(self.services)
+        synthetic = self.services["services"][1]
+        self.assertEqual(synthetic["id"], "synthetic-tenant-kit")
+        self.assertEqual(synthetic["activation"], "source-only")
+        self.assertIsNone(synthetic["image"])
+        self.assertFalse(synthetic["gitOpsReferenced"])
+
     def test_lab_receiver_cannot_activate_without_publication(self) -> None:
         changed = copy.deepcopy(self.services)
         changed["services"][0]["activation"] = "active"
