@@ -109,5 +109,9 @@ RECEIVER_TEST_DATABASE_URL=postgresql://... \
 ```
 
 Repository CI runs the same suite against a disposable PostgreSQL service and
-builds the pinned UBI image. Publication, signing, mirror admission, GitOps
-activation, backup/restore, fault, and soak evidence remain separate steps.
+builds the pinned UBI image for `linux/amd64`. Container dependencies come from
+`requirements-linux-amd64.lock`; every direct and transitive wheel is both
+version- and SHA-256-bound for the pinned base image. Changing the base image,
+architecture, or a dependency requires regenerating and reviewing that lock.
+Publication, signing, mirror admission, GitOps activation, backup/restore,
+fault, and soak evidence remain separate steps.
