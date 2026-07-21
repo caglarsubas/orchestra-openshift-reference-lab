@@ -102,10 +102,5 @@
     "owner": "openshift-gitops",
     "orchestraHasCredentials": false,
     "orchestraMayRecommend": true
-  },
-  "bootstrapReleaseCandidates": {
-    "platform": "platform-v0.1.0-rc.4",
-    "runtime": "v0.18.2",
-    "modelPlane": "v0.1.9"
   }
 }

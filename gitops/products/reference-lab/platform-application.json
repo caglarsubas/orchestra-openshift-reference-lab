@@ -1,0 +1,271 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "name": "orchestra-platform",
+    "namespace": "openshift-gitops",
+    "annotations": {
+      "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/source-revision": "0d1ffe501a29b2dc45d5a08fb716db1c7dc0736e",
+      "orchestra.prometa.ai/source-chart-digest": "sha256:27306e67b631a3fe358e45185c4bfe73aec50efb81dad8e487302776db7c4fb4"
+    }
+  },
+  "spec": {
+    "project": "orchestra-reference-lab",
+    "source": {
+      "repoURL": "harbor.services.ocp-lab.prometa.ai/orchestra/charts",
+      "chart": "prometa",
+      "targetRevision": "0.3.0-rc.5",
+      "helm": {
+        "releaseName": "orchestra-platform",
+        "valuesObject": {
+          "productionProfile": {
+            "enabled": true,
+            "profileId": "orchestra-ocp-4.20-amd64-v1",
+            "imageFlavor": "ubi",
+            "namespaceNetworkPoliciesReady": true
+          },
+          "fullnameOverride": "orchestra-platform",
+          "image": {
+            "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-ubi",
+            "tag": "",
+            "digest": "sha256:ce98532af7ce07a9a1c19f2e6c859cad7a93705dfef49ea776f78677d314b11f",
+            "pullPolicy": "IfNotPresent",
+            "pullSecrets": [{ "name": "orchestra-registry" }]
+          },
+          "toolsImage": {
+            "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-tools-ubi",
+            "tag": "",
+            "digest": "sha256:4d8a0e39a25ec46607abc145c76a3cbf176c28f78a8f1520981745298d48ac2d",
+            "pullPolicy": "IfNotPresent"
+          },
+          "replicaCount": 2,
+          "mode": "self-hosted",
+          "env": "prod",
+          "publicUrl": "https://platform.apps.ocp-lab.prometa.ai",
+          "config": {
+            "clickhouseUrl": "https://clickhouse.services.ocp-lab.prometa.ai:8443",
+            "clickhouseDatabase": "prometa",
+            "clickhouseHostAllowlist": "clickhouse.services.ocp-lab.prometa.ai",
+            "authTrustHost": "true"
+          },
+          "llm": {
+            "defaultProvider": "inference-engine",
+            "defaultModel": "orchestra-reference-cpu",
+            "inferenceEngineBaseUrl": "https://orchestra-model-plane.orchestra-model.svc.cluster.local:8080"
+          },
+          "agentQuerying": { "enabled": false },
+          "toolExecution": { "enabled": false },
+          "releaseValidation": { "enabled": false },
+          "modelPlane": { "enabled": false },
+          "evalModel": { "enabled": false },
+          "nats": { "enabled": false },
+          "eventBus": {
+            "externalJetStream": {
+              "enabled": true,
+              "existingSecret": "orchestra-platform-jetstream",
+              "urlKey": "nats-url",
+              "streamReplicas": 3,
+              "auth": {
+                "mode": "userpass",
+                "usernameKey": "username",
+                "passwordKey": "password",
+                "tokenKey": "token"
+              },
+              "tls": { "required": true },
+              "connection": {
+                "timeoutMs": 10000,
+                "maxReconnectAttempts": 60,
+                "reconnectWaitMs": 1000
+              },
+              "networkPolicyEgress": [
+                {
+                  "to": [
+                    { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                    { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                    { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                  ],
+                  "ports": [{ "protocol": "TCP", "port": 4222 }]
+                }
+              ],
+              "rolloutId": "release-set-7be0106f"
+            }
+          },
+          "controlPlaneEvents": { "mode": "postgres" },
+          "ingest": {
+            "rateLimit": {
+              "scope": "deployment-shared",
+              "shared": {
+                "backend": "sentinel",
+                "existingSecretName": "orchestra-platform-ingest-rate-limit",
+                "sentinelConfigKey": "sentinel-config.json",
+                "allowInsecureRedis": false,
+                "keyPrefix": "orchestra:reference-lab:ingest",
+                "connectTimeoutMs": 1000,
+                "operationTimeoutMs": 1000,
+                "rolloutId": "release-set-7be0106f",
+                "networkPolicyEgress": [
+                  {
+                    "to": [
+                      { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                      { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                      { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                    ],
+                    "ports": [{ "protocol": "TCP", "port": 6379 }]
+                  }
+                ]
+              }
+            }
+          },
+          "secret": {
+            "create": false,
+            "existingSecret": "orchestra-platform-secrets",
+            "rolloutId": "release-set-7be0106f",
+            "data": {}
+          },
+          "serviceAccount": {
+            "create": true,
+            "name": "orchestra-platform",
+            "automountServiceAccountToken": false
+          },
+          "podSecurityContext": {},
+          "containerSecurityContext": {
+            "runAsNonRoot": true,
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true,
+            "capabilities": { "drop": ["ALL"] },
+            "seccompProfile": { "type": "RuntimeDefault" }
+          },
+          "autoscaling": {
+            "enabled": true,
+            "minReplicas": 2,
+            "maxReplicas": 6,
+            "targetCPUUtilizationPercentage": 70
+          },
+          "podDisruptionBudget": { "enabled": true, "minAvailable": 1 },
+          "postgresql": { "enabled": false },
+          "clickhouse": { "enabled": false },
+          "route": {
+            "enabled": true,
+            "host": "platform.apps.ocp-lab.prometa.ai",
+            "tls": {
+              "termination": "edge",
+              "insecureEdgeTerminationPolicy": "Redirect"
+            }
+          },
+          "ingress": { "enabled": false },
+          "trustedCA": {
+            "enabled": true,
+            "configMapName": "orchestra-platform-trusted-ca",
+            "key": "ca-bundle.crt"
+          },
+          "migrate": { "enabled": true, "initClickHouse": true },
+          "scheduledJobs": {
+            "alerts-eval": { "enabled": false },
+            "aml-rule": { "enabled": false },
+            "aml-judge": { "enabled": false },
+            "aql": { "enabled": false },
+            "sector-benchmark-snapshot": { "enabled": false },
+            "retention-enforce": { "enabled": false },
+            "control-plane-events-retention": { "enabled": false },
+            "rotate-keys": { "enabled": false },
+            "audit-checkpoint": { "enabled": false },
+            "guardrail-dispatch": { "enabled": false },
+            "release-validation-evaluate": { "enabled": false }
+          },
+          "networkPolicy": {
+            "enabled": true,
+            "ingressFrom": [
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "openshift-ingress"
+                  }
+                }
+              },
+              {
+                "namespaceSelector": {
+                  "matchLabels": {
+                    "kubernetes.io/metadata.name": "orchestra-synthetic"
+                  }
+                }
+              }
+            ],
+            "egress": [
+              {
+                "to": [
+                  {
+                    "namespaceSelector": {
+                      "matchLabels": {
+                        "kubernetes.io/metadata.name": "orchestra-model"
+                      }
+                    }
+                  }
+                ],
+                "ports": [{ "protocol": "TCP", "port": 8080 }]
+              },
+              {
+                "to": [
+                  { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                  { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                  { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                ],
+                "ports": [
+                  { "protocol": "TCP", "port": 443 },
+                  { "protocol": "TCP", "port": 5432 },
+                  { "protocol": "TCP", "port": 8443 }
+                ]
+              }
+            ]
+          },
+          "metrics": {
+            "serviceMonitor": {
+              "enabled": true,
+              "interval": "30s",
+              "scrapeTimeout": "10s",
+              "bearerTokenSecret": {
+                "name": "orchestra-platform-secrets",
+                "key": "METRICS_SCRAPE_TOKEN"
+              }
+            }
+          },
+          "backup": {
+            "postgres": { "enabled": false },
+            "clickhouse": { "enabled": false }
+          },
+          "topologySpreadConstraints": [
+            {
+              "maxSkew": 1,
+              "topologyKey": "kubernetes.io/hostname",
+              "whenUnsatisfiable": "DoNotSchedule",
+              "labelSelector": {
+                "matchLabels": {
+                  "app.kubernetes.io/component": "app"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "destination": {
+      "server": "https://kubernetes.default.svc",
+      "namespace": "orchestra-platform"
+    },
+    "syncPolicy": {
+      "automated": { "prune": true, "selfHeal": true },
+      "syncOptions": [
+        "CreateNamespace=false",
+        "ServerSideApply=true"
+      ],
+      "retry": {
+        "limit": 3,
+        "backoff": {
+          "duration": "10s",
+          "factor": 2,
+          "maxDuration": "3m"
+        }
+      }
+    }
+  }
+}

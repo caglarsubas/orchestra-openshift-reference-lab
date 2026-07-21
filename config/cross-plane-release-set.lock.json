@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.cross-plane.release-set.v1",
+  "releaseSetId": "orchestra-reference-lab-2026-07-21-rc5-runtime0183-model0110",
+  "createdAt": "2026-07-21T08:27:08Z",
+  "profile": {
+    "id": "orchestra-ocp-4.20-amd64-v1",
+    "digest": "sha256:6778ce06451fdde0f3c49bce15fb610919b3fc2f3d9f7a4854640d64d448b6c4"
+  },
+  "contracts": {
+    "modelWorkloadSurface": "orchestra-model-plane-workload-v1",
+    "runtimeEdgeOverload": "orchestra-runtime-edge-overload-v1"
+  },
+  "planes": [
+    {
+      "plane": "platform",
+      "release": "platform-v0.1.0-rc.5",
+      "source": {
+        "repository": "caglarsubas/agent-hook-v2",
+        "revision": "0d1ffe501a29b2dc45d5a08fb716db1c7dc0736e"
+      },
+      "deploymentImage": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:ce98532af7ce07a9a1c19f2e6c859cad7a93705dfef49ea776f78677d314b11f",
+      "subjects": [
+        {
+          "role": "platform-image-ubi9",
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:ce98532af7ce07a9a1c19f2e6c859cad7a93705dfef49ea776f78677d314b11f"
+        },
+        {
+          "role": "tools-image-ubi9",
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:4d8a0e39a25ec46607abc145c76a3cbf176c28f78a8f1520981745298d48ac2d"
+        },
+        {
+          "role": "certification-runner-image-ubi9",
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:acab65ae4852fe7a6e07f5ca1c29d405356831d260116bdfff24fa60e0665402"
+        },
+        {
+          "role": "helm-chart",
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa@sha256:27306e67b631a3fe358e45185c4bfe73aec50efb81dad8e487302776db7c4fb4"
+        }
+      ]
+    },
+    {
+      "plane": "runtimeHost",
+      "release": "v0.18.3",
+      "source": {
+        "repository": "prometa-ai/orchestra-python-sdk",
+        "revision": "f74c07925cd4e8b8f375333dce86c6c371256154"
+      },
+      "deploymentImage": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144",
+      "subjects": [
+        {
+          "role": "runtime-host-image-ubi9",
+          "ref": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144"
+        },
+        {
+          "role": "helm-chart",
+          "ref": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime@sha256:9151a47860fa5439134bf7b6453dd6aca35192020eb4c9a344d1853ebc48d67d"
+        }
+      ]
+    },
+    {
+      "plane": "modelPlane",
+      "release": "v0.1.10",
+      "source": {
+        "repository": "caglarsubas/llm_inference_engine",
+        "revision": "87f7a64e963842e3350504e305b569f1dea2ed5b"
+      },
+      "deploymentImage": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
+      "subjects": [
+        {
+          "role": "inference-engine-image-ubi9",
+          "ref": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb"
+        },
+        {
+          "role": "helm-chart",
+          "ref": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine@sha256:20b39c55eb0ebe6a71369be98fb84782476f8b2c30266c393cca7d67347a6cde"
+        }
+      ]
+    }
+  ],
+  "certificationRunner": {
+    "release": "platform-v0.1.0-rc.5",
+    "source": {
+      "repository": "caglarsubas/agent-hook-v2",
+      "revision": "0d1ffe501a29b2dc45d5a08fb716db1c7dc0736e"
+    },
+    "image": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:acab65ae4852fe7a6e07f5ca1c29d405356831d260116bdfff24fa60e0665402",
+    "toolchainDigest": "sha256:69cf7a1874dd736afe7be23411874a7fbce36f01b3a91dd24be469cfe5b3421a",
+    "baseImage": "ubi9",
+    "architecture": "linux/amd64"
+  }
+}

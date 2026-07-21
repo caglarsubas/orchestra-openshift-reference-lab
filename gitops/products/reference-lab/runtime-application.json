@@ -1,0 +1,234 @@
+{
+  "apiVersion": "argoproj.io/v1alpha1",
+  "kind": "Application",
+  "metadata": {
+    "name": "orchestra-runtime",
+    "namespace": "openshift-gitops",
+    "annotations": {
+      "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/source-revision": "f74c07925cd4e8b8f375333dce86c6c371256154",
+      "orchestra.prometa.ai/source-chart-digest": "sha256:9151a47860fa5439134bf7b6453dd6aca35192020eb4c9a344d1853ebc48d67d"
+    }
+  },
+  "spec": {
+    "project": "orchestra-reference-lab",
+    "source": {
+      "repoURL": "harbor.services.ocp-lab.prometa.ai/orchestra/charts",
+      "chart": "prometa-runtime",
+      "targetRevision": "0.3.4",
+      "helm": {
+        "releaseName": "orchestra-runtime",
+        "valuesObject": {
+          "productionProfile": {
+            "enabled": true,
+            "profileId": "orchestra-ocp-4.20-amd64-v1",
+            "imageFlavor": "ubi9",
+            "namespaceDefaultDenyAcknowledged": true
+          },
+          "runtimeEdge": {
+            "overloadContract": "orchestra-runtime-edge-overload-v1"
+          },
+          "fullnameOverride": "orchestra-runtime",
+          "image": {
+            "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/runtime/prometa-runtime-host-ubi9",
+            "tag": "",
+            "digest": "sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144",
+            "pullPolicy": "IfNotPresent",
+            "pullSecrets": [{ "name": "orchestra-registry" }]
+          },
+          "replicaCount": 2,
+          "runtimeConfig": {
+            "existingSecret": "orchestra-runtime-config",
+            "existingConfigMap": "",
+            "key": "config.json",
+            "targetFile": "config.json",
+            "rolloutId": "release-set-7be0106f"
+          },
+          "credentials": {
+            "existingSecret": "orchestra-runtime-credentials",
+            "databaseUrlKey": "database-url",
+            "apiTokenKey": "api-token",
+            "modelGatewayApiKeyKey": "model-gateway-api-key",
+            "modelGatewayApiKeyOptional": false,
+            "controlPlaneApiKeyKey": "control-plane-api-key",
+            "controlPlaneApiKeyOptional": true,
+            "receiptApiKeyKey": "receipt-api-key",
+            "receiptApiKeyOptional": false
+          },
+          "serviceAccount": {
+            "create": true,
+            "name": "orchestra-runtime",
+            "annotations": {},
+            "automountServiceAccountToken": false
+          },
+          "podSecurityContext": {
+            "runAsNonRoot": true,
+            "seccompProfile": { "type": "RuntimeDefault" }
+          },
+          "containerSecurityContext": {
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true,
+            "capabilities": { "drop": ["ALL"] }
+          },
+          "service": { "type": "ClusterIP", "port": 8080 },
+          "serverTls": {
+            "enabled": true,
+            "existingSecret": "orchestra-runtime-server-tls",
+            "certificateKey": "tls.crt",
+            "privateKeyKey": "tls.key",
+            "clientCaKey": "ca.crt",
+            "requireClientCertificate": false,
+            "rolloutId": "release-set-7be0106f"
+          },
+          "autoscaling": {
+            "enabled": true,
+            "minReplicas": 2,
+            "maxReplicas": 6,
+            "targetCPUUtilizationPercentage": 70
+          },
+          "podDisruptionBudget": { "enabled": true, "minAvailable": 1 },
+          "topologySpreadConstraints": [
+            {
+              "maxSkew": 1,
+              "topologyKey": "kubernetes.io/hostname",
+              "whenUnsatisfiable": "DoNotSchedule",
+              "labelSelector": {
+                "matchLabels": {
+                  "app.kubernetes.io/component": "runtime"
+                }
+              }
+            }
+          ],
+          "migration": {
+            "enabled": true,
+            "compatibilityCheck": true,
+            "serviceAccountName": "orchestra-runtime-migration",
+            "existingSecret": "orchestra-runtime-migration",
+            "databaseUrlKey": "migration-database-url",
+            "networkPolicy": {
+              "enabled": true,
+              "allowDNS": true,
+              "dnsNamespaceSelector": {
+                "matchLabels": {
+                  "kubernetes.io/metadata.name": "openshift-dns"
+                }
+              },
+              "egress": [
+                {
+                  "to": [
+                    { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                    { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                    { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                  ],
+                  "ports": [{ "protocol": "TCP", "port": 5432 }]
+                }
+              ]
+            }
+          },
+          "backup": { "enabled": false },
+          "networkPolicy": {
+            "enabled": true,
+            "allowDNS": true,
+            "dnsNamespaceSelector": {
+              "matchLabels": {
+                "kubernetes.io/metadata.name": "openshift-dns"
+              }
+            },
+            "ingress": [
+              {
+                "from": [
+                  {
+                    "namespaceSelector": {
+                      "matchLabels": {
+                        "kubernetes.io/metadata.name": "orchestra-synthetic"
+                      }
+                    },
+                    "podSelector": {
+                      "matchLabels": {
+                        "app.kubernetes.io/name": "orchestra-tenant-gateway"
+                      }
+                    }
+                  }
+                ],
+                "ports": [{ "protocol": "TCP", "port": 8080 }]
+              }
+            ],
+            "egress": [
+              {
+                "to": [
+                  {
+                    "namespaceSelector": {
+                      "matchLabels": {
+                        "kubernetes.io/metadata.name": "orchestra-model"
+                      }
+                    }
+                  }
+                ],
+                "ports": [{ "protocol": "TCP", "port": 8080 }]
+              },
+              {
+                "to": [
+                  { "ipBlock": { "cidr": "10.60.0.0/20" } },
+                  { "ipBlock": { "cidr": "10.64.0.0/14" } },
+                  { "ipBlock": { "cidr": "10.68.0.0/20" } }
+                ],
+                "ports": [
+                  { "protocol": "TCP", "port": 443 },
+                  { "protocol": "TCP", "port": 5432 },
+                  { "protocol": "TCP", "port": 4317 },
+                  { "protocol": "TCP", "port": 8443 }
+                ]
+              }
+            ]
+          },
+          "extraEnv": [
+            {
+              "name": "SSL_CERT_FILE",
+              "value": "/etc/orchestra-ca/ca-bundle.crt"
+            }
+          ],
+          "extraVolumes": [
+            {
+              "name": "trusted-ca",
+              "configMap": {
+                "name": "orchestra-runtime-trusted-ca",
+                "items": [
+                  {
+                    "key": "ca-bundle.crt",
+                    "path": "ca-bundle.crt"
+                  }
+                ]
+              }
+            }
+          ],
+          "extraVolumeMounts": [
+            {
+              "name": "trusted-ca",
+              "mountPath": "/etc/orchestra-ca",
+              "readOnly": true
+            }
+          ]
+        }
+      }
+    },
+    "destination": {
+      "server": "https://kubernetes.default.svc",
+      "namespace": "orchestra-runtime"
+    },
+    "syncPolicy": {
+      "automated": { "prune": true, "selfHeal": true },
+      "syncOptions": [
+        "CreateNamespace=false",
+        "ServerSideApply=true"
+      ],
+      "retry": {
+        "limit": 3,
+        "backoff": {
+          "duration": "10s",
+          "factor": 2,
+          "maxDuration": "3m"
+        }
+      }
+    }
+  }
+}
