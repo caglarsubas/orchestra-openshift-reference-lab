@@ -24,7 +24,7 @@ def release_set() -> dict:
     return {
         "schemaVersion": 1,
         "kind": "orchestra.cross-plane.release-set.v1",
-        "releaseSetId": "orchestra-reference-lab-2026.07.21-rc5",
+        "releaseSetId": "orchestra-reference-lab-2026.07.21-rc7",
         "createdAt": "2026-07-21T07:30:00Z",
         "profile": {
             "id": "orchestra-ocp-4.20-amd64-v1",
@@ -37,7 +37,7 @@ def release_set() -> dict:
         "planes": [
             {
                 "plane": "platform",
-                "release": "platform-v0.1.0-rc.5",
+                "release": "platform-v0.1.0-rc.7",
                 "source": {
                     "repository": "caglarsubas/agent-hook-v2",
                     "revision": revisions["platform"],
@@ -81,7 +81,7 @@ def release_set() -> dict:
             },
         ],
         "certificationRunner": {
-            "release": "platform-v0.1.0-rc.5",
+            "release": "platform-v0.1.0-rc.7",
             "source": {
                 "repository": "caglarsubas/agent-hook-v2",
                 "revision": revisions["platform"],
@@ -101,7 +101,7 @@ class ReleaseSetTests(unittest.TestCase):
         )
         self.assertEqual(
             result,
-            "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+            "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
         )
 
     def test_valid_release_set_is_canonically_bound(self) -> None:

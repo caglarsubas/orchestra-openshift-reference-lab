@@ -5,7 +5,7 @@
     "name": "orchestra-model-plane",
     "namespace": "openshift-gitops",
     "annotations": {
-      "orchestra.prometa.ai/release-set-digest": "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+      "orchestra.prometa.ai/release-set-digest": "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
       "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
       "orchestra.prometa.ai/source-revision": "87f7a64e963842e3350504e305b569f1dea2ed5b",
       "orchestra.prometa.ai/source-chart-digest": "sha256:20b39c55eb0ebe6a71369be98fb84782476f8b2c30266c393cca7d67347a6cde"
@@ -40,7 +40,7 @@
           "replicaCount": 2,
           "deploymentId": "reference-lab-tenant-alpha-model",
           "targetEnvironment": "prod",
-          "rolloutId": "release-set-7be0106f",
+          "rolloutId": "release-set-ec705bcc",
           "serverTls": {
             "enabled": true,
             "existingSecret": "orchestra-model-server-tls",
@@ -48,7 +48,7 @@
             "privateKeyKey": "tls.key",
             "clientCaKey": "ca.crt",
             "requireClientCertificate": false,
-            "rolloutId": "release-set-7be0106f"
+            "rolloutId": "release-set-ec705bcc"
           },
           "auth": {
             "enabled": true,

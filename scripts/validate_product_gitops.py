@@ -26,7 +26,7 @@ APPLICATION_CONTRACTS = {
         "name": "orchestra-platform",
         "namespace": "orchestra-platform",
         "chart": "prometa",
-        "chartVersion": "0.3.0-rc.5",
+        "chartVersion": "0.3.0-rc.7",
         "chartRole": "helm-chart",
         "imageRole": "platform-image-ubi9",
         "imageRepository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-ubi",
@@ -189,6 +189,16 @@ def validate_project(release_set_digest: str) -> None:
 
 
 def validate_platform(values: dict[str, Any]) -> None:
+    backend_tls = object_value(
+        values.get("backendTls"), "product_gitops_platform_backend_tls_invalid"
+    )
+    service_certificate = object_value(
+        backend_tls.get("serviceServingCertificate"),
+        "product_gitops_platform_service_certificate_invalid",
+    )
+    route = object_value(
+        values.get("route"), "product_gitops_platform_route_invalid"
+    )
     if (
         values.get("agentQuerying") != {"enabled": False}
         or values.get("toolExecution") != {"enabled": False}
@@ -204,6 +214,23 @@ def validate_platform(values: dict[str, Any]) -> None:
         or values.get("ingest", {}).get("rateLimit", {}).get("scope")
         != "deployment-shared"
         or values.get("secret", {}).get("create") is not False
+        or backend_tls.get("enabled") is not True
+        or backend_tls.get("port") != 3443
+        or backend_tls.get("existingSecret")
+        != "orchestra-platform-backend-tls"
+        or backend_tls.get("rolloutId") != "release-set-ec705bcc"
+        or backend_tls.get("serverName")
+        != "orchestra-platform.orchestra-platform.svc"
+        or service_certificate
+        != {
+            "enabled": True,
+            "caBundleConfigMapName": "orchestra-platform-service-ca",
+        }
+        or route.get("tls")
+        != {
+            "termination": "reencrypt",
+            "insecureEdgeTerminationPolicy": "Redirect",
+        }
     ):
         fail("product_gitops_platform_boundary_invalid")
 

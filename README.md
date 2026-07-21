@@ -56,7 +56,7 @@ Every campaign binds both digests so an artifact update cannot masquerade as a
 topology change or combine evidence from different release sets.
 
 The current canonical release-set digest is
-`sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635`.
+`sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6`.
 It records published artifacts only; it is not deployment, drill, soak, or
 verification evidence.
 

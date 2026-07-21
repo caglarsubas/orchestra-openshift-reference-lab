@@ -27,7 +27,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Vault/ESO/Harbor/Keycloak | No | N/A | No | No | No |
 | Product GitOps applications | Yes | Yes | No | No | No |
 | Runtime/model Secret-backed server TLS declarations | Yes | Yes | No | No | No |
-| Platform router-to-pod TLS | No | N/A | No | No | No |
+| Platform router-to-pod TLS | Yes | Yes | No | No | No |
 | Durable release-validation receiver and GitHub App executor | No | N/A | No | No | No |
 | Synthetic tenant/MCP/model surfaces | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
@@ -39,7 +39,8 @@ The dependency source catalog and fail-closed GitOps floor are now declared.
 The next dependency increment is image-level mirror admission plus reviewed
 service contracts for PostgreSQL, ClickHouse/Keeper, JetStream, Vault, and
 External Secrets. Valkey/Sentinel, Keycloak Operator, and standalone Thanos
-remain named design decisions. Platform backend TLS and the durable
-release-validation receiver follow. Live activation remains behind Red Hat,
+remain named design decisions. Platform backend TLS is now declared with an
+OpenShift service-serving certificate and re-encrypt Route; the durable
+release-validation receiver follows. Live activation remains behind Red Hat,
 GCP, DNS, and short-lived identity gates; no dependency or product declaration
 has been applied.

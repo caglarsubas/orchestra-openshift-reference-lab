@@ -22,7 +22,7 @@ class ProductGitOpsTests(unittest.TestCase):
     def test_applications_bind_the_frozen_release_set(self) -> None:
         self.assertEqual(
             validate_applications(self.release_set),
-            "sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635",
+            "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
         )
 
     def test_applications_bind_the_dependency_bom(self) -> None:
@@ -56,6 +56,33 @@ class ProductGitOpsTests(unittest.TestCase):
         self.assertEqual(values["agentQuerying"], {"enabled": False})
         self.assertEqual(values["toolExecution"], {"enabled": False})
         self.assertEqual(values["releaseValidation"], {"enabled": False})
+
+    def test_platform_uses_service_ca_backed_reencrypt_tls(self) -> None:
+        platform = load_json(PRODUCT_ROOT / "platform-application.json")
+        values = platform["spec"]["source"]["helm"]["valuesObject"]
+        self.assertEqual(
+            values["backendTls"],
+            {
+                "enabled": True,
+                "port": 3443,
+                "existingSecret": "orchestra-platform-backend-tls",
+                "certificateKey": "tls.crt",
+                "privateKeyKey": "tls.key",
+                "rolloutId": "release-set-ec705bcc",
+                "serverName": "orchestra-platform.orchestra-platform.svc",
+                "serviceServingCertificate": {
+                    "enabled": True,
+                    "caBundleConfigMapName": "orchestra-platform-service-ca",
+                },
+            },
+        )
+        self.assertEqual(
+            values["route"]["tls"],
+            {
+                "termination": "reencrypt",
+                "insecureEdgeTerminationPolicy": "Redirect",
+            },
+        )
 
     def test_rendered_secret_objects_are_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "secret_object_forbidden"):

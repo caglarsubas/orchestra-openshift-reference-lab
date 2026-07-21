@@ -3,11 +3,11 @@
 This overlay declares, but does not prove deployment of, the frozen
 three-plane release set. Its three Argo CD Applications bind:
 
-- platform platform-v0.1.0-rc.5;
+- platform platform-v0.1.0-rc.7;
 - runtime v0.18.3;
 - model plane v0.1.10; and
 - release-set digest
-  sha256:7be0106ffe6ff7c79a4d4cc5dadd77f74201dcc7913e12711a05e6ea27dfc635.
+  sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6.
 
 The source chart digest is an Application annotation and the image digest is
 the actual Helm value. Argo resolves an exact chart version from the private
@@ -29,8 +29,9 @@ update and cannot silently reuse a prior deployment declaration.
    apply the lab KMS signature, and pass RHTAS admission dry runs.
 3. Populate the declared Vault paths, configure orchestra-vault as a
    ClusterSecretStore, and make orchestra-vault-pki ready.
-4. Verify all ExternalSecrets, Certificates, and injected CA ConfigMaps are
-   ready without reading their values into evidence.
+4. Verify all ExternalSecrets, cert-manager Certificates, the platform service
+   serving certificate, and injected CA ConfigMaps are ready without reading
+   their values into evidence.
 5. Run a server-side dry run and diff for both the cluster floor and product
    overlay.
 6. Apply the product overlay through the OpenShift GitOps bootstrap path after
@@ -42,14 +43,12 @@ Manual workload edits are prohibited.
 
 - Platform agent querying, tool execution, bundled model services, and all
   production tool paths remain disabled.
-- Runtime and model listeners use Secret-backed server TLS. Client
+- Runtime and model listeners use Vault-PKI-backed Secrets. The platform uses
+  an OpenShift service serving certificate for the router-to-Service re-encrypt
+  leg and a chart-created, service-CA-injected public trust ConfigMap. Client
   authentication remains bearer/policy based; mTLS is not claimed.
 - Platform release validation remains disabled until the durable PostgreSQL
   receiver and GitHub App executor are deployed and exercised.
-- The platform Route currently uses edge TLS termination because the released
-  platform pod has no TLS listener. The frozen campaign cannot start until a
-  reviewed backend-TLS proxy/sidecar or equivalent chart capability closes the
-  router-to-pod plaintext leg.
 
 These blocks keep the overlay useful for integration work without allowing a
 renderable manifest to be mistaken for campaign readiness.
