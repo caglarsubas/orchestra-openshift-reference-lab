@@ -16,13 +16,14 @@ authorization digest, independent timing, and cleanup verification.
 | Dependency image admission | Source contract implemented; live mirror intake pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
 | Dependency risk review | Atomic signed-runner collector, detached verification, builder, strict schemas, and empty intake implemented; live collection and human reviews pending |
+| Certification contract intake | Exact platform policy/schema/fixture bytes pinned, semantically CI-validated, and operator source replay implemented; live campaign pending |
 | Release-validation receiver | Procedure implemented; publication and live rehearsal pending |
 | Synthetic tenant and MCP surfaces | Procedure implemented; publication and live rehearsal pending |
 | Upgrade and rollback | Pending immutable release publication |
 | Backup and restore | Pending dependency operators and backup targets |
 | Credential/certificate rotation | Pending Vault/ESO deployment |
 | Fault campaign | Pending fault-controller deployment and authorization flow |
-| Evidence review/finalization | Contract exists in `prometa-platform`; live custody pending |
+| Evidence review/finalization | Platform contract intake is pinned; live custody, reviews, and closure pending |
 | Cost control and teardown | Procedure implemented; live rehearsal pending |
 
 The table is intentionally not a readiness claim. A runbook becomes

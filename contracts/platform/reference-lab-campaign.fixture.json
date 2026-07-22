@@ -1,0 +1,134 @@
+{
+  "authorizationDigest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+  "campaignId": "fixture-ocp42027-reference-campaign",
+  "cluster": {
+    "architecture": "linux/amd64",
+    "identityDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "version": "4.20.27"
+  },
+  "createdAt": "2026-05-31T00:00:00.000Z",
+  "dependencies": {
+    "bomDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "inventory": [
+      {
+        "identityDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+        "kind": "postgresql",
+        "topologyDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+        "kind": "clickhouse",
+        "topologyDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "kind": "jetstream",
+        "topologyDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "kind": "valkey-sentinel",
+        "topologyDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+        "kind": "registry-mirror",
+        "topologyDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+        "kind": "storage",
+        "topologyDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+        "kind": "secret-population",
+        "topologyDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "version": "fixture"
+      },
+      {
+        "identityDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+        "kind": "fault-controller",
+        "topologyDigest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+        "version": "fixture"
+      }
+    ]
+  },
+  "executionMode": "simulated",
+  "kind": "orchestra.certification-campaign.v2",
+  "policy": {
+    "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "id": "orchestra-reference-lab-live-v2"
+  },
+  "profile": {
+    "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "id": "orchestra-ocp-4.20-amd64-v1"
+  },
+  "releaseSet": {
+    "digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "id": "fixture-release-set"
+  },
+  "runner": {
+    "architecture": "linux/amd64",
+    "baseImage": "ubi9",
+    "image": "registry.example.invalid/orchestra/certification-runner@sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "toolchainDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+  },
+  "schemaVersion": 2,
+  "targetClass": "fixture",
+  "topology": {
+    "cni": "OVN-Kubernetes",
+    "controlPlane": {
+      "count": 3,
+      "machineType": "n2-standard-4"
+    },
+    "dependencyPlane": {
+      "count": 3,
+      "machineType": "n2-standard-8",
+      "mode": "private-regional",
+      "platform": "gke",
+      "preemptible": false
+    },
+    "digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "dnsZone": "ocp-lab.prometa.ai",
+    "ingress": "private",
+    "networkMode": "private-allowlisted",
+    "probeRunners": [
+      {
+        "identityDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+        "outsideClusters": true,
+        "zone": "europe-west1-b"
+      },
+      {
+        "identityDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+        "outsideClusters": true,
+        "zone": "europe-west1-c"
+      }
+    ],
+    "region": "europe-west1",
+    "servicesProjectDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "storageDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "targetProjectDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "vpcPeeringVerified": true,
+    "workers": {
+      "count": 3,
+      "machineType": "n2-standard-8",
+      "preemptible": false
+    },
+    "zones": [
+      "europe-west1-b",
+      "europe-west1-c",
+      "europe-west1-d"
+    ]
+  },
+  "window": {
+    "endsAt": "2026-07-15T00:00:00.000Z",
+    "startsAt": "2026-06-01T00:00:00.000Z"
+  }
+}

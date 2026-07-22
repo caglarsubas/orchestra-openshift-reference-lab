@@ -1,0 +1,197 @@
+{
+  "acceptedExecutionModes": [
+    "live"
+  ],
+  "acceptedTargetClasses": [
+    "vendor-reference-lab"
+  ],
+  "claimType": "reference-profile-verification",
+  "forbiddenEvidenceKeys": [
+    "apiKey",
+    "arguments",
+    "authorizationHeader",
+    "body",
+    "content",
+    "credential",
+    "inputPayload",
+    "outputPayload",
+    "password",
+    "prompt",
+    "requestPayload",
+    "responsePayload",
+    "secret",
+    "token"
+  ],
+  "kind": "orchestra.cross-plane.certification-policy.v2",
+  "policyId": "orchestra-reference-lab-live-v2",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "requiredEvidence": [
+    {
+      "dependencies": [],
+      "evidenceType": "orchestra.openshift.production-preflight.v2",
+      "maxAgeHours": 1488,
+      "slot": "openshift-preflight"
+    },
+    {
+      "dependencies": [
+        "openshift-preflight"
+      ],
+      "evidenceType": "orchestra.openshift.production-target-intake.v2",
+      "maxAgeHours": 1488,
+      "slot": "openshift-target-intake"
+    },
+    {
+      "dependencies": [
+        "openshift-preflight",
+        "openshift-target-intake"
+      ],
+      "evidenceType": "orchestra.openshift.production-deployment-observation.v2",
+      "maxAgeHours": 1488,
+      "slot": "openshift-deployment-observation"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.single-pod-recovery.v2",
+      "maxAgeHours": 1488,
+      "slot": "single-pod-recovery"
+    },
+    {
+      "dependencies": [
+        "single-pod-recovery"
+      ],
+      "evidenceType": "orchestra.openshift.single-worker-drain.v2",
+      "maxAgeHours": 1488,
+      "slot": "single-worker-drain"
+    },
+    {
+      "dependencies": [
+        "single-worker-drain"
+      ],
+      "evidenceType": "orchestra.openshift.external-worker-outage-observation.v2",
+      "maxAgeHours": 1488,
+      "slot": "external-worker-outage"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.external-dependency-partition.v2",
+      "maxAgeHours": 1488,
+      "slot": "external-dependency-partition"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.tenant-isolation.v2",
+      "maxAgeHours": 1488,
+      "slot": "tenant-isolation"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.graceful-drain-overload.v2",
+      "maxAgeHours": 1488,
+      "slot": "graceful-drain-overload"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.published-artifact-upgrade.v2",
+      "maxAgeHours": 1488,
+      "slot": "published-artifact-upgrade"
+    },
+    {
+      "dependencies": [
+        "published-artifact-upgrade"
+      ],
+      "evidenceType": "orchestra.openshift.published-artifact-rollback.v2",
+      "maxAgeHours": 1488,
+      "slot": "published-artifact-rollback"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.credential-certificate-rotation.v2",
+      "maxAgeHours": 1488,
+      "slot": "credential-certificate-rotation"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.postgres-backup-restore.v2",
+      "maxAgeHours": 1488,
+      "slot": "postgres-backup-restore"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.clickhouse-backup-restore.v2",
+      "maxAgeHours": 1488,
+      "slot": "clickhouse-backup-restore"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.jetstream-backup-restore.v2",
+      "maxAgeHours": 1488,
+      "slot": "jetstream-backup-restore"
+    },
+    {
+      "dependencies": [
+        "openshift-deployment-observation"
+      ],
+      "evidenceType": "orchestra.openshift.valkey-backup-restore.v2",
+      "maxAgeHours": 1488,
+      "slot": "valkey-backup-restore"
+    },
+    {
+      "dependencies": [
+        "external-worker-outage",
+        "external-dependency-partition",
+        "postgres-backup-restore",
+        "clickhouse-backup-restore",
+        "jetstream-backup-restore",
+        "valkey-backup-restore"
+      ],
+      "evidenceType": "orchestra.openshift.rpo-rto.v2",
+      "maxAgeHours": 1488,
+      "slot": "rpo-rto"
+    },
+    {
+      "dependencies": [
+        "openshift-preflight",
+        "openshift-target-intake",
+        "openshift-deployment-observation",
+        "single-pod-recovery",
+        "single-worker-drain",
+        "external-worker-outage",
+        "external-dependency-partition",
+        "tenant-isolation",
+        "graceful-drain-overload",
+        "published-artifact-upgrade",
+        "published-artifact-rollback",
+        "credential-certificate-rotation",
+        "postgres-backup-restore",
+        "clickhouse-backup-restore",
+        "jetstream-backup-restore",
+        "valkey-backup-restore",
+        "rpo-rto"
+      ],
+      "evidenceType": "orchestra.openshift.availability-soak.v2",
+      "maxAgeHours": 24,
+      "minimumDurationMinutes": 43200,
+      "slot": "availability-soak-30d"
+    }
+  ],
+  "schemaVersion": 2,
+  "validityDays": 30
+}

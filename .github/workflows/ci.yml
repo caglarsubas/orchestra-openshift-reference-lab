@@ -48,6 +48,9 @@ jobs:
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 
+      - name: Validate platform-owned certification contract intake
+        run: python3 scripts/validate_reference_lab_contract_intake.py
+
       - name: Validate immutable dependency BOM
         run: python3 scripts/validate_dependency_bom.py
 

@@ -1,11 +1,12 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate test verify-dependency-sources verify-risk-collection verify-prerequisite-observation terraform-fmt terraform-validate
+.PHONY: validate test verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
 	$(PYTHON) scripts/validate_release_set.py
+	$(PYTHON) scripts/validate_reference_lab_contract_intake.py
 	$(PYTHON) scripts/validate_dependency_bom.py
 	$(PYTHON) scripts/validate_dependency_admission.py
 	$(PYTHON) scripts/validate_dependency_supply_chain.py
@@ -17,6 +18,10 @@ validate:
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
+
+verify-platform-contract-source:
+	test -n "$(PLATFORM_REPOSITORY)"
+	$(PYTHON) scripts/validate_reference_lab_contract_intake.py --platform-repository "$(PLATFORM_REPOSITORY)"
 
 verify-dependency-sources:
 	$(PYTHON) scripts/verify_dependency_sources.py

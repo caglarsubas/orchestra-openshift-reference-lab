@@ -22,6 +22,7 @@ does not enable platform production tool execution.
 
 This repository contains the source-controlled infrastructure foundation,
 immutable cross-plane release intake, immutable dependency source catalog,
+immutable platform-owned certification contract intake,
 source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, an atomic signed-runner scan collector and detached
@@ -124,7 +125,8 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
+| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
+| `contracts/platform/` | Exact platform-owned policy, schema bundle, and fixture bytes vendored from the pinned release revision; not campaign evidence |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, VPC/DNS peering, public delegation zone, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
@@ -145,14 +147,16 @@ boundaries and residual risks are in
 ```bash
 make validate
 make test
+make verify-platform-contract-source PLATFORM_REPOSITORY=/absolute/path/to/agent-hook-v2
 make verify-dependency-sources
 make terraform-fmt
 ```
 
 `make validate` checks the topology, immutable cross-plane release set,
-dependency BOM, fail-closed dependency admission, bounded signature
-observation, unsigned-source risk policy, empty exception intake, and empty
-mirror intake, plus the staged prerequisite observation policy. It rejects
+platform-owned certification contract intake, dependency BOM, fail-closed
+dependency admission, bounded signature observation, unsigned-source risk
+policy, empty exception intake, and empty mirror intake, plus the staged
+prerequisite observation policy. It rejects
 mutable product tags, missing planes, an unbound runner, changed chart or image
 subjects, wildcard signing identities, silently
 omitted dependencies, populated approvals, self-review, stale evidence,
@@ -164,6 +168,11 @@ digests, profile, and control-plane boundary. Only ExternalSecret and
 cert-manager references may create credential or certificate objects.
 The dependency overlay is checked separately and must contain zero
 Applications and Secrets while its deny window is in force.
+
+The contract-intake check is self-contained and safe for CI. The separate
+`verify-platform-contract-source` target requires an authorized platform
+checkout and replays bytes from the exact pinned Git revision; it does not use
+working-tree contents. Neither check creates or approves a campaign.
 
 `make verify-dependency-sources` is networked and time-bounded. It re-resolves
 the locked image/manifests and reproduces the signature observation, but it
@@ -192,6 +201,8 @@ key injection remain an operator step immediately before installer execution.
 
 Repository CI proves syntax, topology invariants, strict gate shapes,
 secret-exclusion rules, Terraform formatting/validation, and deterministic
-installer rendering. It is not OpenShift deployment evidence. Live evidence
-must be produced by the signed certification runner under the v2 contracts in
-`prometa-platform` and retained in the configured evidence bucket.
+installer rendering. The vendored certification inputs prove a pinned contract
+intake only. They are not OpenShift deployment or campaign evidence. Live
+evidence must be produced by the signed certification runner under the v2
+contracts in `prometa-platform` and retained in the configured evidence
+bucket.
