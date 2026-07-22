@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/prerequisite-observation-v1.schema.json",
+  "title": "Orchestra reference-lab prerequisite observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "observationId",
+    "bindings",
+    "collection",
+    "gates",
+    "summary",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.reference-lab.prerequisite-observation.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"enum": ["fixture", "vendor-reference-lab"]},
+    "executionMode": {"enum": ["simulated", "live"]},
+    "observationId": {
+      "type": "string",
+      "pattern": "^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["topologyDigest", "releaseSetDigest", "policyDigest"],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "policyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "runnerRelease",
+        "runnerImageDigest",
+        "runnerToolchainDigest",
+        "collectorScriptDigest",
+        "actorIdentityDigest",
+        "startedAt",
+        "completedAt",
+        "commandPolicy",
+        "rawProviderOutputStored",
+        "secretValuesStored"
+      ],
+      "properties": {
+        "executionClass": {"enum": ["developer-diagnostic", "signed-certification-runner"]},
+        "runnerRelease": {"type": ["string", "null"]},
+        "runnerImageDigest": {"anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
+        "runnerToolchainDigest": {"anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
+        "collectorScriptDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"},
+        "commandPolicy": {"const": "read-only"},
+        "rawProviderOutputStored": {"const": false},
+        "secretValuesStored": {"const": false}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "redHatEntitlement",
+        "openshiftPullSecret",
+        "openshiftInstaller",
+        "gcpBillingAndQuotas",
+        "targetProject",
+        "servicesEvidenceProject",
+        "dnsDelegation",
+        "shortLivedIdentityFederation",
+        "certificationRunner",
+        "crossPlaneReleaseSet"
+      ],
+      "properties": {
+        "redHatEntitlement": {"$ref": "#/$defs/gate"},
+        "openshiftPullSecret": {"$ref": "#/$defs/gate"},
+        "openshiftInstaller": {"$ref": "#/$defs/gate"},
+        "gcpBillingAndQuotas": {"$ref": "#/$defs/gate"},
+        "targetProject": {"$ref": "#/$defs/gate"},
+        "servicesEvidenceProject": {"$ref": "#/$defs/gate"},
+        "dnsDelegation": {"$ref": "#/$defs/gate"},
+        "shortLivedIdentityFederation": {"$ref": "#/$defs/gate"},
+        "certificationRunner": {"$ref": "#/$defs/gate"},
+        "crossPlaneReleaseSet": {"$ref": "#/$defs/gate"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passedGates", "blockedGates", "totalGates"],
+      "properties": {
+        "passedGates": {"type": "integer", "minimum": 0, "maximum": 10},
+        "blockedGates": {"type": "integer", "minimum": 0, "maximum": 10},
+        "totalGates": {"const": 10}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allRequiredObservationsPassed",
+        "eligibleForIndependentReview",
+        "verifiedPrerequisiteGates",
+        "provisioningReady",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "allRequiredObservationsPassed": {"type": "boolean"},
+        "eligibleForIndependentReview": {"type": "boolean"},
+        "verifiedPrerequisiteGates": {"const": 0},
+        "provisioningReady": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"executionMode": {"const": "live"}}},
+      "then": {"properties": {"targetClass": {"const": "vendor-reference-lab"}}}
+    },
+    {
+      "if": {"properties": {"executionMode": {"const": "simulated"}}},
+      "then": {"properties": {"targetClass": {"const": "fixture"}}}
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "evidenceDigest", "observedAt", "reasonCode"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+        "status": {"enum": ["passed", "failed", "not-run"]},
+        "evidenceDigest": {"anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
+        "observedAt": {"anyOf": [{"$ref": "#/$defs/timestamp"}, {"type": "null"}]},
+        "reasonCode": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"}
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "checks", "reasonCodes"],
+      "properties": {
+        "status": {"enum": ["passed", "blocked"]},
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/check"}
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"}
+        }
+      }
+    }
+  }
+}

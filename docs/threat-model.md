@@ -52,6 +52,10 @@
 
 ## Explicit residual risks
 
+- A prerequisite observation proves only what the read-only collector saw. It
+  cannot prove reviewer independence or grant provisioning admission. Live
+  observations must be independently reviewed and projected into the separate
+  gate contract; diagnostic `fixture/simulated` output is never admissible.
 - Initial project bootstrap necessarily uses a privileged human or enterprise
   provisioning identity before WIF exists. Its token lifecycle and audit trail
   are external prerequisites.

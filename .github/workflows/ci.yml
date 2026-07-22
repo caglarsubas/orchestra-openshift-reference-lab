@@ -60,6 +60,9 @@ jobs:
       - name: Validate unsigned-source risk and exception intake
         run: python3 scripts/validate_dependency_risk_intake.py
 
+      - name: Validate staged prerequisite observation policy
+        run: python3 scripts/validate_prerequisite_policy.py
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

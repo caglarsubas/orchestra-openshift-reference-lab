@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.reference-lab.prerequisite-observation-policy.v1",
+  "policyId": "orchestra-reference-lab-prerequisite-observation-v1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "releaseSetDigest": "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428"
+  },
+  "observationPolicy": {
+    "maximumAgeHours": 24,
+    "maximumCollectionMinutes": 30,
+    "liveExecutionClass": "signed-certification-runner",
+    "diagnosticExecutionClass": "developer-diagnostic",
+    "rawProviderOutputStored": false,
+    "secretValuesStored": false,
+    "collectorMayVerifyGates": false,
+    "observationMayAuthorizeProvisioning": false
+  },
+  "runner": {
+    "release": "platform-v0.1.0-rc.8",
+    "repository": "caglarsubas/agent-hook-v2",
+    "revision": "188283376af4e3337f106fb58c5077ff9a6e774d",
+    "image": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8",
+    "imageDigest": "sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8",
+    "toolchainDigest": "sha256:b6e3a4e11f5e0a5421c5007c132fba3bdd3b72ad620ed07f813b8c7677b0b34e"
+  },
+  "stages": {
+    "bootstrap": [
+      "redHatEntitlement",
+      "openshiftPullSecret",
+      "openshiftInstaller",
+      "certificationRunner",
+      "crossPlaneReleaseSet"
+    ],
+    "foundation": [
+      "redHatEntitlement",
+      "openshiftPullSecret",
+      "openshiftInstaller",
+      "gcpBillingAndQuotas",
+      "targetProject",
+      "servicesEvidenceProject",
+      "shortLivedIdentityFederation",
+      "certificationRunner",
+      "crossPlaneReleaseSet"
+    ],
+    "openshift-install": [
+      "redHatEntitlement",
+      "openshiftPullSecret",
+      "openshiftInstaller",
+      "gcpBillingAndQuotas",
+      "targetProject",
+      "servicesEvidenceProject",
+      "dnsDelegation",
+      "shortLivedIdentityFederation",
+      "certificationRunner",
+      "crossPlaneReleaseSet"
+    ],
+    "all": [
+      "redHatEntitlement",
+      "openshiftPullSecret",
+      "openshiftInstaller",
+      "gcpBillingAndQuotas",
+      "targetProject",
+      "servicesEvidenceProject",
+      "dnsDelegation",
+      "shortLivedIdentityFederation",
+      "certificationRunner",
+      "crossPlaneReleaseSet"
+    ]
+  },
+  "gates": {
+    "redHatEntitlement": {
+      "stage": "bootstrap",
+      "evidenceClass": "red-hat-entitlement-statement",
+      "requiredChecks": ["active-entitlement"],
+      "independentReviewRequired": true
+    },
+    "openshiftPullSecret": {
+      "stage": "bootstrap",
+      "evidenceClass": "restricted-secret-read",
+      "requiredChecks": ["required-registry-auths"],
+      "independentReviewRequired": true
+    },
+    "openshiftInstaller": {
+      "stage": "bootstrap",
+      "evidenceClass": "local-binary-and-official-digest",
+      "requiredChecks": ["exact-installer"],
+      "independentReviewRequired": true
+    },
+    "gcpBillingAndQuotas": {
+      "stage": "foundation",
+      "evidenceClass": "gcp-read-only-api",
+      "requiredChecks": ["billing-and-capacity"],
+      "independentReviewRequired": true
+    },
+    "targetProject": {
+      "stage": "foundation",
+      "evidenceClass": "gcp-read-only-api",
+      "requiredChecks": ["dedicated-target-project"],
+      "independentReviewRequired": true
+    },
+    "servicesEvidenceProject": {
+      "stage": "foundation",
+      "evidenceClass": "gcp-read-only-api",
+      "requiredChecks": ["dedicated-services-project"],
+      "independentReviewRequired": true
+    },
+    "dnsDelegation": {
+      "stage": "openshift-install",
+      "evidenceClass": "gcp-dns-and-public-delegation",
+      "requiredChecks": ["exact-public-delegation"],
+      "independentReviewRequired": true
+    },
+    "shortLivedIdentityFederation": {
+      "stage": "foundation",
+      "evidenceClass": "gcp-iam-read-only-api",
+      "requiredChecks": ["restricted-wif-no-user-keys"],
+      "independentReviewRequired": true
+    },
+    "certificationRunner": {
+      "stage": "bootstrap",
+      "evidenceClass": "sigstore-registry-verification",
+      "requiredChecks": ["signed-runner-provenance"],
+      "independentReviewRequired": true
+    },
+    "crossPlaneReleaseSet": {
+      "stage": "bootstrap",
+      "evidenceClass": "canonical-repository-contract",
+      "requiredChecks": ["locked-release-set"],
+      "independentReviewRequired": true
+    }
+  },
+  "gcp": {
+    "region": "europe-west1",
+    "targetLabels": {
+      "environment": "reference-lab",
+      "plane": "target",
+      "managed_by": "terraform"
+    },
+    "servicesLabels": {
+      "environment": "reference-lab",
+      "plane": "services-evidence",
+      "managed_by": "terraform"
+    },
+    "targetRequiredApis": [
+      "cloudapis.googleapis.com",
+      "cloudkms.googleapis.com",
+      "compute.googleapis.com",
+      "dns.googleapis.com",
+      "iam.googleapis.com",
+      "iamcredentials.googleapis.com",
+      "logging.googleapis.com",
+      "monitoring.googleapis.com",
+      "secretmanager.googleapis.com",
+      "serviceusage.googleapis.com",
+      "storage.googleapis.com",
+      "sts.googleapis.com"
+    ],
+    "servicesRequiredApis": [
+      "artifactregistry.googleapis.com",
+      "billingbudgets.googleapis.com",
+      "binaryauthorization.googleapis.com",
+      "cloudkms.googleapis.com",
+      "compute.googleapis.com",
+      "container.googleapis.com",
+      "containeranalysis.googleapis.com",
+      "dns.googleapis.com",
+      "iam.googleapis.com",
+      "iamcredentials.googleapis.com",
+      "logging.googleapis.com",
+      "monitoring.googleapis.com",
+      "secretmanager.googleapis.com",
+      "serviceusage.googleapis.com",
+      "storage.googleapis.com",
+      "sts.googleapis.com"
+    ],
+    "quotaMinimumAvailable": {
+      "target": {
+        "global": {
+          "CPUS_ALL_REGIONS": 48,
+          "FIREWALLS": 40,
+          "NETWORKS": 2
+        },
+        "regional": {
+          "CPUS": 48,
+          "IN_USE_ADDRESSES": 16,
+          "INSTANCES": 8,
+          "N2_CPUS": 48,
+          "SSD_TOTAL_GB": 2048
+        }
+      },
+      "services": {
+        "global": {
+          "CPUS_ALL_REGIONS": 32,
+          "FIREWALLS": 40,
+          "NETWORKS": 2
+        },
+        "regional": {
+          "CPUS": 32,
+          "IN_USE_ADDRESSES": 16,
+          "INSTANCES": 8,
+          "N2_CPUS": 32,
+          "SSD_TOTAL_GB": 4096
+        }
+      }
+    },
+    "wif": {
+      "poolId": "orchestra-lab-github",
+      "providerId": "github",
+      "serviceAccountId": "orchestra-lab-foundation",
+      "issuerUri": "https://token.actions.githubusercontent.com",
+      "repository": "caglarsubas/orchestra-openshift-reference-lab",
+      "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch'"
+    }
+  },
+  "dns": {
+    "dnsName": "ocp-lab.prometa.ai.",
+    "visibility": "public"
+  },
+  "claim": {
+    "independentReviewRequired": true,
+    "provisioningReady": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false
+  }
+}

@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate test verify-dependency-sources verify-risk-collection terraform-fmt terraform-validate
+.PHONY: validate test verify-dependency-sources verify-risk-collection verify-prerequisite-observation terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -10,6 +10,7 @@ validate:
 	$(PYTHON) scripts/validate_dependency_admission.py
 	$(PYTHON) scripts/validate_dependency_supply_chain.py
 	$(PYTHON) scripts/validate_dependency_risk_intake.py
+	$(PYTHON) scripts/validate_prerequisite_policy.py
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
 	kubectl kustomize gitops/dependencies/reference-lab | $(PYTHON) scripts/validate_dependency_gitops.py
 	kubectl kustomize gitops/products/reference-lab | $(PYTHON) scripts/validate_product_gitops.py
@@ -24,6 +25,10 @@ verify-dependency-sources:
 verify-risk-collection:
 	test -n "$(MANIFEST)"
 	$(PYTHON) scripts/verify_dependency_risk_collection.py --manifest "$(MANIFEST)"
+
+verify-prerequisite-observation:
+	test -n "$(OBSERVATION)"
+	$(PYTHON) scripts/validate_prerequisite_observation.py --observation "$(OBSERVATION)"
 
 terraform-fmt:
 	$(TERRAFORM) fmt -check -recursive infra/terraform

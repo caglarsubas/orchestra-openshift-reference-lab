@@ -33,6 +33,18 @@ EXPECTED_GATES = {
     "certificationRunner",
     "crossPlaneReleaseSet",
 }
+PREREQUISITE_STAGE_GATES = {
+    "bootstrap": {
+        "redHatEntitlement",
+        "openshiftPullSecret",
+        "openshiftInstaller",
+        "certificationRunner",
+        "crossPlaneReleaseSet",
+    },
+    "foundation": EXPECTED_GATES - {"dnsDelegation"},
+    "openshift-install": EXPECTED_GATES,
+    "all": EXPECTED_GATES,
+}
 EXPECTED_RECEIVER_BLOCKERS = [
     "published-signed-image",
     "mirror-admission",
@@ -177,8 +189,12 @@ def validate_prerequisites(
     value: dict[str, Any],
     require_ready: bool,
     now: datetime | None = None,
+    readiness_stage: str = "all",
 ) -> None:
     assessed_at = now or datetime.now(timezone.utc)
+    if readiness_stage not in PREREQUISITE_STAGE_GATES:
+        fail("prerequisite_readiness_stage_invalid")
+    required_gates = PREREQUISITE_STAGE_GATES[readiness_stage]
     if set(value) != {
         "schemaVersion",
         "profileId",
@@ -215,7 +231,7 @@ def validate_prerequisites(
         if gate["status"] == "missing":
             if any(field is not None for field in fields):
                 fail(f"prerequisite_missing_gate_has_evidence:{name}")
-            if require_ready:
+            if require_ready and name in required_gates:
                 fail(f"prerequisite_gate_missing:{name}")
             continue
         if not DIGEST.fullmatch(str(gate["evidenceDigest"])) or not DIGEST.fullmatch(
@@ -234,13 +250,13 @@ def validate_prerequisites(
             or assessed_at - verified_at > MAX_PREREQUISITE_AGE
         ):
             fail(f"prerequisite_gate_time_invalid:{name}")
-    if all(gate["status"] == "verified" for gate in gates.values()):
+    if all(gates[name]["status"] == "verified" for name in required_gates):
         verifier_identities = {
-            gate["verifiedByIdentityDigest"] for gate in gates.values()
+            gates[name]["verifiedByIdentityDigest"] for name in required_gates
         }
         if len(verifier_identities) < 2:
             fail("prerequisite_verifiers_not_independent")
-        if (
+        if {"targetProject", "servicesEvidenceProject"}.issubset(required_gates) and (
             gates["targetProject"]["evidenceDigest"]
             == gates["servicesEvidenceProject"]["evidenceDigest"]
         ):
@@ -350,6 +366,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prerequisites", type=Path)
     parser.add_argument("--require-ready", action="store_true")
+    parser.add_argument(
+        "--readiness-stage",
+        choices=tuple(PREREQUISITE_STAGE_GATES),
+        default="all",
+    )
     args = parser.parse_args(argv)
     if args.require_ready and args.prerequisites is None:
         fail("prerequisites_required_for_ready_check")
@@ -368,6 +389,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.prerequisites
         else load_json(ROOT / "config" / "prerequisites.example.json"),
         args.require_ready,
+        readiness_stage=args.readiness_stage,
     )
     print(f"repository_valid topologyDigest={canonical_digest(lock)}")
     return 0
