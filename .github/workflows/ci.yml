@@ -57,6 +57,9 @@ jobs:
       - name: Validate source verification and empty mirror intake
         run: python3 scripts/validate_dependency_supply_chain.py
 
+      - name: Validate unsigned-source risk and exception intake
+        run: python3 scripts/validate_dependency_risk_intake.py
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

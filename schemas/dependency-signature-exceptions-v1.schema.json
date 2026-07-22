@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/dependency-signature-exceptions-v1.schema.json",
+  "title": "Orchestra upstream signature exception intake v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "intakeId",
+    "bindings",
+    "claim",
+    "subjects",
+    "admission"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "intakeId": {
+      "type": "string",
+      "pattern": "^orchestra-dependency-signature-exceptions-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riskEvidenceBundles",
+        "reviewReadySubjects",
+        "approvedExceptions",
+        "allExceptionsApproved",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "applied",
+        "campaignEvidence"
+      ],
+      "properties": {
+        "riskEvidenceBundles": {"type": "integer", "minimum": 0},
+        "reviewReadySubjects": {"type": "integer", "minimum": 0, "maximum": 8},
+        "approvedExceptions": {"type": "integer", "minimum": 0, "maximum": 8},
+        "allExceptionsApproved": {"type": "boolean"},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "applied": {"const": false},
+        "campaignEvidence": {"const": false}
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/exceptionSubject"}
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "requiredExceptionCount",
+        "reviewReadyCount",
+        "approvedExceptionCount",
+        "reasonCodes"
+      ],
+      "properties": {
+        "status": {"const": "blocked"},
+        "requiredExceptionCount": {"const": 8},
+        "reviewReadyCount": {"type": "integer", "minimum": 0, "maximum": 8},
+        "approvedExceptionCount": {"type": "integer", "minimum": 0, "maximum": 8},
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "nullableDigest": {
+      "oneOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]
+    },
+    "nullableTimestamp": {
+      "oneOf": [
+        {"type": "string", "format": "date-time", "pattern": "Z$"},
+        {"type": "null"}
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "dependencyAdmissionDigest",
+        "sourceVerificationDigest",
+        "riskPolicyDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
+        "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riskEvidenceDigest",
+        "collectionAttestationDigest",
+        "runnerImageDigest",
+        "runnerProvenanceBundleDigest",
+        "sbomDigest",
+        "vulnerabilityReportDigest",
+        "licenseInventoryDigest",
+        "machineReviewDigest",
+        "licenseReviewDigest",
+        "riskReviewDigest",
+        "compensatingControlsDigest"
+      ],
+      "properties": {
+        "riskEvidenceDigest": {"$ref": "#/$defs/nullableDigest"},
+        "collectionAttestationDigest": {"$ref": "#/$defs/nullableDigest"},
+        "runnerImageDigest": {"$ref": "#/$defs/nullableDigest"},
+        "runnerProvenanceBundleDigest": {"$ref": "#/$defs/nullableDigest"},
+        "sbomDigest": {"$ref": "#/$defs/nullableDigest"},
+        "vulnerabilityReportDigest": {"$ref": "#/$defs/nullableDigest"},
+        "licenseInventoryDigest": {"$ref": "#/$defs/nullableDigest"},
+        "machineReviewDigest": {"$ref": "#/$defs/nullableDigest"},
+        "licenseReviewDigest": {"$ref": "#/$defs/nullableDigest"},
+        "riskReviewDigest": {"$ref": "#/$defs/nullableDigest"},
+        "compensatingControlsDigest": {"$ref": "#/$defs/nullableDigest"}
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "exceptionId",
+        "requestedAt",
+        "requestorIdentityDigest",
+        "candidateDigest"
+      ],
+      "properties": {
+        "status": {"enum": ["evidence-required", "review-pending", "approved"]},
+        "exceptionId": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^orchestra-upstream-signature-exception-[a-z0-9][a-z0-9.-]+$"
+            },
+            {"type": "null"}
+          ]
+        },
+        "requestedAt": {"$ref": "#/$defs/nullableTimestamp"},
+        "requestorIdentityDigest": {"$ref": "#/$defs/nullableDigest"},
+        "candidateDigest": {"$ref": "#/$defs/nullableDigest"}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "reviewerIdentityDigest",
+        "decision",
+        "decidedAt",
+        "candidateDigest",
+        "signatureBundleDigest"
+      ],
+      "properties": {
+        "role": {"enum": ["security-reviewer", "service-owner"]},
+        "reviewerIdentityDigest": {"$ref": "#/$defs/digest"},
+        "decision": {"const": "approve"},
+        "decidedAt": {"type": "string", "format": "date-time", "pattern": "Z$"},
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "signatureBundleDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "approvedAt", "expiresAt", "approvalDigest"],
+      "properties": {
+        "status": {"enum": ["required-not-approved", "approved"]},
+        "approvedAt": {"$ref": "#/$defs/nullableTimestamp"},
+        "expiresAt": {"$ref": "#/$defs/nullableTimestamp"},
+        "approvalDigest": {"$ref": "#/$defs/nullableDigest"}
+      }
+    },
+    "exceptionSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sourceSubject",
+        "platformSubject",
+        "evidence",
+        "request",
+        "approvals",
+        "decision",
+        "sourceAdmissionState",
+        "reasonCodes"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "barman-cloud-controller",
+            "barman-cloud-sidecar",
+            "clickhouse-metrics-exporter",
+            "clickhouse-operator",
+            "clickhouse-server-lts",
+            "nats-config-reloader",
+            "nats-server",
+            "vault-server"
+          ]
+        },
+        "sourceSubject": {"type": "string", "minLength": 1},
+        "platformSubject": {"type": "string", "minLength": 1},
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "request": {"$ref": "#/$defs/request"},
+        "approvals": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/approval"}
+        },
+        "decision": {"$ref": "#/$defs/decision"},
+        "sourceAdmissionState": {
+          "enum": ["blocked", "exception-approved-pending-source-aggregate"]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

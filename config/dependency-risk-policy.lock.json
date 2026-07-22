@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "policyId": "orchestra-unsigned-source-risk-policy-v1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89"
+  },
+  "scope": {
+    "signatureObservation": "no-cosign-signature-at-locked-index",
+    "platform": "linux/amd64",
+    "subjectIds": [
+      "barman-cloud-controller",
+      "barman-cloud-sidecar",
+      "clickhouse-metrics-exporter",
+      "clickhouse-operator",
+      "clickhouse-server-lts",
+      "nats-config-reloader",
+      "nats-server",
+      "vault-server"
+    ]
+  },
+  "collectionPolicy": {
+    "executionClass": "signed-certification-runner",
+    "maximumCollectionDurationHours": 6,
+    "maximumEvidenceAgeHours": 72,
+    "requiredArtifactTypes": [
+      "trivy-vulnerability-json",
+      "spdx-2.3-json"
+    ],
+    "runnerProvenanceRequired": true,
+    "collectionAttestationRequired": true,
+    "rawArtifactsRestricted": true
+  },
+  "vulnerabilityPolicy": {
+    "blockingSeverities": [
+      "CRITICAL",
+      "HIGH",
+      "UNKNOWN"
+    ],
+    "recognizedSeverities": [
+      "CRITICAL",
+      "HIGH",
+      "MEDIUM",
+      "LOW",
+      "UNKNOWN"
+    ],
+    "ignoreFileAllowed": false,
+    "ignoreUnfixedAllowed": false,
+    "severityFilterAllowed": false,
+    "databaseDigestRequired": true,
+    "scanTargetRequired": true
+  },
+  "licensePolicy": {
+    "format": "SPDX-2.3",
+    "packageInventoryRequired": true,
+    "humanReviewRequired": true,
+    "automatedApprovalAllowed": false,
+    "unknownLicenseRequiresExplicitDecision": true
+  },
+  "exceptionPolicy": {
+    "maximumLifetimeHours": 720,
+    "minimumReviewers": 2,
+    "requiredReviewerRoles": [
+      "security-reviewer",
+      "service-owner"
+    ],
+    "distinctReviewerIdentities": true,
+    "requestorMayReview": false,
+    "collectorMayReview": false,
+    "approvalBindsCandidateDigest": true,
+    "expiryBlocksNewSync": true
+  },
+  "compensatingControls": [
+    {
+      "id": "exact-source-and-platform-digests",
+      "requiredBefore": "review"
+    },
+    {
+      "id": "signed-runner-evidence-and-independent-verification",
+      "requiredBefore": "review"
+    },
+    {
+      "id": "private-mirror-by-digest",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "lab-kms-signature",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "admission-policy-rejects-unapproved-destination",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "restricted-runtime-default-deny-and-allowlisted-egress",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "continuous-rescan-and-expiry-enforcement",
+      "requiredBefore": "activation"
+    }
+  ],
+  "claim": {
+    "riskEvidenceBundles": 0,
+    "exceptionsApproved": 0,
+    "sourceAdmissionAuthorized": false,
+    "mirrorAuthorization": false,
+    "activationAuthorized": false,
+    "applied": false,
+    "campaignEvidence": false
+  }
+}

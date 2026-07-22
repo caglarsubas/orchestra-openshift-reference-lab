@@ -9,6 +9,7 @@ validate:
 	$(PYTHON) scripts/validate_dependency_bom.py
 	$(PYTHON) scripts/validate_dependency_admission.py
 	$(PYTHON) scripts/validate_dependency_supply_chain.py
+	$(PYTHON) scripts/validate_dependency_risk_intake.py
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
 	kubectl kustomize gitops/dependencies/reference-lab | $(PYTHON) scripts/validate_dependency_gitops.py
 	kubectl kustomize gitops/products/reference-lab | $(PYTHON) scripts/validate_product_gitops.py

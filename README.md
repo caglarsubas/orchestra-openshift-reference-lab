@@ -23,12 +23,13 @@ does not enable platform production tool execution.
 This repository contains the source-controlled infrastructure foundation,
 immutable cross-plane release intake, immutable dependency source catalog,
 source-resolved dependency admission contract, bounded source-signature
-observation, empty mirror-intake contract, gate-controlled product and
-dependency GitOps floors, a source-only durable release-validation receiver,
-and a source-only synthetic tenant kit. It does not contain a kubeconfig,
-provider identity, OpenShift pull secret, live campaign, campaign evidence
-report, or completed soak. No declaration has been applied to a target, so the
-reference profile is not verified.
+observation, locked unsigned-source risk policy, empty signature-exception and
+mirror-intake contracts, gate-controlled product and dependency GitOps floors,
+a source-only durable release-validation receiver, and a source-only synthetic
+tenant kit. It does not contain a kubeconfig, provider identity, OpenShift pull
+secret, live risk scan, approved source exception, live campaign, campaign
+evidence report, or completed soak. No declaration has been applied to a
+target, so the reference profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -88,6 +89,18 @@ intake digest is
 `sha256:fe357261b272cd8fb4d6917e55453b613967fe5557616550c49591d035a5fc21`.
 No destination, receipt, lab signature, pull proof, or approval is populated.
 
+The unsigned-source risk-policy digest is
+`sha256:c0f22c02e37447a97a6d97c6352d7fb2207c601969ba7857d7910ab661f3731e`.
+It requires signed-runner Trivy and SPDX evidence, blocks critical, high, and
+unknown-severity findings, requires human licence and risk review, and enforces
+two independent approval roles with a maximum 30-day exception lifetime. The
+empty signature-exception intake digest is
+`sha256:ddff89276316a21d25770cfbfc5095dcf2781281e4026236d98d6bbf784cf848`.
+It contains all eight unsigned subjects but zero evidence bundles and zero
+approvals. Even a fully approved exception set cannot authorize source
+admission or mirroring without the separate signed-runner source replay and
+admission aggregate.
+
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
 release-validation receiver and synthetic tenant kit remain `source-only`:
@@ -98,12 +111,13 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, empty mirror intake, and prerequisite gates |
+| `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, and prerequisite gates |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Cluster declarations; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
+| `schemas/` | Strict additive JSON contracts for scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |
@@ -124,10 +138,12 @@ make terraform-fmt
 
 `make validate` checks the topology, immutable cross-plane release set,
 dependency BOM, fail-closed dependency admission, bounded signature
-observation, and empty mirror intake. It rejects mutable product tags, missing
-planes, an unbound runner, changed chart or image subjects, wildcard signing
-identities, silently omitted dependencies, populated mirror claims, or any
-attempt to mark the dependency plane active.
+observation, unsigned-source risk policy, empty exception intake, and empty
+mirror intake. It rejects mutable product tags, missing planes, an unbound
+runner, changed chart or image subjects, wildcard signing identities, silently
+omitted dependencies, populated approvals, self-review, stale evidence,
+overlong exceptions, populated mirror claims, or any attempt to mark the
+dependency plane active.
 It also renders the product overlay and proves that the Argo Applications use
 the matching source revisions, chart digests, mirrored repositories, image
 digests, profile, and control-plane boundary. Only ExternalSecret and
