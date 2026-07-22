@@ -49,13 +49,15 @@
         "topologyDigest",
         "dependencyAdmissionDigest",
         "sourceVerificationDigest",
-        "riskPolicyDigest"
+        "riskPolicyDigest",
+        "releaseSetDigest"
       ],
       "properties": {
         "topologyDigest": {"$ref": "#/$defs/digest"},
         "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
         "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
-        "riskPolicyDigest": {"$ref": "#/$defs/digest"}
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"}
       }
     },
     "collection": {
@@ -63,32 +65,92 @@
       "additionalProperties": false,
       "required": [
         "executionClass",
+        "runnerRelease",
+        "runnerRevision",
+        "runnerImage",
         "runnerImageDigest",
+        "runnerToolchainDigest",
+        "runnerReleaseManifestFile",
+        "runnerReleaseManifestDigest",
+        "runnerReleaseManifestSignatureBundleFile",
+        "runnerReleaseManifestSignatureBundleDigest",
+        "runnerProvenanceBundleFile",
         "runnerProvenanceBundleDigest",
+        "runnerReleaseMetadataFile",
+        "runnerReleaseMetadataDigest",
+        "runnerToolchainLockFile",
+        "collectorScriptFile",
+        "collectorScriptDigest",
         "actorIdentityDigest",
+        "signingPublicKeyFile",
+        "signingPublicKeyDigest",
         "startedAt",
         "completedAt",
+        "collectionAttestationFile",
         "collectionAttestationDigest",
+        "collectionSignatureBundleFile",
+        "collectionSignatureBundleDigest",
         "vulnerabilityScanner",
         "sbomScanner",
         "invocationPolicy"
       ],
       "properties": {
         "executionClass": {"const": "signed-certification-runner"},
+        "runnerRelease": {
+          "type": "string",
+          "pattern": "^platform-v[0-9]+\\.[0-9]+\\.[0-9]+-rc\\.[0-9]+$"
+        },
+        "runnerRevision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "runnerImage": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:[a-f0-9]{64}$"
+        },
         "runnerImageDigest": {"$ref": "#/$defs/digest"},
+        "runnerToolchainDigest": {"$ref": "#/$defs/digest"},
+        "runnerReleaseManifestFile": {"const": "platform-release-manifest.json"},
+        "runnerReleaseManifestDigest": {"$ref": "#/$defs/digest"},
+        "runnerReleaseManifestSignatureBundleFile": {
+          "const": "platform-release-manifest.sigstore.json"
+        },
+        "runnerReleaseManifestSignatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "runnerProvenanceBundleFile": {
+          "const": "platform-release-manifest.provenance.sigstore.json"
+        },
         "runnerProvenanceBundleDigest": {"$ref": "#/$defs/digest"},
+        "runnerReleaseMetadataFile": {
+          "const": "release-orchestra-certification-runner-ubi.json"
+        },
+        "runnerReleaseMetadataDigest": {"$ref": "#/$defs/digest"},
+        "runnerToolchainLockFile": {
+          "const": "certification-runner-toolchain-lock.json"
+        },
+        "collectorScriptFile": {"const": "dependency-risk-collector.sh"},
+        "collectorScriptDigest": {"$ref": "#/$defs/digest"},
         "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "signingPublicKeyFile": {"const": "collection-signing-public-key.pem"},
+        "signingPublicKeyDigest": {"$ref": "#/$defs/digest"},
         "startedAt": {"$ref": "#/$defs/timestamp"},
         "completedAt": {"$ref": "#/$defs/timestamp"},
+        "collectionAttestationFile": {
+          "const": "dependency-risk-collection-statement.json"
+        },
         "collectionAttestationDigest": {"$ref": "#/$defs/digest"},
+        "collectionSignatureBundleFile": {
+          "const": "dependency-risk-collection-signature.sigstore.json"
+        },
+        "collectionSignatureBundleDigest": {"$ref": "#/$defs/digest"},
         "vulnerabilityScanner": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["name", "version", "databaseDigest"],
+          "required": ["name", "version", "databaseDigest", "javaDatabaseDigest"],
           "properties": {
             "name": {"const": "trivy"},
-            "version": {"type": "string", "minLength": 1},
-            "databaseDigest": {"$ref": "#/$defs/digest"}
+            "version": {"const": "0.72.0"},
+            "databaseDigest": {"$ref": "#/$defs/digest"},
+            "javaDatabaseDigest": {"$ref": "#/$defs/digest"}
           }
         },
         "sbomScanner": {
@@ -97,7 +159,7 @@
           "required": ["name", "version"],
           "properties": {
             "name": {"const": "syft"},
-            "version": {"type": "string", "minLength": 1}
+            "version": {"const": "1.48.0"}
           }
         },
         "invocationPolicy": {
@@ -105,14 +167,20 @@
           "additionalProperties": false,
           "required": [
             "platform",
+            "imageSource",
             "vulnerabilityScanners",
             "ignoreFileUsed",
             "ignoreUnfixed",
             "severityFilter",
+            "externalConfigUsed",
+            "databaseUpdatesDuringScan",
+            "offlineScan",
+            "sbomSource",
             "sbomFormat"
           ],
           "properties": {
             "platform": {"const": "linux/amd64"},
+            "imageSource": {"const": "remote"},
             "vulnerabilityScanners": {
               "type": "array",
               "prefixItems": [{"const": "vuln"}],
@@ -123,6 +191,10 @@
             "ignoreFileUsed": {"const": false},
             "ignoreUnfixed": {"const": false},
             "severityFilter": {"type": "array", "maxItems": 0},
+            "externalConfigUsed": {"const": false},
+            "databaseUpdatesDuringScan": {"const": false},
+            "offlineScan": {"const": true},
+            "sbomSource": {"const": "registry"},
             "sbomFormat": {"const": "spdx-2.3-json"}
           }
         }

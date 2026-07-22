@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/dependency-risk-collection-statement-v1.schema.json",
+  "title": "Orchestra unsigned dependency collection statement v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "evidenceId",
+    "bindings",
+    "runner",
+    "collector",
+    "scanners",
+    "invocationPolicy",
+    "subjects",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.dependency-risk.collection-statement.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "runner": {"$ref": "#/$defs/runner"},
+    "collector": {"$ref": "#/$defs/collector"},
+    "scanners": {"$ref": "#/$defs/scanners"},
+    "invocationPolicy": {"$ref": "#/$defs/invocationPolicy"},
+    "subjects": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/scanSubject"}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawArtifactsRestricted",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "campaignEvidence"
+      ],
+      "properties": {
+        "rawArtifactsRestricted": {"const": true},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "campaignEvidence": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "dependencyAdmissionDigest",
+        "sourceVerificationDigest",
+        "riskPolicyDigest",
+        "releaseSetDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
+        "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "release",
+        "revision",
+        "image",
+        "imageDigest",
+        "toolchainDigest",
+        "releaseManifestDigest",
+        "releaseManifestSignatureBundleDigest",
+        "provenanceBundleDigest",
+        "releaseMetadataDigest"
+      ],
+      "properties": {
+        "release": {
+          "type": "string",
+          "pattern": "^platform-v[0-9]+\\.[0-9]+\\.[0-9]+-rc\\.[0-9]+$"
+        },
+        "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "image": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:[a-f0-9]{64}$"
+        },
+        "imageDigest": {"$ref": "#/$defs/digest"},
+        "toolchainDigest": {"$ref": "#/$defs/digest"},
+        "releaseManifestDigest": {"$ref": "#/$defs/digest"},
+        "releaseManifestSignatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "provenanceBundleDigest": {"$ref": "#/$defs/digest"},
+        "releaseMetadataDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "collector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "scriptDigest",
+        "actorIdentityDigest",
+        "signingPublicKeyDigest",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "executionClass": {"const": "signed-certification-runner"},
+        "scriptDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "signingPublicKeyDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "scanners": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vulnerability", "sbom"],
+      "properties": {
+        "vulnerability": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version", "databaseDigest", "javaDatabaseDigest"],
+          "properties": {
+            "name": {"const": "trivy"},
+            "version": {"const": "0.72.0"},
+            "databaseDigest": {"$ref": "#/$defs/digest"},
+            "javaDatabaseDigest": {"$ref": "#/$defs/digest"}
+          }
+        },
+        "sbom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": {
+            "name": {"const": "syft"},
+            "version": {"const": "1.48.0"}
+          }
+        }
+      }
+    },
+    "invocationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "platform",
+        "imageSource",
+        "vulnerabilityScanners",
+        "ignoreFileUsed",
+        "ignoreUnfixed",
+        "severityFilter",
+        "externalConfigUsed",
+        "databaseUpdatesDuringScan",
+        "offlineScan",
+        "sbomSource",
+        "sbomFormat"
+      ],
+      "properties": {
+        "platform": {"const": "linux/amd64"},
+        "imageSource": {"const": "remote"},
+        "vulnerabilityScanners": {
+          "type": "array",
+          "prefixItems": [{"const": "vuln"}],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "ignoreFileUsed": {"const": false},
+        "ignoreUnfixed": {"const": false},
+        "severityFilter": {"type": "array", "maxItems": 0},
+        "externalConfigUsed": {"const": false},
+        "databaseUpdatesDuringScan": {"const": false},
+        "offlineScan": {"const": true},
+        "sbomSource": {"const": "registry"},
+        "sbomFormat": {"const": "spdx-2.3-json"}
+      }
+    },
+    "scanSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sourceSubject",
+        "platformSubject",
+        "vulnerabilityReportFile",
+        "vulnerabilityReportDigest",
+        "sbomFile",
+        "sbomDigest"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "barman-cloud-controller",
+            "barman-cloud-sidecar",
+            "clickhouse-metrics-exporter",
+            "clickhouse-operator",
+            "clickhouse-server-lts",
+            "nats-config-reloader",
+            "nats-server",
+            "vault-server"
+          ]
+        },
+        "sourceSubject": {"type": "string", "minLength": 1},
+        "platformSubject": {"type": "string", "minLength": 1},
+        "vulnerabilityReportFile": {"$ref": "#/$defs/fileName"},
+        "vulnerabilityReportDigest": {"$ref": "#/$defs/digest"},
+        "sbomFile": {"$ref": "#/$defs/fileName"},
+        "sbomDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "fileName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\]+$"
+    }
+  }
+}

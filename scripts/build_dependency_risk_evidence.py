@@ -11,6 +11,7 @@ from typing import Any
 try:
     from scripts.dependency_risk_contract import (
         CONTROL_PLAN,
+        EVIDENCE_ID,
         SEVERITIES,
         blob_digest,
         expected_bindings,
@@ -26,6 +27,7 @@ try:
 except ModuleNotFoundError:
     from dependency_risk_contract import (
         CONTROL_PLAN,
+        EVIDENCE_ID,
         SEVERITIES,
         blob_digest,
         expected_bindings,
@@ -221,6 +223,7 @@ def validate_manifest(
         or value["targetClass"] != "vendor-reference-lab"
         or value["executionMode"] != "live"
         or not isinstance(value["evidenceId"], str)
+        or not EVIDENCE_ID.fullmatch(value["evidenceId"])
         or value["bindings"] != expected_bindings()
     ):
         fail("dependency_risk_manifest_identity_invalid")
@@ -403,6 +406,18 @@ def main(argv: list[str] | None = None) -> int:
     manifest, _ = load_json_bytes(
         args.manifest, "dependency_risk_manifest_json_invalid"
     )
+    try:
+        from scripts.verify_dependency_risk_collection import (
+            verify_collection_attestation,
+        )
+    except ModuleNotFoundError:
+        from verify_dependency_risk_collection import verify_collection_attestation
+
+    verification_digest = verify_collection_attestation(
+        manifest, args.manifest.resolve().parent
+    )
+    if verification_digest != manifest["collection"]["collectionAttestationDigest"]:
+        fail("dependency_risk_collection_verification_digest_mismatch")
     admission, source_verification, _ = load_contract_inputs()
     result = build_risk_evidence(
         manifest, args.manifest.resolve().parent, admission, source_verification

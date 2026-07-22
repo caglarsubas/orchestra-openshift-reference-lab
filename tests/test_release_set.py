@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import unittest
 
 from scripts.validate_release_set import PROFILE_DIGEST, validate_release_set
@@ -24,7 +23,7 @@ def release_set() -> dict:
     return {
         "schemaVersion": 1,
         "kind": "orchestra.cross-plane.release-set.v1",
-        "releaseSetId": "orchestra-reference-lab-2026.07.21-rc7",
+        "releaseSetId": "orchestra-reference-lab-2026.07.22-rc8",
         "createdAt": "2026-07-21T07:30:00Z",
         "profile": {
             "id": "orchestra-ocp-4.20-amd64-v1",
@@ -37,7 +36,7 @@ def release_set() -> dict:
         "planes": [
             {
                 "plane": "platform",
-                "release": "platform-v0.1.0-rc.7",
+                "release": "platform-v0.1.0-rc.8",
                 "source": {
                     "repository": "caglarsubas/agent-hook-v2",
                     "revision": revisions["platform"],
@@ -81,7 +80,7 @@ def release_set() -> dict:
             },
         ],
         "certificationRunner": {
-            "release": "platform-v0.1.0-rc.7",
+            "release": "platform-v0.1.0-rc.8",
             "source": {
                 "repository": "caglarsubas/agent-hook-v2",
                 "revision": revisions["platform"],
@@ -101,7 +100,7 @@ class ReleaseSetTests(unittest.TestCase):
         )
         self.assertEqual(
             result,
-            "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
+            "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428",
         )
 
     def test_valid_release_set_is_canonically_bound(self) -> None:
@@ -128,9 +127,9 @@ class ReleaseSetTests(unittest.TestCase):
 
     def test_subject_roles_cannot_alias_one_artifact(self) -> None:
         changed = release_set()
-        changed["planes"][0]["subjects"][1]["ref"] = changed["planes"][0][
-            "subjects"
-        ][0]["ref"]
+        changed["planes"][0]["subjects"][1]["ref"] = changed["planes"][0]["subjects"][
+            0
+        ]["ref"]
         with self.assertRaisesRegex(ValueError, "subject_roles_invalid"):
             validate_release_set(changed)
 

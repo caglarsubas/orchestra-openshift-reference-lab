@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate test verify-dependency-sources terraform-fmt terraform-validate
+.PHONY: validate test verify-dependency-sources verify-risk-collection terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -20,6 +20,10 @@ test:
 verify-dependency-sources:
 	$(PYTHON) scripts/verify_dependency_sources.py
 	$(PYTHON) scripts/verify_dependency_signatures.py
+
+verify-risk-collection:
+	test -n "$(MANIFEST)"
+	$(PYTHON) scripts/verify_dependency_risk_collection.py --manifest "$(MANIFEST)"
 
 terraform-fmt:
 	$(TERRAFORM) fmt -check -recursive infra/terraform

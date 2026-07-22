@@ -13,7 +13,7 @@ authorization digest, independent timing, and cleanup verification.
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract implemented; live mirror intake pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
-| Dependency risk review | Builder, schemas, semantic validation, and empty intake implemented; signed-runner scan and human reviews pending |
+| Dependency risk review | Atomic signed-runner collector, detached verification, builder, strict schemas, and empty intake implemented; live collection and human reviews pending |
 | Release-validation receiver | Procedure implemented; publication and live rehearsal pending |
 | Synthetic tenant and MCP surfaces | Procedure implemented; publication and live rehearsal pending |
 | Upgrade and rollback | Pending immutable release publication |

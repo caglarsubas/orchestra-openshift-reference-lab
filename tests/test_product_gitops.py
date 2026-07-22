@@ -24,7 +24,7 @@ class ProductGitOpsTests(unittest.TestCase):
     def test_applications_bind_the_frozen_release_set(self) -> None:
         self.assertEqual(
             validate_applications(self.release_set),
-            "sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6",
+            "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428",
         )
 
     def test_applications_bind_the_dependency_bom(self) -> None:
@@ -113,7 +113,7 @@ class ProductGitOpsTests(unittest.TestCase):
                 "existingSecret": "orchestra-platform-backend-tls",
                 "certificateKey": "tls.crt",
                 "privateKeyKey": "tls.key",
-                "rolloutId": "release-set-ec705bcc",
+                "rolloutId": "release-set-d4b4ef7e",
                 "serverName": "orchestra-platform.orchestra-platform.svc",
                 "serviceServingCertificate": {
                     "enabled": True,

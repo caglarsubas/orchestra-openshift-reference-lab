@@ -101,13 +101,15 @@
         "topologyDigest",
         "dependencyAdmissionDigest",
         "sourceVerificationDigest",
-        "riskPolicyDigest"
+        "riskPolicyDigest",
+        "releaseSetDigest"
       ],
       "properties": {
         "topologyDigest": {"$ref": "#/$defs/digest"},
         "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
         "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
-        "riskPolicyDigest": {"$ref": "#/$defs/digest"}
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"}
       }
     },
     "evidence": {
@@ -116,8 +118,14 @@
       "required": [
         "riskEvidenceDigest",
         "collectionAttestationDigest",
+        "collectionSignatureBundleDigest",
+        "signingPublicKeyDigest",
         "runnerImageDigest",
+        "runnerToolchainDigest",
+        "runnerReleaseManifestDigest",
+        "collectorScriptDigest",
         "runnerProvenanceBundleDigest",
+        "releaseSetDigest",
         "sbomDigest",
         "vulnerabilityReportDigest",
         "licenseInventoryDigest",
@@ -129,8 +137,14 @@
       "properties": {
         "riskEvidenceDigest": {"$ref": "#/$defs/nullableDigest"},
         "collectionAttestationDigest": {"$ref": "#/$defs/nullableDigest"},
+        "collectionSignatureBundleDigest": {"$ref": "#/$defs/nullableDigest"},
+        "signingPublicKeyDigest": {"$ref": "#/$defs/nullableDigest"},
         "runnerImageDigest": {"$ref": "#/$defs/nullableDigest"},
+        "runnerToolchainDigest": {"$ref": "#/$defs/nullableDigest"},
+        "runnerReleaseManifestDigest": {"$ref": "#/$defs/nullableDigest"},
+        "collectorScriptDigest": {"$ref": "#/$defs/nullableDigest"},
         "runnerProvenanceBundleDigest": {"$ref": "#/$defs/nullableDigest"},
+        "releaseSetDigest": {"$ref": "#/$defs/nullableDigest"},
         "sbomDigest": {"$ref": "#/$defs/nullableDigest"},
         "vulnerabilityReportDigest": {"$ref": "#/$defs/nullableDigest"},
         "licenseInventoryDigest": {"$ref": "#/$defs/nullableDigest"},
