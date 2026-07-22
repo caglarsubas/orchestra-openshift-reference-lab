@@ -2,13 +2,16 @@
 
 ## Preconditions
 
-1. `restricted/prerequisites.json` passes `--require-ready`.
-2. Two operators review project IDs, billing account, monthly budget, quota,
+1. A fresh live prerequisite observation has been independently reviewed.
+2. `restricted/prerequisites.json` passes `--require-ready
+   --readiness-stage bootstrap`. Project and WIF gates are not required yet
+   because this module creates them.
+3. Two operators review project IDs, billing account, monthly budget, quota,
    DNS delegation, image pins, approved egress CIDRs, and the exact installer
    digest.
-3. The initial identity is short-lived and recorded by digest. No key file is
+4. The initial identity is short-lived and recorded by digest. No key file is
    created or downloaded.
-4. The working directory is encrypted and excluded from backup/sync tools that
+5. The working directory is encrypted and excluded from backup/sync tools that
    are not approved for restricted material.
 
 ## Bootstrap apply
@@ -26,6 +29,8 @@
    migrate state to a local backend.
 6. Re-authenticate through WIF and prove the bootstrap credential is no longer
    used for ordinary foundation operations.
+7. Re-run the read-only observation, obtain independent project/WIF review, and
+   require `--readiness-stage foundation` before the foundation apply.
 
 ## Foundation apply
 
@@ -41,6 +46,9 @@
 5. Exercise backup/export access before considering the retention lock.
 6. In a separately approved change, set certification mode and the exact lock
    acknowledgement. Confirm the 400-day lock is irreversible before apply.
+7. Establish and independently verify the exact public DNS delegation. Require
+   `--readiness-stage openshift-install` before rendering or executing the
+   OpenShift installer.
 
 ## Dependency source intake
 

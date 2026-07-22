@@ -8,6 +8,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Exact topology and claim lock | Yes | Yes | No | No | No |
 | Immutable three-plane release set and runner | Yes | Yes | No | No | No |
 | Strict prerequisite admission | Yes | Yes | No | No | No |
+| Stage-aware payload-free prerequisite observation | Yes | Yes | No | No | No |
 | Project/API/state/KMS/WIF bootstrap | Yes | Yes | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
@@ -78,3 +79,14 @@ lanes. Both services have hash-locked UBI AMD64 builds, but neither has a
 published or mirrored image or GitOps reference. Live activation remains
 behind Red Hat, GCP, DNS, PKI, Keycloak, and short-lived identity gates; no
 dependency or product declaration has been applied.
+
+Prerequisite admission is now separated from machine observation. The locked
+policy defines bootstrap, foundation, and OpenShift-install stages, removing
+the prior cycle that required project and WIF evidence before Terraform created
+those resources. The read-only collector validates restricted pull-secret and
+installer inputs, exact GCP project/API/billing/quota state, DNS delegation,
+WIF restrictions, runner Sigstore identity, and the canonical release set while
+storing no secret or raw provider output. Diagnostic runs are
+`fixture/simulated`; live runs bind the published runner. Neither can verify a
+gate, authorize provisioning, or produce campaign evidence. No live
+prerequisite observation or independent review exists yet.

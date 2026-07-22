@@ -25,18 +25,24 @@ immutable cross-plane release intake, immutable dependency source catalog,
 source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, an atomic signed-runner scan collector and detached
-attestation verifier, gate-controlled product and dependency GitOps floors, a
-source-only durable release-validation receiver, and a source-only synthetic
-tenant kit. It does not contain a kubeconfig, provider identity, OpenShift pull
-secret, live risk scan, approved source exception, live campaign, campaign
-evidence report, or completed soak. No declaration has been applied to a
-target, so the reference profile is not verified.
+attestation verifier, a stage-aware prerequisite observation policy and
+payload-free read-only collector, gate-controlled product and dependency
+GitOps floors, a source-only durable release-validation receiver, and a
+source-only synthetic tenant kit. It does not contain a kubeconfig, provider
+identity, OpenShift pull secret, live prerequisite observation, independent
+prerequisite review, live risk scan, approved source exception, live campaign,
+campaign evidence report, or completed soak. No declaration has been applied
+to a target, so the reference profile is not verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
 live copy belongs under ignored `restricted/` storage and must contain digests,
 not credentials. Provisioning is blocked until every gate is independently
-verified.
+verified. Machine observation is separately governed by
+[`config/prerequisite-observation-policy.lock.json`](config/prerequisite-observation-policy.lock.json):
+diagnostic output is always `fixture/simulated`, while live output must bind the
+published certification runner. Neither output can verify a gate or authorize
+provisioning.
 
 ## Locked topology
 
@@ -114,13 +120,13 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, and prerequisite gates |
+| `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Cluster declarations; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for prerequisite observations, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |
@@ -142,8 +148,9 @@ make terraform-fmt
 `make validate` checks the topology, immutable cross-plane release set,
 dependency BOM, fail-closed dependency admission, bounded signature
 observation, unsigned-source risk policy, empty exception intake, and empty
-mirror intake. It rejects mutable product tags, missing planes, an unbound
-runner, changed chart or image subjects, wildcard signing identities, silently
+mirror intake, plus the staged prerequisite observation policy. It rejects
+mutable product tags, missing planes, an unbound runner, changed chart or image
+subjects, wildcard signing identities, silently
 omitted dependencies, populated approvals, self-review, stale evidence,
 overlong exceptions, populated mirror claims, or any attempt to mark the
 dependency plane active.

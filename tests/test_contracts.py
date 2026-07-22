@@ -75,6 +75,33 @@ class ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "prerequisite_gate_missing"):
             validate_prerequisites(self.prerequisites, require_ready=True)
 
+    def test_bootstrap_stage_does_not_require_resources_created_by_bootstrap(
+        self,
+    ) -> None:
+        changed = copy.deepcopy(self.prerequisites)
+        verified_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        bootstrap_gates = (
+            "redHatEntitlement",
+            "openshiftPullSecret",
+            "openshiftInstaller",
+            "certificationRunner",
+            "crossPlaneReleaseSet",
+        )
+        for index, name in enumerate(bootstrap_gates, start=1):
+            changed["gates"][name].update(
+                {
+                    "status": "verified",
+                    "evidenceDigest": f"sha256:{index:064x}",
+                    "verifiedAt": verified_at,
+                    "verifiedByIdentityDigest": f"sha256:{index + 30:064x}",
+                }
+            )
+        validate_prerequisites(changed, require_ready=True, readiness_stage="bootstrap")
+        with self.assertRaisesRegex(ValueError, "prerequisite_gate_missing"):
+            validate_prerequisites(
+                changed, require_ready=True, readiness_stage="foundation"
+            )
+
     def test_verified_gate_requires_all_evidence(self) -> None:
         changed = copy.deepcopy(self.prerequisites)
         changed["gates"]["redHatEntitlement"]["status"] = "verified"
