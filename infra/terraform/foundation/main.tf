@@ -632,6 +632,14 @@ resource "google_kms_crypto_key_iam_member" "dependency_risk_signer" {
   member        = "serviceAccount:orchestra-dependency-risk@${var.services_project_id}.iam.gserviceaccount.com"
 }
 
+resource "google_kms_crypto_key_iam_member" "dependency_risk_collector_signer" {
+  provider = google.services
+
+  crypto_key_id = google_kms_crypto_key.dependency_risk_signing.id
+  role          = "roles/cloudkms.signerVerifier"
+  member        = "serviceAccount:orchestra-risk-collector@${var.services_project_id}.iam.gserviceaccount.com"
+}
+
 data "google_storage_project_service_account" "services" {
   provider = google.services
   project  = var.services_project_id
@@ -748,6 +756,14 @@ resource "google_storage_bucket_iam_member" "raw_evidence_writer" {
   bucket = google_storage_bucket.raw_evidence.name
   role   = "roles/storage.objectCreator"
   member = "serviceAccount:${google_service_account.evidence_writer.email}"
+}
+
+resource "google_storage_bucket_iam_member" "dependency_risk_collector_writer" {
+  provider = google.services
+
+  bucket = google_storage_bucket.raw_evidence.name
+  role   = "roles/storage.objectCreator"
+  member = "serviceAccount:orchestra-risk-collector@${var.services_project_id}.iam.gserviceaccount.com"
 }
 
 resource "google_service_account" "bastion" {

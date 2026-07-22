@@ -298,7 +298,7 @@ def validate_declared_implementation() -> None:
         "PROMOTE",
     )
     authority_references = (
-        "google_service_account.dependency_risk",
+        "google_service_account.dependency_risk.name",
         "orchestra-dependency-risk@",
     )
     allowed_iam_resources = {

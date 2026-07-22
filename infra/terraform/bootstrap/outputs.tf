@@ -22,6 +22,10 @@ output "dependency_risk_workload_identity_provider" {
   value = google_iam_workload_identity_pool_provider.dependency_risk.name
 }
 
+output "dependency_risk_collection_workload_identity_provider" {
+  value = google_iam_workload_identity_pool_provider.dependency_risk_collection.name
+}
+
 output "foundation_service_account" {
   value = google_service_account.foundation_executor.email
 }
@@ -32,6 +36,10 @@ output "foundation_plan_service_account" {
 
 output "dependency_risk_service_account" {
   value = google_service_account.dependency_risk.email
+}
+
+output "dependency_risk_collection_service_account" {
+  value = google_service_account.dependency_risk_collector.email
 }
 
 output "foundation_identity_contract" {
@@ -53,6 +61,22 @@ output "dependency_risk_identity_contract" {
     workflow_ref                         = local.dependency_risk_preflight_workflow_ref
     declared_project_roles               = []
     declared_evidence_bucket_write_grant = false
+    declared_artifact_mirror_write_grant = false
+    user_managed_key_resource_declared   = false
+  }
+}
+
+output "dependency_risk_collection_identity_contract" {
+  value = {
+    service_account                      = google_service_account.dependency_risk_collector.email
+    workload_identity_provider           = google_iam_workload_identity_pool_provider.dependency_risk_collection.name
+    environment                          = local.dependency_risk_collection_environment
+    workflow_ref                         = local.dependency_risk_collection_workflow_ref
+    declared_project_roles               = []
+    declared_raw_evidence_create_grant   = true
+    declared_raw_evidence_read_grant     = false
+    declared_raw_evidence_delete_grant   = false
+    declared_signed_evidence_write_grant = false
     declared_artifact_mirror_write_grant = false
     user_managed_key_resource_declared   = false
   }

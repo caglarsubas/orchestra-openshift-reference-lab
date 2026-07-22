@@ -28,9 +28,10 @@
    versioned CMEK state bucket, budget thresholds, WIF provider condition, and
    absence of service-account keys. The bootstrap also creates the separate
    `dependency-risk-preflight` provider and `orchestra-dependency-risk`
-   identity. Confirm its provider condition names only exact `main`,
-   `workflow_dispatch`, the protected preflight environment, and the exact
-   preflight workflow; confirm the identity has no project role.
+   identity, plus the `dependency-risk-collection` provider and
+   `orchestra-risk-collector` identity. Confirm each provider condition names
+   only exact `main`, `workflow_dispatch`, its own protected environment, and
+   its own exact workflow; confirm both identities have no project role.
 5. Configure the foundation GCS backend using the bootstrap outputs. Never
    migrate state to a local backend.
 6. Re-authenticate through WIF and prove the bootstrap credential is no longer
@@ -53,11 +54,14 @@
    public DNS zone has only its managed SOA/NS records, and the services-to-
    target DNS peering zone has no writable records.
 5. Verify the separate `dependency-risk-collection-signing` key uses
-   `ASYMMETRIC_SIGN` and `EC_SIGN_P256_SHA256`. Confirm the collector identity
-   has only `roles/cloudkms.signerVerifier` on that key and no evidence-bucket
-   or artifact-mirror grant. Record an exact enabled key version and have an
-   independent reviewer derive the public-key PEM digest before following the
-   protected preflight procedure in `docs/runbooks/dependency-risk-review.md`.
+   `ASYMMETRIC_SIGN` and `EC_SIGN_P256_SHA256`. Confirm the preflight identity
+   has only `roles/cloudkms.signerVerifier` on that key and no bucket or mirror
+   grant. Confirm the full-collection identity has the same key-level role and
+   only `roles/storage.objectCreator` on the restricted raw-evidence bucket,
+   with no read, delete, signed-evidence, mirror, or project grant. Record an
+   exact enabled key version and have an independent reviewer derive the
+   public-key PEM digest before following both protected procedures in
+   `docs/runbooks/dependency-risk-review.md`.
 6. Exercise backup/export access before considering the retention lock.
 7. In a separately approved change, set certification mode and the exact lock
    acknowledgement. Confirm the 400-day lock is irreversible before apply.

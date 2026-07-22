@@ -19,7 +19,11 @@ from typing import Any, NoReturn
 API_ROOT = "https://api.github.com"
 API_VERSION = "2026-03-10"
 GithubGetter = Callable[[str, str], Any]
-ENVIRONMENT_CONTRACTS = ("foundation-plan", "dependency-risk-preflight")
+ENVIRONMENT_CONTRACTS = (
+    "foundation-plan",
+    "dependency-risk-preflight",
+    "dependency-risk-collection",
+)
 
 
 def fail(code: str) -> NoReturn:
@@ -396,6 +400,21 @@ def load_expected_environment(contract: str) -> dict[str, Any]:
             )
         except ModuleNotFoundError:
             from dependency_risk_execution import load_contract, validate_authority
+
+        authority, release_set, risk_policy = load_contract()
+        validate_authority(authority, release_set, risk_policy)
+        return authority["federation"]
+    if contract == "dependency-risk-collection":
+        try:
+            from scripts.dependency_risk_collection_execution import (
+                load_contract,
+                validate_authority,
+            )
+        except ModuleNotFoundError:
+            from dependency_risk_collection_execution import (
+                load_contract,
+                validate_authority,
+            )
 
         authority, release_set, risk_policy = load_contract()
         validate_authority(authority, release_set, risk_policy)

@@ -12,15 +12,20 @@ The checked-in exception intake is deliberately empty, digest
 The preflight authority is locked separately in
 `config/dependency-risk-execution.lock.json`, digest
 `sha256:746304a45ba15385d629ee3ef5c7618e36980524ca4f73e024007e958925b679`.
+The full-collection and restricted raw-custody authority is locked in
+`config/dependency-risk-collection-execution.lock.json`, digest
+`sha256:120cb99523e13116473548ee6e34e1b0fd7f2fdce9ea98b2d22861697ab1c4b0`.
 
 ## Separation of duties
 
 Use distinct short-lived identities for preflight, full collection, exception
-request, security review, service-owner review, and mirroring. The source
-declares the preflight signer's only federation path as the exact preflight
-workflow, which contains no full-collection invocation. A later collection
-signer may attest its own collection but cannot request or approve an
-exception. The requestor and signed-runner
+request, security review, service-owner review, custody verification, and
+mirroring. The source declares the preflight signer's only federation path as
+the exact preflight workflow, which contains no full-collection invocation.
+The full-collection signer is bound to a different exact workflow and may only
+sign its collection and create objects in restricted raw custody. It cannot
+read/delete raw objects, write signed evidence, mirror, request an exception,
+or approve one. The requestor and signed-runner
 collector cannot approve the exception. The two reviewers must have distinct
 identity digests and roles:
 
@@ -91,6 +96,58 @@ Do not dispatch after the locked source-verification window expires. Renew and
 review that source observation first, which changes its digest and all bound
 contracts.
 
+## Configure the protected full-collection lane
+
+Configure this lane only after independently verifying the bootstrap and
+foundation resources used by preflight:
+
+1. Verify bootstrap outputs
+   `dependency_risk_collection_workload_identity_provider` and
+   `dependency_risk_collection_service_account`. They must name only the
+   `dependency-risk-collection` provider and `orchestra-risk-collector`
+   identity.
+2. Verify foundation output `dependency_risk_collection_contract` and the
+   live IAM APIs. The identity may have key-level
+   `roles/cloudkms.signerVerifier` and bucket-level
+   `roles/storage.objectCreator` only. Reject any project role, object read or
+   delete grant, signed-evidence grant, or mirror grant.
+3. Create GitHub environment
+   `reference-lab-dependency-risk-collection`, restricted to exact `main`.
+   Require a configured non-owner reviewer, prevent self-review, and disable
+   administrator bypass. Set
+   `DEPENDENCY_RISK_COLLECTION_REVIEW_GATE_CONFIGURED=true` only after a
+   second operator verifies these controls.
+4. Set `GCP_DEPENDENCY_RISK_COLLECTION_WIF_PROVIDER`,
+   `GCP_DEPENDENCY_RISK_COLLECTION_SERVICE_ACCOUNT`,
+   `GCP_SERVICES_PROJECT_ID`, and `GCP_RAW_EVIDENCE_BUCKET` from independently
+   observed live resources. Reuse the narrowly installed GitHub App secrets
+   from preflight; do not broaden its repository or permission scope.
+5. Bind the exact enabled KMS key version and reviewer-derived PEM digest to
+   the current environment approval. Never rerun a failed workflow attempt;
+   dispatch a new run and obtain a new approval.
+
+After a successful standalone preflight, dispatch the full lane from exact
+`main`:
+
+```bash
+revision="$(git rev-parse origin/main)"
+gh workflow run dependency-risk-collection.yml \
+  --ref main \
+  -f expected_main_sha="$revision" \
+  -f kms_key_version='<reviewed-version>' \
+  -f expected_signing_public_key_digest='sha256:<reviewed-pem-digest>' \
+  -f reason='Collect bounded dependency vulnerability and SPDX evidence'
+```
+
+The workflow repeats preflight and the full collection in the same approved
+attempt. It verifies the complete collection before uploading four
+generation-zero objects under a unique evidence prefix. The deterministic raw
+archive, KMS public key, and payload-free custody statement are uploaded first;
+the detached custody signature is the final completion marker. An absent
+signature means the prefix is incomplete. The collector cannot list the
+bucket, read back objects, or capture immutable object generations, so success
+still leaves `custodyVerified=false`.
+
 ## Collect raw evidence
 
 Run collection only in the exact published certification-runner image from
@@ -110,13 +167,14 @@ It refuses any externally supplied scanner policy environment. It downloads
 and hashes both frozen Trivy databases before scanning, then disables database
 updates for all eight scans.
 
-Use Workload Identity Federation to obtain a short-lived collector identity
-and Cloud KMS signing authority. Determine the approved public-key digest in a
-separate reviewer-controlled step. The key version must be enabled and use
-`EC_SIGN_P256_SHA256`. The pinned runner package is private, so also issue a
-short-lived source-registry credential with package-read access and place its
-Docker config under ignored `auth/` storage. The pull credential is consumed by
-Cosign, Trivy, and Syft and is never copied into evidence.
+The protected full-collection workflow is the supported execution path. The
+container command below is retained only to document the runner boundary and
+for controlled local rehearsal; it is not authorized for live publication.
+The workflow obtains a short-lived collector identity and Cloud KMS signing
+authority, and a separate reviewer supplies the approved public-key digest.
+The key version must be enabled and use `EC_SIGN_P256_SHA256`. The private
+runner receives a short-lived package-read credential consumed by Cosign,
+Trivy, and Syft and never copied into evidence.
 
 First run the launch preflight. It replays the runner and release attestations,
 checks the exact Trivy, Syft, Cosign, and gcloud versions, validates the source
@@ -154,12 +212,12 @@ docker run --rm --platform linux/amd64 \
 
 A successful preflight prints `collectionStarted=false` and every authorization
 claim as `false`; it is a readiness signal, not a stored certification artifact.
-The protected workflow cannot start collection and must never be edited merely
-to remove `--preflight-only`. A separate collection execution contract must
-bind its own exact workflow, approval, identity, output custody, and source
-window before an operator may invoke the same container without that flag. The
-runner entrypoint defaults to `orchestra-certification`, so any later approved
-collection invocation must retain the Bash entrypoint override shown above.
+The preflight workflow cannot start collection and must never be edited merely
+to remove `--preflight-only`. Only the separately protected
+`dependency-risk-collection.yml` contract may invoke the same container
+without that flag. The runner entrypoint defaults to
+`orchestra-certification`, so both controlled invocations retain an explicit
+Bash entrypoint override.
 
 The output directory must not already exist. The collector stages everything
 in a mode-`0700` sibling directory, writes files mode `0600`, and renames the
@@ -186,6 +244,14 @@ commit them.
 Collection must finish within six hours and inside the seven-day source
 observation window. A network, registry, scanner, or database error is an
 indeterminate collection failure, not a clean report.
+
+Before building a payload-free candidate, a separate read-only custody actor
+must list the exact four raw objects, record their immutable GCS generations,
+recompute their digests, verify the detached signature and KMS public-key
+binding, and attest that the signature object was the completion marker for
+that prefix. The collector's success log is not that attestation. The
+independent custody lane is not yet implemented, so no live raw prefix can
+currently advance to source admission.
 
 ## Build the payload-free candidate
 
