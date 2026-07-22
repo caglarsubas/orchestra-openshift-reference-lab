@@ -68,7 +68,7 @@ out of Git.
 
 The source-only candidate is bound by
 `config/dependency-gitops-candidate.lock.json`, digest
-`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It covers only the five chart packages whose operator/service images are fully
 inventoried:
 

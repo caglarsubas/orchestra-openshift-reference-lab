@@ -6,9 +6,9 @@ authorize mirroring, activate a dependency, or create campaign evidence.
 
 The locked policy is
 `config/dependency-risk-policy.lock.json`, digest
-`sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7`.
+`sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4`.
 The checked-in exception intake is deliberately empty, digest
-`sha256:8b1f8a6905f8927565ec13ea49ddd662939ae5ec3db7d82176e76fa4d4b7a4af`.
+`sha256:2231cf7c2f2dce5c1b35f402cdd193ce4268e1726f7ab3b27f3fd23b7bb9b70f`.
 
 ## Separation of duties
 
@@ -46,13 +46,18 @@ updates for all eight scans.
 
 Use Workload Identity Federation to obtain a short-lived collector identity
 and Cloud KMS signing authority. Determine the approved public-key digest in a
-separate reviewer-controlled step. The exact RC8 runner package is private, so
-also issue a short-lived source-registry credential with package-read access
-and place its Docker config under ignored `auth/` storage. The pull credential
-is consumed by Cosign, Trivy, and Syft and is never copied into evidence. Then
-launch the exact runner image with the repository and restricted release
-directory mounted. Its entrypoint defaults to `orchestra-certification`, so
-override the entrypoint to Bash when invoking the collector:
+separate reviewer-controlled step. The key version must be enabled and use
+`EC_SIGN_P256_SHA256`. The pinned runner package is private, so also issue a
+short-lived source-registry credential with package-read access and place its
+Docker config under ignored `auth/` storage. The pull credential is consumed by
+Cosign, Trivy, and Syft and is never copied into evidence.
+
+First run the launch preflight. It replays the runner and release attestations,
+checks the exact Trivy, Syft, Cosign, and gcloud versions, validates the source
+window and approved public key, and performs an ephemeral Cloud KMS sign plus
+local OpenSSL verification. It exits before scanner database downloads and
+removes its staging directory, challenge, and signature. It creates no report,
+authorization, or campaign evidence.
 
 ```bash
 runner="$(jq -r .certificationRunner.image config/cross-plane-release-set.lock.json)"
@@ -77,8 +82,16 @@ docker run --rm --platform linux/amd64 \
     --actor-identity-digest 'sha256:<collector-identity-digest>' \
     --platform-release-dir restricted/platform-release-rc10 \
     --signing-key 'gcpkms://projects/.../cryptoKeyVersions/...' \
-    --expected-signing-public-key-digest 'sha256:<approved-public-key-digest>'
+    --expected-signing-public-key-digest 'sha256:<approved-public-key-digest>' \
+    --preflight-only
 ```
+
+A successful preflight prints `collectionStarted=false` and every authorization
+claim as `false`; it is a readiness signal, not a stored certification artifact.
+Review that result, then rerun the same container
+command without `--preflight-only` to start collection. The runner entrypoint
+defaults to `orchestra-certification`, so both invocations must retain the Bash
+entrypoint override shown above.
 
 The output directory must not already exist. The collector stages everything
 in a mode-`0700` sibling directory, writes files mode `0600`, and renames the

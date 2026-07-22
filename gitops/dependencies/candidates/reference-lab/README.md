@@ -8,7 +8,7 @@ CD `Application`, `ApplicationSet`, Kubernetes `Secret`, or deployable YAML.
 The controlling lock is
 [`config/dependency-gitops-candidate.lock.json`](../../../../config/dependency-gitops-candidate.lock.json),
 canonical digest
-`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It binds the topology, release set, dependency BOM, source admission,
 signature observation, risk policy, and empty mirror intake.
 

@@ -29,6 +29,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Bounded source-signature observation | Yes | Yes | No | Partial | No |
 | Unsigned-source risk policy and strict contracts | Yes | Yes | No | No | No |
 | Signed-runner vulnerability/SBOM evidence bundle contract | Yes | Yes | No | No | No |
+| Signed-runner collection launch preflight | Yes | Yes | No | No | No |
 | Live signed-runner vulnerability/SBOM evidence | No | N/A | No | No | No |
 | Empty upstream-signature exception intake | Yes | Yes | No | No | No |
 | Reviewed upstream-signature exceptions | No | N/A | No | No | No |
@@ -75,10 +76,13 @@ seven-day, non-campaign workstation observation cryptographically verified
 three exact keyless subjects and found no attached signature for eight. It did
 not approve an exception or authorize mirroring; signed-runner replay remains
 required. A locked risk policy, strict JSON contracts, atomic eight-subject
-collector, detached Cloud KMS verification path, payload-free Trivy/SPDX
-evidence builder, and empty eight-subject exception intake are now declared and
-CI-validated. The collector also replays the published runner signature, SBOM
-attestation, release-manifest signature, and SLSA provenance before scanning.
+collector, fail-closed no-evidence launch preflight, detached Cloud KMS
+verification path, payload-free Trivy/SPDX evidence builder, and empty
+eight-subject exception intake are now declared and CI-validated. The preflight
+replays the published runner signature, SBOM attestation, release-manifest
+signature, and SLSA provenance, verifies exact tool versions, and proves an
+ephemeral Cloud KMS signing round trip before any scanner database download.
+It has not been run against live infrastructure.
 No live scan or human review is checked in, so no exception is approved. The
 mirror intake is intentionally empty. No destination mirror, lab
 signature, live identity, backup target, server-side dry run, or approval is
@@ -90,10 +94,11 @@ the Altinity mutable CRD hook, uses the chart-provided Vault Raft node identity,
 and requires external cert-manager issuance for the External Secrets webhook.
 CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
-The next dependency increment is execution of the live signed-runner
-collection with an approved short-lived identity and Cloud KMS key, followed
-by independent licence/risk reviews, source-replay aggregation, live Artifact
-Registry/Harbor receipts, and a new executable operator/service overlay.
+The next dependency increment is execution of the launch preflight and then the
+live signed-runner collection with an approved short-lived identity and Cloud
+KMS key, followed by independent licence/risk reviews, source-replay
+aggregation, live Artifact Registry/Harbor receipts, and a new executable
+operator/service overlay.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

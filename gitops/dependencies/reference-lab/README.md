@@ -36,7 +36,7 @@ The separate
 projects the five fully inventoried chart/image sets into offline
 values and records six blocked service-resource plans. Its controlling digest
 is
-`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It is not part of this Kustomization, contains no Application, and has no
 destination reference. Its existence does not remove this project's deny
 window.
