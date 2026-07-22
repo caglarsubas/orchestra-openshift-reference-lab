@@ -16,8 +16,14 @@ The bootstrap module separates two identities:
 Before the first run, a repository administrator must configure the
 `reference-lab-foundation-plan` environment outside Git:
 
-1. Restrict deployment branches to `main`.
-2. Require an independent reviewer and prevent self-review.
+1. Keep the repository private and use a GitHub plan that supports required
+   reviewers for private repositories. GitHub's
+   [environment availability matrix](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments)
+   currently reserves that control for Enterprise; making the lab repository
+   public is not an acceptable workaround.
+2. Add at least one non-owner collaborator with read access, restrict the exact
+   deployment branch to `main`, require that collaborator as reviewer, and
+   prevent self-review. Disable administrator bypass in the environment UI.
 3. Add the exact non-secret repository variables listed below.
 4. Add `LAB_FOUNDATION_PREREQUISITES_JSON` as an environment secret. It contains
    only the independently reviewed gate projection, never provider credentials.
@@ -25,8 +31,26 @@ Before the first run, a repository administrator must configure the
    verifies the protection rules. The variable is an operational interlock,
    not evidence that GitHub protection is configured.
 
-The repository currently has no such environment. Until it exists, the plan
-job is deliberately blocked before OIDC authentication.
+The repository currently has no such environment and only its owner is a
+collaborator. Until the account and reviewer prerequisites exist, the plan job
+is deliberately blocked before OIDC authentication.
+
+The workflow uses its ephemeral `GITHUB_TOKEN` with Actions-read permission to
+run `scripts/github_environment_contract.py`. The verifier reads the repository,
+environment, deployment-branch, and current workflow-run approval APIs and
+emits only identity digests and counts. It rejects owner review, self-review,
+review by the triggering actor, unconfigured approvers, rejected or ambiguous
+review history, duplicate reviewers, missing required-reviewer protection, and
+any branch pattern other than exact `main`. It accepts only workflow attempt
+one because GitHub's review-history response does not bind events to rerun
+attempts. GitHub documents the
+[approval-history endpoint](https://docs.github.com/en/rest/actions/workflow-runs#get-the-review-history-for-a-workflow-run)
+as requiring Actions-read permission.
+
+The read API does not expose the environment's administrator-bypass toggle.
+Disabling bypass is therefore a separately reviewed UI precondition. The
+current-run approval check still fails when no matching approval event exists;
+it must not be described as an API attestation of that toggle.
 
 ## Required variables
 
@@ -55,6 +79,8 @@ The WIF provider accepts a token only when all locked claims match:
 - `refs/heads/main` and `workflow_dispatch`.
 - Workflow ref `.github/workflows/foundation-plan.yml@refs/heads/main`.
 - Environment `reference-lab-foundation-plan`.
+- At least one non-owner `User` reviewer, `prevent_self_review=true`, and one
+  exact custom branch policy named `main`.
 
 Run the live prerequisite collector and obtain independent review of the WIF
 gate after bootstrap changes. A workflow file or Terraform plan is not proof
@@ -76,8 +102,10 @@ that the deployed provider has these restrictions.
 
 3. The protected-environment reviewer compares the revision, reason, gate
    projection, and requested variables before approving the job.
-4. The workflow validates the repository and the independently reviewed
-   `foundation` gate before requesting a GCP token.
+4. The workflow re-reads and validates the GitHub protection rules and binds a
+   single approved event for this run to a configured non-owner reviewer who
+   did not trigger the run. It then validates the repository and independently
+   reviewed `foundation` gate before requesting a GCP token.
 5. Terraform refreshes live state with `-lock=false`. This avoids granting the
    planner state-write authority; therefore the result is a preview and cannot
    be promoted into an apply artifact.
@@ -93,6 +121,12 @@ that the deployed provider has these restrictions.
   apply work begins.
 - Treat a state-read, API-read, environment, WIF, or prerequisite failure as a
   blocker. Do not broaden planner roles during the run.
+- Do not set the environment interlock when GitHub cannot return the required
+  reviewer and exact branch-policy state.
+- Do not continue when the current-run approval is absent, rejected, duplicated,
+  from the triggering actor, or from an identity outside the configured set.
+- Never rerun a failed or cancelled foundation-plan workflow. Start a new
+  `workflow_dispatch` so it receives a new run ID and independent review.
 - Never rerun against a different main revision using the previous reason or
   summary.
 - A successful preview does not authorize infrastructure changes. A future

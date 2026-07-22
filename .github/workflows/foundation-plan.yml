@@ -13,6 +13,7 @@ on:
         type: string
 
 permissions:
+  actions: read
   contents: read
   id-token: write
 
@@ -79,6 +80,20 @@ jobs:
         run: |
           python3 scripts/validate_repository.py
           python3 scripts/validate_prerequisite_policy.py
+
+      - name: Verify independent environment protection
+        env:
+          GITHUB_ENVIRONMENT_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ -n "$GITHUB_ENVIRONMENT_READ_TOKEN" ]]
+          printf '%s' "$GITHUB_ENVIRONMENT_READ_TOKEN" > "$RUNNER_TEMP/github-token"
+          python3 scripts/github_environment_contract.py verify \
+            --token-file "$RUNNER_TEMP/github-token" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-actor-id "$GITHUB_ACTOR_ID"
 
       - name: Validate independently reviewed foundation admission
         env:
@@ -172,6 +187,7 @@ jobs:
         if: always()
         run: |
           rm -f \
+            "$RUNNER_TEMP/github-token" \
             "$RUNNER_TEMP/prerequisites.json" \
             "$RUNNER_TEMP/foundation.tfplan" \
             "$RUNNER_TEMP/foundation-plan.json" \

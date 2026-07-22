@@ -9,9 +9,11 @@
 3. Two operators review project IDs, billing account, monthly budget, quota,
    DNS delegation, image pins, approved egress CIDRs, and the exact installer
    digest.
-4. The initial identity is short-lived and recorded by digest. No key file is
+4. A dedicated GCP organization or folder parent is visible to the bootstrap
+   identity. No-organization project creation is outside the locked profile.
+5. The initial identity is short-lived and recorded by digest. No key file is
    created or downloaded.
-5. The working directory is encrypted and excluded from backup/sync tools that
+6. The working directory is encrypted and excluded from backup/sync tools that
    are not approved for restricted material.
 
 ## Bootstrap apply

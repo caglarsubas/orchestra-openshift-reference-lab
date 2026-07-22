@@ -19,7 +19,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
 | DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
-| WIF | Exact private repository/owner IDs, plan workflow/environment restriction, planner binding, and no user-managed key |
+| WIF | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, plan workflow restriction, planner binding, and no user-managed key |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
 
@@ -43,7 +43,7 @@ as independent verification of its own outputs.
 
 The locked policy is
 `config/prerequisite-observation-policy.lock.json`; its canonical digest is
-`sha256:03aef37f64e0f0dd82b9aa3927914af2433952c5b69d4cea12b101d95811ae0c`.
+`sha256:c04c6038eba4facf57e2b6c7095be7a2e6fbfb9057695af4f6e05998ebfadafe`.
 It requires a maximum 30-minute read-only collection window and expires an
 observation after 24 hours.
 
@@ -78,6 +78,7 @@ python3 scripts/collect_prerequisite_observation.py \
   --pull-secret restricted/pull-secret.json \
   --installer-binary restricted/openshift-install \
   --installer-digest 'sha256:<officially-verified-binary-digest>' \
+  --github-token-file restricted/github-actions-read-token \
   --target-project-id '<dedicated-target-project>' \
   --services-project-id '<dedicated-services-project>' \
   --dns-managed-zone 'orchestra-ocp-lab-public' \
@@ -85,11 +86,12 @@ python3 scripts/collect_prerequisite_observation.py \
 ```
 
 The collector reads the pull secret only to validate required registry entries;
-it emits only a digest. GCP and DNS commands are read-only, and their raw output
-is reduced to policy facts before hashing. Runner verification uses the exact
-Sigstore publisher identity. Command failures produce typed blocker codes,
-the exact workflow SHA/ref/repository/trigger, and never raw provider errors in
-the report.
+it emits only a digest. The GitHub token must be a mode-`0600`, short-lived
+GitHub App or fine-grained token with Actions-read permission; it is never
+embedded in evidence. GCP, GitHub, and DNS requests are read-only, and their raw
+output is reduced to policy facts before hashing. Runner verification uses the
+exact Sigstore publisher identity. Command failures produce typed blocker codes
+and never raw provider errors in the report.
 
 The public zone is an explicit ownership/delegation gate, not the private
 cluster record authority. OpenShift `publish: Internal` creates and owns the
@@ -98,15 +100,20 @@ peering zone only resolves that namespace; it does not create or modify
 OpenShift records. See `docs/runbooks/dns-delegation.md` for the apply and
 independent verification sequence.
 
-The foundation WIF gate observes only the read-only planner identity. The
-apply-capable executor intentionally has no GitHub WIF binding. The collector
-requires the exact repository IDs, private visibility, `main` ref,
-`workflow_dispatch`, `foundation-plan.yml` workflow ref, protected-environment
-name, numeric principal-set binding, and absence of user-managed keys. GitHub
-environment protection is reviewed separately because the GCP provider sees
-the environment claim, not its reviewer configuration. The same observation
-also requires the planner's federated binding to be exact and proves that the
-apply executor has no federated principal or user-managed key.
+The foundation WIF gate has two required observations. The GitHub observation
+requires the exact private repository IDs, environment, non-owner reviewer,
+self-review prevention, and exact `main` deployment policy. The GCP observation
+requires the exact workflow/ref/event condition, numeric principal-set binding,
+and absence of user-managed keys. It also requires the planner's federated
+binding to be exact and proves that the apply executor has no federated
+principal or user-managed key.
+
+The standalone collector proves the environment configuration only because it
+is not executing inside an approved workflow run. The foundation-plan workflow
+adds a current-run check against GitHub's approval-history API and requires one
+approved event from a configured non-owner reviewer distinct from the workflow
+initiator. Neither path claims to attest the administrator-bypass UI setting,
+which remains an independently reviewed Enterprise-environment precondition.
 
 The Red Hat input is a payload-free external statement with exact product,
 OpenShift `4.20.27`, `linux/amd64`, active/expiry timestamps, and issuer/account
