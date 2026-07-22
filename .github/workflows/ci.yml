@@ -63,6 +63,9 @@ jobs:
       - name: Validate unsigned-source risk and exception intake
         run: python3 scripts/validate_dependency_risk_intake.py
 
+      - name: Validate blocked dependency GitOps candidate
+        run: python3 scripts/validate_dependency_gitops_candidate.py
+
       - name: Validate staged prerequisite observation policy
         run: python3 scripts/validate_prerequisite_policy.py
 

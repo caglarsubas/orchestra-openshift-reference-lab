@@ -35,9 +35,10 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Empty mirror-receipt intake contract | Yes | Yes | No | No | No |
 | Dependency topology/security/backup contracts | Yes | Yes | No | No | No |
 | Dependency GitOps namespace/default-deny/project floor | Yes | Yes | No | No | No |
+| Source-only dependency chart values and service plans | Yes | Yes | No | No | No |
 | Dependency operator Applications and admitted image locks | No | N/A | No | No | No |
-| Dependency service CRs/values | No | N/A | No | No | No |
-| Vault/ESO/Harbor/Keycloak | No | N/A | No | No | No |
+| Admitted dependency service CRs/values | No | N/A | No | No | No |
+| Admitted/deployed Vault/ESO/Harbor/Keycloak | No | N/A | No | No | No |
 | Product GitOps applications | Yes | Yes | No | No | No |
 | Runtime/model Secret-backed server TLS declarations | Yes | Yes | No | No | No |
 | Platform router-to-pod TLS | Yes | Yes | No | No | No |
@@ -83,11 +84,16 @@ mirror intake is intentionally empty. No destination mirror, lab
 signature, live identity, backup target, server-side dry run, or approval is
 claimed. ClickHouse backup selection and compatibility proofs remain explicit
 blockers. External Secrets is correctly assigned to OpenShift while Vault
-remains in the GKE services plane. The next dependency increment is execution
-of the live signed-runner collection with an approved short-lived identity and
-Cloud KMS key, followed by independent licence/risk reviews, source-replay
-aggregation, live Artifact Registry/Harbor receipts, and executable
-operator/service overlays.
+remains in the GKE services plane. A separate source-only candidate now binds
+five exact chart/image projections and six blocked service plans. It disables
+the Altinity mutable CRD hook, uses the chart-provided Vault Raft node identity,
+and requires external cert-manager issuance for the External Secrets webhook.
+CI proves it contains no deployable manifest or destination reference and is
+not reachable from the active Kustomization. This is not an admitted overlay.
+The next dependency increment is execution of the live signed-runner
+collection with an approved short-lived identity and Cloud KMS key, followed
+by independent licence/risk reviews, source-replay aggregation, live Artifact
+Registry/Harbor receipts, and a new executable operator/service overlay.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

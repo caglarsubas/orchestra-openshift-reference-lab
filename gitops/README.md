@@ -20,3 +20,9 @@ services plane. It currently creates only namespaces, default-deny policies,
 and a continuously denied AppProject. It contains no dependency Applications
 until a complete image/mirror/Secret admission lock is reviewed. Services-plane
 Argo CD cannot reconcile OpenShift product namespaces.
+
+`dependencies/candidates/reference-lab` is a separate, source-only review
+surface. It contains digest-bound values for five source-resolved charts and
+six blocked service-resource plans, but no Kustomization or deployable YAML.
+CI proves that the active overlay does not reference it. Offline Helm output
+belongs only under ignored `restricted/` storage and may not be applied.

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.dependency-service-overlays.v1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "overlays": [
+    {
+      "id": "postgresql-platform",
+      "applicationId": "cloudnative-pg-operator",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-postgres",
+      "resourceKinds": [
+        "Cluster",
+        "ObjectStore",
+        "ScheduledBackup"
+      ],
+      "configurationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "postgresql-infrastructure",
+      "applicationId": "cloudnative-pg-operator",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-postgres",
+      "resourceKinds": [
+        "Cluster",
+        "ObjectStore",
+        "ScheduledBackup"
+      ],
+      "configurationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "clickhouse-and-keeper",
+      "applicationId": "clickhouse-operator",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-clickhouse",
+      "resourceKinds": [
+        "ClickHouseInstallation",
+        "ClickHouseKeeperInstallation"
+      ],
+      "configurationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "CLICKHOUSE_BACKUP_CONTRACT_PENDING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "jetstream",
+      "applicationId": "jetstream",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-jetstream",
+      "resourceKinds": [
+        "StatefulSet",
+        "PodDisruptionBudget",
+        "Service"
+      ],
+      "configurationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_IDENTITY_BINDING_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "vault",
+      "applicationId": "vault",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-vault",
+      "resourceKinds": [
+        "StatefulSet",
+        "PodDisruptionBudget",
+        "Service"
+      ],
+      "configurationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "LIVE_KMS_BINDING_MISSING",
+        "LIVE_PKI_BINDING_MISSING",
+        "PRODUCT_COMPATIBILITY_PROOF_MISSING"
+      ]
+    },
+    {
+      "id": "external-secrets",
+      "applicationId": "external-secrets",
+      "targetCluster": "openshift",
+      "namespace": "orchestra-external-secrets",
+      "resourceKinds": [
+        "Deployment",
+        "CustomResourceDefinition",
+        "ValidatingWebhookConfiguration"
+      ],
+      "configurationState": "blocked",
+      "reasonCodes": [
+        "DEPENDENCY_MIRROR_ADMISSION_MISSING",
+        "VAULT_NOT_READY",
+        "LIVE_PKI_BINDING_MISSING",
+        "OPENSHIFT_SERVER_DRY_RUN_MISSING"
+      ]
+    }
+  ],
+  "claim": {
+    "rendered": false,
+    "serverDryRunPassed": false,
+    "applicationsEmitted": false,
+    "activated": false,
+    "applied": false,
+    "campaignEvidence": false
+  }
+}
