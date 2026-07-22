@@ -72,7 +72,7 @@ Every campaign binds both digests so an artifact update cannot masquerade as a
 topology change or combine evidence from different release sets.
 
 The current canonical release-set digest is
-`sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428`.
+`sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe`.
 It records published artifacts only; it is not deployment, drill, soak, or
 verification evidence.
 
@@ -102,14 +102,14 @@ intake digest is
 No destination, receipt, lab signature, pull proof, or approval is populated.
 
 The unsigned-source risk-policy digest is
-`sha256:819211d44fb510a0598135f5abb406cf53da579cd5537faf3d0b867d7aafc298`.
+`sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7`.
 It requires the release-set-bound signed runner, exact Trivy and Syft versions,
 frozen vulnerability databases, Cloud KMS detached collection evidence, and
 SPDX inventory. It blocks critical, high, and unknown-severity findings,
 requires human licence and risk review, and enforces two independent approval
 roles with a maximum 30-day exception lifetime. The empty signature-exception
 intake digest is
-`sha256:95f2f3cfe9852b5f17c208a54431ee453373a98c5f70623603a9f3522db5d9bf`.
+`sha256:8b1f8a6905f8927565ec13ea49ddd662939ae5ec3db7d82176e76fa4d4b7a4af`.
 It contains all eight unsigned subjects but zero evidence bundles and zero
 approvals. Even a fully approved exception set cannot authorize source
 admission or mirroring without the separate signed-runner source replay and

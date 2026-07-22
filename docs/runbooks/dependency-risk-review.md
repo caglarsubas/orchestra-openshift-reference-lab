@@ -6,9 +6,9 @@ authorize mirroring, activate a dependency, or create campaign evidence.
 
 The locked policy is
 `config/dependency-risk-policy.lock.json`, digest
-`sha256:819211d44fb510a0598135f5abb406cf53da579cd5537faf3d0b867d7aafc298`.
+`sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7`.
 The checked-in exception intake is deliberately empty, digest
-`sha256:95f2f3cfe9852b5f17c208a54431ee453373a98c5f70623603a9f3522db5d9bf`.
+`sha256:8b1f8a6905f8927565ec13ea49ddd662939ae5ec3db7d82176e76fa4d4b7a4af`.
 
 ## Separation of duties
 
@@ -75,7 +75,7 @@ docker run --rm --platform linux/amd64 \
     --output-dir restricted/dependency-risk-collection-<run-id> \
     --evidence-id orchestra-dependency-risk-evidence-<run-id> \
     --actor-identity-digest 'sha256:<collector-identity-digest>' \
-    --platform-release-dir restricted/platform-release-rc8 \
+    --platform-release-dir restricted/platform-release-rc10 \
     --signing-key 'gcpkms://projects/.../cryptoKeyVersions/...' \
     --expected-signing-public-key-digest 'sha256:<approved-public-key-digest>'
 ```

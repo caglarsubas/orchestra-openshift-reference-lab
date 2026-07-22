@@ -40,10 +40,10 @@ RELEASE_SET = ROOT / "config" / "cross-plane-release-set.lock.json"
 COLLECTOR_SCRIPT = ROOT / "scripts" / "collect_dependency_risk_evidence.sh"
 EXCEPTION_TEMPLATE = ROOT / "config" / "dependency-signature-exceptions.example.json"
 EXPECTED_RISK_POLICY_DIGEST = (
-    "sha256:819211d44fb510a0598135f5abb406cf53da579cd5537faf3d0b867d7aafc298"
+    "sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7"
 )
 EXPECTED_EXCEPTION_TEMPLATE_DIGEST = (
-    "sha256:95f2f3cfe9852b5f17c208a54431ee453373a98c5f70623603a9f3522db5d9bf"
+    "sha256:8b1f8a6905f8927565ec13ea49ddd662939ae5ec3db7d82176e76fa4d4b7a4af"
 )
 SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN")
 BLOCKING_SEVERITIES = ("CRITICAL", "HIGH", "UNKNOWN")

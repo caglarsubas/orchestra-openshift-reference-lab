@@ -43,7 +43,7 @@ as independent verification of its own outputs.
 
 The locked policy is
 `config/prerequisite-observation-policy.lock.json`; its canonical digest is
-`sha256:c04c6038eba4facf57e2b6c7095be7a2e6fbfb9057695af4f6e05998ebfadafe`.
+`sha256:496471c4c7d35fba78c6e37acf82388099bc01b3485f9972d92056ab729aefda`.
 It requires a maximum 30-minute read-only collection window and expires an
 observation after 24 hours.
 
@@ -67,8 +67,8 @@ requires Linux AMD64, the exact in-image toolchain-lock digest, all read-only
 probe commands, and a passing `orchestra-certification self-test`:
 
 ```bash
-export ORCHESTRA_CERTIFICATION_RUNNER_IMAGE='ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8'
-export ORCHESTRA_CERTIFICATION_RUNNER_TOOLCHAIN_DIGEST='sha256:b6e3a4e11f5e0a5421c5007c132fba3bdd3b72ad620ed07f813b8c7677b0b34e'
+export ORCHESTRA_CERTIFICATION_RUNNER_IMAGE='ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:0009128ccbb53b9e376f74e7a6110ab6d2316be392be825d938705b88488f061'
+export ORCHESTRA_CERTIFICATION_RUNNER_TOOLCHAIN_DIGEST='sha256:7dc16baeb7c7a5dcfb0fb360f748b190d0e042f1bd9cf5843e1b75e3546a9593'
 
 python3 scripts/collect_prerequisite_observation.py \
   --observation-id orchestra-prerequisite-observation-live.1 \

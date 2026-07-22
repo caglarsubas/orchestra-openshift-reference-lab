@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "orchestra.cross-plane.release-set.v1",
-  "releaseSetId": "orchestra-reference-lab-2026-07-22-rc8-runtime0183-model0110",
-  "createdAt": "2026-07-22T05:36:49Z",
+  "releaseSetId": "orchestra-reference-lab-2026-07-22-rc10-runtime0183-model0110",
+  "createdAt": "2026-07-22T15:25:05Z",
   "profile": {
     "id": "orchestra-ocp-4.20-amd64-v1",
     "digest": "sha256:6ff6819336b882180565a0a07049e8251faae0ab58e7ed4cef838700956b1d80"
@@ -14,28 +14,28 @@
   "planes": [
     {
       "plane": "platform",
-      "release": "platform-v0.1.0-rc.8",
+      "release": "platform-v0.1.0-rc.10",
       "source": {
         "repository": "caglarsubas/agent-hook-v2",
-        "revision": "188283376af4e3337f106fb58c5077ff9a6e774d"
+        "revision": "a6eb8a98051197722cd338c76a3e4d29d5a51c87"
       },
-      "deploymentImage": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:8e714a264d3292f4296398dabe900425b63ee745357c5029c4c808c839268b18",
+      "deploymentImage": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2",
       "subjects": [
         {
           "role": "platform-image-ubi9",
-          "ref": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:8e714a264d3292f4296398dabe900425b63ee745357c5029c4c808c839268b18"
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2"
         },
         {
           "role": "tools-image-ubi9",
-          "ref": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:7da2df9a9c71b95a2d56ab44c4f94fff2a66acd1e4102a8cafeaca2017ed586d"
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:58acc61dae319e9460d16612a347b97e708a6695c7e9d1e45db2548a9b180ce4"
         },
         {
           "role": "certification-runner-image-ubi9",
-          "ref": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8"
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:0009128ccbb53b9e376f74e7a6110ab6d2316be392be825d938705b88488f061"
         },
         {
           "role": "helm-chart",
-          "ref": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa@sha256:c07c5084b74048b94dee758d60bcb5054a382c347ee506077355080a4b8756f2"
+          "ref": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa@sha256:0057f4760420ede0d707a52f50beb1551d68ffbd9ad39cb73ef7a69e372ae7aa"
         }
       ]
     },
@@ -79,13 +79,13 @@
     }
   ],
   "certificationRunner": {
-    "release": "platform-v0.1.0-rc.8",
+    "release": "platform-v0.1.0-rc.10",
     "source": {
       "repository": "caglarsubas/agent-hook-v2",
-      "revision": "188283376af4e3337f106fb58c5077ff9a6e774d"
+      "revision": "a6eb8a98051197722cd338c76a3e4d29d5a51c87"
     },
-    "image": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8",
-    "toolchainDigest": "sha256:b6e3a4e11f5e0a5421c5007c132fba3bdd3b72ad620ed07f813b8c7677b0b34e",
+    "image": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:0009128ccbb53b9e376f74e7a6110ab6d2316be392be825d938705b88488f061",
+    "toolchainDigest": "sha256:7dc16baeb7c7a5dcfb0fb360f748b190d0e042f1bd9cf5843e1b75e3546a9593",
     "baseImage": "ubi9",
     "architecture": "linux/amd64"
   }

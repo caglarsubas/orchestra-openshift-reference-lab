@@ -39,6 +39,27 @@
       "sha256": "6cef9a7f37220d9067eaf9cfaaa2fce986e9f320a8d42cbc36658c99af78ea04"
     }
   },
+  "capabilities": {
+    "schemaVersion": 1,
+    "contract": "orchestra.openshift.certification-probes.v1",
+    "commands": [
+      "campaign.create",
+      "campaign.verify",
+      "campaign.close",
+      "reference-lab.schemas",
+      "reference-lab.assess",
+      "reference-lab.finalize",
+      "reference-lab.verify",
+      "openshift.preflight",
+      "openshift.target-intake",
+      "openshift.observe-deployment",
+      "openshift.drill-pod-recovery",
+      "openshift.drill-worker-drain",
+      "openshift.observe-worker-outage",
+      "openshift.secret-rotation.capture",
+      "openshift.secret-rotation.verify"
+    ]
+  },
   "nodePackages": {
     "@esbuild/linux-x64": "0.28.1",
     "ajv": "8.18.0",

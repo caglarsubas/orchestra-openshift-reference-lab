@@ -1,9 +1,30 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import unittest
 
 from scripts.validate_release_set import PROFILE_DIGEST, validate_release_set
 from scripts.validate_repository import ROOT, load_json
+
+
+PROBE_COMMANDS = [
+    "campaign.create",
+    "campaign.verify",
+    "campaign.close",
+    "reference-lab.schemas",
+    "reference-lab.assess",
+    "reference-lab.finalize",
+    "reference-lab.verify",
+    "openshift.preflight",
+    "openshift.target-intake",
+    "openshift.observe-deployment",
+    "openshift.drill-pod-recovery",
+    "openshift.drill-worker-drain",
+    "openshift.observe-worker-outage",
+    "openshift.secret-rotation.capture",
+    "openshift.secret-rotation.verify",
+]
 
 
 def digest(character: str) -> str:
@@ -23,7 +44,7 @@ def release_set() -> dict:
     return {
         "schemaVersion": 1,
         "kind": "orchestra.cross-plane.release-set.v1",
-        "releaseSetId": "orchestra-reference-lab-2026.07.22-rc8",
+        "releaseSetId": "orchestra-reference-lab-2026.07.22-rc10",
         "createdAt": "2026-07-21T07:30:00Z",
         "profile": {
             "id": "orchestra-ocp-4.20-amd64-v1",
@@ -36,7 +57,7 @@ def release_set() -> dict:
         "planes": [
             {
                 "plane": "platform",
-                "release": "platform-v0.1.0-rc.8",
+                "release": "platform-v0.1.0-rc.10",
                 "source": {
                     "repository": "caglarsubas/agent-hook-v2",
                     "revision": revisions["platform"],
@@ -80,7 +101,7 @@ def release_set() -> dict:
             },
         ],
         "certificationRunner": {
-            "release": "platform-v0.1.0-rc.8",
+            "release": "platform-v0.1.0-rc.10",
             "source": {
                 "repository": "caglarsubas/agent-hook-v2",
                 "revision": revisions["platform"],
@@ -100,12 +121,37 @@ class ReleaseSetTests(unittest.TestCase):
         )
         self.assertEqual(
             result,
-            "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428",
+            "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
         )
 
     def test_valid_release_set_is_canonically_bound(self) -> None:
         result = validate_release_set(release_set())
         self.assertRegex(result, r"^sha256:[a-f0-9]{64}$")
+
+    def test_runner_toolchain_is_digest_bound_to_the_probe_contract(self) -> None:
+        current = load_json(ROOT / "config" / "cross-plane-release-set.lock.json")
+        path = (
+            ROOT
+            / "tests"
+            / "fixtures"
+            / "platform-rc10-certification-runner-toolchain-lock.json"
+        )
+        raw = path.read_bytes()
+        toolchain = json.loads(raw)
+        self.assertEqual(
+            f"sha256:{hashlib.sha256(raw).hexdigest()}",
+            current["certificationRunner"]["toolchainDigest"],
+        )
+        self.assertEqual(toolchain["architecture"], "linux/amd64")
+        self.assertEqual(toolchain["tools"]["oc"]["version"], "4.20.27")
+        self.assertEqual(
+            toolchain["capabilities"],
+            {
+                "schemaVersion": 1,
+                "contract": "orchestra.openshift.certification-probes.v1",
+                "commands": PROBE_COMMANDS,
+            },
+        )
 
     def test_mutable_deployment_tag_is_rejected(self) -> None:
         changed = release_set()

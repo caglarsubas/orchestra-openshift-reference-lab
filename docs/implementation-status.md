@@ -51,14 +51,22 @@ States are recorded independently. `declared` or `CI-validated` never implies
 
 The platform-owned certification intake now pins the exact policy, strict
 schema bundle, and fixture bytes from platform release
-`platform-v0.1.0-rc.8` at revision
-`188283376af4e3337f106fb58c5077ff9a6e774d`. CI validates their raw and
+`platform-v0.1.0-rc.10` at revision
+`a6eb8a98051197722cd338c76a3e4d29d5a51c87`. CI validates their raw and
 canonical digests, the live policy's 18 evidence slots, schema strictness,
 release/topology/dependency bindings, bounded BOM claims, and the fixture's
 `fixture/simulated` isolation. An operator command additionally replays the
 pinned Git objects from an authorized platform checkout. This is source-only
 contract intake: no live campaign has started, no evidence slot is populated,
 and no verification or certification claim changes.
+
+The pinned runner toolchain now binds the
+`orchestra.openshift.certification-probes.v1` contract and its 15 exact
+commands, including preflight, target intake, deployment observation, pod and
+worker drills, outage observation, and secret-rotation capture/verification.
+CI checks the released toolchain bytes and command inventory. Live OCI
+signature replay, mirroring, admission, and runner execution remain required
+before those commands can produce reference-lab evidence.
 
 The dependency source catalog, fail-closed GitOps floor, eleven exact AMD64
 source image identities, and six detailed service contracts are declared. A
