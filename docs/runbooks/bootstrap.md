@@ -36,9 +36,10 @@
 
 1. Pin immutable bastion/probe OS images and probe container image.
 2. Review every egress CIDR and its business purpose. `0.0.0.0/0` is rejected.
-3. Run a non-certification plan with
-   `certification_mode=false` and
-   `lock_signed_evidence_bucket=false`.
+3. Configure the independently protected GitHub environment, then follow
+   `docs/runbooks/foundation-plan.md`. The plan identity must remain read-only,
+   use `certification_mode=false` and `lock_signed_evidence_bucket=false`, and
+   must not produce an apply artifact.
 4. Apply the reviewed plan, then prove no VM has an external IP, both flow-log
    sinks receive traffic, the two probes are in distinct zones, GKE has
    exactly three standard nodes, the immutable `orchestra-bootstrap` Artifact
@@ -74,6 +75,8 @@
 
 - Never rerun an apply blindly. Capture state serial, plan digest, actor, and
   provider error first.
+- Never grant the read-only planner object-write, project mutation, or apply
+  permissions to work around a failed preview.
 - If a partial apply affects routing, IAM, KMS, or retention, stop and obtain
   security review before repair.
 - A bootstrap or foundation apply is infrastructure evidence only. It cannot

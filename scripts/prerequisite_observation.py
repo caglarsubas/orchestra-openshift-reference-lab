@@ -25,7 +25,7 @@ TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:0d6cd254a9b1823a3c693bcd2cd012af779484844756032ff1d03ed69aeb52f4"
+    "sha256:03aef37f64e0f0dd82b9aa3927914af2433952c5b69d4cea12b101d95811ae0c"
 )
 OBSERVATION_ID = re.compile(r"^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$")
 REASON_CODE = re.compile(r"^[A-Z][A-Z0-9_]+$")
@@ -286,18 +286,49 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
             "poolId",
             "providerId",
             "serviceAccountId",
+            "executorServiceAccountId",
+            "executorFederated",
             "issuerUri",
             "repository",
+            "repositoryId",
+            "repositoryOwnerId",
+            "repositoryVisibility",
+            "workflowRef",
+            "environment",
             "attributeCondition",
         },
         "prerequisite_observation_policy_wif_invalid",
     )
-    if (
-        wif["issuerUri"] != "https://token.actions.githubusercontent.com"
-        or wif["repository"] != "caglarsubas/orchestra-openshift-reference-lab"
-        or "refs/heads/main" not in wif["attributeCondition"]
-        or "workflow_dispatch" not in wif["attributeCondition"]
-    ):
+    if wif != {
+        "poolId": "orchestra-lab-github",
+        "providerId": "github",
+        "serviceAccountId": "orchestra-lab-foundation-plan",
+        "executorServiceAccountId": "orchestra-lab-foundation",
+        "executorFederated": False,
+        "issuerUri": "https://token.actions.githubusercontent.com",
+        "repository": "caglarsubas/orchestra-openshift-reference-lab",
+        "repositoryId": "1307302690",
+        "repositoryOwnerId": "37515097",
+        "repositoryVisibility": "private",
+        "workflowRef": (
+            "caglarsubas/orchestra-openshift-reference-lab/"
+            ".github/workflows/foundation-plan.yml@refs/heads/main"
+        ),
+        "environment": "reference-lab-foundation-plan",
+        "attributeCondition": (
+            "assertion.repository == "
+            "'caglarsubas/orchestra-openshift-reference-lab' && "
+            "assertion.repository_id == '1307302690' && "
+            "assertion.repository_owner_id == '37515097' && "
+            "assertion.repository_visibility == 'private' && "
+            "assertion.ref == 'refs/heads/main' && "
+            "assertion.event_name == 'workflow_dispatch' && "
+            "assertion.workflow_ref == "
+            "'caglarsubas/orchestra-openshift-reference-lab/"
+            ".github/workflows/foundation-plan.yml@refs/heads/main' && "
+            "assertion.environment == 'reference-lab-foundation-plan'"
+        ),
+    }:
         fail("prerequisite_observation_policy_wif_invalid")
     if value["dns"] != {
         "managedZoneName": "orchestra-ocp-lab-public",

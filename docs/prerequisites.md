@@ -19,7 +19,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
 | DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
-| WIF | GitHub/environment subject restriction, expected binding, and no user-managed key |
+| WIF | Exact private repository/owner IDs, plan workflow/environment restriction, planner binding, and no user-managed key |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
 
@@ -43,7 +43,7 @@ as independent verification of its own outputs.
 
 The locked policy is
 `config/prerequisite-observation-policy.lock.json`; its canonical digest is
-`sha256:0d6cd254a9b1823a3c693bcd2cd012af779484844756032ff1d03ed69aeb52f4`.
+`sha256:03aef37f64e0f0dd82b9aa3927914af2433952c5b69d4cea12b101d95811ae0c`.
 It requires a maximum 30-minute read-only collection window and expires an
 observation after 24 hours.
 
@@ -97,6 +97,16 @@ private cluster namespace in the target VPC. The foundation's services-plane
 peering zone only resolves that namespace; it does not create or modify
 OpenShift records. See `docs/runbooks/dns-delegation.md` for the apply and
 independent verification sequence.
+
+The foundation WIF gate observes only the read-only planner identity. The
+apply-capable executor intentionally has no GitHub WIF binding. The collector
+requires the exact repository IDs, private visibility, `main` ref,
+`workflow_dispatch`, `foundation-plan.yml` workflow ref, protected-environment
+name, numeric principal-set binding, and absence of user-managed keys. GitHub
+environment protection is reviewed separately because the GCP provider sees
+the environment claim, not its reviewer configuration. The same observation
+also requires the planner's federated binding to be exact and proves that the
+apply executor has no federated principal or user-managed key.
 
 The Red Hat input is a payload-free external statement with exact product,
 OpenShift `4.20.27`, `linux/amd64`, active/expiry timestamps, and issuer/account

@@ -8,6 +8,7 @@ authorization digest, independent timing, and cleanup verification.
 |---|---|
 | Prerequisite verification | Implemented in `docs/prerequisites.md` |
 | Project/state bootstrap | Procedure implemented; live rehearsal pending |
+| Read-only foundation plan | Workflow and payload-free summary implemented; protected GitHub environment and live run pending |
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
 | Split-horizon DNS and delegation | Procedure and Terraform contract implemented; live delegation pending |
 | Private OpenShift installation | Template delivered; live procedure pending gates |

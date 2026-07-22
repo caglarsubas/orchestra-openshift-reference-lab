@@ -362,6 +362,39 @@ def validate_workflow_pins() -> None:
                 fail(f"workflow_action_not_pinned:{workflow.name}:{line_number}")
 
 
+def validate_foundation_plan_workflow() -> None:
+    path = ROOT / ".github" / "workflows" / "foundation-plan.yml"
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError as error:
+        fail(f"foundation_plan_workflow_missing:{error}")
+    required = (
+        "workflow_dispatch:",
+        "expected_main_sha:",
+        "id-token: write",
+        "if: github.ref == 'refs/heads/main'",
+        "environment: reference-lab-foundation-plan",
+        "FOUNDATION_PLAN_REVIEW_GATE_CONFIGURED",
+        "GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT",
+        "--readiness-stage foundation",
+        "-lock=false",
+        "--execution-mode live",
+        "foundation-plan.log",
+        "foundation-plan-summary.json",
+    )
+    if any(fragment not in content for fragment in required):
+        fail("foundation_plan_workflow_contract_invalid")
+    forbidden = (
+        "terraform apply",
+        "-lock=true",
+        "GCP_FOUNDATION_SERVICE_ACCOUNT",
+        "path: ${{ runner.temp }}/foundation.tfplan",
+        "path: ${{ runner.temp }}/foundation-plan.json",
+    )
+    if any(fragment in content for fragment in forbidden):
+        fail("foundation_plan_workflow_authority_invalid")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prerequisites", type=Path)
@@ -384,6 +417,7 @@ def main(argv: list[str] | None = None) -> int:
         fail("repository_policy_claim_mismatch")
     validate_repository_safety(policy)
     validate_workflow_pins()
+    validate_foundation_plan_workflow()
     validate_prerequisites(
         load_json(args.prerequisites.resolve())
         if args.prerequisites

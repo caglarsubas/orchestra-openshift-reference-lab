@@ -21,3 +21,18 @@ output "workload_identity_provider" {
 output "foundation_service_account" {
   value = google_service_account.foundation_executor.email
 }
+
+output "foundation_plan_service_account" {
+  value = google_service_account.foundation_planner.email
+}
+
+output "foundation_identity_contract" {
+  value = {
+    planner_service_account  = google_service_account.foundation_planner.email
+    planner_environment      = local.foundation_plan_environment
+    planner_workflow_ref     = local.foundation_plan_workflow_ref
+    planner_state_access     = "read-only-without-lock"
+    executor_service_account = google_service_account.foundation_executor.email
+    executor_federated       = false
+  }
+}

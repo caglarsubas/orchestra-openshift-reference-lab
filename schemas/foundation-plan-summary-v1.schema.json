@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/foundation-plan-summary-v1.schema.json",
+  "title": "Orchestra reference-lab foundation plan summary v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "source",
+    "terraform",
+    "createdAt",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.reference-lab.foundation-plan-summary.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"enum": ["fixture", "vendor-reference-lab"]},
+    "executionMode": {"enum": ["simulated", "live"]},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "releaseSetDigest",
+        "policyDigest",
+        "prerequisiteProjectionDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "policyDigest": {"$ref": "#/$defs/digest"},
+        "prerequisiteProjectionDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "revision",
+        "ref",
+        "workflowRef",
+        "environment",
+        "workflowRunId",
+        "workflowRunAttempt",
+        "actorIdentityDigest",
+        "authorizationReasonDigest"
+      ],
+      "properties": {
+        "repository": {"const": "caglarsubas/orchestra-openshift-reference-lab"},
+        "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "ref": {"const": "refs/heads/main"},
+        "workflowRef": {
+          "const": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main"
+        },
+        "environment": {"const": "reference-lab-foundation-plan"},
+        "workflowRunId": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "workflowRunAttempt": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "authorizationReasonDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "terraform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "formatVersion",
+        "planDigest",
+        "refreshEnabled",
+        "stateLockUsed",
+        "resourceChanges",
+        "actionCounts"
+      ],
+      "properties": {
+        "version": {"const": "1.14.6"},
+        "formatVersion": {"type": "string", "minLength": 1},
+        "planDigest": {"$ref": "#/$defs/digest"},
+        "refreshEnabled": {"const": true},
+        "stateLockUsed": {"const": false},
+        "resourceChanges": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/resourceChange"}
+        },
+        "actionCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["noOp", "create", "read", "update", "delete", "replace"],
+          "properties": {
+            "noOp": {"type": "integer", "minimum": 0},
+            "create": {"type": "integer", "minimum": 0},
+            "read": {"type": "integer", "minimum": 0},
+            "update": {"type": "integer", "minimum": 0},
+            "delete": {"type": "integer", "minimum": 0},
+            "replace": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "createdAt": {"$ref": "#/$defs/timestamp"},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readOnlyPlan",
+        "applyAuthorized",
+        "infrastructureApplied",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "readOnlyPlan": {"const": true},
+        "applyAuthorized": {"const": false},
+        "infrastructureApplied": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"executionMode": {"const": "live"}}},
+      "then": {"properties": {"targetClass": {"const": "vendor-reference-lab"}}}
+    },
+    {
+      "if": {"properties": {"executionMode": {"const": "simulated"}}},
+      "then": {"properties": {"targetClass": {"const": "fixture"}}}
+    }
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "safeResource": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9_.:/@\\-\\[\\]\\\"]+$"
+    },
+    "resourceChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["addressDigest", "mode", "type", "provider", "actions", "category"],
+      "properties": {
+        "addressDigest": {"$ref": "#/$defs/digest"},
+        "mode": {"enum": ["managed", "data"]},
+        "type": {"$ref": "#/$defs/safeResource"},
+        "provider": {"$ref": "#/$defs/safeResource"},
+        "actions": {
+          "oneOf": [
+            {"const": ["no-op"]},
+            {"const": ["create"]},
+            {"const": ["read"]},
+            {"const": ["update"]},
+            {"const": ["delete"]},
+            {"const": ["delete", "create"]},
+            {"const": ["create", "delete"]}
+          ]
+        },
+        "category": {"enum": ["noOp", "create", "read", "update", "delete", "replace"]}
+      }
+    }
+  }
+}

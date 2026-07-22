@@ -208,10 +208,17 @@
     "wif": {
       "poolId": "orchestra-lab-github",
       "providerId": "github",
-      "serviceAccountId": "orchestra-lab-foundation",
+      "serviceAccountId": "orchestra-lab-foundation-plan",
+      "executorServiceAccountId": "orchestra-lab-foundation",
+      "executorFederated": false,
       "issuerUri": "https://token.actions.githubusercontent.com",
       "repository": "caglarsubas/orchestra-openshift-reference-lab",
-      "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch'"
+      "repositoryId": "1307302690",
+      "repositoryOwnerId": "37515097",
+      "repositoryVisibility": "private",
+      "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main",
+      "environment": "reference-lab-foundation-plan",
+      "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.repository_id == '1307302690' && assertion.repository_owner_id == '37515097' && assertion.repository_visibility == 'private' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch' && assertion.workflow_ref == 'caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main' && assertion.environment == 'reference-lab-foundation-plan'"
     }
   },
   "dns": {

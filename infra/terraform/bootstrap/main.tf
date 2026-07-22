@@ -59,6 +59,27 @@ locals {
       "roles/storage.admin",
     ])
   }
+  foundation_planner_roles = {
+    target = toset([
+      "roles/browser",
+      "roles/compute.viewer",
+      "roles/dns.reader",
+      "roles/iam.securityReviewer",
+      "roles/iam.serviceAccountViewer",
+      "roles/serviceusage.serviceUsageConsumer",
+    ])
+    services = toset([
+      "roles/artifactregistry.reader",
+      "roles/browser",
+      "roles/cloudkms.viewer",
+      "roles/compute.viewer",
+      "roles/container.clusterViewer",
+      "roles/dns.reader",
+      "roles/iam.securityReviewer",
+      "roles/iam.serviceAccountViewer",
+      "roles/serviceusage.serviceUsageConsumer",
+    ])
+  }
   role_bindings = merge(
     {
       for role in local.foundation_roles.target : "target:${role}" => {
@@ -73,6 +94,32 @@ locals {
       }
     },
   )
+  planner_role_bindings = merge(
+    {
+      for role in local.foundation_planner_roles.target : "target:${role}" => {
+        project = google_project.target.project_id
+        role    = role
+      }
+    },
+    {
+      for role in local.foundation_planner_roles.services : "services:${role}" => {
+        project = google_project.services.project_id
+        role    = role
+      }
+    },
+  )
+  foundation_plan_environment  = "reference-lab-foundation-plan"
+  foundation_plan_workflow_ref = "${var.github_repository}/.github/workflows/foundation-plan.yml@refs/heads/main"
+  foundation_plan_wif_condition = join(" && ", [
+    "assertion.repository == '${var.github_repository}'",
+    "assertion.repository_id == '${var.github_repository_id}'",
+    "assertion.repository_owner_id == '${var.github_repository_owner_id}'",
+    "assertion.repository_visibility == 'private'",
+    "assertion.ref == 'refs/heads/main'",
+    "assertion.event_name == 'workflow_dispatch'",
+    "assertion.workflow_ref == '${local.foundation_plan_workflow_ref}'",
+    "assertion.environment == '${local.foundation_plan_environment}'",
+  ])
 }
 
 resource "google_project" "target" {
@@ -196,7 +243,7 @@ resource "google_iam_workload_identity_pool" "github" {
   project                   = google_project.services.project_id
   workload_identity_pool_id = "orchestra-lab-github"
   display_name              = "Orchestra lab GitHub Actions"
-  description               = "Short-lived apply identity; no service-account key exists."
+  description               = "Short-lived workflow identities; no service-account key exists."
 
   depends_on = [google_project_service.services]
 }
@@ -208,14 +255,18 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   display_name                       = "GitHub Actions"
 
   attribute_mapping = {
-    "google.subject"             = "assertion.sub"
-    "attribute.actor"            = "assertion.actor"
-    "attribute.event_name"       = "assertion.event_name"
-    "attribute.job_workflow_ref" = "assertion.job_workflow_ref"
-    "attribute.ref"              = "assertion.ref"
-    "attribute.repository"       = "assertion.repository"
+    "google.subject"                  = "assertion.sub"
+    "attribute.actor_id"              = "assertion.actor_id"
+    "attribute.environment"           = "assertion.environment"
+    "attribute.event_name"            = "assertion.event_name"
+    "attribute.ref"                   = "assertion.ref"
+    "attribute.repository"            = "assertion.repository"
+    "attribute.repository_id"         = "assertion.repository_id"
+    "attribute.repository_owner_id"   = "assertion.repository_owner_id"
+    "attribute.repository_visibility" = "assertion.repository_visibility"
+    "attribute.workflow_ref"          = "assertion.workflow_ref"
   }
-  attribute_condition = "assertion.repository == '${var.github_repository}' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch'"
+  attribute_condition = local.foundation_plan_wif_condition
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -229,10 +280,17 @@ resource "google_service_account" "foundation_executor" {
   description  = "Short-lived Terraform executor. No key creation is permitted."
 }
 
-resource "google_service_account_iam_member" "foundation_wif" {
-  service_account_id = google_service_account.foundation_executor.name
+resource "google_service_account" "foundation_planner" {
+  project      = google_project.services.project_id
+  account_id   = "orchestra-lab-foundation-plan"
+  display_name = "Orchestra lab foundation planner"
+  description  = "Read-only Terraform planner. No key creation or apply permissions are permitted."
+}
+
+resource "google_service_account_iam_member" "foundation_plan_wif" {
+  service_account_id = google_service_account.foundation_planner.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository/${var.github_repository}"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
 }
 
 resource "google_project_iam_member" "foundation" {
@@ -241,6 +299,25 @@ resource "google_project_iam_member" "foundation" {
   project = each.value.project
   role    = each.value.role
   member  = "serviceAccount:${google_service_account.foundation_executor.email}"
+}
+
+resource "google_project_iam_member" "foundation_planner" {
+  for_each = local.planner_role_bindings
+
+  project = each.value.project
+  role    = each.value.role
+  member  = "serviceAccount:${google_service_account.foundation_planner.email}"
+}
+
+resource "google_storage_bucket_iam_member" "foundation_planner_state" {
+  for_each = toset([
+    "roles/storage.legacyBucketReader",
+    "roles/storage.objectViewer",
+  ])
+
+  bucket = google_storage_bucket.state.name
+  role   = each.value
+  member = "serviceAccount:${google_service_account.foundation_planner.email}"
 }
 
 resource "google_billing_budget" "reference_lab" {

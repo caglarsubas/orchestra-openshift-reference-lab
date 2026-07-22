@@ -40,13 +40,35 @@ variable "state_bucket_name" {
 }
 
 variable "github_repository" {
-  description = "Exact owner/repository allowed to request apply identity."
+  description = "Exact private owner/repository allowed to request the plan identity."
   type        = string
   default     = "caglarsubas/orchestra-openshift-reference-lab"
 
   validation {
     condition     = can(regex("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", var.github_repository))
     error_message = "github_repository must use owner/repository syntax."
+  }
+}
+
+variable "github_repository_id" {
+  description = "Immutable numeric GitHub repository ID allowed to request the plan identity."
+  type        = string
+  default     = "1307302690"
+
+  validation {
+    condition     = var.github_repository_id == "1307302690"
+    error_message = "The reference-lab plan identity is locked to repository ID 1307302690."
+  }
+}
+
+variable "github_repository_owner_id" {
+  description = "Immutable numeric GitHub owner ID allowed to request the plan identity."
+  type        = string
+  default     = "37515097"
+
+  validation {
+    condition     = var.github_repository_owner_id == "37515097"
+    error_message = "The reference-lab plan identity is locked to owner ID 37515097."
   }
 }
 
