@@ -1,0 +1,179 @@
+name: reference-lab-foundation-plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for this plan
+        required: true
+        type: string
+      reason:
+        description: Bounded operator reason for generating the plan
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: reference-lab-foundation-plan
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: read-only foundation plan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: reference-lab-foundation-plan
+    env:
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
+      TF_VAR_target_project_id: ${{ vars.GCP_TARGET_PROJECT_ID }}
+      TF_VAR_services_project_id: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+      TF_VAR_signed_evidence_bucket_name: ${{ vars.GCP_SIGNED_EVIDENCE_BUCKET }}
+      TF_VAR_raw_evidence_bucket_name: ${{ vars.GCP_RAW_EVIDENCE_BUCKET }}
+      TF_VAR_bastion_source_image: ${{ vars.GCP_BASTION_SOURCE_IMAGE }}
+      TF_VAR_probe_source_image: ${{ vars.GCP_PROBE_SOURCE_IMAGE }}
+      TF_VAR_probe_container_image: ${{ vars.ORCHESTRA_PROBE_CONTAINER_IMAGE }}
+      TF_VAR_approved_egress_cidrs: ${{ vars.GCP_APPROVED_EGRESS_CIDRS_JSON }}
+      TF_VAR_iap_operator_members: ${{ vars.GCP_IAP_OPERATOR_MEMBERS_JSON || '[]' }}
+      TF_VAR_gke_release_channel: ${{ vars.GCP_GKE_RELEASE_CHANNEL || 'STABLE' }}
+      TF_VAR_certification_mode: "false"
+      TF_VAR_lock_signed_evidence_bucket: "false"
+
+    steps:
+      - name: Require reviewed workflow identity and configuration
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          PLAN_REASON: ${{ inputs.reason }}
+          REVIEW_GATE_CONFIGURED: ${{ vars.FOUNDATION_PLAN_REVIEW_GATE_CONFIGURED }}
+          WIF_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          PLAN_SERVICE_ACCOUNT: ${{ vars.GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT }}
+          STATE_BUCKET: ${{ vars.GCP_TERRAFORM_STATE_BUCKET }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ ${#PLAN_REASON} -ge 12 && ${#PLAN_REASON} -le 500 ]]
+          [[ "$REVIEW_GATE_CONFIGURED" == "true" ]]
+          for name in \
+            WIF_PROVIDER PLAN_SERVICE_ACCOUNT STATE_BUCKET \
+            TF_VAR_target_project_id TF_VAR_services_project_id \
+            TF_VAR_signed_evidence_bucket_name TF_VAR_raw_evidence_bucket_name \
+            TF_VAR_bastion_source_image TF_VAR_probe_source_image \
+            TF_VAR_probe_container_image TF_VAR_approved_egress_cidrs; do
+            [[ -n "${!name:-}" ]] || { echo "required configuration missing: $name" >&2; exit 1; }
+          done
+
+      - name: Check out reviewed main revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate source contracts
+        run: |
+          python3 scripts/validate_repository.py
+          python3 scripts/validate_prerequisite_policy.py
+
+      - name: Validate independently reviewed foundation admission
+        env:
+          FOUNDATION_PREREQUISITES_JSON: ${{ secrets.LAB_FOUNDATION_PREREQUISITES_JSON }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ -n "$FOUNDATION_PREREQUISITES_JSON" ]]
+          printf '%s' "$FOUNDATION_PREREQUISITES_JSON" > "$RUNNER_TEMP/prerequisites.json"
+          python3 scripts/validate_repository.py \
+            --prerequisites "$RUNNER_TEMP/prerequisites.json" \
+            --require-ready \
+            --readiness-stage foundation
+          prerequisite_digest="sha256:$(sha256sum "$RUNNER_TEMP/prerequisites.json" | cut -d' ' -f1)"
+          echo "PREREQUISITE_PROJECTION_DIGEST=$prerequisite_digest" >> "$GITHUB_ENV"
+
+      - name: Authenticate as the read-only foundation planner
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "1.14.6"
+          terraform_wrapper: false
+
+      - name: Initialize and validate foundation
+        env:
+          STATE_BUCKET: ${{ vars.GCP_TERRAFORM_STATE_BUCKET }}
+        run: |
+          set -euo pipefail
+          terraform -chdir=infra/terraform/foundation fmt -check
+          terraform -chdir=infra/terraform/foundation init \
+            -input=false \
+            -lockfile=readonly \
+            -backend-config="bucket=$STATE_BUCKET" \
+            -backend-config="prefix=foundation"
+          terraform -chdir=infra/terraform/foundation validate
+
+      - name: Generate read-only plan and payload-free summary
+        env:
+          PLAN_REASON: ${{ inputs.reason }}
+        run: |
+          set -euo pipefail
+          umask 077
+          if ! terraform -chdir=infra/terraform/foundation plan \
+            -input=false \
+            -lock=false \
+            -refresh=true \
+            -out="$RUNNER_TEMP/foundation.tfplan" \
+            > "$RUNNER_TEMP/foundation-plan.log" 2>&1; then
+            echo "Terraform plan failed; value-bearing diagnostics were withheld from workflow logs." >&2
+            exit 1
+          fi
+          if ! terraform -chdir=infra/terraform/foundation show -json \
+            "$RUNNER_TEMP/foundation.tfplan" \
+            > "$RUNNER_TEMP/foundation-plan.json" \
+            2>> "$RUNNER_TEMP/foundation-plan.log"; then
+            echo "Terraform plan rendering failed; diagnostics were withheld from workflow logs." >&2
+            exit 1
+          fi
+          plan_digest="sha256:$(sha256sum "$RUNNER_TEMP/foundation.tfplan" | cut -d' ' -f1)"
+          python3 scripts/foundation_plan_summary.py build \
+            --plan-json "$RUNNER_TEMP/foundation-plan.json" \
+            --plan-digest "$plan_digest" \
+            --prerequisite-projection-digest "$PREREQUISITE_PROJECTION_DIGEST" \
+            --source-revision "$GITHUB_SHA" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --actor-id "$GITHUB_ACTOR_ID" \
+            --reason "$PLAN_REASON" \
+            --execution-mode live \
+            --created-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --output "$RUNNER_TEMP/foundation-plan-summary.json"
+          python3 scripts/foundation_plan_summary.py validate \
+            --summary "$RUNNER_TEMP/foundation-plan-summary.json"
+
+      - name: Upload payload-free plan summary
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: foundation-plan-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/foundation-plan-summary.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove restricted and value-bearing plan files
+        if: always()
+        run: |
+          rm -f \
+            "$RUNNER_TEMP/prerequisites.json" \
+            "$RUNNER_TEMP/foundation.tfplan" \
+            "$RUNNER_TEMP/foundation-plan.json" \
+            "$RUNNER_TEMP/foundation-plan.log" \
+            "$RUNNER_TEMP/foundation-plan-summary.json"

@@ -10,6 +10,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Strict prerequisite admission | Yes | Yes | No | No | No |
 | Stage-aware payload-free prerequisite observation | Yes | Yes | No | No | No |
 | Project/API/state/KMS/WIF bootstrap | Yes | Yes | No | No | No |
+| Environment-bound read-only foundation plan | Yes | Yes | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
 | Public delegation zone and private DNS peering | Yes | Yes | No | No | No |
@@ -98,3 +99,10 @@ does not create private OpenShift records, perform registrar delegation, or
 claim that either resolution path works live. Those states require the
 foundation apply, external NS update, installer-created private zone, and the
 independent checks in the DNS runbook.
+
+The foundation planning lane now has a separate read-only service account,
+repository-ID/workflow/environment-bound WIF policy, protected-environment
+interlock, strict payload-free plan summary, and no `terraform apply` path.
+The required GitHub environment is not configured, the bootstrap has not been
+applied, and no live plan exists. The apply-capable service account has no
+GitHub WIF binding.

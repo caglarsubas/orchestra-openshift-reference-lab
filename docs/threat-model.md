@@ -29,6 +29,7 @@
 | Threat | Control |
 |---|---|
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
+| Arbitrary workflow obtains foundation mutation authority | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, separate read-only planner, and no executor WIF binding |
 | Public control-plane exposure | Private OCP/GKE endpoints, no VM external IP, IAP tunnel only |
 | Peering used as broad trust | Non-transitive peering, explicit port/CIDR firewall, flow logs, namespace default deny |
 | Public DNS takeover or private-name leakage | Terraform-owned exact public zone, external delegation review, no public cluster records, installer-owned private records, and one-way read-only DNS peering |
@@ -60,6 +61,9 @@
 - Initial project bootstrap necessarily uses a privileged human or enterprise
   provisioning identity before WIF exists. Its token lifecycle and audit trail
   are external prerequisites.
+- GitHub environment protection is external state. The workflow interlock and
+  environment claim do not prove required-reviewer configuration; an
+  independent operator must verify it before enabling the plan lane.
 - IP allowlists do not provide domain-aware egress policy. A later proxy lane
   must pin domain/TLS destinations before the frozen campaign.
 - The declared GKE singleton Binary Authorization policy is not equivalent to

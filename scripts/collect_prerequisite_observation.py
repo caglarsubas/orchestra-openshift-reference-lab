@@ -553,8 +553,11 @@ def observe_wif(
     if not services_project:
         return not_run(check_id, "WIF_PROJECT_INPUT_MISSING")
     wif = policy["gcp"]["wif"]
-    service_account = (
+    planner_service_account = (
         f"{wif['serviceAccountId']}@{services_project}.iam.gserviceaccount.com"
+    )
+    executor_service_account = (
+        f"{wif['executorServiceAccountId']}@{services_project}.iam.gserviceaccount.com"
     )
     try:
         provider = run_json(
@@ -572,7 +575,7 @@ def observe_wif(
                 "--format=json",
             ],
         )
-        keys = run_json(
+        planner_keys = run_json(
             run,
             [
                 "gcloud",
@@ -580,19 +583,44 @@ def observe_wif(
                 "service-accounts",
                 "keys",
                 "list",
-                f"--iam-account={service_account}",
+                f"--iam-account={planner_service_account}",
                 f"--project={services_project}",
                 "--format=json",
             ],
         )
-        iam_policy = run_json(
+        executor_keys = run_json(
+            run,
+            [
+                "gcloud",
+                "iam",
+                "service-accounts",
+                "keys",
+                "list",
+                f"--iam-account={executor_service_account}",
+                f"--project={services_project}",
+                "--format=json",
+            ],
+        )
+        planner_iam_policy = run_json(
             run,
             [
                 "gcloud",
                 "iam",
                 "service-accounts",
                 "get-iam-policy",
-                service_account,
+                planner_service_account,
+                f"--project={services_project}",
+                "--format=json",
+            ],
+        )
+        executor_iam_policy = run_json(
+            run,
+            [
+                "gcloud",
+                "iam",
+                "service-accounts",
+                "get-iam-policy",
+                executor_service_account,
                 f"--project={services_project}",
                 "--format=json",
             ],
@@ -600,44 +628,106 @@ def observe_wif(
         provider_name = provider.get("name", "")
         expected_member = (
             f"principalSet://iam.googleapis.com/{provider_name.rsplit('/providers/', 1)[0]}"
-            f"/attribute.repository/{wif['repository']}"
+            f"/attribute.repository_id/{wif['repositoryId']}"
         )
-        bindings = (
-            iam_policy.get("bindings", []) if isinstance(iam_policy, dict) else []
+        planner_bindings = (
+            planner_iam_policy.get("bindings", [])
+            if isinstance(planner_iam_policy, dict)
+            else []
         )
-        member_present = any(
-            isinstance(binding, dict)
-            and binding.get("role") == "roles/iam.workloadIdentityUser"
-            and expected_member in binding.get("members", [])
-            for binding in bindings
+        executor_bindings = (
+            executor_iam_policy.get("bindings", [])
+            if isinstance(executor_iam_policy, dict)
+            else []
         )
-        user_keys = (
-            [
-                item
-                for item in keys
-                if isinstance(item, dict) and item.get("keyType") == "USER_MANAGED"
-            ]
-            if isinstance(keys, list)
-            else ["invalid"]
-        )
+
+        def federated_members(bindings: Any) -> list[tuple[str, str]]:
+            if not isinstance(bindings, list):
+                return [("invalid", "invalid")]
+            result: list[tuple[str, str]] = []
+            for binding in bindings:
+                if not isinstance(binding, dict):
+                    return [("invalid", "invalid")]
+                role = binding.get("role")
+                members = binding.get("members", [])
+                if (
+                    not isinstance(role, str)
+                    or not isinstance(members, list)
+                    or not all(isinstance(member, str) for member in members)
+                ):
+                    return [("invalid", "invalid")]
+                result.extend(
+                    (role, member)
+                    for member in members
+                    if isinstance(member, str)
+                    and member.startswith(
+                        (
+                            "principal://iam.googleapis.com/",
+                            "principalSet://iam.googleapis.com/",
+                        )
+                    )
+                )
+            return sorted(result)
+
+        planner_federated = federated_members(planner_bindings)
+        executor_federated = federated_members(executor_bindings)
+        planner_binding_exact = planner_federated == [
+            ("roles/iam.workloadIdentityUser", expected_member)
+        ]
+
+        def user_managed_keys(keys: Any) -> list[Any]:
+            return (
+                [
+                    item
+                    for item in keys
+                    if isinstance(item, dict) and item.get("keyType") == "USER_MANAGED"
+                ]
+                if isinstance(keys, list)
+                else ["invalid"]
+            )
+
+        planner_user_keys = user_managed_keys(planner_keys)
+        executor_user_keys = user_managed_keys(executor_keys)
         mapping = (
             provider.get("attributeMapping", {}) if isinstance(provider, dict) else {}
         )
+        expected_mapping = {
+            "google.subject": "assertion.sub",
+            "attribute.actor_id": "assertion.actor_id",
+            "attribute.environment": "assertion.environment",
+            "attribute.event_name": "assertion.event_name",
+            "attribute.ref": "assertion.ref",
+            "attribute.repository": "assertion.repository",
+            "attribute.repository_id": "assertion.repository_id",
+            "attribute.repository_owner_id": "assertion.repository_owner_id",
+            "attribute.repository_visibility": "assertion.repository_visibility",
+            "attribute.workflow_ref": "assertion.workflow_ref",
+        }
         valid = (
             provider.get("state", "ACTIVE") == "ACTIVE"
             and provider.get("oidc", {}).get("issuerUri") == wif["issuerUri"]
             and provider.get("attributeCondition") == wif["attributeCondition"]
-            and mapping.get("attribute.repository") == "assertion.repository"
-            and mapping.get("attribute.ref") == "assertion.ref"
-            and member_present
-            and not user_keys
+            and mapping == expected_mapping
+            and planner_binding_exact
+            and not executor_federated
+            and wif["executorFederated"] is False
+            and not planner_user_keys
+            and not executor_user_keys
         )
         evidence = {
             "providerIdentityDigest": payload_digest(provider_name),
-            "serviceAccountIdentityDigest": payload_digest(service_account),
+            "plannerServiceAccountIdentityDigest": payload_digest(
+                planner_service_account
+            ),
+            "executorServiceAccountIdentityDigest": payload_digest(
+                executor_service_account
+            ),
             "conditionDigest": payload_digest(provider.get("attributeCondition")),
-            "requiredBindingPresent": member_present,
-            "userManagedKeyCount": len(user_keys),
+            "plannerBindingExact": planner_binding_exact,
+            "plannerFederatedBindingCount": len(planner_federated),
+            "executorFederatedBindingCount": len(executor_federated),
+            "plannerUserManagedKeyCount": len(planner_user_keys),
+            "executorUserManagedKeyCount": len(executor_user_keys),
         }
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ValueError):
         return failed(check_id, "WIF_READ_ONLY_OBSERVATION_FAILED", now)

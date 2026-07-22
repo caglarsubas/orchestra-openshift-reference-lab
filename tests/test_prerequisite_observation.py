@@ -265,8 +265,16 @@ class PrerequisiteObservationTests(unittest.TestCase):
                     "oidc": {"issuerUri": policy["gcp"]["wif"]["issuerUri"]},
                     "attributeCondition": policy["gcp"]["wif"]["attributeCondition"],
                     "attributeMapping": {
-                        "attribute.repository": "assertion.repository",
+                        "google.subject": "assertion.sub",
+                        "attribute.actor_id": "assertion.actor_id",
+                        "attribute.environment": "assertion.environment",
+                        "attribute.event_name": "assertion.event_name",
                         "attribute.ref": "assertion.ref",
+                        "attribute.repository": "assertion.repository",
+                        "attribute.repository_id": "assertion.repository_id",
+                        "attribute.repository_owner_id": "assertion.repository_owner_id",
+                        "attribute.repository_visibility": "assertion.repository_visibility",
+                        "attribute.workflow_ref": "assertion.workflow_ref",
                     },
                 }
             elif command[1:5] == [
@@ -281,16 +289,20 @@ class PrerequisiteObservationTests(unittest.TestCase):
                 "service-accounts",
                 "get-iam-policy",
             ]:
-                output = {
-                    "bindings": [
-                        {
-                            "role": "roles/iam.workloadIdentityUser",
-                            "members": [
-                                "principalSet://iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/attribute.repository/caglarsubas/orchestra-openshift-reference-lab"
-                            ],
-                        }
-                    ]
-                }
+                output = (
+                    {
+                        "bindings": [
+                            {
+                                "role": "roles/iam.workloadIdentityUser",
+                                "members": [
+                                    "principalSet://iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/attribute.repository_id/1307302690"
+                                ],
+                            }
+                        ]
+                    }
+                    if command[4].startswith("orchestra-lab-foundation-plan@")
+                    else {"bindings": []}
+                )
             else:
                 raise AssertionError(f"unexpected_command:{command}")
             stdout = output if isinstance(output, str) else json.dumps(output)
@@ -317,6 +329,39 @@ class PrerequisiteObservationTests(unittest.TestCase):
         self.assertEqual(
             observe_wif(services_project, self.now, live_runner, policy)["status"],
             "passed",
+        )
+
+        def executor_federated_runner(
+            command: list[str],
+        ) -> subprocess.CompletedProcess[str]:
+            if command[1:4] == [
+                "iam",
+                "service-accounts",
+                "get-iam-policy",
+            ] and command[4].startswith("orchestra-lab-foundation@"):
+                output = {
+                    "bindings": [
+                        {
+                            "role": "roles/iam.workloadIdentityUser",
+                            "members": [
+                                "principalSet://iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/attribute.repository_id/1307302690"
+                            ],
+                        }
+                    ]
+                }
+                return subprocess.CompletedProcess(
+                    command, 0, stdout=json.dumps(output), stderr=""
+                )
+            return live_runner(command)
+
+        self.assertEqual(
+            observe_wif(
+                services_project,
+                self.now,
+                executor_federated_runner,
+                policy,
+            )["status"],
+            "failed",
         )
         with patch(
             "scripts.collect_prerequisite_observation.shutil.which",

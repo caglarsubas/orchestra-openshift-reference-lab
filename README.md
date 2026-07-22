@@ -27,8 +27,9 @@ observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, an atomic signed-runner scan collector and detached
 attestation verifier, a stage-aware prerequisite observation policy and
 payload-free read-only collector, gate-controlled product and dependency
-GitOps floors, a source-only durable release-validation receiver, and a
-source-only synthetic tenant kit. It does not contain a kubeconfig, provider
+GitOps floors, an environment-bound read-only Terraform planning lane, a
+source-only durable release-validation receiver, and a source-only synthetic
+tenant kit. It does not contain a kubeconfig, provider
 identity, OpenShift pull secret, live prerequisite observation, independent
 prerequisite review, live risk scan, approved source exception, live campaign,
 campaign evidence report, or completed soak. No declaration has been applied
