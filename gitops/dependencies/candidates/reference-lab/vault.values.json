@@ -1,0 +1,145 @@
+{
+  "global": {
+    "enabled": true,
+    "tlsDisable": false
+  },
+  "injector": {
+    "enabled": false
+  },
+  "server": {
+    "enabled": true,
+    "statefulSet": {
+      "securityContext": {
+        "pod": {
+          "runAsNonRoot": true,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "container": {
+          "allowPrivilegeEscalation": false,
+          "readOnlyRootFilesystem": true,
+          "capabilities": {
+            "drop": [
+              "ALL"
+            ]
+          },
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        }
+      }
+    },
+    "image": {
+      "repository": "europe-west1-docker.pkg.dev/ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/vault",
+      "tag": "2.0.3@sha256:db6a5f78749204d0a8d002be1cc6e9a2a6de53dffce41a894c4a06d309dca360",
+      "pullPolicy": "IfNotPresent"
+    },
+    "resources": {
+      "requests": {
+        "cpu": "1",
+        "memory": "2Gi"
+      },
+      "limits": {
+        "cpu": "4",
+        "memory": "8Gi"
+      }
+    },
+    "extraEnvironmentVars": {
+      "GOOGLE_PROJECT": "ORCHESTRA_SERVICES_PROJECT_REQUIRED",
+      "GOOGLE_REGION": "global"
+    },
+    "volumes": [
+      {
+        "name": "vault-server-tls",
+        "secret": {
+          "secretName": "vault-server-tls"
+        }
+      },
+      {
+        "name": "vault-client-ca",
+        "secret": {
+          "secretName": "vault-client-ca"
+        }
+      }
+    ],
+    "volumeMounts": [
+      {
+        "name": "vault-server-tls",
+        "mountPath": "/vault/userconfig/vault-server-tls",
+        "readOnly": true
+      },
+      {
+        "name": "vault-client-ca",
+        "mountPath": "/vault/userconfig/vault-client-ca",
+        "readOnly": true
+      }
+    ],
+    "topologySpreadConstraints": [
+      {
+        "maxSkew": 1,
+        "topologyKey": "topology.kubernetes.io/zone",
+        "whenUnsatisfiable": "DoNotSchedule",
+        "labelSelector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "vault"
+          }
+        }
+      },
+      {
+        "maxSkew": 1,
+        "topologyKey": "kubernetes.io/hostname",
+        "whenUnsatisfiable": "DoNotSchedule",
+        "labelSelector": {
+          "matchLabels": {
+            "app.kubernetes.io/name": "vault"
+          }
+        }
+      }
+    ],
+    "dataStorage": {
+      "enabled": true,
+      "size": "100Gi",
+      "mountPath": "/vault/data",
+      "storageClass": "orchestra-regional-rwo",
+      "accessMode": "ReadWriteOnce"
+    },
+    "auditStorage": {
+      "enabled": true,
+      "size": "50Gi",
+      "mountPath": "/vault/audit",
+      "storageClass": "orchestra-regional-rwo",
+      "accessMode": "ReadWriteOnce"
+    },
+    "standalone": {
+      "enabled": false
+    },
+    "ha": {
+      "enabled": true,
+      "replicas": 3,
+      "raft": {
+        "enabled": true,
+        "setNodeId": true,
+        "config": "ui = true\ndisable_mlock = true\n\nlistener \"tcp\" {\n  address = \"[::]:8200\"\n  cluster_address = \"[::]:8201\"\n  tls_disable = 0\n  tls_cert_file = \"/vault/userconfig/vault-server-tls/tls.crt\"\n  tls_key_file = \"/vault/userconfig/vault-server-tls/tls.key\"\n  tls_client_ca_file = \"/vault/userconfig/vault-client-ca/ca.crt\"\n}\n\nstorage \"raft\" {\n  path = \"/vault/data\"\n}\n\nseal \"gcpckms\" {\n  project = \"ORCHESTRA_SERVICES_PROJECT_REQUIRED\"\n  region = \"global\"\n  key_ring = \"orchestra-vault-unseal\"\n  crypto_key = \"vault-auto-unseal\"\n}\n\nservice_registration \"kubernetes\" {}\n"
+      }
+    },
+    "serviceAccount": {
+      "create": true,
+      "name": "vault",
+      "annotations": {
+        "iam.gke.io/gcp-service-account": "vault-kms@ORCHESTRA_SERVICES_PROJECT_REQUIRED.iam.gserviceaccount.com"
+      }
+    },
+    "podDisruptionBudget": {
+      "enabled": true,
+      "maxUnavailable": 1
+    }
+  },
+  "csi": {
+    "enabled": false
+  },
+  "ui": {
+    "enabled": true,
+    "serviceType": "ClusterIP"
+  }
+}

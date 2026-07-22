@@ -1,0 +1,181 @@
+{
+  "tlsCA": {
+    "enabled": true,
+    "secretName": "jetstream-client-ca",
+    "dir": "/etc/nats-ca-cert",
+    "key": "ca.crt"
+  },
+  "config": {
+    "cluster": {
+      "enabled": true,
+      "replicas": 3,
+      "noAdvertise": true,
+      "tls": {
+        "enabled": true,
+        "secretName": "jetstream-route-tls",
+        "dir": "/etc/nats-certs/cluster",
+        "cert": "tls.crt",
+        "key": "tls.key",
+        "merge": {
+          "ca_file": "/etc/nats-ca-cert/ca.crt",
+          "verify": true
+        }
+      }
+    },
+    "jetstream": {
+      "enabled": true,
+      "fileStore": {
+        "enabled": true,
+        "dir": "/data",
+        "pvc": {
+          "enabled": true,
+          "size": "500Gi",
+          "storageClassName": "orchestra-regional-rwo"
+        },
+        "maxSize": "450Gi"
+      },
+      "memoryStore": {
+        "enabled": true,
+        "maxSize": "2Gi"
+      }
+    },
+    "nats": {
+      "tls": {
+        "enabled": true,
+        "secretName": "jetstream-server-tls",
+        "dir": "/etc/nats-certs/nats",
+        "cert": "tls.crt",
+        "key": "tls.key",
+        "merge": {
+          "ca_file": "/etc/nats-ca-cert/ca.crt",
+          "verify": true
+        }
+      }
+    },
+    "merge": {
+      "$include": "/etc/nats-auth/accounts.conf"
+    }
+  },
+  "container": {
+    "image": {
+      "repository": "europe-west1-docker.pkg.dev/ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/nats",
+      "tag": "2.14.2-alpine@sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
+      "pullPolicy": "IfNotPresent"
+    },
+    "merge": {
+      "resources": {
+        "requests": {
+          "cpu": "1",
+          "memory": "4Gi"
+        },
+        "limits": {
+          "cpu": "4",
+          "memory": "8Gi"
+        }
+      },
+      "securityContext": {
+        "allowPrivilegeEscalation": false,
+        "readOnlyRootFilesystem": true,
+        "runAsNonRoot": true,
+        "capabilities": {
+          "drop": [
+            "ALL"
+          ]
+        },
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      },
+      "volumeMounts": [
+        {
+          "name": "jetstream-accounts",
+          "mountPath": "/etc/nats-auth",
+          "readOnly": true
+        }
+      ]
+    }
+  },
+  "reloader": {
+    "enabled": true,
+    "image": {
+      "repository": "europe-west1-docker.pkg.dev/ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/nats-server-config-reloader",
+      "tag": "0.23.0@sha256:1418d42cea39ea729c1d34ca26ba33d967abdf040bad45ec1314c807bfacc56f",
+      "pullPolicy": "IfNotPresent"
+    },
+    "merge": {
+      "securityContext": {
+        "allowPrivilegeEscalation": false,
+        "readOnlyRootFilesystem": true,
+        "runAsNonRoot": true,
+        "capabilities": {
+          "drop": [
+            "ALL"
+          ]
+        },
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      }
+    }
+  },
+  "promExporter": {
+    "enabled": false
+  },
+  "podTemplate": {
+    "merge": {
+      "spec": {
+        "securityContext": {
+          "runAsNonRoot": true,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "topologySpreadConstraints": [
+          {
+            "maxSkew": 1,
+            "topologyKey": "topology.kubernetes.io/zone",
+            "whenUnsatisfiable": "DoNotSchedule",
+            "labelSelector": {
+              "matchLabels": {
+                "app.kubernetes.io/name": "nats"
+              }
+            }
+          },
+          {
+            "maxSkew": 1,
+            "topologyKey": "kubernetes.io/hostname",
+            "whenUnsatisfiable": "DoNotSchedule",
+            "labelSelector": {
+              "matchLabels": {
+                "app.kubernetes.io/name": "nats"
+              }
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "name": "jetstream-accounts",
+            "secret": {
+              "secretName": "jetstream-accounts"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "podDisruptionBudget": {
+    "enabled": true,
+    "merge": {
+      "spec": {
+        "minAvailable": 2
+      }
+    }
+  },
+  "serviceAccount": {
+    "enabled": true,
+    "name": "jetstream"
+  },
+  "natsBox": {
+    "enabled": false
+  }
+}

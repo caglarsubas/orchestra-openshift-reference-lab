@@ -1,0 +1,117 @@
+{
+  "namespaceOverride": "orchestra-clickhouse",
+  "commonAnnotations": {
+    "orchestra.prometa.ai/activation": "blocked-source-candidate"
+  },
+  "deployment": {
+    "strategy": {
+      "type": "RollingUpdate"
+    }
+  },
+  "crdHook": {
+    "enabled": false
+  },
+  "operator": {
+    "image": {
+      "registry": "europe-west1-docker.pkg.dev",
+      "repository": "ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/clickhouse-operator",
+      "tag": "0.27.1@sha256:678ea8ebc4f68eb6fef14e1461c2109cb8d9d135c0f2d4119a46141d54fa0930",
+      "pullPolicy": "IfNotPresent"
+    },
+    "containerSecurityContext": {
+      "allowPrivilegeEscalation": false,
+      "readOnlyRootFilesystem": true,
+      "runAsNonRoot": true,
+      "seccompProfile": {
+        "type": "RuntimeDefault"
+      },
+      "capabilities": {
+        "drop": [
+          "ALL"
+        ]
+      }
+    },
+    "resources": {
+      "requests": {
+        "cpu": "250m",
+        "memory": "256Mi"
+      },
+      "limits": {
+        "cpu": "1",
+        "memory": "1Gi"
+      }
+    }
+  },
+  "metrics": {
+    "enabled": true,
+    "image": {
+      "registry": "europe-west1-docker.pkg.dev",
+      "repository": "ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/clickhouse-metrics-exporter",
+      "tag": "0.27.1@sha256:ca56a26fda49da1a5938e5532b6f0ead71726af38d5dd88810fc0cd4123ef113",
+      "pullPolicy": "IfNotPresent"
+    },
+    "containerSecurityContext": {
+      "allowPrivilegeEscalation": false,
+      "readOnlyRootFilesystem": true,
+      "runAsNonRoot": true,
+      "seccompProfile": {
+        "type": "RuntimeDefault"
+      },
+      "capabilities": {
+        "drop": [
+          "ALL"
+        ]
+      }
+    },
+    "resources": {
+      "requests": {
+        "cpu": "100m",
+        "memory": "128Mi"
+      },
+      "limits": {
+        "cpu": "500m",
+        "memory": "512Mi"
+      }
+    }
+  },
+  "imagePullSecrets": [
+    {
+      "name": "orchestra-bootstrap-registry"
+    }
+  ],
+  "serviceAccount": {
+    "create": true,
+    "name": "clickhouse-operator"
+  },
+  "rbac": {
+    "create": true,
+    "namespaceScoped": false
+  },
+  "secret": {
+    "create": false
+  },
+  "podSecurityContext": {
+    "runAsNonRoot": true,
+    "seccompProfile": {
+      "type": "RuntimeDefault"
+    }
+  },
+  "topologySpreadConstraints": [
+    {
+      "maxSkew": 1,
+      "topologyKey": "topology.kubernetes.io/zone",
+      "whenUnsatisfiable": "DoNotSchedule",
+      "labelSelector": {
+        "matchLabels": {
+          "app.kubernetes.io/name": "altinity-clickhouse-operator"
+        }
+      }
+    }
+  ],
+  "serviceMonitor": {
+    "enabled": true,
+    "additionalLabels": {
+      "orchestra.prometa.ai/profile": "orchestra-ocp-4.20-amd64-v1"
+    }
+  }
+}

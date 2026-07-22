@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.dependency-gitops-candidate.v1",
+  "candidateId": "orchestra-dependency-gitops-source-candidate-2026-07-22.1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "architecture": "linux/amd64",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
+    "dependencyBomDigest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+    "riskPolicyDigest": "sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7",
+    "mirrorIntakeDigest": "sha256:fe357261b272cd8fb4d6917e55453b613967fe5557616550c49591d035a5fc21"
+  },
+  "applications": [
+    {
+      "id": "cloudnative-pg-operator",
+      "controller": "services-gitops",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-postgres",
+      "stage": "data-foundation",
+      "chart": {
+        "id": "cloudnative-pg",
+        "name": "cloudnative-pg",
+        "version": "0.29.0",
+        "packageDigest": "sha256:668e065ff53508d58238788fd35b355a925060843629a951df0e6a9362e6d32f",
+        "mirrorPath": "charts/cloudnative-pg",
+        "destinationRepository": null
+      },
+      "images": [
+        {
+          "id": "cloudnative-pg-operator",
+          "sourceIndexDigest": "sha256:a2701eb97cdd2a34b1fdb2cb51987f544b706e40bec72ae7146cd8580efefebb",
+          "sourcePlatformDigest": "sha256:091d306935cfdf646debfe78010d59ebfb572150eb6eb922b0203873c0c68841",
+          "destinationReference": null
+        }
+      ],
+      "values": {
+        "path": "gitops/dependencies/candidates/reference-lab/cloudnative-pg.values.json",
+        "canonicalDigest": "sha256:81ddf5a16e19dc0523aafcbf0f337757ca0b8bb8ac94c35a6485e1ee819d1a65"
+      },
+      "activationState": "blocked",
+      "reasonCodes": [
+        "SOURCE_ADMISSION_INCOMPLETE",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "SERVER_SIDE_DRY_RUN_MISSING",
+        "TWO_PERSON_APPROVAL_MISSING"
+      ]
+    },
+    {
+      "id": "clickhouse-operator",
+      "controller": "services-gitops",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-clickhouse",
+      "stage": "data-foundation",
+      "chart": {
+        "id": "clickhouse-operator",
+        "name": "altinity-clickhouse-operator",
+        "version": "0.27.1",
+        "packageDigest": "sha256:716fd37d87bce19e15b42b207db5b0363f61d4f7b546413935d9a2ed9144401e",
+        "mirrorPath": "charts/altinity-clickhouse-operator",
+        "destinationRepository": null
+      },
+      "images": [
+        {
+          "id": "clickhouse-operator",
+          "sourceIndexDigest": "sha256:a802b3a19d2011f672c32cea6733e573e004938ff463d1c3ab4ac0b16b9877dd",
+          "sourcePlatformDigest": "sha256:678ea8ebc4f68eb6fef14e1461c2109cb8d9d135c0f2d4119a46141d54fa0930",
+          "destinationReference": null
+        },
+        {
+          "id": "clickhouse-metrics-exporter",
+          "sourceIndexDigest": "sha256:5523d83190ad1560051f19fe6daa00876436f12cf833a506731ed6226192193f",
+          "sourcePlatformDigest": "sha256:ca56a26fda49da1a5938e5532b6f0ead71726af38d5dd88810fc0cd4123ef113",
+          "destinationReference": null
+        }
+      ],
+      "values": {
+        "path": "gitops/dependencies/candidates/reference-lab/clickhouse-operator.values.json",
+        "canonicalDigest": "sha256:cfb1b2bca2cda9f59956cbccba68afb3721853691833cb454b6f5d77178ced7a"
+      },
+      "activationState": "blocked",
+      "reasonCodes": [
+        "SOURCE_ADMISSION_INCOMPLETE",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "CLICKHOUSE_BACKUP_CONTRACT_PENDING",
+        "SERVER_SIDE_DRY_RUN_MISSING",
+        "TWO_PERSON_APPROVAL_MISSING"
+      ]
+    },
+    {
+      "id": "jetstream",
+      "controller": "services-gitops",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-jetstream",
+      "stage": "data-foundation",
+      "chart": {
+        "id": "nats",
+        "name": "nats",
+        "version": "2.14.2",
+        "packageDigest": "sha256:86e0fbfe000b6d7fe70a3032ad3a667252f2d3dd2022e95f7330704d947d0f84",
+        "mirrorPath": "charts/nats",
+        "destinationRepository": null
+      },
+      "images": [
+        {
+          "id": "nats-server",
+          "sourceIndexDigest": "sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32",
+          "sourcePlatformDigest": "sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
+          "destinationReference": null
+        },
+        {
+          "id": "nats-config-reloader",
+          "sourceIndexDigest": "sha256:64cb6c858e794906d3167378e02b7e0feb83c4e14c07b371eb8d921ef8c4a60b",
+          "sourcePlatformDigest": "sha256:1418d42cea39ea729c1d34ca26ba33d967abdf040bad45ec1314c807bfacc56f",
+          "destinationReference": null
+        }
+      ],
+      "values": {
+        "path": "gitops/dependencies/candidates/reference-lab/jetstream.values.json",
+        "canonicalDigest": "sha256:b838b3041b55491dd5bc6b7de9242c61bad3a5249e1e71d3da22e0f97e2dcdd1"
+      },
+      "activationState": "blocked",
+      "reasonCodes": [
+        "SOURCE_ADMISSION_INCOMPLETE",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "LIVE_BACKUP_TARGET_MISSING",
+        "SERVER_SIDE_DRY_RUN_MISSING",
+        "TWO_PERSON_APPROVAL_MISSING"
+      ]
+    },
+    {
+      "id": "vault",
+      "controller": "services-gitops",
+      "targetCluster": "services-gke",
+      "namespace": "orchestra-vault",
+      "stage": "security-foundation",
+      "chart": {
+        "id": "vault",
+        "name": "vault",
+        "version": "0.34.0",
+        "packageDigest": "sha256:a716f4fa8bb80e450ce7c0f9de7b475183c47437a162eee744cd40bf991244e9",
+        "mirrorPath": "charts/vault",
+        "destinationRepository": null
+      },
+      "images": [
+        {
+          "id": "vault-server",
+          "sourceIndexDigest": "sha256:a296a888b118615dc01d5f1a6846e6d4a7277946caaed5b447008fff5fe06b54",
+          "sourcePlatformDigest": "sha256:db6a5f78749204d0a8d002be1cc6e9a2a6de53dffce41a894c4a06d309dca360",
+          "destinationReference": null
+        }
+      ],
+      "values": {
+        "path": "gitops/dependencies/candidates/reference-lab/vault.values.json",
+        "canonicalDigest": "sha256:873993d24263ebf0724ef0f748c26603b00a5d2967cb861ec0743dc83d673b39"
+      },
+      "activationState": "blocked",
+      "reasonCodes": [
+        "SOURCE_ADMISSION_INCOMPLETE",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "LIVE_KMS_BINDING_MISSING",
+        "LIVE_PKI_BINDING_MISSING",
+        "SERVER_SIDE_DRY_RUN_MISSING",
+        "TWO_PERSON_APPROVAL_MISSING"
+      ]
+    },
+    {
+      "id": "external-secrets",
+      "controller": "openshift-gitops",
+      "targetCluster": "openshift",
+      "namespace": "orchestra-external-secrets",
+      "stage": "security-foundation",
+      "chart": {
+        "id": "external-secrets",
+        "name": "external-secrets",
+        "version": "2.8.0",
+        "packageDigest": "sha256:251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd",
+        "mirrorPath": "charts/external-secrets",
+        "destinationRepository": null
+      },
+      "images": [
+        {
+          "id": "external-secrets-controller",
+          "sourceIndexDigest": "sha256:24c0dd3699e0988520afd2218612758cd97d1f702757b5b4fcf89adaa33ef679",
+          "sourcePlatformDigest": "sha256:02259bfd212de0b563b1eb9065e85e816bfec13d1aec84ee4e1a48cfed228b40",
+          "destinationReference": null
+        }
+      ],
+      "values": {
+        "path": "gitops/dependencies/candidates/reference-lab/external-secrets.values.json",
+        "canonicalDigest": "sha256:a351eca3a1147b1dd4e419ec211d0ce5ac7e131d7947ae161bec4d76c46bb566"
+      },
+      "activationState": "blocked",
+      "reasonCodes": [
+        "SOURCE_ADMISSION_INCOMPLETE",
+        "DESTINATION_MIRROR_MISSING",
+        "LAB_SIGNATURE_MISSING",
+        "VAULT_NOT_READY",
+        "CERT_MANAGER_NOT_READY",
+        "LIVE_PKI_BINDING_MISSING",
+        "OPENSHIFT_SERVER_DRY_RUN_MISSING",
+        "TWO_PERSON_APPROVAL_MISSING"
+      ]
+    }
+  ],
+  "serviceOverlays": {
+    "path": "gitops/dependencies/candidates/reference-lab/service-overlays.json",
+    "canonicalDigest": "sha256:76d8efbd3c25be01ac58e5b54ec64fbdf711da2524e91615aa46c8013665f244"
+  },
+  "unresolvedServices": [
+    {
+      "id": "services-gitops",
+      "reasonCodes": [
+        "IMAGE_INVENTORY_MISSING",
+        "EXTERNAL_IDENTITY_MISSING"
+      ]
+    },
+    {
+      "id": "cert-manager",
+      "reasonCodes": [
+        "IMAGE_INVENTORY_MISSING",
+        "MIRROR_BINDING_MISSING"
+      ]
+    },
+    {
+      "id": "valkey",
+      "reasonCodes": [
+        "VALKEY_SENTINEL_PROVIDER_UNRESOLVED"
+      ]
+    },
+    {
+      "id": "harbor",
+      "reasonCodes": [
+        "INFRASTRUCTURE_DATABASE_NOT_READY",
+        "VALKEY_SENTINEL_PROVIDER_UNRESOLVED"
+      ]
+    },
+    {
+      "id": "keycloak",
+      "reasonCodes": [
+        "KEYCLOAK_OPERATOR_SOURCE_NOT_LOCKED",
+        "INFRASTRUCTURE_DATABASE_NOT_READY"
+      ]
+    },
+    {
+      "id": "prometheus-thanos",
+      "reasonCodes": [
+        "THANOS_DEPLOYMENT_CONTRACT_UNRESOLVED",
+        "OBJECT_STORE_BINDING_MISSING"
+      ]
+    },
+    {
+      "id": "blackbox-probes",
+      "reasonCodes": [
+        "PROBE_POLICY_MISSING",
+        "IMAGE_INVENTORY_MISSING"
+      ]
+    },
+    {
+      "id": "model-backend",
+      "reasonCodes": [
+        "MODEL_ARTIFACT_CONTRACT_MISSING"
+      ]
+    },
+    {
+      "id": "embedding-model",
+      "reasonCodes": [
+        "MODEL_ARTIFACT_CONTRACT_MISSING"
+      ]
+    },
+    {
+      "id": "synthetic-mcp",
+      "reasonCodes": [
+        "SYNTHETIC_SERVICE_RELEASE_MISSING"
+      ]
+    }
+  ],
+  "renderPolicy": {
+    "candidateRoot": "gitops/dependencies/candidates/reference-lab",
+    "outputRoot": "restricted/dependency-gitops-candidate",
+    "offlineHelmTemplateAllowed": true,
+    "applicationEmissionAllowed": false,
+    "serverDryRunAllowed": false,
+    "imperativeSyncAllowed": false,
+    "activeKustomizationReferenceAllowed": false
+  },
+  "claim": {
+    "sourceCandidateDeclared": true,
+    "destinationMirrorsBound": false,
+    "labSignaturesVerified": false,
+    "applicationsEmitted": false,
+    "serverDryRunPassed": false,
+    "twoPersonApproved": false,
+    "activated": false,
+    "applied": false,
+    "liveTested": false,
+    "campaignEvidence": false
+  }
+}

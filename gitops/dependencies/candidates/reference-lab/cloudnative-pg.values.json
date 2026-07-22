@@ -1,0 +1,84 @@
+{
+  "replicaCount": 2,
+  "image": {
+    "repository": "europe-west1-docker.pkg.dev/ORCHESTRA_SERVICES_PROJECT_REQUIRED/orchestra-bootstrap/cloudnative-pg",
+    "tag": "1.30.0@sha256:091d306935cfdf646debfe78010d59ebfb572150eb6eb922b0203873c0c68841",
+    "pullPolicy": "IfNotPresent"
+  },
+  "imagePullSecrets": [
+    {
+      "name": "orchestra-bootstrap-registry"
+    }
+  ],
+  "crds": {
+    "create": true
+  },
+  "config": {
+    "create": true,
+    "secret": false,
+    "clusterWide": true,
+    "maxConcurrentReconciles": 10
+  },
+  "serviceAccount": {
+    "create": true,
+    "name": "cloudnative-pg"
+  },
+  "containerSecurityContext": {
+    "allowPrivilegeEscalation": false,
+    "readOnlyRootFilesystem": true,
+    "runAsUser": 10001,
+    "runAsGroup": 10001,
+    "seccompProfile": {
+      "type": "RuntimeDefault"
+    },
+    "capabilities": {
+      "drop": [
+        "ALL"
+      ]
+    }
+  },
+  "podSecurityContext": {
+    "runAsNonRoot": true,
+    "seccompProfile": {
+      "type": "RuntimeDefault"
+    }
+  },
+  "resources": {
+    "requests": {
+      "cpu": "250m",
+      "memory": "256Mi"
+    },
+    "limits": {
+      "cpu": "1",
+      "memory": "1Gi"
+    }
+  },
+  "topologySpreadConstraints": [
+    {
+      "maxSkew": 1,
+      "topologyKey": "topology.kubernetes.io/zone",
+      "whenUnsatisfiable": "DoNotSchedule",
+      "labelSelector": {
+        "matchLabels": {
+          "app.kubernetes.io/name": "cloudnative-pg"
+        }
+      }
+    },
+    {
+      "maxSkew": 1,
+      "topologyKey": "kubernetes.io/hostname",
+      "whenUnsatisfiable": "DoNotSchedule",
+      "labelSelector": {
+        "matchLabels": {
+          "app.kubernetes.io/name": "cloudnative-pg"
+        }
+      }
+    }
+  ],
+  "monitoring": {
+    "podMonitorEnabled": true,
+    "podMonitorAdditionalLabels": {
+      "orchestra.prometa.ai/profile": "orchestra-ocp-4.20-amd64-v1"
+    }
+  }
+}

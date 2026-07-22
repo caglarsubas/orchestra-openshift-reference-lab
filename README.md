@@ -25,7 +25,8 @@ immutable cross-plane release intake, immutable dependency source catalog,
 immutable platform-owned certification contract intake,
 source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
-mirror-intake contracts, an atomic signed-runner scan collector and detached
+mirror-intake contracts, a digest-bound source-only dependency GitOps
+candidate, an atomic signed-runner scan collector and detached
 attestation verifier, a stage-aware prerequisite observation policy and
 payload-free read-only collector, gate-controlled product and dependency
 GitOps floors, an environment-bound read-only Terraform planning lane, a
@@ -115,6 +116,17 @@ approvals. Even a fully approved exception set cannot authorize source
 admission or mirroring without the separate signed-runner source replay and
 admission aggregate.
 
+The source-only dependency GitOps candidate digest is
+`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+It projects five exact chart/image contracts into offline values for
+CloudNativePG, the ClickHouse operator, JetStream, Vault, and External Secrets,
+plus six blocked service-resource plans. CI derives the chart and image
+bindings from the existing BOM and admission contracts, checks the values
+semantically, and proves the candidate is absent from the active
+Kustomization. It contains no Argo Application or destination mirror reference
+and cannot be applied. Ten services, including cert-manager and
+Valkey/Sentinel, remain unresolved.
+
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
 release-validation receiver and synthetic tenant kit remain `source-only`:
@@ -125,12 +137,12 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
+| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission/GitOps candidate, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
 | `contracts/platform/` | Exact platform-owned policy, schema bundle, and fixture bytes vendored from the pinned release revision; not campaign evidence |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, VPC/DNS peering, public delegation zone, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
-| `gitops/` | Cluster declarations; no generated Secret values |
+| `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
 | `schemas/` | Strict additive JSON contracts for prerequisite observations, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
@@ -155,13 +167,18 @@ make terraform-fmt
 `make validate` checks the topology, immutable cross-plane release set,
 platform-owned certification contract intake, dependency BOM, fail-closed
 dependency admission, bounded signature observation, unsigned-source risk
-policy, empty exception intake, and empty mirror intake, plus the staged
+policy, empty exception intake, empty mirror intake, and source-only dependency
+GitOps candidate, plus the staged
 prerequisite observation policy. It rejects
 mutable product tags, missing planes, an unbound runner, changed chart or image
 subjects, wildcard signing identities, silently
 omitted dependencies, populated approvals, self-review, stale evidence,
 overlong exceptions, populated mirror claims, or any attempt to mark the
 dependency plane active.
+The dependency candidate validator also rejects destination references,
+mutable image tags, values drift, path escapes, missing blocked services,
+unsafe chart features, generated manifests in the candidate tree, or a
+reference from the active Kustomization.
 It also renders the product overlay and proves that the Argo Applications use
 the matching source revisions, chart digests, mirrored repositories, image
 digests, profile, and control-plane boundary. Only ExternalSecret and

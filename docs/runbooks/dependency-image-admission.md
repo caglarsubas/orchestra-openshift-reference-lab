@@ -64,6 +64,54 @@ image-name-only Secret with a non-Secret configuration mechanism, add resource
 limits and disruption behavior, and keep cert-manager-generated TLS material
 out of Git.
 
+## Offline values-candidate review
+
+The source-only candidate is bound by
+`config/dependency-gitops-candidate.lock.json`, digest
+`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+It covers only the five chart packages whose operator/service images are fully
+inventoried:
+
+| Package | Expected package SHA-256 |
+|---|---|
+| `cloudnative-pg-0.29.0.tgz` | `668e065ff53508d58238788fd35b355a925060843629a951df0e6a9362e6d32f` |
+| `altinity-clickhouse-operator-0.27.1.tgz` | `716fd37d87bce19e15b42b207db5b0363f61d4f7b546413935d9a2ed9144401e` |
+| `nats-2.14.2.tgz` | `86e0fbfe000b6d7fe70a3032ad3a667252f2d3dd2022e95f7330704d947d0f84` |
+| `vault-0.34.0.tgz` | `a716f4fa8bb80e450ce7c0f9de7b475183c47437a162eee744cd40bf991244e9` |
+| `external-secrets-2.8.0.tgz` | `251e4615013c6d2f9ade5cedf1cd8615613f286bfc381e44fb005f197e611ecd` |
+
+Verify package bytes before extraction or rendering. Store chart packages and
+rendered manifests under ignored `restricted/` custody, never in Git:
+
+```bash
+shasum -a 256 /path/to/cloudnative-pg-0.29.0.tgz
+mkdir -p restricted/dependency-gitops-candidate
+helm template cloudnative-pg /path/to/cloudnative-pg-0.29.0.tgz \
+  --namespace orchestra-postgres \
+  --include-crds \
+  -f gitops/dependencies/candidates/reference-lab/cloudnative-pg.values.json \
+  > restricted/dependency-gitops-candidate/cloudnative-pg.yaml
+```
+
+Repeat for ClickHouse, JetStream, Vault, and External Secrets with their exact
+package and values paths. For every output:
+
+1. enumerate all rendered images and require the admitted `linux/amd64`
+   platform digests;
+2. reject upstream registries, mutable tags, undeclared hooks, tests, init
+   containers, and sidecars;
+3. inspect cluster-scoped RBAC, CRDs, webhook configuration, PDBs, topology,
+   storage, TLS, Workload Identity, and Secret references;
+4. confirm the Altinity CRD hook and NATS toolbox are disabled;
+5. confirm Vault relies on the chart-injected per-pod Raft node identity; and
+6. confirm External Secrets uses external cert-manager issuance and renders no
+   built-in certificate `Secret` or `Certificate`.
+
+The registry project placeholder is intentionally unresolved. An offline
+render does not establish a destination mirror, signature, private-pull proof,
+server-side dry run, deployment, or campaign evidence. Do not apply it and do
+not add the candidate directory to the active Kustomization.
+
 ## Mirror and sign
 
 1. Copy only the declared linux/amd64 manifest into the immutable bootstrap

@@ -31,6 +31,16 @@ Three exact subjects verified cryptographically, while eight require reviewed
 exceptions. The observation is not signed-runner evidence and does not remove
 the deny window. The mirror-intake template remains completely empty.
 
+The separate
+[source-only dependency candidate](../candidates/reference-lab/README.md)
+projects the five fully inventoried chart/image sets into offline
+values and records six blocked service-resource plans. Its controlling digest
+is
+`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+It is not part of this Kustomization, contains no Application, and has no
+destination reference. Its existence does not remove this project's deny
+window.
+
 ## Why there are no Applications yet
 
 A chart version does not bind all images rendered by that chart. Creating an
