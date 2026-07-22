@@ -40,10 +40,10 @@ RELEASE_SET = ROOT / "config" / "cross-plane-release-set.lock.json"
 COLLECTOR_SCRIPT = ROOT / "scripts" / "collect_dependency_risk_evidence.sh"
 EXCEPTION_TEMPLATE = ROOT / "config" / "dependency-signature-exceptions.example.json"
 EXPECTED_RISK_POLICY_DIGEST = (
-    "sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7"
+    "sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4"
 )
 EXPECTED_EXCEPTION_TEMPLATE_DIGEST = (
-    "sha256:8b1f8a6905f8927565ec13ea49ddd662939ae5ec3db7d82176e76fa4d4b7a4af"
+    "sha256:2231cf7c2f2dce5c1b35f402cdd193ce4268e1726f7ab3b27f3fd23b7bb9b70f"
 )
 SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN")
 BLOCKING_SEVERITIES = ("CRITICAL", "HIGH", "UNKNOWN")
@@ -227,6 +227,9 @@ def validate_risk_policy(value: dict[str, Any]) -> str:
             "spdx-2.3-json",
         ],
         "requiredToolVersions": {"trivy": "0.72.0", "syft": "1.48.0"},
+        "preflightKmsSigningRoundTripRequired": True,
+        "preflightKmsAlgorithm": "EC_SIGN_P256_SHA256",
+        "preflightCollectionArtifactPersistenceAllowed": False,
         "runnerProvenanceRequired": True,
         "collectionAttestationRequired": True,
         "externalScannerConfigAllowed": False,

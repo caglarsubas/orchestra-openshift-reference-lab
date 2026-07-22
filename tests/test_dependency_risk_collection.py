@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -294,9 +295,172 @@ class DependencyRiskCollectionTests(unittest.TestCase):
             '"registry:$platform_subject"',
             "cosign sign-blob",
             '--key "$SIGNING_KEY"',
+            "--preflight-only",
+            "gcloud kms asymmetric-sign",
+            "openssl dgst -sha256",
+            "collectionStarted=false",
         ):
             self.assertIn(fragment, source)
         self.assertNotIn("--ignore-unfixed", source)
+        self.assertLess(
+            source.index('if [[ "$PREFLIGHT_ONLY" == "true" ]]'),
+            source.index("--download-db-only"),
+        )
+
+    def test_preflight_verifies_kms_and_publishes_no_evidence(self) -> None:
+        restricted = ROOT / "restricted"
+        restricted.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(
+            prefix="dependency-risk-preflight.", dir=restricted
+        ) as temporary:
+            work = Path(temporary)
+            release_dir = work / "platform-release"
+            fake_bin = work / "bin"
+            release_dir.mkdir()
+            fake_bin.mkdir()
+            self.write_fixture(release_dir)
+
+            call_log = work / "calls.log"
+            public_key = release_dir / "collection-signing-public-key.pem"
+
+            def command(name: str, source: str) -> None:
+                path = fake_bin / name
+                path.write_text(
+                    "#!/usr/bin/env bash\nset -euo pipefail\n"
+                    'printf \'%s %s\\n\' "$(basename "$0")" "$*" '
+                    '>>"${PREFLIGHT_CALL_LOG:?}"\n' + source,
+                    encoding="utf-8",
+                )
+                path.chmod(0o755)
+
+            command(
+                "date",
+                "printf '2026-07-22T02:00:00Z\\n'\n",
+            )
+            command(
+                "realpath",
+                "[[ \"${1:-}\" == '-m' ]] && shift\n"
+                "python3 -c 'import pathlib, sys; print(pathlib.Path(sys.argv[1]).resolve())' \"$1\"\n",
+            )
+            command(
+                "trivy",
+                "[[ \"${1:-}\" == '--version' ]] || exit 91\n"
+                "printf 'Version: 0.72.0\\n'\n",
+            )
+            command(
+                "syft",
+                "[[ \"${1:-}\" == 'version' ]] || exit 92\n"
+                'printf \'{"version":"1.48.0"}\\n\'\n',
+            )
+            command(
+                "cosign",
+                'case "${1:-}" in\n'
+                '  version) printf \'{"gitVersion":"v3.1.1"}\\n\' ;;\n'
+                '  public-key) cat "${FIXTURE_KMS_PUBLIC_KEY:?}" ;;\n'
+                "  verify*) exit 0 ;;\n"
+                "  *) exit 93 ;;\n"
+                "esac\n",
+            )
+            command(
+                "gcloud",
+                "if [[ \"${1:-}\" == 'version' ]]; then\n"
+                '  printf \'{"Google Cloud SDK":"576.0.0"}\\n\'\n'
+                "elif [[ \"$*\" == *'keys versions describe'* ]]; then\n"
+                "  printf 'EC_SIGN_P256_SHA256\\tENABLED\\n'\n"
+                "elif [[ \"$*\" == *'kms asymmetric-sign'* ]]; then\n"
+                "  signature_file=''\n"
+                '  for argument in "$@"; do\n'
+                '    case "$argument" in\n'
+                '      --signature-file=*) signature_file="${argument#*=}" ;;\n'
+                "    esac\n"
+                "  done\n"
+                '  [[ -n "$signature_file" ]] || exit 94\n'
+                "  printf 'fixture-kms-signature' >\"$signature_file\"\n"
+                "else\n"
+                "  exit 95\n"
+                "fi\n",
+            )
+            command(
+                "openssl",
+                "[[ \"${1:-}\" == 'dgst' && \"$*\" == *'-sha256'* ]] || exit 96\n",
+            )
+            command(
+                "orchestra-certification",
+                "[[ \"${1:-}\" == 'self-test' ]] || exit 97\n",
+            )
+
+            output_dir = work / "unpublished-evidence"
+            actor_digest = digest_bytes(b"preflight-collector")
+            public_key_digest = digest_bytes(public_key.read_bytes())
+            environment = os.environ.copy()
+            environment.update(
+                {
+                    "PATH": f"{fake_bin}:{environment['PATH']}",
+                    "PREFLIGHT_CALL_LOG": str(call_log),
+                    "FIXTURE_KMS_PUBLIC_KEY": str(public_key),
+                    "ORCHESTRA_RUNNER_TOOLCHAIN_LOCK": str(
+                        release_dir / "certification-runner-toolchain-lock.json"
+                    ),
+                }
+            )
+            collector_command = [
+                str(ROOT / "scripts" / "collect_dependency_risk_evidence.sh"),
+                "--output-dir",
+                str(output_dir),
+                "--evidence-id",
+                "orchestra-dependency-risk-evidence-preflight.1",
+                "--actor-identity-digest",
+                actor_digest,
+                "--platform-release-dir",
+                str(release_dir),
+                "--signing-key",
+                (
+                    "gcpkms://projects/lab/locations/europe-west1/keyRings/"
+                    "evidence/cryptoKeys/dependency-risk/cryptoKeyVersions/1"
+                ),
+                "--expected-signing-public-key-digest",
+                public_key_digest,
+                "--preflight-only",
+            ]
+            result = subprocess.run(
+                collector_command,
+                cwd=ROOT,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("dependency_risk_collection_preflight_ready", result.stdout)
+            self.assertIn("collectionStarted=false", result.stdout)
+            self.assertIn("sourceAdmission=false", result.stdout)
+            self.assertFalse(output_dir.exists())
+            self.assertEqual(
+                list(work.glob(".dependency-risk-collection.*")),
+                [],
+            )
+            calls = call_log.read_text(encoding="utf-8")
+            self.assertIn("gcloud kms asymmetric-sign", calls)
+            self.assertIn("openssl dgst -sha256", calls)
+            self.assertNotIn("--download-db-only", calls)
+            self.assertNotIn("trivy image", calls)
+
+            command("openssl", "exit 96\n")
+            invalid_signature = subprocess.run(
+                collector_command,
+                cwd=ROOT,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertNotEqual(invalid_signature.returncode, 0)
+            self.assertIn(
+                "cloud_kms_signing_challenge_verification_failed",
+                invalid_signature.stderr,
+            )
+            self.assertFalse(output_dir.exists())
+            self.assertEqual(list(work.glob(".dependency-risk-collection.*")), [])
 
     def test_fixture_is_non_authorizing(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

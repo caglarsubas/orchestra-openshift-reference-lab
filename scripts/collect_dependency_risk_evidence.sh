@@ -20,6 +20,7 @@ ACTOR_IDENTITY_DIGEST=""
 PLATFORM_RELEASE_DIR=""
 SIGNING_KEY=""
 EXPECTED_SIGNING_PUBLIC_KEY_DIGEST=""
+PREFLIGHT_ONLY=false
 
 usage() {
   cat <<'EOF'
@@ -29,11 +30,15 @@ Usage: collect_dependency_risk_evidence.sh \
   --actor-identity-digest sha256:<digest> \
   --platform-release-dir restricted/platform-release \
   --signing-key gcpkms://projects/.../cryptoKeyVersions/... \
-  --expected-signing-public-key-digest sha256:<digest>
+  --expected-signing-public-key-digest sha256:<digest> \
+  [--preflight-only]
 
 Run this command only inside the exact certification-runner image pinned by
 config/cross-plane-release-set.lock.json. Output is published atomically and
 never authorizes source admission, mirroring, activation, or campaign evidence.
+Preflight mode validates every launch prerequisite, including an ephemeral KMS
+sign-and-verify challenge, but downloads no scanner database and publishes no
+collection artifact.
 EOF
 }
 
@@ -91,6 +96,10 @@ while (($# > 0)); do
       EXPECTED_SIGNING_PUBLIC_KEY_DIGEST="${2:-}"
       shift 2
       ;;
+    --preflight-only)
+      PREFLIGHT_ONLY=true
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -106,7 +115,15 @@ done
 [[ -n "$EVIDENCE_ID" ]] || fail "evidence_id_required"
 [[ "$EVIDENCE_ID" =~ ^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$ ]] || fail "evidence_id_invalid"
 require_digest "$ACTOR_IDENTITY_DIGEST" "actor_identity_digest_invalid"
-[[ "$SIGNING_KEY" =~ ^gcpkms://projects/[^/]+/locations/[^/]+/keyRings/[^/]+/cryptoKeys/[^/]+/cryptoKeyVersions/[0-9]+$ ]] || fail "cloud_kms_signing_key_version_required"
+if [[ "$SIGNING_KEY" =~ ^gcpkms://projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)/cryptoKeys/([^/]+)/cryptoKeyVersions/([0-9]+)$ ]]; then
+  KMS_PROJECT="${BASH_REMATCH[1]}"
+  KMS_LOCATION="${BASH_REMATCH[2]}"
+  KMS_KEYRING="${BASH_REMATCH[3]}"
+  KMS_KEY="${BASH_REMATCH[4]}"
+  KMS_VERSION="${BASH_REMATCH[5]}"
+else
+  fail "cloud_kms_signing_key_version_required"
+fi
 require_digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" "expected_signing_public_key_digest_invalid"
 require_command realpath
 RESTRICTED_ROOT="$(realpath -m "$ROOT/restricted")"
@@ -115,7 +132,7 @@ PLATFORM_RELEASE_DIR="$(realpath -m "$PLATFORM_RELEASE_DIR")"
 [[ "$OUTPUT_DIR" == "$RESTRICTED_ROOT/"* ]] || fail "output_dir_outside_restricted_storage"
 [[ "$PLATFORM_RELEASE_DIR" == "$RESTRICTED_ROOT/"* && -d "$PLATFORM_RELEASE_DIR" ]] || fail "platform_release_dir_invalid"
 
-for command_name in jq sha256sum awk install mktemp date trivy syft cosign orchestra-certification; do
+for command_name in jq sha256sum awk install mktemp date trivy syft cosign gcloud openssl orchestra-certification; do
   require_command "$command_name"
 done
 for contract_file in "$LAB_LOCK" "$ADMISSION" "$SOURCE_VERIFICATION" "$RISK_POLICY" "$RELEASE_SET" "$COLLECTOR_SCRIPT_SOURCE" "$TOOLCHAIN_LOCK"; do
@@ -250,6 +267,73 @@ chmod 0600 "$TEMP_DIR/collection-signing-public-key.pem"
 SIGNING_PUBLIC_KEY_DIGEST="$(raw_digest "$TEMP_DIR/collection-signing-public-key.pem")"
 [[ "$SIGNING_PUBLIC_KEY_DIGEST" == "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" ]] || fail "signing_public_key_digest_mismatch"
 
+EXPECTED_TRIVY_VERSION="$(jq -er '.tools.trivy.version' "$TOOLCHAIN_LOCK")"
+EXPECTED_SYFT_VERSION="$(jq -er '.tools.syft.version' "$TOOLCHAIN_LOCK")"
+EXPECTED_COSIGN_VERSION="$(jq -er '.tools.cosign.version' "$TOOLCHAIN_LOCK")"
+EXPECTED_GCLOUD_VERSION="$(jq -er '.tools.gcloud.version' "$TOOLCHAIN_LOCK")"
+TRIVY_VERSION="$(trivy --version | awk '/^Version:/ {print $2; exit}')"
+SYFT_VERSION="$(syft version -o json | jq -er '.version')"
+COSIGN_VERSION="$(cosign version --json | jq -er '.gitVersion | ltrimstr("v")')"
+GCLOUD_VERSION="$(gcloud version --format=json | jq -er '."Google Cloud SDK"')"
+[[ "$TRIVY_VERSION" == "$EXPECTED_TRIVY_VERSION" ]] || fail "trivy_version_invalid"
+[[ "$SYFT_VERSION" == "$EXPECTED_SYFT_VERSION" ]] || fail "syft_version_invalid"
+[[ "$COSIGN_VERSION" == "$EXPECTED_COSIGN_VERSION" ]] || fail "cosign_version_invalid"
+[[ "$GCLOUD_VERSION" == "$EXPECTED_GCLOUD_VERSION" ]] || fail "gcloud_version_invalid"
+
+REQUIRED_KMS_ALGORITHM="$(jq -er '.collectionPolicy.preflightKmsAlgorithm' "$RISK_POLICY")"
+read -r KMS_ALGORITHM KMS_STATE < <(
+  gcloud kms keys versions describe "$KMS_VERSION" \
+    --project="$KMS_PROJECT" \
+    --location="$KMS_LOCATION" \
+    --keyring="$KMS_KEYRING" \
+    --key="$KMS_KEY" \
+    --format='value(algorithm,state)'
+)
+[[ "$KMS_ALGORITHM" == "$REQUIRED_KMS_ALGORITHM" ]] || fail "cloud_kms_signing_algorithm_invalid"
+[[ "$KMS_STATE" == "ENABLED" ]] || fail "cloud_kms_signing_key_not_enabled"
+
+PREFLIGHT_CHECKED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+[[ "$PREFLIGHT_CHECKED_AT" > "$SOURCE_OBSERVED_AT" || "$PREFLIGHT_CHECKED_AT" == "$SOURCE_OBSERVED_AT" ]] || fail "source_observation_not_started_during_preflight"
+[[ "$PREFLIGHT_CHECKED_AT" < "$SOURCE_VALID_UNTIL" || "$PREFLIGHT_CHECKED_AT" == "$SOURCE_VALID_UNTIL" ]] || fail "source_observation_expired_during_preflight"
+jq -nS \
+  --arg profileId "$PROFILE_ID" \
+  --arg evidenceId "$EVIDENCE_ID" \
+  --arg releaseSetDigest "$RELEASE_SET_DIGEST" \
+  --arg runnerImageDigest "$RUNNER_IMAGE_DIGEST" \
+  --arg runnerToolchainDigest "$RUNNER_TOOLCHAIN_DIGEST" \
+  --arg collectorScriptDigest "$COLLECTOR_SCRIPT_DIGEST" \
+  --arg actorIdentityDigest "$ACTOR_IDENTITY_DIGEST" \
+  --arg signingPublicKeyDigest "$SIGNING_PUBLIC_KEY_DIGEST" \
+  --arg checkedAt "$PREFLIGHT_CHECKED_AT" \
+  '{schemaVersion:1,kind:"orchestra.dependency-risk.collection-preflight-challenge.v1",profileId:$profileId,evidenceId:$evidenceId,releaseSetDigest:$releaseSetDigest,runnerImageDigest:$runnerImageDigest,runnerToolchainDigest:$runnerToolchainDigest,collectorScriptDigest:$collectorScriptDigest,actorIdentityDigest:$actorIdentityDigest,signingPublicKeyDigest:$signingPublicKeyDigest,checkedAt:$checkedAt,claims:{collectionStarted:false,sourceAdmissionAuthorized:false,mirrorAuthorization:false,activationAuthorized:false,campaignEvidence:false}}' \
+  >"$TEMP_DIR/dependency-risk-preflight-challenge.json"
+chmod 0600 "$TEMP_DIR/dependency-risk-preflight-challenge.json"
+gcloud kms asymmetric-sign \
+  --project="$KMS_PROJECT" \
+  --location="$KMS_LOCATION" \
+  --keyring="$KMS_KEYRING" \
+  --key="$KMS_KEY" \
+  --version="$KMS_VERSION" \
+  --digest-algorithm=sha256 \
+  --input-file="$TEMP_DIR/dependency-risk-preflight-challenge.json" \
+  --signature-file="$TEMP_DIR/dependency-risk-preflight-challenge.sig" \
+  --quiet
+chmod 0600 "$TEMP_DIR/dependency-risk-preflight-challenge.sig"
+openssl dgst -sha256 \
+  -verify "$TEMP_DIR/collection-signing-public-key.pem" \
+  -signature "$TEMP_DIR/dependency-risk-preflight-challenge.sig" \
+  "$TEMP_DIR/dependency-risk-preflight-challenge.json" >/dev/null \
+  || fail "cloud_kms_signing_challenge_verification_failed"
+PREFLIGHT_COMPLETED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+[[ "$PREFLIGHT_COMPLETED_AT" < "$SOURCE_VALID_UNTIL" || "$PREFLIGHT_COMPLETED_AT" == "$SOURCE_VALID_UNTIL" ]] || fail "source_observation_expired_during_preflight"
+
+if [[ "$PREFLIGHT_ONLY" == "true" ]]; then
+  printf 'dependency_risk_collection_preflight_ready profile=%s releaseSet=%s runner=%s signingKey=%s collectionStarted=false sourceAdmission=false mirrorAuthorization=false activation=false campaignEvidence=false\n' \
+    "$PROFILE_ID" "$RELEASE_SET_DIGEST" "$RUNNER_IMAGE_DIGEST" "$SIGNING_PUBLIC_KEY_DIGEST"
+  exit 0
+fi
+rm -f "$TEMP_DIR/dependency-risk-preflight-challenge.json" "$TEMP_DIR/dependency-risk-preflight-challenge.sig"
+
 STARTED_AT="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 TRIVY_CACHE="$TEMP_DIR/trivy-cache"
 mkdir -p "$TRIVY_CACHE"
@@ -260,10 +344,6 @@ trivy image --config /dev/null --cache-dir "$TRIVY_CACHE" --no-progress --disabl
 [[ -f "$TRIVY_CACHE/java-db/trivy-java.db" ]] || fail "trivy_java_database_missing"
 TRIVY_DATABASE_DIGEST="$(raw_digest "$TRIVY_CACHE/db/trivy.db")"
 TRIVY_JAVA_DATABASE_DIGEST="$(raw_digest "$TRIVY_CACHE/java-db/trivy-java.db")"
-TRIVY_VERSION="$(trivy --version | awk '/^Version:/ {print $2; exit}')"
-SYFT_VERSION="$(syft version -o json | jq -er '.version')"
-[[ "$TRIVY_VERSION" == "0.72.0" ]] || fail "trivy_version_invalid"
-[[ "$SYFT_VERSION" == "1.48.0" ]] || fail "syft_version_invalid"
 
 SUBJECTS_JSON="$TEMP_DIR/subjects.jsonl"
 : >"$SUBJECTS_JSON"

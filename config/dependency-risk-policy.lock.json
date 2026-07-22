@@ -24,7 +24,7 @@
   },
   "collectionPolicy": {
     "executionClass": "signed-certification-runner",
-    "collectorScriptDigest": "sha256:c125caa2909add08d1e0a2515d8ff988c7ead7b73b0ac08835c8f55907adfe54",
+    "collectorScriptDigest": "sha256:a474328d9cfab9340c67ff1179f947144134ef7cee501894a2f0f14782d8f415",
     "maximumCollectionDurationHours": 6,
     "maximumEvidenceAgeHours": 72,
     "requiredArtifactTypes": [
@@ -35,6 +35,9 @@
       "trivy": "0.72.0",
       "syft": "1.48.0"
     },
+    "preflightKmsSigningRoundTripRequired": true,
+    "preflightKmsAlgorithm": "EC_SIGN_P256_SHA256",
+    "preflightCollectionArtifactPersistenceAllowed": false,
     "runnerProvenanceRequired": true,
     "collectionAttestationRequired": true,
     "externalScannerConfigAllowed": false,

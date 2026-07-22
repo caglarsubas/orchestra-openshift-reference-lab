@@ -28,7 +28,7 @@ RISK_POLICY_LOCK = ROOT / "config" / "dependency-risk-policy.lock.json"
 MIRROR_INTAKE = ROOT / "config" / "dependency-mirror-intake.example.json"
 
 EXPECTED_CANDIDATE_DIGEST = (
-    "sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5"
+    "sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790"
 )
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 ARCHITECTURE = "linux/amd64"

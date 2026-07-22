@@ -103,21 +103,24 @@ intake digest is
 No destination, receipt, lab signature, pull proof, or approval is populated.
 
 The unsigned-source risk-policy digest is
-`sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7`.
+`sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4`.
 It requires the release-set-bound signed runner, exact Trivy and Syft versions,
 frozen vulnerability databases, Cloud KMS detached collection evidence, and
-SPDX inventory. It blocks critical, high, and unknown-severity findings,
-requires human licence and risk review, and enforces two independent approval
-roles with a maximum 30-day exception lifetime. The empty signature-exception
-intake digest is
-`sha256:8b1f8a6905f8927565ec13ea49ddd662939ae5ec3db7d82176e76fa4d4b7a4af`.
+SPDX inventory. Its preflight-only lane verifies the exact release, runner,
+toolchain, scanner versions, source window, and an ephemeral Cloud KMS signing
+round trip before downloading scanner databases; it publishes no collection
+artifact and grants no authorization. The policy blocks critical, high, and
+unknown-severity findings, requires human licence and risk review, and enforces
+two independent approval roles with a maximum 30-day exception lifetime. The
+empty signature-exception intake digest is
+`sha256:2231cf7c2f2dce5c1b35f402cdd193ce4268e1726f7ab3b27f3fd23b7bb9b70f`.
 It contains all eight unsigned subjects but zero evidence bundles and zero
 approvals. Even a fully approved exception set cannot authorize source
 admission or mirroring without the separate signed-runner source replay and
 admission aggregate.
 
 The source-only dependency GitOps candidate digest is
-`sha256:432f3a9c430229b54cc75b9c123b0b9596124bd0b7e104a7522c5475a92484a5`.
+`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It projects five exact chart/image contracts into offline values for
 CloudNativePG, the ClickHouse operator, JetStream, Vault, and External Secrets,
 plus six blocked service-resource plans. CI derives the chart and image

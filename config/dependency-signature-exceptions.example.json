@@ -8,7 +8,7 @@
     "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
     "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
     "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
-    "riskPolicyDigest": "sha256:90e7056e059f545d490639cd99e883a757458d48a496152c16f88554f5e473c7",
+    "riskPolicyDigest": "sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe"
   },
   "claim": {
