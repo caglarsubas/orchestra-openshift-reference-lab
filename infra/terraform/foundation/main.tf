@@ -607,6 +607,31 @@ resource "google_kms_crypto_key" "evidence" {
   }
 }
 
+resource "google_kms_crypto_key" "dependency_risk_signing" {
+  provider = google.services
+
+  name     = "dependency-risk-collection-signing"
+  key_ring = google_kms_key_ring.evidence.id
+  purpose  = "ASYMMETRIC_SIGN"
+
+  version_template {
+    algorithm        = "EC_SIGN_P256_SHA256"
+    protection_level = "SOFTWARE"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "dependency_risk_signer" {
+  provider = google.services
+
+  crypto_key_id = google_kms_crypto_key.dependency_risk_signing.id
+  role          = "roles/cloudkms.signerVerifier"
+  member        = "serviceAccount:orchestra-dependency-risk@${var.services_project_id}.iam.gserviceaccount.com"
+}
+
 data "google_storage_project_service_account" "services" {
   provider = google.services
   project  = var.services_project_id

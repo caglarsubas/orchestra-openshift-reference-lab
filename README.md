@@ -119,6 +119,18 @@ approvals. Even a fully approved exception set cannot authorize source
 admission or mirroring without the separate signed-runner source replay and
 admission aggregate.
 
+The dependency-risk preflight authority digest is
+`sha256:746304a45ba15385d629ee3ef5c7618e36980524ca4f73e024007e958925b679`.
+It declares a separate exact-main GitHub WIF provider, a collector service
+account with no project, evidence-bucket, or artifact-mirror role, and a
+dedicated `EC_SIGN_P256_SHA256` Cloud KMS key whose only collector grant is
+key-level `roles/cloudkms.signerVerifier`. The protected workflow obtains a
+short-lived GitHub App token for the exact platform release and package,
+rechecks the current environment approval, and invokes only the collector's
+no-evidence `--preflight-only` path. No Terraform has been applied and no live
+identity, KMS round trip, preflight, collection, admission, mirror, activation,
+campaign, or verification state is claimed.
+
 The source-only dependency GitOps candidate digest is
 `sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It projects five exact chart/image contracts into offline values for

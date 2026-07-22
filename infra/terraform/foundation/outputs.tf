@@ -79,3 +79,17 @@ output "evidence_writer_service_account" {
 output "artifact_mirror_service_account" {
   value = google_service_account.artifact_mirror.email
 }
+
+output "dependency_risk_signing_contract" {
+  value = {
+    crypto_key                           = google_kms_crypto_key.dependency_risk_signing.id
+    purpose                              = "ASYMMETRIC_SIGN"
+    algorithm                            = "EC_SIGN_P256_SHA256"
+    protection_level                     = "SOFTWARE"
+    exact_key_version_required           = true
+    signer_service_account               = "orchestra-dependency-risk@${var.services_project_id}.iam.gserviceaccount.com"
+    signer_role                          = "roles/cloudkms.signerVerifier"
+    declared_evidence_bucket_write_grant = false
+    declared_artifact_mirror_write_grant = false
+  }
+}

@@ -30,6 +30,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Unsigned-source risk policy and strict contracts | Yes | Yes | No | No | No |
 | Signed-runner vulnerability/SBOM evidence bundle contract | Yes | Yes | No | No | No |
 | Signed-runner collection launch preflight | Yes | Yes | No | No | No |
+| Dedicated dependency-risk KMS/WIF preflight authority | Yes | Yes | No | No | No |
+| Protected exact-main dependency-risk preflight workflow | Yes | Yes | No | No | No |
 | Live signed-runner vulnerability/SBOM evidence | No | N/A | No | No | No |
 | Empty upstream-signature exception intake | Yes | Yes | No | No | No |
 | Reviewed upstream-signature exceptions | No | N/A | No | No | No |
@@ -83,6 +85,18 @@ replays the published runner signature, SBOM attestation, release-manifest
 signature, and SLSA provenance, verifies exact tool versions, and proves an
 ephemeral Cloud KMS signing round trip before any scanner database download.
 It has not been run against live infrastructure.
+
+The dedicated preflight authority is now also source-declared and
+CI-validated. Bootstrap Terraform declares an exact-workflow WIF provider and
+a service account with no project, storage, or mirror grant. Foundation
+Terraform declares a separate asymmetric signing key and grants that identity
+only key-level signing and verification. The protected workflow accepts an
+exact reviewed key version and public-key digest, obtains short-lived GCP and
+GitHub App credentials, and runs only `--preflight-only`; it uploads no
+artifact. Neither Terraform state has been applied, the protected environment
+and GitHub App remain external configuration, and no live preflight result is
+checked in or inferred.
+
 No live scan or human review is checked in, so no exception is approved. The
 mirror intake is intentionally empty. No destination mirror, lab
 signature, live identity, backup target, server-side dry run, or approval is
@@ -94,11 +108,15 @@ the Altinity mutable CRD hook, uses the chart-provided Vault Raft node identity,
 and requires external cert-manager issuance for the External Secrets webhook.
 CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
-The next dependency increment is execution of the launch preflight and then the
-live signed-runner collection with an approved short-lived identity and Cloud
-KMS key, followed by independent licence/risk reviews, source-replay
-aggregation, live Artifact Registry/Harbor receipts, and a new executable
-operator/service overlay.
+
+The next dependency increment is bootstrap/foundation application and
+independent verification of the dedicated WIF provider, service account, key
+version, public-key digest, protected environment, and GitHub App installation;
+then the protected launch preflight can execute. A successful preflight still
+does not start collection. The later live signed-runner collection requires a
+separate reviewed execution lane, followed by independent licence/risk
+reviews, source-replay aggregation, live Artifact Registry/Harbor receipts,
+and a new executable operator/service overlay.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

@@ -9,13 +9,20 @@ The locked policy is
 `sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4`.
 The checked-in exception intake is deliberately empty, digest
 `sha256:2231cf7c2f2dce5c1b35f402cdd193ce4268e1726f7ab3b27f3fd23b7bb9b70f`.
+The preflight authority is locked separately in
+`config/dependency-risk-execution.lock.json`, digest
+`sha256:746304a45ba15385d629ee3ef5c7618e36980524ca4f73e024007e958925b679`.
 
 ## Separation of duties
 
-Use distinct short-lived identities for collection, exception request,
-security review, service-owner review, mirroring, and KMS signing. The
-requestor and signed-runner collector cannot approve the exception. The two
-reviewers must have distinct identity digests and roles:
+Use distinct short-lived identities for preflight, full collection, exception
+request, security review, service-owner review, and mirroring. The source
+declares the preflight signer's only federation path as the exact preflight
+workflow, which contains no full-collection invocation. A later collection
+signer may attest its own collection but cannot request or approve an
+exception. The requestor and signed-runner
+collector cannot approve the exception. The two reviewers must have distinct
+identity digests and roles:
 
 - `security-reviewer` verifies provenance, vulnerability evidence, the risk
   assessment, and the compensating-control plan;
@@ -24,6 +31,65 @@ reviewers must have distinct identity digests and roles:
 
 Each approval is separately signed and binds the exact per-subject candidate
 digest. One identity cannot satisfy both roles.
+
+## Configure the protected preflight lane
+
+The checked-in Terraform and workflow are declarations, not live authority.
+After independently reviewed bootstrap and foundation applies:
+
+1. Verify bootstrap output `dependency_risk_workload_identity_provider` names
+   the `dependency-risk-preflight` provider and output
+   `dependency_risk_service_account` names only
+   `orchestra-dependency-risk` in the services/evidence project.
+2. Verify foundation output `dependency_risk_signing_contract` against the
+   live KMS and IAM APIs. The key must use `ASYMMETRIC_SIGN`, algorithm
+   `EC_SIGN_P256_SHA256`, and software protection; the collector must have only
+   key-level `roles/cloudkms.signerVerifier` and no project, bucket, or mirror
+   grant.
+3. Create GitHub environment
+   `reference-lab-dependency-risk-preflight`. Restrict it to exact `main`,
+   require at least one configured non-owner reviewer, prevent self-review,
+   and disable administrator bypass. Set
+   `DEPENDENCY_RISK_PREFLIGHT_REVIEW_GATE_CONFIGURED=true` only after a second
+   operator verifies those controls.
+4. Set environment variables `GCP_DEPENDENCY_RISK_WIF_PROVIDER`,
+   `GCP_DEPENDENCY_RISK_COLLECTOR_SERVICE_ACCOUNT`, and
+   `GCP_SERVICES_PROJECT_ID` from independently verified live outputs.
+5. Install a dedicated GitHub App on only `agent-hook-v2`, grant only release
+   contents read and package read, and store its App ID/private key as
+   `DEPENDENCY_RISK_GITHUB_APP_ID` and
+   `DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY` environment secrets. Do not use a
+   personal access token or a service-account key.
+6. Select one enabled KMS key version. A reviewer outside the triggering
+   workflow obtains its public key, writes the PEM in the exact form returned
+   by Cloud KMS, computes `sha256sum`, and records that digest with the key
+   version and source-observation window. A workflow input is not evidence of
+   review; the protected-environment approval binds the reviewed values to the
+   current run.
+
+Dispatch only from exact `main` and never rerun a failed attempt:
+
+```bash
+revision="$(git rev-parse origin/main)"
+gh workflow run dependency-risk-preflight.yml \
+  --ref main \
+  -f expected_main_sha="$revision" \
+  -f kms_key_version='<reviewed-version>' \
+  -f expected_signing_public_key_digest='sha256:<reviewed-pem-digest>' \
+  -f reason='Verify dependency risk collection launch prerequisites'
+```
+
+The workflow re-reads the current environment approval, rejects rerun
+attempts, obtains short-lived WIF and GitHub App tokens, downloads the exact
+five platform release assets, mounts credentials read-only into the pinned
+runner, and invokes `collect_dependency_risk_evidence.sh` exactly once with
+`--preflight-only`. It uploads nothing and removes credentials, release assets,
+and transient logs. A successful log contains `collectionStarted=false`; it is
+an operational readiness observation, not stored campaign evidence.
+
+Do not dispatch after the locked source-verification window expires. Renew and
+review that source observation first, which changes its digest and all bound
+contracts.
 
 ## Collect raw evidence
 
@@ -88,10 +154,12 @@ docker run --rm --platform linux/amd64 \
 
 A successful preflight prints `collectionStarted=false` and every authorization
 claim as `false`; it is a readiness signal, not a stored certification artifact.
-Review that result, then rerun the same container
-command without `--preflight-only` to start collection. The runner entrypoint
-defaults to `orchestra-certification`, so both invocations must retain the Bash
-entrypoint override shown above.
+The protected workflow cannot start collection and must never be edited merely
+to remove `--preflight-only`. A separate collection execution contract must
+bind its own exact workflow, approval, identity, output custody, and source
+window before an operator may invoke the same container without that flag. The
+runner entrypoint defaults to `orchestra-certification`, so any later approved
+collection invocation must retain the Bash entrypoint override shown above.
 
 The output directory must not already exist. The collector stages everything
 in a mode-`0700` sibling directory, writes files mode `0600`, and renames the

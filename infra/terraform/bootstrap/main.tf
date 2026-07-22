@@ -120,6 +120,18 @@ locals {
     "assertion.workflow_ref == '${local.foundation_plan_workflow_ref}'",
     "assertion.environment == '${local.foundation_plan_environment}'",
   ])
+  dependency_risk_preflight_environment  = "reference-lab-dependency-risk-preflight"
+  dependency_risk_preflight_workflow_ref = "${var.github_repository}/.github/workflows/dependency-risk-preflight.yml@refs/heads/main"
+  dependency_risk_preflight_wif_condition = join(" && ", [
+    "assertion.repository == '${var.github_repository}'",
+    "assertion.repository_id == '${var.github_repository_id}'",
+    "assertion.repository_owner_id == '${var.github_repository_owner_id}'",
+    "assertion.repository_visibility == 'private'",
+    "assertion.ref == 'refs/heads/main'",
+    "assertion.event_name == 'workflow_dispatch'",
+    "assertion.workflow_ref == '${local.dependency_risk_preflight_workflow_ref}'",
+    "assertion.environment == '${local.dependency_risk_preflight_environment}'",
+  ])
 }
 
 resource "google_project" "target" {
@@ -273,6 +285,32 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   }
 }
 
+resource "google_iam_workload_identity_pool_provider" "dependency_risk" {
+  project                            = google_project.services.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "dependency-risk-preflight"
+  display_name                       = "Dependency risk preflight"
+  description                        = "Exact-main preflight identity; no collection, mirror, or evidence-write authority."
+
+  attribute_mapping = {
+    "google.subject"                  = "assertion.sub"
+    "attribute.actor_id"              = "assertion.actor_id"
+    "attribute.environment"           = "assertion.environment"
+    "attribute.event_name"            = "assertion.event_name"
+    "attribute.ref"                   = "assertion.ref"
+    "attribute.repository"            = "assertion.repository"
+    "attribute.repository_id"         = "assertion.repository_id"
+    "attribute.repository_owner_id"   = "assertion.repository_owner_id"
+    "attribute.repository_visibility" = "assertion.repository_visibility"
+    "attribute.workflow_ref"          = "assertion.workflow_ref"
+  }
+  attribute_condition = local.dependency_risk_preflight_wif_condition
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
 resource "google_service_account" "foundation_executor" {
   project      = google_project.services.project_id
   account_id   = "orchestra-lab-foundation"
@@ -287,8 +325,21 @@ resource "google_service_account" "foundation_planner" {
   description  = "Read-only Terraform planner. No key creation or apply permissions are permitted."
 }
 
+resource "google_service_account" "dependency_risk" {
+  project      = google_project.services.project_id
+  account_id   = "orchestra-dependency-risk"
+  display_name = "Orchestra dependency risk preflight"
+  description  = "Short-lived preflight signer; receives no project, bucket, mirror, or collection role."
+}
+
 resource "google_service_account_iam_member" "foundation_plan_wif" {
   service_account_id = google_service_account.foundation_planner.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
+}
+
+resource "google_service_account_iam_member" "dependency_risk_wif" {
+  service_account_id = google_service_account.dependency_risk.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
 }

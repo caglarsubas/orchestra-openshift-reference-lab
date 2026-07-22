@@ -401,6 +401,25 @@ def validate_foundation_plan_workflow() -> None:
         fail("foundation_plan_workflow_authority_invalid")
 
 
+def validate_dependency_risk_preflight_workflow() -> None:
+    try:
+        from scripts.dependency_risk_execution import (
+            load_contract,
+            validate_authority,
+            validate_declared_implementation,
+        )
+    except ModuleNotFoundError:
+        from dependency_risk_execution import (
+            load_contract,
+            validate_authority,
+            validate_declared_implementation,
+        )
+
+    authority, release_set, risk_policy = load_contract()
+    validate_authority(authority, release_set, risk_policy)
+    validate_declared_implementation()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prerequisites", type=Path)
@@ -424,6 +443,7 @@ def main(argv: list[str] | None = None) -> int:
     validate_repository_safety(policy)
     validate_workflow_pins()
     validate_foundation_plan_workflow()
+    validate_dependency_risk_preflight_workflow()
     validate_prerequisites(
         load_json(args.prerequisites.resolve())
         if args.prerequisites
