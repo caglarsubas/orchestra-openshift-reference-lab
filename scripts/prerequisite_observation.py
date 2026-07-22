@@ -25,7 +25,7 @@ TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:70270422a283f5dfe623025d82e00e7deb5bd2e8980a5ac78f609e5a887f2e97"
+    "sha256:0d6cd254a9b1823a3c693bcd2cd012af779484844756032ff1d03ed69aeb52f4"
 )
 OBSERVATION_ID = re.compile(r"^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$")
 REASON_CODE = re.compile(r"^[A-Z][A-Z0-9_]+$")
@@ -300,8 +300,13 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
     ):
         fail("prerequisite_observation_policy_wif_invalid")
     if value["dns"] != {
+        "managedZoneName": "orchestra-ocp-lab-public",
+        "managedZoneProjectPlane": "services-evidence",
         "dnsName": "ocp-lab.prometa.ai.",
         "visibility": "public",
+        "clusterDnsName": "orchestra.ocp-lab.prometa.ai.",
+        "privateZoneAuthority": "openshift-installer",
+        "servicesPeeringZoneName": "orchestra-services-to-ocp-private",
     }:
         fail("prerequisite_observation_policy_dns_invalid")
     if value["claim"] != {

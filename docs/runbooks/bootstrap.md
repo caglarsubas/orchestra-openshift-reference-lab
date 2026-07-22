@@ -42,13 +42,15 @@
 4. Apply the reviewed plan, then prove no VM has an external IP, both flow-log
    sinks receive traffic, the two probes are in distinct zones, GKE has
    exactly three standard nodes, the immutable `orchestra-bootstrap` Artifact
-   Registry repository exists, and peering is active in both directions.
+   Registry repository exists, VPC peering is active in both directions, the
+   public DNS zone has only its managed SOA/NS records, and the services-to-
+   target DNS peering zone has no writable records.
 5. Exercise backup/export access before considering the retention lock.
 6. In a separately approved change, set certification mode and the exact lock
    acknowledgement. Confirm the 400-day lock is irreversible before apply.
-7. Establish and independently verify the exact public DNS delegation. Require
-   `--readiness-stage openshift-install` before rendering or executing the
-   OpenShift installer.
+7. Follow `docs/runbooks/dns-delegation.md` to establish and independently
+   verify the exact public DNS delegation. Require `--readiness-stage
+   openshift-install` before rendering or executing the OpenShift installer.
 
 ## Dependency source intake
 

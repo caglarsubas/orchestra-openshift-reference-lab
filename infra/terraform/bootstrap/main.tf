@@ -38,6 +38,7 @@ locals {
       "roles/compute.admin",
       "roles/compute.networkAdmin",
       "roles/dns.admin",
+      "roles/dns.peer",
       "roles/iam.serviceAccountAdmin",
       "roles/iam.serviceAccountUser",
       "roles/resourcemanager.projectIamAdmin",

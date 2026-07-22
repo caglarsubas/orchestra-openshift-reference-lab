@@ -242,9 +242,10 @@ class PrerequisiteObservationTests(unittest.TestCase):
                 "dns",
                 "managed-zones",
                 "describe",
-                "ocp-lab",
+                "orchestra-ocp-lab-public",
             ]:
                 output = {
+                    "name": "orchestra-ocp-lab-public",
                     "dnsName": "ocp-lab.prometa.ai.",
                     "visibility": "public",
                     "nameServers": [
@@ -304,9 +305,13 @@ class PrerequisiteObservationTests(unittest.TestCase):
         )
         self.assertTrue(all(item["status"] == "passed" for item in gcp.values()))
         self.assertEqual(
-            observe_dns("ocp-lab", services_project, self.now, live_runner, policy)[
-                "status"
-            ],
+            observe_dns(
+                "orchestra-ocp-lab-public",
+                services_project,
+                self.now,
+                live_runner,
+                policy,
+            )["status"],
             "passed",
         )
         self.assertEqual(
@@ -349,6 +354,26 @@ class PrerequisiteObservationTests(unittest.TestCase):
                 for command in cosign_calls
             )
         )
+
+    def test_dns_probe_rejects_an_unlocked_managed_zone_before_provider_access(
+        self,
+    ) -> None:
+        policy, _ = load_contract()
+
+        def unexpected_runner(
+            command: list[str],
+        ) -> subprocess.CompletedProcess[str]:
+            raise AssertionError(f"provider_access_not_expected:{command}")
+
+        check = observe_dns(
+            "unreviewed-zone",
+            "orchestra-services-fixture",
+            self.now,
+            unexpected_runner,
+            policy,
+        )
+        self.assertEqual(check["status"], "failed")
+        self.assertEqual(check["reasonCode"], "DNS_MANAGED_ZONE_POLICY_MISMATCH")
 
     def test_live_report_binds_the_published_runner_but_grants_nothing(self) -> None:
         with patch(

@@ -12,6 +12,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Project/API/state/KMS/WIF bootstrap | Yes | Yes | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
+| Public delegation zone and private DNS peering | Yes | Yes | No | No | No |
 | Explicit egress allowlist plus deny floor | Yes | Yes | No | No | No |
 | Private regional GKE, three fixed nodes | Yes | Yes | No | No | No |
 | Immutable pre-Harbor Artifact Registry seed | Yes | Yes | No | No | No |
@@ -90,3 +91,10 @@ storing no secret or raw provider output. Diagnostic runs are
 `fixture/simulated`; live runs bind the published runner. Neither can verify a
 gate, authorize provisioning, or produce campaign evidence. No live
 prerequisite observation or independent review exists yet.
+
+The DNS foundation now declares the exact services-project public zone and a
+one-way services-to-target peering zone for the private cluster namespace. It
+does not create private OpenShift records, perform registrar delegation, or
+claim that either resolution path works live. Those states require the
+foundation apply, external NS update, installer-created private zone, and the
+independent checks in the DNS runbook.

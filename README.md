@@ -48,6 +48,8 @@ provisioning.
 
 - GCP `europe-west1`, zones `b`, `c`, and `d`.
 - Separate target and services/evidence projects with private VPC peering.
+- Services-project public delegation zone plus one-way private DNS peering to
+  the installer-owned OpenShift namespace.
 - Private self-managed OpenShift `4.20.27`, OVN-Kubernetes, three
   `n2-standard-4` control-plane nodes, and three `n2-standard-8` workers.
 - Private regional GKE dependency plane with three non-preemptible
@@ -122,7 +124,7 @@ prerequisites are complete.
 |---|---|
 | `config/` | Independently locked topology, release set, dependency BOM/admission, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
-| `infra/terraform/foundation/` | Private networks, GKE, peering, evidence buckets, bastion, probes |
+| `infra/terraform/foundation/` | Private networks, GKE, VPC/DNS peering, public delegation zone, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Cluster declarations; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
