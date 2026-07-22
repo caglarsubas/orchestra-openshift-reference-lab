@@ -66,6 +66,9 @@ jobs:
       - name: Validate preflight execution authority and isolation
         run: python3 scripts/validate_dependency_risk_execution.py
 
+      - name: Validate full collection authority and restricted raw custody
+        run: python3 scripts/validate_dependency_risk_collection_execution.py
+
       - name: Validate blocked dependency GitOps candidate
         run: python3 scripts/validate_dependency_gitops_candidate.py
 

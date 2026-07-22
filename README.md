@@ -131,6 +131,22 @@ no-evidence `--preflight-only` path. No Terraform has been applied and no live
 identity, KMS round trip, preflight, collection, admission, mirror, activation,
 campaign, or verification state is claimed.
 
+The dependency-risk collection authority digest is
+`sha256:120cb99523e13116473548ee6e34e1b0fd7f2fdce9ea98b2d22861697ab1c4b0`.
+It declares a second exact-main WIF provider and protected environment for the
+full collection, plus a distinct `orchestra-risk-collector` identity. That
+identity receives only key-level `roles/cloudkms.signerVerifier` and
+create-only `roles/storage.objectCreator` on the restricted raw-evidence
+bucket. The workflow repeats the no-evidence preflight, runs and verifies the
+full collection in the same approved attempt, then uploads a deterministic raw
+archive, KMS public key, payload-free custody statement, and detached custody
+signature with generation-zero preconditions. The signature is uploaded last
+as the completion marker. The collector cannot read or delete raw objects,
+write signed evidence, mirror artifacts, or record object generations. The
+Terraform and workflow remain source declarations: no live collection, raw
+publication, independent custody verification, source admission, activation,
+campaign evidence, or reference-profile verification is claimed.
+
 The source-only dependency GitOps candidate digest is
 `sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It projects five exact chart/image contracts into offline values for

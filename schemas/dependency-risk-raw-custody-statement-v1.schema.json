@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/dependency-risk-raw-custody-statement-v1.schema.json",
+  "title": "Orchestra dependency-risk raw custody statement v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "evidenceId",
+    "bindings",
+    "collection",
+    "storage",
+    "publisher",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.dependency-risk.raw-custody-statement.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "collection": {"$ref": "#/$defs/collection"},
+    "storage": {"$ref": "#/$defs/storage"},
+    "publisher": {"$ref": "#/$defs/publisher"},
+    "claims": {"$ref": "#/$defs/claims"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "dependencyAdmissionDigest",
+        "releaseSetDigest",
+        "sourceVerificationDigest",
+        "riskPolicyDigest",
+        "preflightAuthorityDigest",
+        "collectionExecutionAuthorityDigest",
+        "collectorScriptDigest",
+        "publisherScriptDigest",
+        "rawCustodySchemaDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"},
+        "preflightAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "collectionExecutionAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "collectorScriptDigest": {"$ref": "#/$defs/digest"},
+        "publisherScriptDigest": {"$ref": "#/$defs/digest"},
+        "rawCustodySchemaDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifestFile",
+        "manifestDigest",
+        "collectionAttestationDigest",
+        "collectionSignatureBundleDigest",
+        "rawArchiveObject",
+        "rawArchiveDigest"
+      ],
+      "properties": {
+        "manifestFile": {"const": "dependency-risk-scan-manifest.json"},
+        "manifestDigest": {"$ref": "#/$defs/digest"},
+        "collectionAttestationDigest": {"$ref": "#/$defs/digest"},
+        "collectionSignatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "rawArchiveObject": {"const": "dependency-risk-raw-collection.tar.gz"},
+        "rawArchiveDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "signingPublicKeyObject",
+        "custodyStatementObject",
+        "custodySignatureBundleObject",
+        "createOnlyGenerationPrecondition",
+        "objectGenerationRecorded",
+        "independentCustodyVerificationRequired"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$"
+        },
+        "prefix": {
+          "type": "string",
+          "pattern": "^dependency-risk/v1/orchestra-ocp-4\\.20-amd64-v1/orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+        },
+        "signingPublicKeyObject": {"const": "dependency-risk-raw-custody-public-key.pem"},
+        "custodyStatementObject": {"const": "dependency-risk-raw-custody-statement.json"},
+        "custodySignatureBundleObject": {"const": "dependency-risk-raw-custody-signature.sigstore.json"},
+        "createOnlyGenerationPrecondition": {"const": 0},
+        "objectGenerationRecorded": {"const": false},
+        "independentCustodyVerificationRequired": {"const": true}
+      }
+    },
+    "publisher": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "scriptDigest",
+        "actorIdentityDigest",
+        "signingPublicKeyDigest",
+        "publishedAt"
+      ],
+      "properties": {
+        "executionClass": {"const": "signed-certification-runner"},
+        "scriptDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "signingPublicKeyDigest": {"$ref": "#/$defs/digest"},
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawCollectionUploaded",
+        "rawArtifactsRestricted",
+        "custodyVerified",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "rawCollectionUploaded": {"const": true},
+        "rawArtifactsRestricted": {"const": true},
+        "custodyVerified": {"const": false},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  }
+}

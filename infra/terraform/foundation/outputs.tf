@@ -93,3 +93,18 @@ output "dependency_risk_signing_contract" {
     declared_artifact_mirror_write_grant = false
   }
 }
+
+output "dependency_risk_collection_contract" {
+  value = {
+    crypto_key                           = google_kms_crypto_key.dependency_risk_signing.id
+    exact_key_version_required           = true
+    collector_service_account            = "orchestra-risk-collector@${var.services_project_id}.iam.gserviceaccount.com"
+    declared_signer_role                 = "roles/cloudkms.signerVerifier"
+    declared_raw_evidence_role           = "roles/storage.objectCreator"
+    raw_evidence_bucket                  = google_storage_bucket.raw_evidence.name
+    declared_raw_evidence_read_grant     = false
+    declared_raw_evidence_delete_grant   = false
+    declared_signed_evidence_write_grant = false
+    declared_artifact_mirror_write_grant = false
+  }
+}

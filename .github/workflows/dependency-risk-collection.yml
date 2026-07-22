@@ -1,0 +1,267 @@
+name: dependency-risk-collection
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for this collection
+        required: true
+        type: string
+      kms_key_version:
+        description: Exact enabled signing-key version reviewed for this collection
+        required: true
+        type: string
+      expected_signing_public_key_digest:
+        description: Reviewer-derived SHA-256 digest of the exact KMS public key PEM
+        required: true
+        type: string
+      reason:
+        description: Bounded operator reason for collecting dependency risk evidence
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: dependency-risk-collection
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: signed-runner collection and restricted raw custody
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 390
+    environment: reference-lab-dependency-risk-collection
+
+    steps:
+      - name: Require reviewed identity and bounded inputs
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          KMS_KEY_VERSION: ${{ inputs.kms_key_version }}
+          EXPECTED_SIGNING_PUBLIC_KEY_DIGEST: ${{ inputs.expected_signing_public_key_digest }}
+          COLLECTION_REASON: ${{ inputs.reason }}
+          REVIEW_GATE_CONFIGURED: ${{ vars.DEPENDENCY_RISK_COLLECTION_REVIEW_GATE_CONFIGURED }}
+          WIF_PROVIDER: ${{ vars.GCP_DEPENDENCY_RISK_COLLECTION_WIF_PROVIDER }}
+          COLLECTOR_SERVICE_ACCOUNT: ${{ vars.GCP_DEPENDENCY_RISK_COLLECTION_SERVICE_ACCOUNT }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          RAW_EVIDENCE_BUCKET: ${{ vars.GCP_RAW_EVIDENCE_BUCKET }}
+          GITHUB_APP_ID: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$KMS_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ ${#COLLECTION_REASON} -ge 12 && ${#COLLECTION_REASON} -le 500 ]]
+          [[ "$REVIEW_GATE_CONFIGURED" == "true" ]]
+          [[ "$GCP_SERVICES_PROJECT_ID" =~ ^[a-z][a-z0-9-]{4,28}[a-z0-9]$ ]]
+          [[ "$RAW_EVIDENCE_BUCKET" =~ ^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$ ]]
+          [[ "$WIF_PROVIDER" =~ ^projects/[1-9][0-9]*/locations/global/workloadIdentityPools/orchestra-lab-github/providers/dependency-risk-collection$ ]]
+          [[ "$COLLECTOR_SERVICE_ACCOUNT" == "orchestra-risk-collector@$GCP_SERVICES_PROJECT_ID.iam.gserviceaccount.com" ]]
+          [[ "$GITHUB_APP_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$GITHUB_APP_PRIVATE_KEY" == *"BEGIN"*"PRIVATE KEY"* ]]
+
+      - name: Check out reviewed main revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate collection authority and evidence contracts
+        run: |
+          python3 scripts/validate_repository.py
+          python3 scripts/validate_dependency_risk_collection_execution.py
+          python3 scripts/validate_dependency_risk_intake.py
+
+      - name: Verify independent environment protection for this run
+        env:
+          GITHUB_ENVIRONMENT_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ -n "$GITHUB_ENVIRONMENT_READ_TOKEN" ]]
+          printf '%s' "$GITHUB_ENVIRONMENT_READ_TOKEN" > "$RUNNER_TEMP/github-token"
+          verification="$(python3 scripts/github_environment_contract.py verify \
+            --contract dependency-risk-collection \
+            --token-file "$RUNNER_TEMP/github-token" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-actor-id "$GITHUB_ACTOR_ID")"
+          printf '%s\n' "$verification"
+          [[ "$verification" =~ digest=(sha256:[a-f0-9]{64}) ]]
+          printf 'ENVIRONMENT_APPROVAL_DIGEST=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+
+      - name: Authenticate as the restricted raw-evidence collector
+        id: gcp-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_DEPENDENCY_RISK_COLLECTION_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPENDENCY_RISK_COLLECTION_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Issue short-lived platform release and package token
+        id: platform-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY }}
+          owner: caglarsubas
+          repositories: agent-hook-v2
+          permission-contents: read
+          permission-packages: read
+
+      - name: Fetch exact release assets and configure ephemeral registry auth
+        env:
+          GH_TOKEN: ${{ steps.platform-token.outputs.token }}
+          PLATFORM_REPOSITORY: caglarsubas/agent-hook-v2
+          PLATFORM_RELEASE: platform-v0.1.0-rc.10
+        run: |
+          set -euo pipefail
+          umask 077
+          release_dir="$GITHUB_WORKSPACE/restricted/platform-release-rc10"
+          docker_config="$RUNNER_TEMP/docker"
+          mkdir -p "$release_dir" "$docker_config"
+          gh release download "$PLATFORM_RELEASE" \
+            --repo "$PLATFORM_REPOSITORY" \
+            --dir "$release_dir" \
+            --pattern platform-release-manifest.json \
+            --pattern platform-release-manifest.sigstore.json \
+            --pattern platform-release-manifest.provenance.sigstore.json \
+            --pattern release-orchestra-certification-runner-ubi.json \
+            --pattern certification-runner-toolchain-lock.json
+          printf '%s' "$GH_TOKEN" | docker --config "$docker_config" login ghcr.io \
+            --username x-access-token --password-stdin >/dev/null
+          chmod 0700 "$GITHUB_WORKSPACE/restricted" "$release_dir" "$docker_config"
+          chmod 0600 "$release_dir"/* "$docker_config/config.json"
+
+      - name: Run preflight, collect, verify, and publish restricted raw custody
+        env:
+          KMS_KEY_VERSION: ${{ inputs.kms_key_version }}
+          EXPECTED_SIGNING_PUBLIC_KEY_DIGEST: ${{ inputs.expected_signing_public_key_digest }}
+          COLLECTION_REASON: ${{ inputs.reason }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          RAW_EVIDENCE_BUCKET: ${{ vars.GCP_RAW_EVIDENCE_BUCKET }}
+          GCP_CREDENTIALS_FILE: ${{ steps.gcp-auth.outputs.credentials_file_path }}
+        run: |
+          set -euo pipefail
+          umask 077
+          runner="$(jq -er '.certificationRunner.image' config/cross-plane-release-set.lock.json)"
+          signing_key="gcpkms://projects/$GCP_SERVICES_PROJECT_ID/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/dependency-risk-collection-signing/cryptoKeyVersions/$KMS_KEY_VERSION"
+          evidence_id="orchestra-dependency-risk-evidence-collection.$GITHUB_RUN_ID.$GITHUB_RUN_ATTEMPT"
+          collection_dir="restricted/dependency-risk-collection-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          reason_digest="sha256:$(printf '%s' "$COLLECTION_REASON" | sha256sum | cut -d' ' -f1)"
+          actor_identity_digest="sha256:$(jq -cnS \
+            --arg repositoryId "$GITHUB_REPOSITORY_ID" \
+            --arg workflowRunId "$GITHUB_RUN_ID" \
+            --arg workflowRunAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg actorId "$GITHUB_ACTOR_ID" \
+            --arg sourceRevision "$GITHUB_SHA" \
+            --arg environmentApprovalDigest "$ENVIRONMENT_APPROVAL_DIGEST" \
+            --arg reasonDigest "$reason_digest" \
+            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,environmentApprovalDigest:$environmentApprovalDigest,reasonDigest:$reasonDigest}' \
+            | sha256sum | cut -d' ' -f1)"
+          DOCKER_CONFIG="$RUNNER_TEMP/docker" docker pull "$runner" >/dev/null
+
+          docker run --rm --platform linux/amd64 \
+            --entrypoint /bin/bash \
+            --user "$(id -u):$(id -g)" \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --pids-limit 512 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=2g \
+            --env HOME=/tmp/orchestra-home \
+            --env CLOUDSDK_CONFIG=/tmp/gcloud \
+            --env GOOGLE_APPLICATION_CREDENTIALS=/run/orchestra-auth/gcp-wif.json \
+            --env DOCKER_CONFIG=/run/orchestra-auth/docker \
+            --volume "$GCP_CREDENTIALS_FILE:/run/orchestra-auth/gcp-wif.json:ro" \
+            --volume "$RUNNER_TEMP/docker:/run/orchestra-auth/docker:ro" \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$GITHUB_WORKSPACE/restricted:/workspace/restricted:rw" \
+            --workdir /workspace \
+            "$runner" \
+            scripts/collect_dependency_risk_evidence.sh \
+              --output-dir "restricted/dependency-risk-preflight-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+              --evidence-id "$evidence_id" \
+              --actor-identity-digest "$actor_identity_digest" \
+              --platform-release-dir restricted/platform-release-rc10 \
+              --signing-key "$signing_key" \
+              --expected-signing-public-key-digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" \
+              --preflight-only \
+            | tee "$RUNNER_TEMP/dependency-risk-preflight.log"
+          grep -F "collectionStarted=false" "$RUNNER_TEMP/dependency-risk-preflight.log" >/dev/null
+
+          docker run --rm --platform linux/amd64 \
+            --entrypoint /bin/bash \
+            --user "$(id -u):$(id -g)" \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --pids-limit 512 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=2g \
+            --env HOME=/tmp/orchestra-home \
+            --env CLOUDSDK_CONFIG=/tmp/gcloud \
+            --env GOOGLE_APPLICATION_CREDENTIALS=/run/orchestra-auth/gcp-wif.json \
+            --env DOCKER_CONFIG=/run/orchestra-auth/docker \
+            --volume "$GCP_CREDENTIALS_FILE:/run/orchestra-auth/gcp-wif.json:ro" \
+            --volume "$RUNNER_TEMP/docker:/run/orchestra-auth/docker:ro" \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$GITHUB_WORKSPACE/restricted:/workspace/restricted:rw" \
+            --workdir /workspace \
+            "$runner" \
+            scripts/collect_dependency_risk_evidence.sh \
+              --output-dir "$collection_dir" \
+              --evidence-id "$evidence_id" \
+              --actor-identity-digest "$actor_identity_digest" \
+              --platform-release-dir restricted/platform-release-rc10 \
+              --signing-key "$signing_key" \
+              --expected-signing-public-key-digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" \
+            | tee "$RUNNER_TEMP/dependency-risk-collection.log"
+          grep -F "dependency_risk_collection_complete" "$RUNNER_TEMP/dependency-risk-collection.log" >/dev/null
+
+          docker run --rm --platform linux/amd64 \
+            --entrypoint /bin/bash \
+            --user "$(id -u):$(id -g)" \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --pids-limit 512 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=2g \
+            --env HOME=/tmp/orchestra-home \
+            --env CLOUDSDK_CONFIG=/tmp/gcloud \
+            --env GOOGLE_APPLICATION_CREDENTIALS=/run/orchestra-auth/gcp-wif.json \
+            --env DOCKER_CONFIG=/run/orchestra-auth/docker \
+            --volume "$GCP_CREDENTIALS_FILE:/run/orchestra-auth/gcp-wif.json:ro" \
+            --volume "$RUNNER_TEMP/docker:/run/orchestra-auth/docker:ro" \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$GITHUB_WORKSPACE/restricted:/workspace/restricted:rw" \
+            --workdir /workspace \
+            "$runner" \
+            scripts/publish_dependency_risk_collection.sh \
+              --collection-dir "$collection_dir" \
+              --raw-evidence-bucket "$RAW_EVIDENCE_BUCKET" \
+              --signing-key "$signing_key" \
+              --expected-signing-public-key-digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" \
+              --actor-identity-digest "$actor_identity_digest" \
+            | tee "$RUNNER_TEMP/dependency-risk-publish.log"
+          grep -F "custodyVerified=false" "$RUNNER_TEMP/dependency-risk-publish.log" >/dev/null
+
+      - name: Remove credentials, release assets, raw scans, and transient logs
+        if: always()
+        run: |
+          rm -rf \
+            "$RUNNER_TEMP/docker" \
+            "$RUNNER_TEMP/github-token" \
+            "$RUNNER_TEMP/dependency-risk-preflight.log" \
+            "$RUNNER_TEMP/dependency-risk-collection.log" \
+            "$RUNNER_TEMP/dependency-risk-publish.log" \
+            "$GITHUB_WORKSPACE/restricted"
+          find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

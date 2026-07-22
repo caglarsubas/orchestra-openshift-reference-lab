@@ -31,6 +31,8 @@
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
 | Arbitrary workflow obtains foundation mutation authority | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, machine-checked current-run approval, separate read-only planner, and no executor WIF binding |
 | Preflight identity is reused for scanning, mirroring, or evidence mutation | Separate exact-workflow WIF provider, current-run non-owner approval, key-level signer role only, no project/bucket/mirror grant, short-lived release token, and a statically enforced `--preflight-only` workflow |
+| Full-collection identity overwrites, reads back, deletes, or promotes evidence | Separate exact-workflow WIF provider and current-run approval, no project role, key-level signer plus raw-bucket object-creator only, generation-zero uploads, detached signature uploaded last, and no signed-evidence or mirror grant |
+| Partial raw upload is mistaken for a completed collection | Unique evidence prefix, create-only writes, detached signature as the last completion marker, no success output after a failed marker upload, and later independent generation/signature verification |
 | Public control-plane exposure | Private OCP/GKE endpoints, no VM external IP, IAP tunnel only |
 | Peering used as broad trust | Non-transitive peering, explicit port/CIDR firewall, flow logs, namespace default deny |
 | Public DNS takeover or private-name leakage | Terraform-owned exact public zone, external delegation review, no public cluster records, installer-owned private records, and one-way read-only DNS peering |
@@ -86,11 +88,14 @@
   the dependency BOM. They cannot be activated until verification or a named,
   time-bounded security exception is recorded.
 - The atomic risk collector and detached verifier have not yet run with the
-  approved lab WIF identity and Cloud KMS key. The dedicated provider, service
-  account, signing key, and protected preflight workflow are source-declared
-  only. They have not been applied or independently observed, and the external
-  GitHub environment/App installation does not exist merely because its source
-  contract does. Fixture tests prove contract and tamper behavior only; they
+  approved lab WIF identities and Cloud KMS key. Separate preflight and
+  full-collection providers, service accounts, protected workflows, signing,
+  and create-only raw custody are source-declared only. They have not been
+  applied or independently observed, and the external GitHub environments/App
+  installation do not exist merely because their source contracts do. The
+  collector intentionally cannot read raw objects or record their immutable
+  generations; the independent custody-verification lane remains absent.
+  Fixture tests prove contract, upload-order, and tamper behavior only; they
   are not vulnerability, licence, source-admission, mirror, or campaign
   evidence.
 - The first-party Valkey chart does not currently satisfy the locked Sentinel

@@ -32,6 +32,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Signed-runner collection launch preflight | Yes | Yes | No | No | No |
 | Dedicated dependency-risk KMS/WIF preflight authority | Yes | Yes | No | No | No |
 | Protected exact-main dependency-risk preflight workflow | Yes | Yes | No | No | No |
+| Dedicated dependency-risk collection/custody authority | Yes | Yes | No | No | No |
+| Protected full collection and create-only raw-custody workflow | Yes | Yes | No | No | No |
 | Live signed-runner vulnerability/SBOM evidence | No | N/A | No | No | No |
 | Empty upstream-signature exception intake | Yes | Yes | No | No | No |
 | Reviewed upstream-signature exceptions | No | N/A | No | No | No |
@@ -97,6 +99,18 @@ artifact. Neither Terraform state has been applied, the protected environment
 and GitHub App remain external configuration, and no live preflight result is
 checked in or inferred.
 
+The separate full-collection authority is also source-declared and
+CI-validated. Its exact-workflow WIF identity receives no project role, raw
+read/delete grant, signed-evidence grant, or mirror grant. It can sign with the
+dedicated key and create non-overwritable objects in the restricted raw bucket.
+The protected workflow repeats preflight, performs the complete collection,
+verifies it before publication, and uploads the detached custody signature
+last. Tests execute the publisher with simulated KMS and storage commands,
+including a failed completion-marker upload. This proves local contract,
+ordering, and fail-closed behavior only. The collector deliberately does not
+record GCS object generations, so an independent custody observer remains
+required before the raw prefix can support any later evidence intake.
+
 No live scan or human review is checked in, so no exception is approved. The
 mirror intake is intentionally empty. No destination mirror, lab
 signature, live identity, backup target, server-side dry run, or approval is
@@ -110,13 +124,15 @@ CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
 
 The next dependency increment is bootstrap/foundation application and
-independent verification of the dedicated WIF provider, service account, key
-version, public-key digest, protected environment, and GitHub App installation;
-then the protected launch preflight can execute. A successful preflight still
-does not start collection. The later live signed-runner collection requires a
-separate reviewed execution lane, followed by independent licence/risk
+independent verification of both dedicated WIF providers, both service
+accounts, the exact key version/public-key digest, restricted raw-bucket IAM,
+both protected environments, and the GitHub App installation. The protected
+launch preflight executes first; a successful result still does not start
+collection. A separately approved full-collection run may then publish only a
+completed raw prefix. An independent read-only custody lane must capture exact
+object generations and verify the detached signature before licence/risk
 reviews, source-replay aggregation, live Artifact Registry/Harbor receipts,
-and a new executable operator/service overlay.
+or an executable operator/service overlay can proceed.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable
