@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.reference-lab.certification-contract-intake.v1",
+  "source": {
+    "ownerPlane": "platform",
+    "repository": "caglarsubas/agent-hook-v2",
+    "revision": "188283376af4e3337f106fb58c5077ff9a6e774d",
+    "release": "platform-v0.1.0-rc.8",
+    "certificationRunnerImage": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8",
+    "toolchainDigest": "sha256:b6e3a4e11f5e0a5421c5007c132fba3bdd3b72ad620ed07f813b8c7677b0b34e"
+  },
+  "bindings": {
+    "profileId": "orchestra-ocp-4.20-amd64-v1",
+    "platformProfileDigest": "sha256:6ff6819336b882180565a0a07049e8251faae0ab58e7ed4cef838700956b1d80",
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "releaseSetId": "orchestra-reference-lab-2026-07-22-rc8-runtime0183-model0110",
+    "releaseSetDigest": "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428",
+    "dependencyBomId": "orchestra-dependencies-2026-07-21.1",
+    "dependencyBomDigest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
+  },
+  "artifacts": [
+    {
+      "id": "certification-policy",
+      "sourcePath": "prometa-platform/deploy/helm/prometa/ci/reference-lab-certification-policy.v2.json",
+      "vendoredPath": "contracts/platform/reference-lab-certification-policy.v2.json",
+      "rawDigest": "sha256:9f123a624d777f5e154356d98777631437fc321dac21d73a944f8a24b9b949e5",
+      "canonicalDigest": "sha256:9f123a624d777f5e154356d98777631437fc321dac21d73a944f8a24b9b949e5"
+    },
+    {
+      "id": "contract-schema-bundle",
+      "sourcePath": "prometa-platform/deploy/helm/prometa/ci/reference-lab-contract-schemas.v2.json",
+      "vendoredPath": "contracts/platform/reference-lab-contract-schemas.v2.json",
+      "rawDigest": "sha256:3a4b9187fd9472f74fbec9339ea035db6e0d901bfd766b0538901d5827ba2405",
+      "canonicalDigest": "sha256:3a4b9187fd9472f74fbec9339ea035db6e0d901bfd766b0538901d5827ba2405"
+    },
+    {
+      "id": "fixture-campaign",
+      "sourcePath": "prometa-platform/deploy/helm/prometa/ci/reference-lab-campaign.example.json",
+      "vendoredPath": "contracts/platform/reference-lab-campaign.fixture.json",
+      "rawDigest": "sha256:243825f78356c4754c9815ec5311bb802251043561c09c947628e51d903166f2",
+      "canonicalDigest": "sha256:243825f78356c4754c9815ec5311bb802251043561c09c947628e51d903166f2"
+    }
+  ],
+  "semantics": {
+    "policyId": "orchestra-reference-lab-live-v2",
+    "acceptedTargetClasses": [
+      "vendor-reference-lab"
+    ],
+    "acceptedExecutionModes": [
+      "live"
+    ],
+    "evidenceSlots": [
+      "openshift-preflight",
+      "openshift-target-intake",
+      "openshift-deployment-observation",
+      "single-pod-recovery",
+      "single-worker-drain",
+      "external-worker-outage",
+      "external-dependency-partition",
+      "tenant-isolation",
+      "graceful-drain-overload",
+      "published-artifact-upgrade",
+      "published-artifact-rollback",
+      "credential-certificate-rotation",
+      "postgres-backup-restore",
+      "clickhouse-backup-restore",
+      "jetstream-backup-restore",
+      "valkey-backup-restore",
+      "rpo-rto",
+      "availability-soak-30d"
+    ],
+    "schemaContracts": [
+      "campaign",
+      "campaignClosure",
+      "evidence",
+      "evidenceIndex",
+      "faultAttestation",
+      "policy",
+      "referenceProfileVerificationBom",
+      "reviewAttestation"
+    ],
+    "fixtureVector": {
+      "targetClass": "fixture",
+      "executionMode": "simulated",
+      "acceptedByLivePolicy": false
+    }
+  },
+  "claim": {
+    "contractSourceOnly": true,
+    "liveCampaignStarted": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false
+  }
+}

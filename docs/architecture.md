@@ -90,9 +90,10 @@ flowchart LR
 ## Source-of-truth split
 
 - This repository: infrastructure, GitOps, synthetic surfaces, campaigns,
-  fault orchestration, and runbooks.
-- `prometa-platform`: certification contracts, aggregation, platform probes,
-  policy/evidence behavior, and certification-runner source.
+  fault orchestration, runbooks, and immutable intake of the platform-owned
+  certification contract.
+- `prometa-platform`: authoritative certification contracts, aggregation,
+  platform probes, policy/evidence behavior, and certification-runner source.
 - `orchestra-python-sdk`: runtime-host lifecycle and MCP probes.
 - `llm_inference_engine`: routing, inference, TLS, fairness, fallback,
   embedding, and lifecycle probes.
@@ -100,6 +101,13 @@ flowchart LR
 Changing a product-owned behavior here is prohibited. A product fix creates a
 new immutable artifact in its owning repository, updates the cross-plane
 release set, and reruns affected evidence.
+
+The lab vendors the exact platform policy, schema bundle, and fixture bytes
+from the release-set revision so campaign tooling can validate without a
+runtime dependency on another private repository. Raw and canonical digests
+plus optional upstream Git-object replay detect substitution. Vendoring is an
+intake mechanism, not ownership transfer; the fixture remains
+`fixture/simulated` and cannot authorize a live campaign.
 
 The topology, release set, and dependency BOM are separate canonical inputs.
 Campaigns bind their digests independently;

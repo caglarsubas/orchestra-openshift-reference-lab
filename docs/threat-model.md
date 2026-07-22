@@ -37,6 +37,7 @@
 | Cross-tenant confused deputy | Alpha/beta identities, signed tenant bindings, negative campaign cases, no shared credentials |
 | Fault actor forges success | Independent fault attestation and separate signing authority |
 | Evidence tampering or run mixing | Canonical digests, object generations, CMEK, retention lock, campaign/topology edges |
+| Certification contract substitution or semantic widening | Platform revision and release binding, byte and canonical digests, strict semantic validation, fixture/live separation, and operator replay of pinned Git objects |
 | Reviewer substitution | Different identity and key digests, post-window attestations, two-person closure |
 | Supply-chain substitution | Immutable image refs, mirrored signature verification, admission policy, release-set binding |
 | Harbor bootstrap cycle bypasses admission | Immutable Artifact Registry seed, distinct mirror identity, source/destination digest edge, deny-all dependency AppProject |
@@ -76,6 +77,10 @@
 - The repository has no live SAML certification; synthetic OIDC/SCIM is the
   identity target until strict SAML validation is shipped in the product.
 - No control here proves Red Hat supportability or customer certification.
+- CI validates the locked, vendored certification contract but has no private
+  platform-repository credential. An authorized operator must perform the
+  upstream Git-object replay before campaign intake; until then, CI proves
+  internal consistency and provenance claims, not independent source custody.
 - Several upstream charts do not yet have verified publisher signatures in
   the dependency BOM. They cannot be activated until verification or a named,
   time-bounded security exception is recorded.
