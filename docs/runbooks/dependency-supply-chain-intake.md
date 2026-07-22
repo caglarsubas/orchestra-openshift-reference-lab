@@ -30,6 +30,11 @@ Vault at their locked index subjects. Those eight observations do not approve
 the images. Each requires an expiring, two-person exception with independent
 licence, vulnerability, risk, and compensating-control evidence.
 
+The machine-readable policy and empty intake for those reviews are
+`config/dependency-risk-policy.lock.json` and
+`config/dependency-signature-exceptions.example.json`. The end-to-end operator
+procedure is in [Dependency risk review](dependency-risk-review.md).
+
 ## Reproduce the observation
 
 The live verifier rejects stale observations, Cosign version drift, trust-root
@@ -66,6 +71,12 @@ record:
 
 The source owner, mirror operator, KMS signer, and final approver may not all
 be the same identity. Expiry blocks new syncs and requires a new candidate.
+
+An approved exception is still not source admission. The separate
+signed-runner signature replay and source-admission aggregate must bind the
+same source-verification, risk-policy, and exception-intake digests. The
+exception contract always keeps `sourceAdmissionAuthorized` and
+`mirrorAuthorization` false.
 
 ## Mirror receipts
 

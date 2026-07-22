@@ -23,6 +23,11 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Immutable dependency source/BOM lock | Yes | Yes | No | No | No |
 | Source-resolved dependency image admission lock | Yes | Yes | No | No | No |
 | Bounded source-signature observation | Yes | Yes | No | Partial | No |
+| Unsigned-source risk policy and strict contracts | Yes | Yes | No | No | No |
+| Signed-runner vulnerability/SBOM evidence bundle contract | Yes | Yes | No | No | No |
+| Live signed-runner vulnerability/SBOM evidence | No | N/A | No | No | No |
+| Empty upstream-signature exception intake | Yes | Yes | No | No | No |
+| Reviewed upstream-signature exceptions | No | N/A | No | No | No |
 | Empty mirror-receipt intake contract | Yes | Yes | No | No | No |
 | Dependency topology/security/backup contracts | Yes | Yes | No | No | No |
 | Dependency GitOps namespace/default-deny/project floor | Yes | Yes | No | No | No |
@@ -45,13 +50,17 @@ source image identities, and six detailed service contracts are declared. A
 seven-day, non-campaign workstation observation cryptographically verified
 three exact keyless subjects and found no attached signature for eight. It did
 not approve an exception or authorize mirroring; signed-runner replay remains
-required. The checked-in mirror intake is intentionally empty. No destination
-mirror, lab signature, live identity, backup target, server-side dry run, or
-approval is claimed. ClickHouse backup selection and compatibility proofs
-remain explicit blockers. External Secrets is correctly assigned to OpenShift
-while Vault remains in the GKE services plane. The next dependency increment
-is reviewed source exceptions plus signed-runner replay, followed by live
-Artifact Registry/Harbor receipts and executable operator/service overlays.
+required. A locked risk policy, strict JSON contracts, payload-free Trivy/SPDX
+evidence builder, and empty eight-subject exception intake are now declared and
+CI-validated. No live scan or human review is checked in, so no exception is
+approved. The mirror intake is intentionally empty. No destination mirror, lab
+signature, live identity, backup target, server-side dry run, or approval is
+claimed. ClickHouse backup selection and compatibility proofs remain explicit
+blockers. External Secrets is correctly assigned to OpenShift while Vault
+remains in the GKE services plane. The next dependency increment is live
+signed-runner scan/attestation collection and independent licence/risk reviews,
+followed by source-replay aggregation, live Artifact Registry/Harbor receipts,
+and executable operator/service overlays.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

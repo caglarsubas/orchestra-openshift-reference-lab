@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "targetClass": "vendor-reference-lab",
+  "executionMode": "live",
+  "intakeId": "orchestra-dependency-signature-exceptions-template-v1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+    "riskPolicyDigest": "sha256:c0f22c02e37447a97a6d97c6352d7fb2207c601969ba7857d7910ab661f3731e"
+  },
+  "claim": {
+    "riskEvidenceBundles": 0,
+    "reviewReadySubjects": 0,
+    "approvedExceptions": 0,
+    "allExceptionsApproved": false,
+    "sourceAdmissionAuthorized": false,
+    "mirrorAuthorization": false,
+    "activationAuthorized": false,
+    "applied": false,
+    "campaignEvidence": false
+  },
+  "subjects": [
+    {
+      "id": "barman-cloud-controller",
+      "sourceSubject": "ghcr.io/cloudnative-pg/plugin-barman-cloud@sha256:71589dbac582333442812b07b31f7ea4d00324a8358aac7ca507dabf9f4b6c96",
+      "platformSubject": "ghcr.io/cloudnative-pg/plugin-barman-cloud@sha256:417449fe4f6f0a56acdeb30e4131930815f2b46b9afeb808059b57aa8b4c2ef5",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "barman-cloud-sidecar",
+      "sourceSubject": "ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar@sha256:990361af3319f9e23aafa0f6d7981f99bf1f69b4e6a85cf1bc7d71d6f09bb288",
+      "platformSubject": "ghcr.io/cloudnative-pg/plugin-barman-cloud-sidecar@sha256:15cb1a01e7c5235eedac2061cab8208e5f7c39dbda292f9c2d4ddaa0c1f211e6",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "clickhouse-operator",
+      "sourceSubject": "docker.io/altinity/clickhouse-operator@sha256:a802b3a19d2011f672c32cea6733e573e004938ff463d1c3ab4ac0b16b9877dd",
+      "platformSubject": "docker.io/altinity/clickhouse-operator@sha256:678ea8ebc4f68eb6fef14e1461c2109cb8d9d135c0f2d4119a46141d54fa0930",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "clickhouse-metrics-exporter",
+      "sourceSubject": "docker.io/altinity/metrics-exporter@sha256:5523d83190ad1560051f19fe6daa00876436f12cf833a506731ed6226192193f",
+      "platformSubject": "docker.io/altinity/metrics-exporter@sha256:ca56a26fda49da1a5938e5532b6f0ead71726af38d5dd88810fc0cd4123ef113",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "clickhouse-server-lts",
+      "sourceSubject": "docker.io/clickhouse/clickhouse-server@sha256:a9d328123ff8a61bf6b16448528b577d59deb85758172e13b09054b0727f8adf",
+      "platformSubject": "docker.io/clickhouse/clickhouse-server@sha256:cb75da0e596b8115d10bea34cef1414eafebfbcb5f5136c03e022c7b525899b3",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "nats-server",
+      "sourceSubject": "docker.io/library/nats@sha256:952d157e28d5394a211229bd57a7b37ff9f184e58e2c8486a08fa909fd254e32",
+      "platformSubject": "docker.io/library/nats@sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "nats-config-reloader",
+      "sourceSubject": "docker.io/natsio/nats-server-config-reloader@sha256:64cb6c858e794906d3167378e02b7e0feb83c4e14c07b371eb8d921ef8c4a60b",
+      "platformSubject": "docker.io/natsio/nats-server-config-reloader@sha256:1418d42cea39ea729c1d34ca26ba33d967abdf040bad45ec1314c807bfacc56f",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    },
+    {
+      "id": "vault-server",
+      "sourceSubject": "docker.io/hashicorp/vault@sha256:a296a888b118615dc01d5f1a6846e6d4a7277946caaed5b447008fff5fe06b54",
+      "platformSubject": "docker.io/hashicorp/vault@sha256:db6a5f78749204d0a8d002be1cc6e9a2a6de53dffce41a894c4a06d309dca360",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionAttestationDigest": null,
+        "runnerImageDigest": null,
+        "runnerProvenanceBundleDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING",
+        "SIGNED_RUNNER_REVERIFICATION_REQUIRED"
+      ]
+    }
+  ],
+  "admission": {
+    "status": "blocked",
+    "requiredExceptionCount": 8,
+    "reviewReadyCount": 0,
+    "approvedExceptionCount": 0,
+    "reasonCodes": [
+      "RISK_EVIDENCE_BUNDLES_MISSING",
+      "LICENSE_REVIEWS_MISSING",
+      "RISK_REVIEWS_MISSING",
+      "COMPENSATING_CONTROL_PLANS_MISSING",
+      "TWO_PERSON_APPROVALS_MISSING",
+      "SIGNED_RUNNER_REVERIFICATION_REQUIRED",
+      "SOURCE_ADMISSION_INCOMPLETE",
+      "MIRRORING_NOT_AUTHORIZED"
+    ]
+  }
+}

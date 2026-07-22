@@ -1,0 +1,310 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/dependency-risk-evidence-v1.schema.json",
+  "title": "Orchestra unsigned dependency risk evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "evidenceId",
+    "bindings",
+    "collection",
+    "subjects",
+    "claim"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "runnerImageDigest",
+        "runnerProvenanceBundleDigest",
+        "actorIdentityDigest",
+        "startedAt",
+        "completedAt",
+        "collectionAttestationDigest",
+        "vulnerabilityScanner",
+        "sbomScanner",
+        "invocationPolicy"
+      ],
+      "properties": {
+        "executionClass": {"const": "signed-certification-runner"},
+        "runnerImageDigest": {"$ref": "#/$defs/digest"},
+        "runnerProvenanceBundleDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"},
+        "collectionAttestationDigest": {"$ref": "#/$defs/digest"},
+        "vulnerabilityScanner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version", "databaseDigest"],
+          "properties": {
+            "name": {"const": "trivy"},
+            "version": {"type": "string", "minLength": 1},
+            "databaseDigest": {"$ref": "#/$defs/digest"}
+          }
+        },
+        "sbomScanner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": {
+            "name": {"const": "syft"},
+            "version": {"type": "string", "minLength": 1}
+          }
+        },
+        "invocationPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "platform",
+            "vulnerabilityScanners",
+            "ignoreFileUsed",
+            "ignoreUnfixed",
+            "severityFilter",
+            "sbomFormat"
+          ],
+          "properties": {
+            "platform": {"const": "linux/amd64"},
+            "vulnerabilityScanners": {
+              "type": "array",
+              "prefixItems": [{"const": "vuln"}],
+              "items": false,
+              "minItems": 1,
+              "maxItems": 1
+            },
+            "ignoreFileUsed": {"const": false},
+            "ignoreUnfixed": {"const": false},
+            "severityFilter": {"type": "array", "maxItems": 0},
+            "sbomFormat": {"const": "spdx-2.3-json"}
+          }
+        }
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/riskSubject"}
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allSubjectsCollected",
+        "vulnerabilityThresholdPassedCount",
+        "eligibleForHumanReviewCount",
+        "licenseReviewsComplete",
+        "exceptionsApproved",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "campaignEvidence"
+      ],
+      "properties": {
+        "allSubjectsCollected": {"const": true},
+        "vulnerabilityThresholdPassedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "eligibleForHumanReviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "licenseReviewsComplete": {"const": false},
+        "exceptionsApproved": {"const": false},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "campaignEvidence": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "dependencyAdmissionDigest",
+        "sourceVerificationDigest",
+        "riskPolicyDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
+        "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fileName", "digest"],
+      "properties": {
+        "fileName": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^/\\\\]+$"
+        },
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "severityCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"],
+      "properties": {
+        "CRITICAL": {"type": "integer", "minimum": 0},
+        "HIGH": {"type": "integer", "minimum": 0},
+        "MEDIUM": {"type": "integer", "minimum": 0},
+        "LOW": {"type": "integer", "minimum": 0},
+        "UNKNOWN": {"type": "integer", "minimum": 0}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "requiredBefore", "status"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "requiredBefore": {"enum": ["review", "activation"]},
+        "status": {"const": "declared-not-proven"}
+      }
+    },
+    "riskSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sourceSubject",
+        "platformSubject",
+        "artifacts",
+        "vulnerabilities",
+        "licenses",
+        "compensatingControls",
+        "machineReview"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "barman-cloud-controller",
+            "barman-cloud-sidecar",
+            "clickhouse-metrics-exporter",
+            "clickhouse-operator",
+            "clickhouse-server-lts",
+            "nats-config-reloader",
+            "nats-server",
+            "vault-server"
+          ]
+        },
+        "sourceSubject": {"type": "string", "minLength": 1},
+        "platformSubject": {"type": "string", "minLength": 1},
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["vulnerability", "sbom"],
+          "properties": {
+            "vulnerability": {"$ref": "#/$defs/artifact"},
+            "sbom": {"$ref": "#/$defs/artifact"}
+          }
+        },
+        "vulnerabilities": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "total",
+            "bySeverity",
+            "fixAvailableBySeverity",
+            "scanTargetCount",
+            "thresholdState"
+          ],
+          "properties": {
+            "total": {"type": "integer", "minimum": 0},
+            "bySeverity": {"$ref": "#/$defs/severityCounts"},
+            "fixAvailableBySeverity": {"$ref": "#/$defs/severityCounts"},
+            "scanTargetCount": {"type": "integer", "minimum": 1},
+            "thresholdState": {"enum": ["passed", "blocked"]}
+          }
+        },
+        "licenses": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "packageCount",
+            "expressions",
+            "noAssertionCount",
+            "noneCount",
+            "inventoryDigest",
+            "humanReviewState"
+          ],
+          "properties": {
+            "packageCount": {"type": "integer", "minimum": 1},
+            "expressions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            },
+            "noAssertionCount": {"type": "integer", "minimum": 0},
+            "noneCount": {"type": "integer", "minimum": 0},
+            "inventoryDigest": {"$ref": "#/$defs/digest"},
+            "humanReviewState": {"const": "required"}
+          }
+        },
+        "compensatingControls": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["planDigest", "controls"],
+          "properties": {
+            "planDigest": {"$ref": "#/$defs/digest"},
+            "controls": {
+              "type": "array",
+              "minItems": 7,
+              "maxItems": 7,
+              "items": {"$ref": "#/$defs/control"}
+            }
+          }
+        },
+        "machineReview": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "reasonCodes", "reviewDigest"],
+          "properties": {
+            "state": {"enum": ["blocked", "eligible-for-human-review"]},
+            "reasonCodes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"type": "string", "minLength": 1}
+            },
+            "reviewDigest": {"$ref": "#/$defs/digest"}
+          }
+        }
+      }
+    }
+  }
+}

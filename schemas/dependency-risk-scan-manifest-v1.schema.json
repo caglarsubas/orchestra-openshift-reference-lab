@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/dependency-risk-scan-manifest-v1.schema.json",
+  "title": "Orchestra unsigned dependency scan manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "evidenceId",
+    "bindings",
+    "collection",
+    "subjects"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "collection": {"$ref": "#/$defs/collection"},
+    "subjects": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/scanSubject"}
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "dependencyAdmissionDigest",
+        "sourceVerificationDigest",
+        "riskPolicyDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
+        "sourceVerificationDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "runnerImageDigest",
+        "runnerProvenanceBundleDigest",
+        "actorIdentityDigest",
+        "startedAt",
+        "completedAt",
+        "collectionAttestationDigest",
+        "vulnerabilityScanner",
+        "sbomScanner",
+        "invocationPolicy"
+      ],
+      "properties": {
+        "executionClass": {"const": "signed-certification-runner"},
+        "runnerImageDigest": {"$ref": "#/$defs/digest"},
+        "runnerProvenanceBundleDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"},
+        "collectionAttestationDigest": {"$ref": "#/$defs/digest"},
+        "vulnerabilityScanner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version", "databaseDigest"],
+          "properties": {
+            "name": {"const": "trivy"},
+            "version": {"type": "string", "minLength": 1},
+            "databaseDigest": {"$ref": "#/$defs/digest"}
+          }
+        },
+        "sbomScanner": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version"],
+          "properties": {
+            "name": {"const": "syft"},
+            "version": {"type": "string", "minLength": 1}
+          }
+        },
+        "invocationPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "platform",
+            "vulnerabilityScanners",
+            "ignoreFileUsed",
+            "ignoreUnfixed",
+            "severityFilter",
+            "sbomFormat"
+          ],
+          "properties": {
+            "platform": {"const": "linux/amd64"},
+            "vulnerabilityScanners": {
+              "type": "array",
+              "prefixItems": [{"const": "vuln"}],
+              "items": false,
+              "minItems": 1,
+              "maxItems": 1
+            },
+            "ignoreFileUsed": {"const": false},
+            "ignoreUnfixed": {"const": false},
+            "severityFilter": {"type": "array", "maxItems": 0},
+            "sbomFormat": {"const": "spdx-2.3-json"}
+          }
+        }
+      }
+    },
+    "scanSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sourceSubject",
+        "platformSubject",
+        "vulnerabilityReportFile",
+        "vulnerabilityReportDigest",
+        "sbomFile",
+        "sbomDigest"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "barman-cloud-controller",
+            "barman-cloud-sidecar",
+            "clickhouse-metrics-exporter",
+            "clickhouse-operator",
+            "clickhouse-server-lts",
+            "nats-config-reloader",
+            "nats-server",
+            "vault-server"
+          ]
+        },
+        "sourceSubject": {"type": "string", "minLength": 1},
+        "platformSubject": {"type": "string", "minLength": 1},
+        "vulnerabilityReportFile": {"$ref": "#/$defs/fileName"},
+        "vulnerabilityReportDigest": {"$ref": "#/$defs/digest"},
+        "sbomFile": {"$ref": "#/$defs/fileName"},
+        "sbomDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "fileName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\]+$"
+    }
+  }
+}
