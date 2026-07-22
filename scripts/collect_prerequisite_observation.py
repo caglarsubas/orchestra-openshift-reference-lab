@@ -487,6 +487,13 @@ def observe_dns(
     check_id = GATE_CHECKS["dnsDelegation"][0]
     if not zone or not services_project:
         return not_run(check_id, "DNS_INPUT_MISSING")
+    if zone != policy["dns"]["managedZoneName"]:
+        return failed(
+            check_id,
+            "DNS_MANAGED_ZONE_POLICY_MISMATCH",
+            now,
+            {"zoneIdentityDigest": payload_digest(zone)},
+        )
     try:
         managed = run_json(
             run,
@@ -513,13 +520,15 @@ def observe_dns(
             if isinstance(item, str) and item.strip()
         }
         valid = (
-            managed.get("dnsName") == policy["dns"]["dnsName"]
+            managed.get("name") == policy["dns"]["managedZoneName"]
+            and managed.get("dnsName") == policy["dns"]["dnsName"]
             and managed.get("visibility", "public") == policy["dns"]["visibility"]
             and bool(expected)
             and delegated == expected
         )
         evidence = {
-            "zoneIdentityDigest": payload_digest(zone),
+            "zoneIdentityDigest": payload_digest(managed.get("name")),
+            "zoneProjectIdentityDigest": payload_digest(services_project),
             "dnsName": policy["dns"]["dnsName"],
             "visibility": managed.get("visibility", "public"),
             "nameServerSetDigest": payload_digest(sorted(expected)),

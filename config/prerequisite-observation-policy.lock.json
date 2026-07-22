@@ -215,8 +215,13 @@
     }
   },
   "dns": {
+    "managedZoneName": "orchestra-ocp-lab-public",
+    "managedZoneProjectPlane": "services-evidence",
     "dnsName": "ocp-lab.prometa.ai.",
-    "visibility": "public"
+    "visibility": "public",
+    "clusterDnsName": "orchestra.ocp-lab.prometa.ai.",
+    "privateZoneAuthority": "openshift-installer",
+    "servicesPeeringZoneName": "orchestra-services-to-ocp-private"
   },
   "claim": {
     "independentReviewRequired": true,

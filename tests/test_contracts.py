@@ -189,6 +189,34 @@ class ContractTests(unittest.TestCase):
         self.assertIn("${SSH_PUBLIC_KEY}", rendered)
         self.assertNotIn("${TARGET_PROJECT_ID}", rendered)
 
+    def test_dns_foundation_separates_public_delegation_from_private_authority(
+        self,
+    ) -> None:
+        dns = (ROOT / "infra" / "terraform" / "foundation" / "dns.tf").read_text(
+            encoding="utf-8"
+        )
+        outputs = (
+            ROOT / "infra" / "terraform" / "foundation" / "outputs.tf"
+        ).read_text(encoding="utf-8")
+        bootstrap = (
+            ROOT / "infra" / "terraform" / "bootstrap" / "main.tf"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            'resource "google_dns_managed_zone" "public_base_domain"', dns
+        )
+        self.assertIn(
+            'resource "google_dns_managed_zone" "services_to_openshift_private"',
+            dns,
+        )
+        self.assertIn("peering_config {", dns)
+        self.assertIn("network_url = google_compute_network.services.id", dns)
+        self.assertIn("network_url = google_compute_network.target.id", dns)
+        self.assertNotIn('resource "google_dns_record_set"', dns)
+        self.assertIn('"roles/dns.peer"', bootstrap)
+        self.assertIn('output "dns_contract"', outputs)
+        self.assertIn('"openshift-installer"', outputs)
+        self.assertIn("inferred_from_apply", outputs)
+
 
 if __name__ == "__main__":
     unittest.main()

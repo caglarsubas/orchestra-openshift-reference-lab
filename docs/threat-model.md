@@ -31,6 +31,7 @@
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
 | Public control-plane exposure | Private OCP/GKE endpoints, no VM external IP, IAP tunnel only |
 | Peering used as broad trust | Non-transitive peering, explicit port/CIDR firewall, flow logs, namespace default deny |
+| Public DNS takeover or private-name leakage | Terraform-owned exact public zone, external delegation review, no public cluster records, installer-owned private records, and one-way read-only DNS peering |
 | Dependency outage causes local safety downgrade | Product fail-closed contracts and typed-degradation evidence; no fallback to in-process production state |
 | Cross-tenant confused deputy | Alpha/beta identities, signed tenant bindings, negative campaign cases, no shared credentials |
 | Fault actor forges success | Independent fault attestation and separate signing authority |

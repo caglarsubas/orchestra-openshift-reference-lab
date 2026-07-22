@@ -18,7 +18,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | GCP billing/quotas | Approved quotas for six OCP nodes, GKE, PD, LB, DNS, KMS, and probes |
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
-| DNS | Exact public delegation for `ocp-lab.prometa.ai` |
+| DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
 | WIF | GitHub/environment subject restriction, expected binding, and no user-managed key |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
@@ -43,7 +43,7 @@ as independent verification of its own outputs.
 
 The locked policy is
 `config/prerequisite-observation-policy.lock.json`; its canonical digest is
-`sha256:70270422a283f5dfe623025d82e00e7deb5bd2e8980a5ac78f609e5a887f2e97`.
+`sha256:0d6cd254a9b1823a3c693bcd2cd012af779484844756032ff1d03ed69aeb52f4`.
 It requires a maximum 30-minute read-only collection window and expires an
 observation after 24 hours.
 
@@ -80,7 +80,7 @@ python3 scripts/collect_prerequisite_observation.py \
   --installer-digest 'sha256:<officially-verified-binary-digest>' \
   --target-project-id '<dedicated-target-project>' \
   --services-project-id '<dedicated-services-project>' \
-  --dns-managed-zone '<managed-zone-resource-name>' \
+  --dns-managed-zone 'orchestra-ocp-lab-public' \
   --output restricted/prerequisite-observation.json
 ```
 
@@ -90,6 +90,13 @@ is reduced to policy facts before hashing. Runner verification uses the exact
 Sigstore publisher identity. Command failures produce typed blocker codes,
 the exact workflow SHA/ref/repository/trigger, and never raw provider errors in
 the report.
+
+The public zone is an explicit ownership/delegation gate, not the private
+cluster record authority. OpenShift `publish: Internal` creates and owns the
+private cluster namespace in the target VPC. The foundation's services-plane
+peering zone only resolves that namespace; it does not create or modify
+OpenShift records. See `docs/runbooks/dns-delegation.md` for the apply and
+independent verification sequence.
 
 The Red Hat input is a payload-free external statement with exact product,
 OpenShift `4.20.27`, `linux/amd64`, active/expiry timestamps, and issuer/account

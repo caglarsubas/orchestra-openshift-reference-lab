@@ -6,6 +6,11 @@ locals {
     "europe-west1-d",
   ]
 
+  base_dns_name                  = "ocp-lab.prometa.ai."
+  cluster_dns_name               = "orchestra.${local.base_dns_name}"
+  public_dns_managed_zone_name   = "orchestra-ocp-lab-public"
+  services_dns_peering_zone_name = "orchestra-services-to-ocp-private"
+
   target_subnets = {
     control = "10.40.0.0/24"
     compute = "10.40.16.0/20"
