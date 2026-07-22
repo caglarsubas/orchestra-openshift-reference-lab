@@ -19,6 +19,7 @@ try:
         UNSIGNED_SUBJECTS,
         admission_subjects,
     )
+    from scripts.validate_release_set import validate_release_set
     from scripts.validate_repository import DIGEST, ROOT, canonical_digest, load_json
 except ModuleNotFoundError:
     from validate_dependency_supply_chain import (
@@ -30,16 +31,19 @@ except ModuleNotFoundError:
         UNSIGNED_SUBJECTS,
         admission_subjects,
     )
+    from validate_release_set import validate_release_set
     from validate_repository import DIGEST, ROOT, canonical_digest, load_json
 
 
 RISK_POLICY = ROOT / "config" / "dependency-risk-policy.lock.json"
+RELEASE_SET = ROOT / "config" / "cross-plane-release-set.lock.json"
+COLLECTOR_SCRIPT = ROOT / "scripts" / "collect_dependency_risk_evidence.sh"
 EXCEPTION_TEMPLATE = ROOT / "config" / "dependency-signature-exceptions.example.json"
 EXPECTED_RISK_POLICY_DIGEST = (
-    "sha256:c0f22c02e37447a97a6d97c6352d7fb2207c601969ba7857d7910ab661f3731e"
+    "sha256:819211d44fb510a0598135f5abb406cf53da579cd5537faf3d0b867d7aafc298"
 )
 EXPECTED_EXCEPTION_TEMPLATE_DIGEST = (
-    "sha256:ddff89276316a21d25770cfbfc5095dcf2781281e4026236d98d6bbf784cf848"
+    "sha256:95f2f3cfe9852b5f17c208a54431ee453373a98c5f70623603a9f3522db5d9bf"
 )
 SEVERITIES = ("CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN")
 BLOCKING_SEVERITIES = ("CRITICAL", "HIGH", "UNKNOWN")
@@ -47,8 +51,14 @@ REVIEWER_ROLES = ("security-reviewer", "service-owner")
 EVIDENCE_KEYS = {
     "riskEvidenceDigest",
     "collectionAttestationDigest",
+    "collectionSignatureBundleDigest",
+    "signingPublicKeyDigest",
     "runnerImageDigest",
+    "runnerToolchainDigest",
+    "runnerReleaseManifestDigest",
+    "collectorScriptDigest",
     "runnerProvenanceBundleDigest",
+    "releaseSetDigest",
     "sbomDigest",
     "vulnerabilityReportDigest",
     "licenseInventoryDigest",
@@ -160,11 +170,13 @@ def unsigned_subjects(admission: dict[str, Any]) -> dict[str, dict[str, str]]:
 
 
 def expected_bindings() -> dict[str, str]:
+    release_set = load_json(RELEASE_SET)
     return {
         "topologyDigest": TOPOLOGY_DIGEST,
         "dependencyAdmissionDigest": ADMISSION_DIGEST,
         "sourceVerificationDigest": EXPECTED_SOURCE_VERIFICATION_DIGEST,
         "riskPolicyDigest": EXPECTED_RISK_POLICY_DIGEST,
+        "releaseSetDigest": validate_release_set(release_set),
     }
 
 
@@ -195,6 +207,7 @@ def validate_risk_policy(value: dict[str, Any]) -> str:
             "topologyDigest": TOPOLOGY_DIGEST,
             "dependencyAdmissionDigest": ADMISSION_DIGEST,
             "sourceVerificationDigest": EXPECTED_SOURCE_VERIFICATION_DIGEST,
+            "releaseSetDigest": expected_bindings()["releaseSetDigest"],
         }
     ):
         fail("dependency_risk_policy_identity_invalid")
@@ -206,14 +219,19 @@ def validate_risk_policy(value: dict[str, Any]) -> str:
         fail("dependency_risk_policy_scope_invalid")
     if value["collectionPolicy"] != {
         "executionClass": "signed-certification-runner",
+        "collectorScriptDigest": blob_digest(COLLECTOR_SCRIPT.read_bytes()),
         "maximumCollectionDurationHours": 6,
         "maximumEvidenceAgeHours": 72,
         "requiredArtifactTypes": [
             "trivy-vulnerability-json",
             "spdx-2.3-json",
         ],
+        "requiredToolVersions": {"trivy": "0.72.0", "syft": "1.48.0"},
         "runnerProvenanceRequired": True,
         "collectionAttestationRequired": True,
+        "externalScannerConfigAllowed": False,
+        "databaseUpdatesDuringScanAllowed": False,
+        "remoteDigestSubjectsRequired": True,
         "rawArtifactsRestricted": True,
     }:
         fail("dependency_risk_policy_collection_invalid")
@@ -224,6 +242,7 @@ def validate_risk_policy(value: dict[str, Any]) -> str:
         "ignoreUnfixedAllowed": False,
         "severityFilterAllowed": False,
         "databaseDigestRequired": True,
+        "javaDatabaseDigestRequired": True,
         "scanTargetRequired": True,
     }:
         fail("dependency_risk_policy_vulnerability_invalid")
@@ -272,12 +291,31 @@ def validate_collection(
         value,
         {
             "executionClass",
+            "runnerRelease",
+            "runnerRevision",
+            "runnerImage",
             "runnerImageDigest",
+            "runnerToolchainDigest",
+            "runnerReleaseManifestFile",
+            "runnerReleaseManifestDigest",
+            "runnerReleaseManifestSignatureBundleFile",
+            "runnerReleaseManifestSignatureBundleDigest",
+            "runnerProvenanceBundleFile",
             "runnerProvenanceBundleDigest",
+            "runnerReleaseMetadataFile",
+            "runnerReleaseMetadataDigest",
+            "runnerToolchainLockFile",
+            "collectorScriptFile",
+            "collectorScriptDigest",
             "actorIdentityDigest",
+            "signingPublicKeyFile",
+            "signingPublicKeyDigest",
             "startedAt",
             "completedAt",
+            "collectionAttestationFile",
             "collectionAttestationDigest",
+            "collectionSignatureBundleFile",
+            "collectionSignatureBundleDigest",
             "vulnerabilityScanner",
             "sbomScanner",
             "invocationPolicy",
@@ -286,11 +324,46 @@ def validate_collection(
     )
     if collection["executionClass"] != "signed-certification-runner":
         fail("dependency_risk_collection_execution_class_invalid")
+    release_set = load_json(RELEASE_SET)
+    validate_release_set(release_set)
+    runner = release_set["certificationRunner"]
+    if (
+        collection["runnerRelease"] != runner["release"]
+        or collection["runnerRevision"] != runner["source"]["revision"]
+        or collection["runnerImage"] != runner["image"]
+        or collection["runnerImageDigest"] != runner["image"].rsplit("@", 1)[1]
+        or collection["runnerToolchainDigest"] != runner["toolchainDigest"]
+        or collection["runnerReleaseManifestFile"] != "platform-release-manifest.json"
+        or collection["runnerReleaseManifestSignatureBundleFile"]
+        != "platform-release-manifest.sigstore.json"
+        or collection["runnerProvenanceBundleFile"]
+        != "platform-release-manifest.provenance.sigstore.json"
+        or collection["runnerReleaseMetadataFile"]
+        != "release-orchestra-certification-runner-ubi.json"
+        or collection["runnerToolchainLockFile"]
+        != "certification-runner-toolchain-lock.json"
+        or collection["collectorScriptFile"] != "dependency-risk-collector.sh"
+        or collection["collectorScriptDigest"]
+        != load_json(RISK_POLICY)["collectionPolicy"]["collectorScriptDigest"]
+        or collection["signingPublicKeyFile"] != "collection-signing-public-key.pem"
+        or collection["collectionAttestationFile"]
+        != "dependency-risk-collection-statement.json"
+        or collection["collectionSignatureBundleFile"]
+        != "dependency-risk-collection-signature.sigstore.json"
+    ):
+        fail("dependency_risk_collection_runner_binding_invalid")
     for field in (
         "runnerImageDigest",
+        "runnerToolchainDigest",
+        "runnerReleaseManifestDigest",
+        "runnerReleaseManifestSignatureBundleDigest",
         "runnerProvenanceBundleDigest",
+        "runnerReleaseMetadataDigest",
+        "collectorScriptDigest",
         "actorIdentityDigest",
+        "signingPublicKeyDigest",
         "collectionAttestationDigest",
+        "collectionSignatureBundleDigest",
     ):
         require_digest(
             collection[field], f"dependency_risk_collection_digest_invalid:{field}"
@@ -318,36 +391,40 @@ def validate_collection(
         fail("dependency_risk_collection_time_invalid")
     vulnerability_scanner = strict_keys(
         collection["vulnerabilityScanner"],
-        {"name", "version", "databaseDigest"},
+        {"name", "version", "databaseDigest", "javaDatabaseDigest"},
         "dependency_risk_vulnerability_scanner_invalid",
     )
     if (
         vulnerability_scanner["name"] != "trivy"
-        or not isinstance(vulnerability_scanner["version"], str)
-        or not vulnerability_scanner["version"].strip()
+        or vulnerability_scanner["version"] != "0.72.0"
     ):
         fail("dependency_risk_vulnerability_scanner_invalid")
     require_digest(
         vulnerability_scanner["databaseDigest"],
         "dependency_risk_vulnerability_database_digest_invalid",
     )
+    require_digest(
+        vulnerability_scanner["javaDatabaseDigest"],
+        "dependency_risk_vulnerability_java_database_digest_invalid",
+    )
     sbom_scanner = strict_keys(
         collection["sbomScanner"],
         {"name", "version"},
         "dependency_risk_sbom_scanner_invalid",
     )
-    if (
-        sbom_scanner["name"] != "syft"
-        or not isinstance(sbom_scanner["version"], str)
-        or not sbom_scanner["version"].strip()
-    ):
+    if sbom_scanner["name"] != "syft" or sbom_scanner["version"] != "1.48.0":
         fail("dependency_risk_sbom_scanner_invalid")
     if collection["invocationPolicy"] != {
         "platform": "linux/amd64",
+        "imageSource": "remote",
         "vulnerabilityScanners": ["vuln"],
         "ignoreFileUsed": False,
         "ignoreUnfixed": False,
         "severityFilter": [],
+        "externalConfigUsed": False,
+        "databaseUpdatesDuringScan": False,
+        "offlineScan": True,
+        "sbomSource": "registry",
         "sbomFormat": "spdx-2.3-json",
     }:
         fail("dependency_risk_invocation_policy_invalid")
@@ -816,10 +893,26 @@ def validate_exception_intake(
             "collectionAttestationDigest": risk_evidence["collection"][
                 "collectionAttestationDigest"
             ],
+            "collectionSignatureBundleDigest": risk_evidence["collection"][
+                "collectionSignatureBundleDigest"
+            ],
+            "signingPublicKeyDigest": risk_evidence["collection"][
+                "signingPublicKeyDigest"
+            ],
             "runnerImageDigest": risk_evidence["collection"]["runnerImageDigest"],
+            "runnerToolchainDigest": risk_evidence["collection"][
+                "runnerToolchainDigest"
+            ],
+            "runnerReleaseManifestDigest": risk_evidence["collection"][
+                "runnerReleaseManifestDigest"
+            ],
+            "collectorScriptDigest": risk_evidence["collection"][
+                "collectorScriptDigest"
+            ],
             "runnerProvenanceBundleDigest": risk_evidence["collection"][
                 "runnerProvenanceBundleDigest"
             ],
+            "releaseSetDigest": risk_evidence["bindings"]["releaseSetDigest"],
             "sbomDigest": risk_subject["artifacts"]["sbom"]["digest"],
             "vulnerabilityReportDigest": risk_subject["artifacts"]["vulnerability"][
                 "digest"

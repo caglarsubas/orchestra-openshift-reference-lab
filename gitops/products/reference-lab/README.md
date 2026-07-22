@@ -3,11 +3,11 @@
 This overlay declares, but does not prove deployment of, the frozen
 three-plane release set. Its three Argo CD Applications bind:
 
-- platform platform-v0.1.0-rc.7;
+- platform platform-v0.1.0-rc.8;
 - runtime v0.18.3;
 - model plane v0.1.10; and
 - release-set digest
-  sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6.
+  sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428.
 
 The source chart digest is an Application annotation and the image digest is
 the actual Helm value. Argo resolves an exact chart version from the private

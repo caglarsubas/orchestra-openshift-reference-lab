@@ -24,8 +24,9 @@ This repository contains the source-controlled infrastructure foundation,
 immutable cross-plane release intake, immutable dependency source catalog,
 source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
-mirror-intake contracts, gate-controlled product and dependency GitOps floors,
-a source-only durable release-validation receiver, and a source-only synthetic
+mirror-intake contracts, an atomic signed-runner scan collector and detached
+attestation verifier, gate-controlled product and dependency GitOps floors, a
+source-only durable release-validation receiver, and a source-only synthetic
 tenant kit. It does not contain a kubeconfig, provider identity, OpenShift pull
 secret, live risk scan, approved source exception, live campaign, campaign
 evidence report, or completed soak. No declaration has been applied to a
@@ -60,7 +61,7 @@ Every campaign binds both digests so an artifact update cannot masquerade as a
 topology change or combine evidence from different release sets.
 
 The current canonical release-set digest is
-`sha256:ec705bcc9a1e0cee42b152369c95f30012f7f2516c5a3e02076c9d7711cc74b6`.
+`sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428`.
 It records published artifacts only; it is not deployment, drill, soak, or
 verification evidence.
 
@@ -90,12 +91,14 @@ intake digest is
 No destination, receipt, lab signature, pull proof, or approval is populated.
 
 The unsigned-source risk-policy digest is
-`sha256:c0f22c02e37447a97a6d97c6352d7fb2207c601969ba7857d7910ab661f3731e`.
-It requires signed-runner Trivy and SPDX evidence, blocks critical, high, and
-unknown-severity findings, requires human licence and risk review, and enforces
-two independent approval roles with a maximum 30-day exception lifetime. The
-empty signature-exception intake digest is
-`sha256:ddff89276316a21d25770cfbfc5095dcf2781281e4026236d98d6bbf784cf848`.
+`sha256:819211d44fb510a0598135f5abb406cf53da579cd5537faf3d0b867d7aafc298`.
+It requires the release-set-bound signed runner, exact Trivy and Syft versions,
+frozen vulnerability databases, Cloud KMS detached collection evidence, and
+SPDX inventory. It blocks critical, high, and unknown-severity findings,
+requires human licence and risk review, and enforces two independent approval
+roles with a maximum 30-day exception lifetime. The empty signature-exception
+intake digest is
+`sha256:95f2f3cfe9852b5f17c208a54431ee453373a98c5f70623603a9f3522db5d9bf`.
 It contains all eight unsigned subjects but zero evidence bundles and zero
 approvals. Even a fully approved exception set cannot authorize source
 admission or mirroring without the separate signed-runner source replay and
@@ -117,7 +120,7 @@ prerequisites are complete.
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Cluster declarations; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |

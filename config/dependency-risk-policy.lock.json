@@ -5,7 +5,8 @@
   "bindings": {
     "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
     "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
-    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89"
+    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+    "releaseSetDigest": "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428"
   },
   "scope": {
     "signatureObservation": "no-cosign-signature-at-locked-index",
@@ -23,14 +24,22 @@
   },
   "collectionPolicy": {
     "executionClass": "signed-certification-runner",
+    "collectorScriptDigest": "sha256:c125caa2909add08d1e0a2515d8ff988c7ead7b73b0ac08835c8f55907adfe54",
     "maximumCollectionDurationHours": 6,
     "maximumEvidenceAgeHours": 72,
     "requiredArtifactTypes": [
       "trivy-vulnerability-json",
       "spdx-2.3-json"
     ],
+    "requiredToolVersions": {
+      "trivy": "0.72.0",
+      "syft": "1.48.0"
+    },
     "runnerProvenanceRequired": true,
     "collectionAttestationRequired": true,
+    "externalScannerConfigAllowed": false,
+    "databaseUpdatesDuringScanAllowed": false,
+    "remoteDigestSubjectsRequired": true,
     "rawArtifactsRestricted": true
   },
   "vulnerabilityPolicy": {
@@ -50,6 +59,7 @@
     "ignoreUnfixedAllowed": false,
     "severityFilterAllowed": false,
     "databaseDigestRequired": true,
+    "javaDatabaseDigestRequired": true,
     "scanTargetRequired": true
   },
   "licensePolicy": {

@@ -50,17 +50,21 @@ source image identities, and six detailed service contracts are declared. A
 seven-day, non-campaign workstation observation cryptographically verified
 three exact keyless subjects and found no attached signature for eight. It did
 not approve an exception or authorize mirroring; signed-runner replay remains
-required. A locked risk policy, strict JSON contracts, payload-free Trivy/SPDX
+required. A locked risk policy, strict JSON contracts, atomic eight-subject
+collector, detached Cloud KMS verification path, payload-free Trivy/SPDX
 evidence builder, and empty eight-subject exception intake are now declared and
-CI-validated. No live scan or human review is checked in, so no exception is
-approved. The mirror intake is intentionally empty. No destination mirror, lab
+CI-validated. The collector also replays the published runner signature, SBOM
+attestation, release-manifest signature, and SLSA provenance before scanning.
+No live scan or human review is checked in, so no exception is approved. The
+mirror intake is intentionally empty. No destination mirror, lab
 signature, live identity, backup target, server-side dry run, or approval is
 claimed. ClickHouse backup selection and compatibility proofs remain explicit
 blockers. External Secrets is correctly assigned to OpenShift while Vault
-remains in the GKE services plane. The next dependency increment is live
-signed-runner scan/attestation collection and independent licence/risk reviews,
-followed by source-replay aggregation, live Artifact Registry/Harbor receipts,
-and executable operator/service overlays.
+remains in the GKE services plane. The next dependency increment is execution
+of the live signed-runner collection with an approved short-lived identity and
+Cloud KMS key, followed by independent licence/risk reviews, source-replay
+aggregation, live Artifact Registry/Harbor receipts, and executable
+operator/service overlays.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

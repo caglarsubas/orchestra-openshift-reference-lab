@@ -40,7 +40,7 @@ APPLICATION_CONTRACTS = {
         "name": "orchestra-platform",
         "namespace": "orchestra-platform",
         "chart": "prometa",
-        "chartVersion": "0.3.0-rc.7",
+        "chartVersion": "0.3.0-rc.8",
         "chartRole": "helm-chart",
         "imageRole": "platform-image-ubi9",
         "imageRepository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-ubi",
@@ -244,7 +244,7 @@ def validate_platform(values: dict[str, Any]) -> None:
         or backend_tls.get("enabled") is not True
         or backend_tls.get("port") != 3443
         or backend_tls.get("existingSecret") != "orchestra-platform-backend-tls"
-        or backend_tls.get("rolloutId") != "release-set-ec705bcc"
+        or backend_tls.get("rolloutId") != "release-set-d4b4ef7e"
         or backend_tls.get("serverName") != "orchestra-platform.orchestra-platform.svc"
         or service_certificate
         != {

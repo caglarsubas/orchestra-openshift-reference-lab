@@ -65,6 +65,10 @@
 - Several upstream charts do not yet have verified publisher signatures in
   the dependency BOM. They cannot be activated until verification or a named,
   time-bounded security exception is recorded.
+- The atomic risk collector and detached verifier have not yet run with the
+  approved lab WIF identity and Cloud KMS key. Fixture tests prove contract and
+  tamper behavior only; they are not vulnerability, licence, source-admission,
+  mirror, or campaign evidence.
 - The first-party Valkey chart does not currently satisfy the locked Sentinel
   topology. Selecting a third-party operator or changing topology requires a
   reviewed architecture decision and a new dependency BOM.

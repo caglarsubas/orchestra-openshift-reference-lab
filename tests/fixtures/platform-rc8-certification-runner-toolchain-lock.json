@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.certification-runner.toolchain.v1",
+  "architecture": "linux/amd64",
+  "baseImage": {
+    "name": "registry.access.redhat.com/ubi9/nodejs-20",
+    "digest": "sha256:e395d430f6534e9f8df4519cbbf11fe5a3ac8f2c1209c821bf7b05520dd7c7ce",
+    "nodeVersion": "20.20.2"
+  },
+  "tools": {
+    "oc": {
+      "version": "4.20.27",
+      "url": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/openshift-client-linux-amd64-rhel9-4.20.27.tar.gz",
+      "sha256": "806b01291dc8a57783f08172086553f6a9482048c2fe5271c356953eaa991f1e"
+    },
+    "helm": {
+      "version": "3.16.4",
+      "url": "https://get.helm.sh/helm-v3.16.4-linux-amd64.tar.gz",
+      "sha256": "fc307327959aa38ed8f9f7e66d45492bb022a66c3e5da6063958254b9767d179"
+    },
+    "cosign": {
+      "version": "3.1.1",
+      "url": "https://github.com/sigstore/cosign/releases/download/v3.1.1/cosign-linux-amd64",
+      "sha256": "ae1ecd212663f3693ad9edf8b1a183900c9a52d3155ba6e354237f9a0f6463fc"
+    },
+    "gcloud": {
+      "version": "576.0.0",
+      "url": "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-576.0.0-linux-x86_64.tar.gz",
+      "sha256": "7094a08e8fc3772cdbfb1a8a1920300f52fec5e370c9f9c803c2a3c8824a32c2"
+    },
+    "trivy": {
+      "version": "0.72.0",
+      "url": "https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_Linux-64bit.tar.gz",
+      "sha256": "bbb64b9695866ce4a7a8f5c9592002c5961cab378577fa3f8a040df362b9b2ea"
+    },
+    "syft": {
+      "version": "1.48.0",
+      "url": "https://github.com/anchore/syft/releases/download/v1.48.0/syft_1.48.0_linux_amd64.tar.gz",
+      "sha256": "6cef9a7f37220d9067eaf9cfaaa2fce986e9f320a8d42cbc36658c99af78ea04"
+    }
+  },
+  "nodePackages": {
+    "@esbuild/linux-x64": "0.28.1",
+    "ajv": "8.18.0",
+    "js-yaml": "4.3.0",
+    "tsx": "4.23.1"
+  }
+}

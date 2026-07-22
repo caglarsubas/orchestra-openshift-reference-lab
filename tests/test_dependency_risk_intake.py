@@ -12,6 +12,7 @@ from scripts.dependency_risk_contract import (
     EXCEPTION_TEMPLATE,
     EXPECTED_EXCEPTION_TEMPLATE_DIGEST,
     EXPECTED_RISK_POLICY_DIGEST,
+    RELEASE_SET,
     blob_digest,
     exception_approval_digest,
     exception_candidate_digest,
@@ -54,6 +55,8 @@ class DependencyRiskIntakeTests(unittest.TestCase):
     def write_scan_inputs(
         self, directory: Path, *, blocked_subject: str | None = None
     ) -> dict:
+        release_set = load_json(RELEASE_SET)
+        runner = release_set["certificationRunner"]
         subjects = []
         for index, (subject_id, binding) in enumerate(
             unsigned_subjects(self.admission).items(), start=1
@@ -127,24 +130,51 @@ class DependencyRiskIntakeTests(unittest.TestCase):
             "bindings": expected_bindings(),
             "collection": {
                 "executionClass": "signed-certification-runner",
-                "runnerImageDigest": digest(1),
+                "runnerRelease": runner["release"],
+                "runnerRevision": runner["source"]["revision"],
+                "runnerImage": runner["image"],
+                "runnerImageDigest": runner["image"].rsplit("@", 1)[1],
+                "runnerToolchainDigest": runner["toolchainDigest"],
+                "runnerReleaseManifestFile": "platform-release-manifest.json",
+                "runnerReleaseManifestDigest": digest(1),
+                "runnerReleaseManifestSignatureBundleFile": "platform-release-manifest.sigstore.json",
+                "runnerReleaseManifestSignatureBundleDigest": digest(2),
+                "runnerProvenanceBundleFile": "platform-release-manifest.provenance.sigstore.json",
                 "runnerProvenanceBundleDigest": digest(2),
+                "runnerReleaseMetadataFile": "release-orchestra-certification-runner-ubi.json",
+                "runnerReleaseMetadataDigest": digest(6),
+                "runnerToolchainLockFile": "certification-runner-toolchain-lock.json",
+                "collectorScriptFile": "dependency-risk-collector.sh",
+                "collectorScriptDigest": self.policy["collectionPolicy"][
+                    "collectorScriptDigest"
+                ],
                 "actorIdentityDigest": digest(3),
+                "signingPublicKeyFile": "collection-signing-public-key.pem",
+                "signingPublicKeyDigest": digest(7),
                 "startedAt": "2026-07-22T00:00:00Z",
                 "completedAt": "2026-07-22T01:00:00Z",
+                "collectionAttestationFile": "dependency-risk-collection-statement.json",
                 "collectionAttestationDigest": digest(4),
+                "collectionSignatureBundleFile": "dependency-risk-collection-signature.sigstore.json",
+                "collectionSignatureBundleDigest": digest(8),
                 "vulnerabilityScanner": {
                     "name": "trivy",
-                    "version": "0.67.2",
+                    "version": "0.72.0",
                     "databaseDigest": digest(5),
+                    "javaDatabaseDigest": digest(9),
                 },
-                "sbomScanner": {"name": "syft", "version": "1.33.0"},
+                "sbomScanner": {"name": "syft", "version": "1.48.0"},
                 "invocationPolicy": {
                     "platform": "linux/amd64",
+                    "imageSource": "remote",
                     "vulnerabilityScanners": ["vuln"],
                     "ignoreFileUsed": False,
                     "ignoreUnfixed": False,
                     "severityFilter": [],
+                    "externalConfigUsed": False,
+                    "databaseUpdatesDuringScan": False,
+                    "offlineScan": True,
+                    "sbomSource": "registry",
                     "sbomFormat": "spdx-2.3-json",
                 },
             },
@@ -174,10 +204,20 @@ class DependencyRiskIntakeTests(unittest.TestCase):
             "collectionAttestationDigest": evidence["collection"][
                 "collectionAttestationDigest"
             ],
+            "collectionSignatureBundleDigest": evidence["collection"][
+                "collectionSignatureBundleDigest"
+            ],
+            "signingPublicKeyDigest": evidence["collection"]["signingPublicKeyDigest"],
             "runnerImageDigest": evidence["collection"]["runnerImageDigest"],
+            "runnerToolchainDigest": evidence["collection"]["runnerToolchainDigest"],
+            "runnerReleaseManifestDigest": evidence["collection"][
+                "runnerReleaseManifestDigest"
+            ],
+            "collectorScriptDigest": evidence["collection"]["collectorScriptDigest"],
             "runnerProvenanceBundleDigest": evidence["collection"][
                 "runnerProvenanceBundleDigest"
             ],
+            "releaseSetDigest": evidence["bindings"]["releaseSetDigest"],
             "sbomDigest": risk_subject["artifacts"]["sbom"]["digest"],
             "vulnerabilityReportDigest": risk_subject["artifacts"]["vulnerability"][
                 "digest"
@@ -268,6 +308,7 @@ class DependencyRiskIntakeTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         for name in (
             "dependency-risk-scan-manifest-v1.schema.json",
+            "dependency-risk-collection-statement-v1.schema.json",
             "dependency-risk-evidence-v1.schema.json",
             "dependency-signature-exceptions-v1.schema.json",
         ):
