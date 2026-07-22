@@ -147,6 +147,30 @@ Terraform and workflow remain source declarations: no live collection, raw
 publication, independent custody verification, source admission, activation,
 campaign evidence, or reference-profile verification is claimed.
 
+The independent dependency-risk custody-verification authority digest is
+`sha256:294e544928d032046a4b8a9cec85b067f9ce5b36982597f56029d6f349151eaf`.
+It declares a third exact-main WIF provider and protected environment, a
+distinct `orchestra-custody-verifier` identity, and prefix-scoped managed-folder
+roles. The verifier can list and read only `dependency-risk/`, create but not
+read or delete reports under `dependency-risk-custody/`, view the collection
+public key, and sign with a separate custody-verification key. The protected
+workflow pins all four raw objects by generation and metageneration, requires
+the detached signature to be the newest completion marker, safely extracts the
+bounded archive, replays the complete collection verifier, and uploads a strict
+signed custody report with its detached signature last. A bound offline CLI
+replays that report signature against an independently expected public-key
+digest before publication and for later consumers. The verifier has no
+source-admission, mirror, activation, or campaign authority. Terraform,
+environment protection, and workflow execution remain source declarations: no
+live identity, raw-custody verification, report publication, or downstream
+authorization is claimed.
+
+Each GitHub WIF provider now maps a provider-prefixed numeric
+repository/environment subject, and each service-account impersonation grant
+names that single subject. Repository-wide principal sets are rejected, so the
+foundation planner, preflight signer, collector, and custody verifier cannot
+cross-assume one another merely because they share a workload identity pool.
+
 The source-only dependency GitOps candidate digest is
 `sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
 It projects five exact chart/image contracts into offline values for

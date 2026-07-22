@@ -312,7 +312,10 @@ def validate_declared_implementation() -> None:
         "attribute_condition = local.dependency_risk_collection_wif_condition",
         'resource "google_service_account" "dependency_risk_collector"',
         'account_id   = "orchestra-risk-collector"',
+        'dependency_risk_collection_subject      = "dependency-risk-collection:${var.github_repository_id}:${local.dependency_risk_collection_environment}"',
+        "\"google.subject\"                  = \"'dependency-risk-collection:' + assertion.repository_id + ':' + assertion.environment\"",
         'resource "google_service_account_iam_member" "dependency_risk_collection_wif"',
+        'member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.dependency_risk_collection_subject}"',
     )
     foundation_required = (
         'resource "google_kms_crypto_key_iam_member" "dependency_risk_collector_signer"',
@@ -328,6 +331,7 @@ def validate_declared_implementation() -> None:
         "expected_signing_public_key_digest:",
         "if: github.ref == 'refs/heads/main'",
         f"environment: {ENVIRONMENT}",
+        "persist-credentials: false",
         "DEPENDENCY_RISK_COLLECTION_REVIEW_GATE_CONFIGURED",
         "GCP_DEPENDENCY_RISK_COLLECTION_WIF_PROVIDER",
         "GCP_DEPENDENCY_RISK_COLLECTION_SERVICE_ACCOUNT",

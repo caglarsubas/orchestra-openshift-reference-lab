@@ -108,3 +108,23 @@ output "dependency_risk_collection_contract" {
     declared_artifact_mirror_write_grant = false
   }
 }
+
+output "dependency_risk_custody_verification_contract" {
+  value = {
+    collection_crypto_key                 = google_kms_crypto_key.dependency_risk_signing.id
+    verification_crypto_key               = google_kms_crypto_key.dependency_risk_custody_verification_signing.id
+    exact_key_versions_required           = true
+    verifier_service_account              = "orchestra-custody-verifier@${var.services_project_id}.iam.gserviceaccount.com"
+    declared_collection_public_key_role   = "roles/cloudkms.publicKeyViewer"
+    declared_verification_signer_role     = "roles/cloudkms.signerVerifier"
+    raw_managed_folder                    = google_storage_managed_folder.dependency_risk_raw.name
+    declared_raw_object_role              = "roles/storage.objectViewer"
+    declared_raw_write_grant              = false
+    declared_raw_delete_grant             = false
+    signed_managed_folder                 = google_storage_managed_folder.dependency_risk_signed.name
+    declared_signed_evidence_role         = "roles/storage.objectCreator"
+    declared_signed_evidence_read_grant   = false
+    declared_signed_evidence_delete_grant = false
+    declared_artifact_mirror_write_grant  = false
+  }
+}

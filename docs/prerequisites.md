@@ -103,10 +103,10 @@ independent verification sequence.
 The foundation WIF gate has two required observations. The GitHub observation
 requires the exact private repository IDs, environment, non-owner reviewer,
 self-review prevention, and exact `main` deployment policy. The GCP observation
-requires the exact workflow/ref/event condition, numeric principal-set binding,
-and absence of user-managed keys. It also requires the planner's federated
-binding to be exact and proves that the apply executor has no federated
-principal or user-managed key.
+requires the exact workflow/ref/event condition, provider-prefixed numeric
+repository/environment subject mapping, single-subject planner binding, and
+absence of user-managed keys. It also proves that the apply executor has no
+federated principal or user-managed key.
 
 The standalone collector proves the environment configuration only because it
 is not executing inside an approved workflow run. The foundation-plan workflow

@@ -13,6 +13,7 @@ validate:
 	$(PYTHON) scripts/validate_dependency_risk_intake.py
 	$(PYTHON) scripts/validate_dependency_risk_execution.py
 	$(PYTHON) scripts/validate_dependency_risk_collection_execution.py
+	$(PYTHON) scripts/validate_dependency_risk_custody_verification.py
 	$(PYTHON) scripts/validate_dependency_gitops_candidate.py
 	$(PYTHON) scripts/validate_prerequisite_policy.py
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py

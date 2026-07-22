@@ -15,6 +15,9 @@ The preflight authority is locked separately in
 The full-collection and restricted raw-custody authority is locked in
 `config/dependency-risk-collection-execution.lock.json`, digest
 `sha256:120cb99523e13116473548ee6e34e1b0fd7f2fdce9ea98b2d22861697ab1c4b0`.
+The independent raw-custody verification authority is locked in
+`config/dependency-risk-custody-verification.lock.json`, digest
+`sha256:294e544928d032046a4b8a9cec85b067f9ce5b36982597f56029d6f349151eaf`.
 
 ## Separation of duties
 
@@ -25,9 +28,18 @@ the exact preflight workflow, which contains no full-collection invocation.
 The full-collection signer is bound to a different exact workflow and may only
 sign its collection and create objects in restricted raw custody. It cannot
 read/delete raw objects, write signed evidence, mirror, request an exception,
-or approve one. The requestor and signed-runner
-collector cannot approve the exception. The two reviewers must have distinct
-identity digests and roles:
+or approve one. The custody verifier uses a third exact-workflow identity. It
+can read only the dependency-risk raw prefix, create only custody reports under
+a separate signed-evidence prefix, view the collection public key, and sign
+with a separate verification key. It cannot overwrite/delete either prefix,
+mirror, admit, activate, request an exception, or approve one. The requestor
+and signed-runner collector cannot approve the exception. The two reviewers
+must have distinct identity digests and roles:
+
+Each authority also uses a distinct provider-prefixed `google.subject` derived
+from the numeric repository ID and protected environment. Its service account
+accepts only that exact subject, never the repository-wide principal set shared
+by the workload identity pool.
 
 - `security-reviewer` verifies provenance, vulnerability evidence, the risk
   assessment, and the compensating-control plan;
@@ -148,6 +160,85 @@ signature means the prefix is incomplete. The collector cannot list the
 bucket, read back objects, or capture immutable object generations, so success
 still leaves `custodyVerified=false`.
 
+## Configure the protected custody-verification lane
+
+Configure this lane only after the full-collection authority has been verified
+and a new, completed four-object raw prefix exists:
+
+1. Verify bootstrap outputs
+   `dependency_risk_custody_verification_workload_identity_provider` and
+   `dependency_risk_custody_verification_service_account`. They must name only
+   the `dependency-risk-custody` provider and `orchestra-custody-verifier`
+   identity for the exact custody-verification workflow.
+2. Verify foundation output
+   `dependency_risk_custody_verification_contract` and live IAM independently.
+   The identity may have `roles/storage.objectViewer` only on the
+   `dependency-risk/` raw managed folder,
+   `roles/storage.objectCreator` only on the `dependency-risk-custody/` signed
+   managed folder, `roles/cloudkms.publicKeyViewer` only on the collection key,
+   and `roles/cloudkms.signerVerifier` only on the separate verification key.
+   Reject project roles, raw write/delete, signed read/delete, mirror, source
+   admission, or activation authority.
+3. Create GitHub environment
+   `reference-lab-dependency-risk-custody-verification`, restricted to exact
+   `main`. Require a configured non-owner reviewer, prevent self-review, and
+   disable administrator bypass. Set
+   `DEPENDENCY_RISK_CUSTODY_REVIEW_GATE_CONFIGURED=true` only after a second
+   operator verifies those controls.
+4. Set `GCP_DEPENDENCY_RISK_CUSTODY_WIF_PROVIDER`,
+   `GCP_DEPENDENCY_RISK_CUSTODY_SERVICE_ACCOUNT`, `GCP_SERVICES_PROJECT_ID`,
+   `GCP_RAW_EVIDENCE_BUCKET`, and `GCP_SIGNED_EVIDENCE_BUCKET` from
+   independently observed live resources. Reuse the narrowly installed GitHub
+   App; this workflow requests package-read only.
+5. Independently select enabled collection and verification key versions,
+   fetch their exact Cloud KMS public-key PEMs, and bind both PEM digests to the
+   current protected-environment approval. Never reuse an approval or rerun a
+   failed workflow attempt.
+
+Dispatch from exact `main` after the collector has published its signature
+completion marker:
+
+```bash
+revision="$(git rev-parse origin/main)"
+gh workflow run dependency-risk-custody-verification.yml \
+  --ref main \
+  -f expected_main_sha="$revision" \
+  -f evidence_id='<completed-evidence-id>' \
+  -f collection_kms_key_version='<reviewed-collection-version>' \
+  -f expected_collection_public_key_digest='sha256:<collection-pem-digest>' \
+  -f verification_kms_key_version='<reviewed-verification-version>' \
+  -f expected_verification_public_key_digest='sha256:<verification-pem-digest>' \
+  -f reason='Independently verify immutable dependency-risk raw custody'
+```
+
+The workflow requires exactly four raw objects, records each generation and
+metageneration, and pins both preconditions on every download. It requires the
+detached signature to be the newest object, compares the stored collection
+public key with the exact Cloud KMS key, safely extracts the bounded archive,
+and replays the complete collection verifier. It then create-only uploads the
+strict report and verification public key under `dependency-risk-custody/`,
+with the report signature last as the completion marker. An absent report
+signature means verification is incomplete. A successful report can set
+`custodyVerified=true` only for that exact raw prefix; every source-admission,
+mirror, activation, campaign, and reference-profile claim remains false.
+
+The publishing workflow replays its new signature before upload. A later
+read-only evidence reviewer must independently download the completed report,
+verification public key, and signature bundle by immutable generation, obtain
+the expected key digest outside those objects, and replay the same contract:
+
+```bash
+python3 scripts/validate_dependency_risk_custody_report.py \
+  --report restricted/dependency-risk-custody-verification.json \
+  --verification-public-key restricted/dependency-risk-custody-verification-public-key.pem \
+  --signature-bundle restricted/dependency-risk-custody-verification-signature.sigstore.json \
+  --expected-verification-public-key-digest 'sha256:<reviewed-pem-digest>'
+```
+
+`signatureVerified=true` verifies the detached report signature and its key
+binding; it does not by itself authorize source admission or establish custody
+for the report objects. Their generations belong in the later evidence index.
+
 ## Collect raw evidence
 
 Run collection only in the exact published certification-runner image from
@@ -249,9 +340,10 @@ Before building a payload-free candidate, a separate read-only custody actor
 must list the exact four raw objects, record their immutable GCS generations,
 recompute their digests, verify the detached signature and KMS public-key
 binding, and attest that the signature object was the completion marker for
-that prefix. The collector's success log is not that attestation. The
-independent custody lane is not yet implemented, so no live raw prefix can
-currently advance to source admission.
+that prefix. The collector's success log is not that attestation. The protected
+custody workflow now implements this contract in source, but its Terraform,
+environment, and live report remain unapplied and unverified. Therefore no raw
+prefix can currently advance to source admission.
 
 ## Build the payload-free candidate
 

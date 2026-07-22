@@ -1,0 +1,224 @@
+name: dependency-risk-custody-verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for this verification
+        required: true
+        type: string
+      evidence_id:
+        description: Exact completed dependency-risk raw evidence ID
+        required: true
+        type: string
+      collection_kms_key_version:
+        description: Exact collection-signing key version bound to the raw prefix
+        required: true
+        type: string
+      expected_collection_public_key_digest:
+        description: Reviewer-derived SHA-256 digest of the collection KMS public key PEM
+        required: true
+        type: string
+      verification_kms_key_version:
+        description: Exact custody-verification report-signing key version
+        required: true
+        type: string
+      expected_verification_public_key_digest:
+        description: Reviewer-derived SHA-256 digest of the verification KMS public key PEM
+        required: true
+        type: string
+      reason:
+        description: Bounded operator reason for verifying this raw prefix
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: dependency-risk-custody-verification
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: generation-pinned raw custody verification
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    environment: reference-lab-dependency-risk-custody-verification
+
+    steps:
+      - name: Require reviewed identity and bounded inputs
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          EVIDENCE_ID: ${{ inputs.evidence_id }}
+          COLLECTION_KEY_VERSION: ${{ inputs.collection_kms_key_version }}
+          EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_collection_public_key_digest }}
+          VERIFICATION_KEY_VERSION: ${{ inputs.verification_kms_key_version }}
+          EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_verification_public_key_digest }}
+          VERIFICATION_REASON: ${{ inputs.reason }}
+          REVIEW_GATE_CONFIGURED: ${{ vars.DEPENDENCY_RISK_CUSTODY_REVIEW_GATE_CONFIGURED }}
+          WIF_PROVIDER: ${{ vars.GCP_DEPENDENCY_RISK_CUSTODY_WIF_PROVIDER }}
+          VERIFIER_SERVICE_ACCOUNT: ${{ vars.GCP_DEPENDENCY_RISK_CUSTODY_SERVICE_ACCOUNT }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          RAW_EVIDENCE_BUCKET: ${{ vars.GCP_RAW_EVIDENCE_BUCKET }}
+          SIGNED_EVIDENCE_BUCKET: ${{ vars.GCP_SIGNED_EVIDENCE_BUCKET }}
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$EVIDENCE_ID" =~ ^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$ ]]
+          [[ "$COLLECTION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ "$VERIFICATION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ ${#VERIFICATION_REASON} -ge 12 && ${#VERIFICATION_REASON} -le 500 ]]
+          [[ "$REVIEW_GATE_CONFIGURED" == "true" ]]
+          [[ "$GCP_SERVICES_PROJECT_ID" =~ ^[a-z][a-z0-9-]{4,28}[a-z0-9]$ ]]
+          [[ "$RAW_EVIDENCE_BUCKET" =~ ^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$ ]]
+          [[ "$SIGNED_EVIDENCE_BUCKET" =~ ^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$ ]]
+          [[ "$RAW_EVIDENCE_BUCKET" != "$SIGNED_EVIDENCE_BUCKET" ]]
+          [[ "$WIF_PROVIDER" =~ ^projects/[1-9][0-9]*/locations/global/workloadIdentityPools/orchestra-lab-github/providers/dependency-risk-custody$ ]]
+          [[ "$VERIFIER_SERVICE_ACCOUNT" == "orchestra-custody-verifier@$GCP_SERVICES_PROJECT_ID.iam.gserviceaccount.com" ]]
+
+      - name: Check out reviewed main revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate custody authority and report contracts
+        run: |
+          python3 scripts/validate_repository.py
+          python3 scripts/validate_dependency_risk_custody_verification.py
+
+      - name: Verify independent environment protection for this run
+        env:
+          GITHUB_ENVIRONMENT_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ -n "$GITHUB_ENVIRONMENT_READ_TOKEN" ]]
+          printf '%s' "$GITHUB_ENVIRONMENT_READ_TOKEN" > "$RUNNER_TEMP/github-token"
+          verification="$(python3 scripts/github_environment_contract.py verify \
+            --contract dependency-risk-custody-verification \
+            --token-file "$RUNNER_TEMP/github-token" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-actor-id "$GITHUB_ACTOR_ID")"
+          printf '%s\n' "$verification"
+          [[ "$verification" =~ digest=(sha256:[a-f0-9]{64}) ]]
+          printf 'ENVIRONMENT_APPROVAL_DIGEST=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+
+      - name: Authenticate as the restricted custody verifier
+        id: gcp-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_DEPENDENCY_RISK_CUSTODY_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPENDENCY_RISK_CUSTODY_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Issue short-lived platform package token
+        id: platform-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY }}
+          owner: caglarsubas
+          repositories: agent-hook-v2
+          permission-packages: read
+
+      - name: Configure ephemeral registry auth
+        env:
+          GH_TOKEN: ${{ steps.platform-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          docker_config="$RUNNER_TEMP/docker"
+          mkdir -p "$GITHUB_WORKSPACE/restricted" "$docker_config"
+          printf '%s' "$GH_TOKEN" | docker --config "$docker_config" login ghcr.io \
+            --username x-access-token --password-stdin >/dev/null
+          chmod 0700 "$GITHUB_WORKSPACE/restricted" "$docker_config"
+          chmod 0600 "$docker_config/config.json"
+
+      - name: Capture generations, verify raw custody, and publish signed report
+        env:
+          EVIDENCE_ID: ${{ inputs.evidence_id }}
+          COLLECTION_KEY_VERSION: ${{ inputs.collection_kms_key_version }}
+          EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_collection_public_key_digest }}
+          VERIFICATION_KEY_VERSION: ${{ inputs.verification_kms_key_version }}
+          EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_verification_public_key_digest }}
+          VERIFICATION_REASON: ${{ inputs.reason }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          RAW_EVIDENCE_BUCKET: ${{ vars.GCP_RAW_EVIDENCE_BUCKET }}
+          SIGNED_EVIDENCE_BUCKET: ${{ vars.GCP_SIGNED_EVIDENCE_BUCKET }}
+          GCP_CREDENTIALS_FILE: ${{ steps.gcp-auth.outputs.credentials_file_path }}
+        run: |
+          set -euo pipefail
+          umask 077
+          runner="$(jq -er '.certificationRunner.image' config/cross-plane-release-set.lock.json)"
+          collection_signing_key="gcpkms://projects/$GCP_SERVICES_PROJECT_ID/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/dependency-risk-collection-signing/cryptoKeyVersions/$COLLECTION_KEY_VERSION"
+          verification_signing_key="gcpkms://projects/$GCP_SERVICES_PROJECT_ID/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/dependency-risk-custody-verification-signing/cryptoKeyVersions/$VERIFICATION_KEY_VERSION"
+          verification_id="orchestra-dependency-risk-custody-verification-$GITHUB_RUN_ID.$GITHUB_RUN_ATTEMPT"
+          reason_digest="sha256:$(printf '%s' "$VERIFICATION_REASON" | sha256sum | cut -d' ' -f1)"
+          actor_identity_digest="sha256:$(jq -cnS \
+            --arg repositoryId "$GITHUB_REPOSITORY_ID" \
+            --arg workflowRunId "$GITHUB_RUN_ID" \
+            --arg workflowRunAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg actorId "$GITHUB_ACTOR_ID" \
+            --arg sourceRevision "$GITHUB_SHA" \
+            --arg evidenceId "$EVIDENCE_ID" \
+            --arg collectionKeyVersion "$COLLECTION_KEY_VERSION" \
+            --arg verificationKeyVersion "$VERIFICATION_KEY_VERSION" \
+            --arg environmentApprovalDigest "$ENVIRONMENT_APPROVAL_DIGEST" \
+            --arg reasonDigest "$reason_digest" \
+            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,evidenceId:$evidenceId,collectionKeyVersion:$collectionKeyVersion,verificationKeyVersion:$verificationKeyVersion,environmentApprovalDigest:$environmentApprovalDigest,reasonDigest:$reasonDigest}' \
+            | sha256sum | cut -d' ' -f1)"
+          DOCKER_CONFIG="$RUNNER_TEMP/docker" docker pull "$runner" >/dev/null
+
+          docker run --rm --platform linux/amd64 \
+            --entrypoint /bin/bash \
+            --user "$(id -u):$(id -g)" \
+            --read-only \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --pids-limit 512 \
+            --tmpfs /tmp:rw,noexec,nosuid,size=2g \
+            --env HOME=/tmp/orchestra-home \
+            --env CLOUDSDK_CONFIG=/tmp/gcloud \
+            --env GOOGLE_APPLICATION_CREDENTIALS=/run/orchestra-auth/gcp-wif.json \
+            --volume "$GCP_CREDENTIALS_FILE:/run/orchestra-auth/gcp-wif.json:ro" \
+            --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+            --volume "$GITHUB_WORKSPACE/restricted:/workspace/restricted:rw" \
+            --workdir /workspace \
+            "$runner" \
+            scripts/verify_and_publish_dependency_risk_custody.sh \
+              --raw-evidence-bucket "$RAW_EVIDENCE_BUCKET" \
+              --signed-evidence-bucket "$SIGNED_EVIDENCE_BUCKET" \
+              --evidence-id "$EVIDENCE_ID" \
+              --verification-id "$verification_id" \
+              --collection-signing-key "$collection_signing_key" \
+              --expected-collection-signing-public-key-digest "$EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST" \
+              --verification-signing-key "$verification_signing_key" \
+              --expected-verification-signing-public-key-digest "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" \
+              --actor-identity-digest "$actor_identity_digest" \
+            | tee "$RUNNER_TEMP/dependency-risk-custody-verification.log"
+          grep -F "custodyVerified=true" "$RUNNER_TEMP/dependency-risk-custody-verification.log" >/dev/null
+          grep -F "sourceAdmission=false" "$RUNNER_TEMP/dependency-risk-custody-verification.log" >/dev/null
+
+      - name: Remove credentials, raw downloads, and transient logs
+        if: always()
+        run: |
+          rm -rf \
+            "$RUNNER_TEMP/docker" \
+            "$RUNNER_TEMP/github-token" \
+            "$RUNNER_TEMP/dependency-risk-custody-verification.log" \
+            "$GITHUB_WORKSPACE/restricted"
+          find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

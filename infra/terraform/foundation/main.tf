@@ -640,6 +640,39 @@ resource "google_kms_crypto_key_iam_member" "dependency_risk_collector_signer" {
   member        = "serviceAccount:orchestra-risk-collector@${var.services_project_id}.iam.gserviceaccount.com"
 }
 
+resource "google_kms_crypto_key" "dependency_risk_custody_verification_signing" {
+  provider = google.services
+
+  name     = "dependency-risk-custody-verification-signing"
+  key_ring = google_kms_key_ring.evidence.id
+  purpose  = "ASYMMETRIC_SIGN"
+
+  version_template {
+    algorithm        = "EC_SIGN_P256_SHA256"
+    protection_level = "SOFTWARE"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "dependency_risk_custody_collection_public_key" {
+  provider = google.services
+
+  crypto_key_id = google_kms_crypto_key.dependency_risk_signing.id
+  role          = "roles/cloudkms.publicKeyViewer"
+  member        = "serviceAccount:orchestra-custody-verifier@${var.services_project_id}.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "dependency_risk_custody_verifier_signer" {
+  provider = google.services
+
+  crypto_key_id = google_kms_crypto_key.dependency_risk_custody_verification_signing.id
+  role          = "roles/cloudkms.signerVerifier"
+  member        = "serviceAccount:orchestra-custody-verifier@${var.services_project_id}.iam.gserviceaccount.com"
+}
+
 data "google_storage_project_service_account" "services" {
   provider = google.services
   project  = var.services_project_id
@@ -734,6 +767,22 @@ resource "google_storage_bucket" "raw_evidence" {
   depends_on = [google_kms_crypto_key_iam_member.storage_agent]
 }
 
+resource "google_storage_managed_folder" "dependency_risk_raw" {
+  provider = google.services
+
+  bucket          = google_storage_bucket.raw_evidence.name
+  name            = "dependency-risk/"
+  deletion_policy = "PREVENT"
+}
+
+resource "google_storage_managed_folder" "dependency_risk_signed" {
+  provider = google.services
+
+  bucket          = google_storage_bucket.signed_evidence.name
+  name            = "dependency-risk-custody/"
+  deletion_policy = "PREVENT"
+}
+
 resource "google_service_account" "evidence_writer" {
   provider = google.services
 
@@ -764,6 +813,24 @@ resource "google_storage_bucket_iam_member" "dependency_risk_collector_writer" {
   bucket = google_storage_bucket.raw_evidence.name
   role   = "roles/storage.objectCreator"
   member = "serviceAccount:orchestra-risk-collector@${var.services_project_id}.iam.gserviceaccount.com"
+}
+
+resource "google_storage_managed_folder_iam_member" "dependency_risk_custody_raw_reader" {
+  provider = google.services
+
+  bucket         = google_storage_managed_folder.dependency_risk_raw.bucket
+  managed_folder = google_storage_managed_folder.dependency_risk_raw.name
+  role           = "roles/storage.objectViewer"
+  member         = "serviceAccount:orchestra-custody-verifier@${var.services_project_id}.iam.gserviceaccount.com"
+}
+
+resource "google_storage_managed_folder_iam_member" "dependency_risk_custody_report_writer" {
+  provider = google.services
+
+  bucket         = google_storage_managed_folder.dependency_risk_signed.bucket
+  managed_folder = google_storage_managed_folder.dependency_risk_signed.name
+  role           = "roles/storage.objectCreator"
+  member         = "serviceAccount:orchestra-custody-verifier@${var.services_project_id}.iam.gserviceaccount.com"
 }
 
 resource "google_service_account" "bastion" {

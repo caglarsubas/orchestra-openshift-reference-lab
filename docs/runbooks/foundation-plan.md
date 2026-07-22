@@ -79,6 +79,9 @@ The WIF provider accepts a token only when all locked claims match:
 - `refs/heads/main` and `workflow_dispatch`.
 - Workflow ref `.github/workflows/foundation-plan.yml@refs/heads/main`.
 - Environment `reference-lab-foundation-plan`.
+- `google.subject` exactly
+  `github:1307302690:reference-lab-foundation-plan`, with only that single
+  principal allowed to impersonate the read-only planner.
 - At least one non-owner `User` reviewer, `prevent_self_review=true`, and one
   exact custom branch policy named `main`.
 
