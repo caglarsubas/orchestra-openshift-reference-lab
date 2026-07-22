@@ -482,7 +482,7 @@ class PrerequisiteObservationTests(unittest.TestCase):
                 environ=environment,
                 run=runner,
                 toolchain_path=Path(
-                    "tests/fixtures/platform-rc8-certification-runner-toolchain-lock.json"
+                    "tests/fixtures/platform-rc10-certification-runner-toolchain-lock.json"
                 ),
                 system_name="Linux",
                 machine="x86_64",
@@ -493,7 +493,7 @@ class PrerequisiteObservationTests(unittest.TestCase):
                     environ=environment,
                     run=runner,
                     toolchain_path=Path(
-                        "tests/fixtures/platform-rc8-certification-runner-toolchain-lock.json"
+                        "tests/fixtures/platform-rc10-certification-runner-toolchain-lock.json"
                     ),
                     system_name="Darwin",
                     machine="arm64",

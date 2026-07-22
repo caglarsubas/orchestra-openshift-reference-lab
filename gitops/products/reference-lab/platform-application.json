@@ -5,12 +5,12 @@
     "name": "orchestra-platform",
     "namespace": "openshift-gitops",
     "annotations": {
-      "orchestra.prometa.ai/release-set-digest": "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428",
+      "orchestra.prometa.ai/release-set-digest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
       "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
       "orchestra.prometa.ai/dependency-admission-digest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
       "orchestra.prometa.ai/dependency-source-verification-digest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
-      "orchestra.prometa.ai/source-revision": "188283376af4e3337f106fb58c5077ff9a6e774d",
-      "orchestra.prometa.ai/source-chart-digest": "sha256:c07c5084b74048b94dee758d60bcb5054a382c347ee506077355080a4b8756f2"
+      "orchestra.prometa.ai/source-revision": "a6eb8a98051197722cd338c76a3e4d29d5a51c87",
+      "orchestra.prometa.ai/source-chart-digest": "sha256:0057f4760420ede0d707a52f50beb1551d68ffbd9ad39cb73ef7a69e372ae7aa"
     }
   },
   "spec": {
@@ -18,7 +18,7 @@
     "source": {
       "repoURL": "harbor.services.ocp-lab.prometa.ai/orchestra/charts",
       "chart": "prometa",
-      "targetRevision": "0.3.0-rc.8",
+      "targetRevision": "0.3.0-rc.10",
       "helm": {
         "releaseName": "orchestra-platform",
         "valuesObject": {
@@ -32,14 +32,14 @@
           "image": {
             "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-ubi",
             "tag": "",
-            "digest": "sha256:8e714a264d3292f4296398dabe900425b63ee745357c5029c4c808c839268b18",
+            "digest": "sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2",
             "pullPolicy": "IfNotPresent",
             "pullSecrets": [{ "name": "orchestra-registry" }]
           },
           "toolsImage": {
             "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-tools-ubi",
             "tag": "",
-            "digest": "sha256:7da2df9a9c71b95a2d56ab44c4f94fff2a66acd1e4102a8cafeaca2017ed586d",
+            "digest": "sha256:58acc61dae319e9460d16612a347b97e708a6695c7e9d1e45db2548a9b180ce4",
             "pullPolicy": "IfNotPresent"
           },
           "replicaCount": 2,
@@ -91,7 +91,7 @@
                   "ports": [{ "protocol": "TCP", "port": 4222 }]
                 }
               ],
-              "rolloutId": "release-set-d4b4ef7e"
+              "rolloutId": "release-set-4f571fad"
             }
           },
           "controlPlaneEvents": { "mode": "postgres" },
@@ -106,7 +106,7 @@
                 "keyPrefix": "orchestra:reference-lab:ingest",
                 "connectTimeoutMs": 1000,
                 "operationTimeoutMs": 1000,
-                "rolloutId": "release-set-d4b4ef7e",
+                "rolloutId": "release-set-4f571fad",
                 "networkPolicyEgress": [
                   {
                     "to": [
@@ -123,7 +123,7 @@
           "secret": {
             "create": false,
             "existingSecret": "orchestra-platform-secrets",
-            "rolloutId": "release-set-d4b4ef7e",
+            "rolloutId": "release-set-4f571fad",
             "data": {}
           },
           "backendTls": {
@@ -132,7 +132,7 @@
             "existingSecret": "orchestra-platform-backend-tls",
             "certificateKey": "tls.crt",
             "privateKeyKey": "tls.key",
-            "rolloutId": "release-set-d4b4ef7e",
+            "rolloutId": "release-set-4f571fad",
             "serverName": "orchestra-platform.orchestra-platform.svc",
             "serviceServingCertificate": {
               "enabled": true,

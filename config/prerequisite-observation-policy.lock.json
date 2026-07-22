@@ -5,7 +5,7 @@
   "profileId": "orchestra-ocp-4.20-amd64-v1",
   "bindings": {
     "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
-    "releaseSetDigest": "sha256:d4b4ef7e33a6918d8a31d1f62cf704ae4bd8d4973e406f5a8a6d7ef0c1786428"
+    "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe"
   },
   "observationPolicy": {
     "maximumAgeHours": 24,
@@ -18,12 +18,12 @@
     "observationMayAuthorizeProvisioning": false
   },
   "runner": {
-    "release": "platform-v0.1.0-rc.8",
+    "release": "platform-v0.1.0-rc.10",
     "repository": "caglarsubas/agent-hook-v2",
-    "revision": "188283376af4e3337f106fb58c5077ff9a6e774d",
-    "image": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8",
-    "imageDigest": "sha256:dfe1d808addf2808ea71f63b1297d08db58f8418c3afa3c09eed74b7e701aaa8",
-    "toolchainDigest": "sha256:b6e3a4e11f5e0a5421c5007c132fba3bdd3b72ad620ed07f813b8c7677b0b34e"
+    "revision": "a6eb8a98051197722cd338c76a3e4d29d5a51c87",
+    "image": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:0009128ccbb53b9e376f74e7a6110ab6d2316be392be825d938705b88488f061",
+    "imageDigest": "sha256:0009128ccbb53b9e376f74e7a6110ab6d2316be392be825d938705b88488f061",
+    "toolchainDigest": "sha256:7dc16baeb7c7a5dcfb0fb360f748b190d0e042f1bd9cf5843e1b75e3546a9593"
   },
   "stages": {
     "bootstrap": [

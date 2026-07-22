@@ -25,7 +25,7 @@ TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:c04c6038eba4facf57e2b6c7095be7a2e6fbfb9057695af4f6e05998ebfadafe"
+    "sha256:496471c4c7d35fba78c6e37acf82388099bc01b3485f9972d92056ab729aefda"
 )
 OBSERVATION_ID = re.compile(r"^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$")
 REASON_CODE = re.compile(r"^[A-Z][A-Z0-9_]+$")

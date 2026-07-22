@@ -38,7 +38,7 @@ class DependencyRiskCollectionTests(unittest.TestCase):
             ROOT
             / "tests"
             / "fixtures"
-            / "platform-rc8-certification-runner-toolchain-lock.json"
+            / "platform-rc10-certification-runner-toolchain-lock.json"
         ).read_bytes()
         toolchain_digest = digest_bytes(toolchain_bytes)
         self.assertEqual(
