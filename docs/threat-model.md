@@ -30,6 +30,7 @@
 |---|---|
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
 | Arbitrary workflow obtains foundation mutation authority | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, machine-checked current-run approval, separate read-only planner, and no executor WIF binding |
+| Preflight identity is reused for scanning, mirroring, or evidence mutation | Separate exact-workflow WIF provider, current-run non-owner approval, key-level signer role only, no project/bucket/mirror grant, short-lived release token, and a statically enforced `--preflight-only` workflow |
 | Public control-plane exposure | Private OCP/GKE endpoints, no VM external IP, IAP tunnel only |
 | Peering used as broad trust | Non-transitive peering, explicit port/CIDR firewall, flow logs, namespace default deny |
 | Public DNS takeover or private-name leakage | Terraform-owned exact public zone, external delegation review, no public cluster records, installer-owned private records, and one-way read-only DNS peering |
@@ -85,9 +86,13 @@
   the dependency BOM. They cannot be activated until verification or a named,
   time-bounded security exception is recorded.
 - The atomic risk collector and detached verifier have not yet run with the
-  approved lab WIF identity and Cloud KMS key. Fixture tests prove contract and
-  tamper behavior only; they are not vulnerability, licence, source-admission,
-  mirror, or campaign evidence.
+  approved lab WIF identity and Cloud KMS key. The dedicated provider, service
+  account, signing key, and protected preflight workflow are source-declared
+  only. They have not been applied or independently observed, and the external
+  GitHub environment/App installation does not exist merely because its source
+  contract does. Fixture tests prove contract and tamper behavior only; they
+  are not vulnerability, licence, source-admission, mirror, or campaign
+  evidence.
 - The first-party Valkey chart does not currently satisfy the locked Sentinel
   topology. Selecting a third-party operator or changing topology requires a
   reviewed architecture decision and a new dependency BOM.

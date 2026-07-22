@@ -18,12 +18,20 @@ output "workload_identity_provider" {
   value = google_iam_workload_identity_pool_provider.github.name
 }
 
+output "dependency_risk_workload_identity_provider" {
+  value = google_iam_workload_identity_pool_provider.dependency_risk.name
+}
+
 output "foundation_service_account" {
   value = google_service_account.foundation_executor.email
 }
 
 output "foundation_plan_service_account" {
   value = google_service_account.foundation_planner.email
+}
+
+output "dependency_risk_service_account" {
+  value = google_service_account.dependency_risk.email
 }
 
 output "foundation_identity_contract" {
@@ -34,5 +42,18 @@ output "foundation_identity_contract" {
     planner_state_access     = "read-only-without-lock"
     executor_service_account = google_service_account.foundation_executor.email
     executor_federated       = false
+  }
+}
+
+output "dependency_risk_identity_contract" {
+  value = {
+    service_account                      = google_service_account.dependency_risk.email
+    workload_identity_provider           = google_iam_workload_identity_pool_provider.dependency_risk.name
+    environment                          = local.dependency_risk_preflight_environment
+    workflow_ref                         = local.dependency_risk_preflight_workflow_ref
+    declared_project_roles               = []
+    declared_evidence_bucket_write_grant = false
+    declared_artifact_mirror_write_grant = false
+    user_managed_key_resource_declared   = false
   }
 }

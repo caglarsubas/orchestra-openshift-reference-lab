@@ -10,6 +10,7 @@ from pathlib import Path
 from scripts.collect_prerequisite_observation import observe_github_environment
 from scripts.github_environment_contract import (
     fetch_environment_evidence,
+    load_expected_environment,
     payload_digest,
     read_restricted_token,
     validate_environment_payloads,
@@ -337,6 +338,9 @@ class GithubEnvironmentContractTests(unittest.TestCase):
             observe_github_environment(None, now, policy)["reasonCode"],
             "GITHUB_ENVIRONMENT_TOKEN_MISSING",
         )
+
+    def test_default_foundation_environment_loader_is_unchanged(self) -> None:
+        self.assertEqual(load_expected_environment("foundation-plan"), self.expected)
 
 
 if __name__ == "__main__":

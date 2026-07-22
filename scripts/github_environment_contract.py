@@ -19,6 +19,7 @@ from typing import Any, NoReturn
 API_ROOT = "https://api.github.com"
 API_VERSION = "2026-03-10"
 GithubGetter = Callable[[str, str], Any]
+ENVIRONMENT_CONTRACTS = ("foundation-plan", "dependency-risk-preflight")
 
 
 def fail(code: str) -> NoReturn:
@@ -377,31 +378,54 @@ def fetch_environment_evidence(
     return evidence
 
 
+def load_expected_environment(contract: str) -> dict[str, Any]:
+    if contract == "foundation-plan":
+        try:
+            from scripts.prerequisite_observation import load_contract, validate_policy
+        except ModuleNotFoundError:
+            from prerequisite_observation import load_contract, validate_policy
+
+        policy, release_set = load_contract()
+        validate_policy(policy, release_set)
+        return policy["gcp"]["wif"]
+    if contract == "dependency-risk-preflight":
+        try:
+            from scripts.dependency_risk_execution import (
+                load_contract,
+                validate_authority,
+            )
+        except ModuleNotFoundError:
+            from dependency_risk_execution import load_contract, validate_authority
+
+        authority, release_set, risk_policy = load_contract()
+        validate_authority(authority, release_set, risk_policy)
+        return authority["federation"]
+    fail("github_environment_contract_invalid")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("verify", choices=("verify",))
+    parser.add_argument(
+        "--contract", choices=ENVIRONMENT_CONTRACTS, default="foundation-plan"
+    )
     parser.add_argument("--token-file", type=Path, required=True)
     parser.add_argument("--workflow-run-id", type=int, required=True)
     parser.add_argument("--workflow-run-attempt", type=int, required=True)
     parser.add_argument("--workflow-actor-id", type=int, required=True)
     args = parser.parse_args(argv)
-    try:
-        from scripts.prerequisite_observation import load_contract, validate_policy
-    except ModuleNotFoundError:
-        from prerequisite_observation import load_contract, validate_policy
-
-    policy, release_set = load_contract()
-    validate_policy(policy, release_set)
+    expected = load_expected_environment(args.contract)
     evidence = fetch_environment_evidence(
         args.token_file,
-        policy["gcp"]["wif"],
+        expected,
         workflow_run_id=args.workflow_run_id,
         workflow_run_attempt=args.workflow_run_attempt,
         workflow_actor_id=args.workflow_actor_id,
     )
     print(
         "github_environment_protection_valid "
-        f"digest={payload_digest(evidence)} reviewers={evidence['reviewerCount']} "
+        f"contract={args.contract} digest={payload_digest(evidence)} "
+        f"reviewers={evidence['reviewerCount']} "
         "preventSelfReview=true deploymentBranch=main currentRunApproval=true"
     )
     return 0

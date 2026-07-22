@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.dependency-risk.preflight-authority.v1",
+  "authorityId": "orchestra-dependency-risk-preflight-v1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "bindings": {
+    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
+    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+    "riskPolicyDigest": "sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4",
+    "collectorScriptDigest": "sha256:a474328d9cfab9340c67ff1179f947144134ef7cee501894a2f0f14782d8f415"
+  },
+  "kms": {
+    "projectPlane": "services-evidence",
+    "location": "europe-west1",
+    "keyRingId": "orchestra-reference-evidence",
+    "cryptoKeyId": "dependency-risk-collection-signing",
+    "purpose": "ASYMMETRIC_SIGN",
+    "algorithm": "EC_SIGN_P256_SHA256",
+    "protectionLevel": "SOFTWARE",
+    "exactVersionRequired": true,
+    "preventDestroy": true
+  },
+  "identity": {
+    "serviceAccountId": "orchestra-dependency-risk",
+    "allowedKmsRole": "roles/cloudkms.signerVerifier",
+    "projectRoles": [],
+    "evidenceBucketWriteGranted": false,
+    "artifactMirrorWriteGranted": false,
+    "userManagedServiceAccountKeyDeclared": false
+  },
+  "federation": {
+    "poolId": "orchestra-lab-github",
+    "providerId": "dependency-risk-preflight",
+    "issuerUri": "https://token.actions.githubusercontent.com",
+    "repository": "caglarsubas/orchestra-openshift-reference-lab",
+    "repositoryId": "1307302690",
+    "repositoryOwnerId": "37515097",
+    "repositoryVisibility": "private",
+    "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/dependency-risk-preflight.yml@refs/heads/main",
+    "environment": "reference-lab-dependency-risk-preflight",
+    "minimumIndependentReviewers": 1,
+    "reviewerType": "User",
+    "preventSelfReview": true,
+    "deploymentBranch": "main",
+    "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.repository_id == '1307302690' && assertion.repository_owner_id == '37515097' && assertion.repository_visibility == 'private' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch' && assertion.workflow_ref == 'caglarsubas/orchestra-openshift-reference-lab/.github/workflows/dependency-risk-preflight.yml@refs/heads/main' && assertion.environment == 'reference-lab-dependency-risk-preflight'"
+  },
+  "workflow": {
+    "path": ".github/workflows/dependency-risk-preflight.yml",
+    "trigger": "workflow_dispatch",
+    "exactMainRevisionRequired": true,
+    "currentRunApprovalRequired": true,
+    "rerunAllowed": false,
+    "mode": "preflight-only",
+    "collectionOutputPersisted": false,
+    "workflowArtifactUploaded": false,
+    "sourceAdmissionAuthorized": false,
+    "mirrorAuthorization": false,
+    "activationAuthorized": false,
+    "campaignEvidence": false
+  },
+  "claim": {
+    "terraformDeclared": true,
+    "workflowDeclared": true,
+    "applied": false,
+    "liveIdentityVerified": false,
+    "liveKmsVerified": false,
+    "livePreflightPassed": false,
+    "collectionStarted": false,
+    "sourceAdmissionAuthorized": false,
+    "mirrorAuthorization": false,
+    "activationAuthorized": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false
+  }
+}
