@@ -34,7 +34,10 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Protected exact-main dependency-risk preflight workflow | Yes | Yes | No | No | No |
 | Dedicated dependency-risk collection/custody authority | Yes | Yes | No | No | No |
 | Protected full collection and create-only raw-custody workflow | Yes | Yes | No | No | No |
+| Dedicated independent raw-custody verification authority | Yes | Yes | No | No | No |
+| Generation-pinned raw verification and signed-report workflow | Yes | Yes | No | No | No |
 | Live signed-runner vulnerability/SBOM evidence | No | N/A | No | No | No |
+| Live independently verified raw custody | No | N/A | No | No | No |
 | Empty upstream-signature exception intake | Yes | Yes | No | No | No |
 | Reviewed upstream-signature exceptions | No | N/A | No | No | No |
 | Empty mirror-receipt intake contract | Yes | Yes | No | No | No |
@@ -111,6 +114,26 @@ ordering, and fail-closed behavior only. The collector deliberately does not
 record GCS object generations, so an independent custody observer remains
 required before the raw prefix can support any later evidence intake.
 
+That independent custody lane is now source-declared and CI-validated. A third
+exact-workflow WIF identity has no project role and receives only managed-folder
+read/list access to `dependency-risk/`, managed-folder create-only access to
+`dependency-risk-custody/`, public-key access to the collection key, and
+sign/verify access to a separate report key. Its protected workflow records and
+pins all four raw object generations and metagenerations, verifies completion
+marker ordering and the collection key, safely extracts the bounded archive,
+replays the full collection verifier, verifies the new report signature against
+an independently expected key digest, and uploads that signature last. Tests
+exercise extra-object, marker-order, size-drift, key-substitution,
+archive-traversal, report-tamper, invalid-report-signature, and
+failed-final-upload cases. This remains local source evidence: no Terraform
+resource or protected environment has been created, and no live raw prefix or
+signed custody report has been verified.
+All four GitHub providers now use distinct provider-prefixed subjects, and IAM
+impersonation binds each service account to one exact subject instead of a
+repository-wide principal set. This removes cross-assumption between the
+foundation planner and the three dependency-risk authorities in the shared
+pool; the live bindings still require independent verification after apply.
+
 No live scan or human review is checked in, so no exception is approved. The
 mirror intake is intentionally empty. No destination mirror, lab
 signature, live identity, backup target, server-side dry run, or approval is
@@ -124,15 +147,16 @@ CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
 
 The next dependency increment is bootstrap/foundation application and
-independent verification of both dedicated WIF providers, both service
-accounts, the exact key version/public-key digest, restricted raw-bucket IAM,
-both protected environments, and the GitHub App installation. The protected
-launch preflight executes first; a successful result still does not start
-collection. A separately approved full-collection run may then publish only a
-completed raw prefix. An independent read-only custody lane must capture exact
-object generations and verify the detached signature before licence/risk
-reviews, source-replay aggregation, live Artifact Registry/Harbor receipts,
-or an executable operator/service overlay can proceed.
+independent verification of all three dedicated WIF providers and service
+accounts, both exact key versions/public-key digests, managed-folder and bucket
+IAM, all three protected environments, and the GitHub App installation. The
+protected launch preflight executes first; a successful result still does not
+start collection. A separately approved full-collection run may then publish
+only a completed raw prefix. A third approval runs the independent custody lane
+to capture exact object generations and verify the detached signature. Only
+that signed custody report can feed later licence/risk reviews and source-replay
+aggregation; it still cannot authorize Artifact Registry/Harbor mirroring or an
+executable operator/service overlay.
 Valkey/Sentinel, Keycloak Operator, and standalone Thanos remain named design
 decisions. Platform backend TLS is now declared with an
 OpenShift service-serving certificate and re-encrypt Route. The durable

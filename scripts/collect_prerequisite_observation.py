@@ -656,9 +656,12 @@ def observe_wif(
             ],
         )
         provider_name = provider.get("name", "")
+        expected_subject = (
+            f"{wif['providerId']}:{wif['repositoryId']}:{wif['environment']}"
+        )
         expected_member = (
-            f"principalSet://iam.googleapis.com/{provider_name.rsplit('/providers/', 1)[0]}"
-            f"/attribute.repository_id/{wif['repositoryId']}"
+            f"principal://iam.googleapis.com/{provider_name.rsplit('/providers/', 1)[0]}"
+            f"/subject/{expected_subject}"
         )
         planner_bindings = (
             planner_iam_policy.get("bindings", [])
@@ -722,7 +725,10 @@ def observe_wif(
             provider.get("attributeMapping", {}) if isinstance(provider, dict) else {}
         )
         expected_mapping = {
-            "google.subject": "assertion.sub",
+            "google.subject": (
+                f"'{wif['providerId']}:' + assertion.repository_id + ':' + "
+                "assertion.environment"
+            ),
             "attribute.actor_id": "assertion.actor_id",
             "attribute.environment": "assertion.environment",
             "attribute.event_name": "assertion.event_name",

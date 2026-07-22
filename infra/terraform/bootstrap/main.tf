@@ -110,6 +110,7 @@ locals {
   )
   foundation_plan_environment  = "reference-lab-foundation-plan"
   foundation_plan_workflow_ref = "${var.github_repository}/.github/workflows/foundation-plan.yml@refs/heads/main"
+  foundation_plan_subject      = "github:${var.github_repository_id}:${local.foundation_plan_environment}"
   foundation_plan_wif_condition = join(" && ", [
     "assertion.repository == '${var.github_repository}'",
     "assertion.repository_id == '${var.github_repository_id}'",
@@ -122,6 +123,7 @@ locals {
   ])
   dependency_risk_preflight_environment  = "reference-lab-dependency-risk-preflight"
   dependency_risk_preflight_workflow_ref = "${var.github_repository}/.github/workflows/dependency-risk-preflight.yml@refs/heads/main"
+  dependency_risk_preflight_subject      = "dependency-risk-preflight:${var.github_repository_id}:${local.dependency_risk_preflight_environment}"
   dependency_risk_preflight_wif_condition = join(" && ", [
     "assertion.repository == '${var.github_repository}'",
     "assertion.repository_id == '${var.github_repository_id}'",
@@ -134,6 +136,7 @@ locals {
   ])
   dependency_risk_collection_environment  = "reference-lab-dependency-risk-collection"
   dependency_risk_collection_workflow_ref = "${var.github_repository}/.github/workflows/dependency-risk-collection.yml@refs/heads/main"
+  dependency_risk_collection_subject      = "dependency-risk-collection:${var.github_repository_id}:${local.dependency_risk_collection_environment}"
   dependency_risk_collection_wif_condition = join(" && ", [
     "assertion.repository == '${var.github_repository}'",
     "assertion.repository_id == '${var.github_repository_id}'",
@@ -143,6 +146,19 @@ locals {
     "assertion.event_name == 'workflow_dispatch'",
     "assertion.workflow_ref == '${local.dependency_risk_collection_workflow_ref}'",
     "assertion.environment == '${local.dependency_risk_collection_environment}'",
+  ])
+  dependency_risk_custody_verification_environment  = "reference-lab-dependency-risk-custody-verification"
+  dependency_risk_custody_verification_workflow_ref = "${var.github_repository}/.github/workflows/dependency-risk-custody-verification.yml@refs/heads/main"
+  dependency_risk_custody_verification_subject      = "dependency-risk-custody:${var.github_repository_id}:${local.dependency_risk_custody_verification_environment}"
+  dependency_risk_custody_verification_wif_condition = join(" && ", [
+    "assertion.repository == '${var.github_repository}'",
+    "assertion.repository_id == '${var.github_repository_id}'",
+    "assertion.repository_owner_id == '${var.github_repository_owner_id}'",
+    "assertion.repository_visibility == 'private'",
+    "assertion.ref == 'refs/heads/main'",
+    "assertion.event_name == 'workflow_dispatch'",
+    "assertion.workflow_ref == '${local.dependency_risk_custody_verification_workflow_ref}'",
+    "assertion.environment == '${local.dependency_risk_custody_verification_environment}'",
   ])
 }
 
@@ -279,7 +295,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
   display_name                       = "GitHub Actions"
 
   attribute_mapping = {
-    "google.subject"                  = "assertion.sub"
+    "google.subject"                  = "'github:' + assertion.repository_id + ':' + assertion.environment"
     "attribute.actor_id"              = "assertion.actor_id"
     "attribute.environment"           = "assertion.environment"
     "attribute.event_name"            = "assertion.event_name"
@@ -305,7 +321,7 @@ resource "google_iam_workload_identity_pool_provider" "dependency_risk" {
   description                        = "Exact-main preflight identity; no collection, mirror, or evidence-write authority."
 
   attribute_mapping = {
-    "google.subject"                  = "assertion.sub"
+    "google.subject"                  = "'dependency-risk-preflight:' + assertion.repository_id + ':' + assertion.environment"
     "attribute.actor_id"              = "assertion.actor_id"
     "attribute.environment"           = "assertion.environment"
     "attribute.event_name"            = "assertion.event_name"
@@ -331,7 +347,7 @@ resource "google_iam_workload_identity_pool_provider" "dependency_risk_collectio
   description                        = "Exact-main collection identity; no mirror, activation, signed-evidence, or campaign authority."
 
   attribute_mapping = {
-    "google.subject"                  = "assertion.sub"
+    "google.subject"                  = "'dependency-risk-collection:' + assertion.repository_id + ':' + assertion.environment"
     "attribute.actor_id"              = "assertion.actor_id"
     "attribute.environment"           = "assertion.environment"
     "attribute.event_name"            = "assertion.event_name"
@@ -343,6 +359,32 @@ resource "google_iam_workload_identity_pool_provider" "dependency_risk_collectio
     "attribute.workflow_ref"          = "assertion.workflow_ref"
   }
   attribute_condition = local.dependency_risk_collection_wif_condition
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_iam_workload_identity_pool_provider" "dependency_risk_custody_verification" {
+  project                            = google_project.services.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "dependency-risk-custody"
+  display_name                       = "Dependency risk custody verification"
+  description                        = "Exact-main raw-custody verifier; no raw mutation, mirror, admission, activation, or campaign authority."
+
+  attribute_mapping = {
+    "google.subject"                  = "'dependency-risk-custody:' + assertion.repository_id + ':' + assertion.environment"
+    "attribute.actor_id"              = "assertion.actor_id"
+    "attribute.environment"           = "assertion.environment"
+    "attribute.event_name"            = "assertion.event_name"
+    "attribute.ref"                   = "assertion.ref"
+    "attribute.repository"            = "assertion.repository"
+    "attribute.repository_id"         = "assertion.repository_id"
+    "attribute.repository_owner_id"   = "assertion.repository_owner_id"
+    "attribute.repository_visibility" = "assertion.repository_visibility"
+    "attribute.workflow_ref"          = "assertion.workflow_ref"
+  }
+  attribute_condition = local.dependency_risk_custody_verification_wif_condition
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -377,22 +419,35 @@ resource "google_service_account" "dependency_risk_collector" {
   description  = "Short-lived collection signer and create-only raw evidence writer."
 }
 
+resource "google_service_account" "dependency_risk_custody_verifier" {
+  project      = google_project.services.project_id
+  account_id   = "orchestra-custody-verifier"
+  display_name = "Orchestra dependency risk custody verifier"
+  description  = "Short-lived generation-pinned raw reader and create-only signed custody reporter."
+}
+
 resource "google_service_account_iam_member" "foundation_plan_wif" {
   service_account_id = google_service_account.foundation_planner.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_plan_subject}"
 }
 
 resource "google_service_account_iam_member" "dependency_risk_wif" {
   service_account_id = google_service_account.dependency_risk.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.dependency_risk_preflight_subject}"
 }
 
 resource "google_service_account_iam_member" "dependency_risk_collection_wif" {
   service_account_id = google_service_account.dependency_risk_collector.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/${var.github_repository_id}"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.dependency_risk_collection_subject}"
+}
+
+resource "google_service_account_iam_member" "dependency_risk_custody_verification_wif" {
+  service_account_id = google_service_account.dependency_risk_custody_verifier.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.dependency_risk_custody_verification_subject}"
 }
 
 resource "google_project_iam_member" "foundation" {

@@ -29,10 +29,14 @@
 | Threat | Control |
 |---|---|
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
-| Arbitrary workflow obtains foundation mutation authority | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, machine-checked current-run approval, separate read-only planner, and no executor WIF binding |
+| Arbitrary workflow obtains or cross-assumes a lab service account | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, provider-prefixed subject mapping, single-subject impersonation grants, machine-checked current-run approval, separate read-only planner, and no executor WIF binding |
 | Preflight identity is reused for scanning, mirroring, or evidence mutation | Separate exact-workflow WIF provider, current-run non-owner approval, key-level signer role only, no project/bucket/mirror grant, short-lived release token, and a statically enforced `--preflight-only` workflow |
 | Full-collection identity overwrites, reads back, deletes, or promotes evidence | Separate exact-workflow WIF provider and current-run approval, no project role, key-level signer plus raw-bucket object-creator only, generation-zero uploads, detached signature uploaded last, and no signed-evidence or mirror grant |
 | Partial raw upload is mistaken for a completed collection | Unique evidence prefix, create-only writes, detached signature as the last completion marker, no success output after a failed marker upload, and later independent generation/signature verification |
+| Custody verifier reads unrelated raw evidence or existing signed reports | Managed-folder IAM limits raw viewing to `dependency-risk/` and signed creation to `dependency-risk-custody/`; the verifier has no bucket/project role and no signed-object read/delete grant |
+| Raw objects change between listing and verification, or a reordered marker is accepted | Exact four-object inventory, immutable generation and metageneration capture, precondition-pinned downloads, digest replay, and detached signature required as the newest object |
+| A malicious raw archive escapes extraction or exhausts the verifier | Bounded compressed/member/expanded sizes, one expected root, path normalization, and rejection of links, devices, FIFOs, traversal, or extra members before deep replay |
+| A forged or valid custody report is treated as source admission or activation | Strict false authorization claims, distinct report-signing key, offline signature replay against an independently expected key digest, create-only evidence role, no mirror/admission/activation grant, and separate later human and source-replay gates |
 | Public control-plane exposure | Private OCP/GKE endpoints, no VM external IP, IAP tunnel only |
 | Peering used as broad trust | Non-transitive peering, explicit port/CIDR firewall, flow logs, namespace default deny |
 | Public DNS takeover or private-name leakage | Terraform-owned exact public zone, external delegation review, no public cluster records, installer-owned private records, and one-way read-only DNS peering |
@@ -94,10 +98,13 @@
   applied or independently observed, and the external GitHub environments/App
   installation do not exist merely because their source contracts do. The
   collector intentionally cannot read raw objects or record their immutable
-  generations; the independent custody-verification lane remains absent.
-  Fixture tests prove contract, upload-order, and tamper behavior only; they
-  are not vulnerability, licence, source-admission, mirror, or campaign
-  evidence.
+  generations. The independent custody-verification authority, managed-folder
+  IAM, protected workflow, deep replay, and signed report are now
+  source-declared and fixture-tested, but none is applied or live-observed.
+  There is no independently signed live custody report. Fixture tests prove
+  contract, generation/order checks, bounded extraction, upload ordering, and
+  tamper behavior only; they are not vulnerability, licence, source-admission,
+  mirror, or campaign evidence.
 - The first-party Valkey chart does not currently satisfy the locked Sentinel
   topology. Selecting a third-party operator or changing topology requires a
   reviewed architecture decision and a new dependency BOM.

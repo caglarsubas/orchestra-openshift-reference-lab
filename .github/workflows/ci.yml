@@ -69,6 +69,9 @@ jobs:
       - name: Validate full collection authority and restricted raw custody
         run: python3 scripts/validate_dependency_risk_collection_execution.py
 
+      - name: Validate independent raw-custody verification authority
+        run: python3 scripts/validate_dependency_risk_custody_verification.py
+
       - name: Validate blocked dependency GitOps candidate
         run: python3 scripts/validate_dependency_gitops_candidate.py
 

@@ -163,7 +163,19 @@ class FoundationPlanSummaryTests(unittest.TestCase):
             'resource "google_service_account_iam_member" "foundation_wif"',
             bootstrap,
         )
-        self.assertIn("attribute.repository_id", bootstrap)
+        self.assertIn(
+            '"google.subject"                  = "\'github:\' + '
+            "assertion.repository_id + ':' + assertion.environment\"",
+            bootstrap,
+        )
+        self.assertIn(
+            "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_plan_subject}",
+            bootstrap,
+        )
+        self.assertNotIn(
+            "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/attribute.repository_id/",
+            bootstrap,
+        )
         self.assertIn("assertion.workflow_ref", bootstrap)
         self.assertIn("assertion.environment", bootstrap)
 

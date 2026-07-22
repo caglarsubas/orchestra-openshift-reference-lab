@@ -375,6 +375,7 @@ def validate_foundation_plan_workflow() -> None:
         "id-token: write",
         "if: github.ref == 'refs/heads/main'",
         "environment: reference-lab-foundation-plan",
+        "persist-credentials: false",
         "FOUNDATION_PLAN_REVIEW_GATE_CONFIGURED",
         "GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT",
         "github_environment_contract.py verify",
@@ -439,6 +440,25 @@ def validate_dependency_risk_collection_workflow() -> None:
     validate_declared_implementation()
 
 
+def validate_dependency_risk_custody_verification_workflow() -> None:
+    try:
+        from scripts.dependency_risk_custody_verification import (
+            load_contract,
+            validate_authority,
+            validate_declared_implementation,
+        )
+    except ModuleNotFoundError:
+        from dependency_risk_custody_verification import (
+            load_contract,
+            validate_authority,
+            validate_declared_implementation,
+        )
+
+    authority, release_set, risk_policy = load_contract()
+    validate_authority(authority, release_set, risk_policy)
+    validate_declared_implementation()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prerequisites", type=Path)
@@ -464,6 +484,7 @@ def main(argv: list[str] | None = None) -> int:
     validate_foundation_plan_workflow()
     validate_dependency_risk_preflight_workflow()
     validate_dependency_risk_collection_workflow()
+    validate_dependency_risk_custody_verification_workflow()
     validate_prerequisites(
         load_json(args.prerequisites.resolve())
         if args.prerequisites

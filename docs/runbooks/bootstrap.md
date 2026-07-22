@@ -29,9 +29,15 @@
    absence of service-account keys. The bootstrap also creates the separate
    `dependency-risk-preflight` provider and `orchestra-dependency-risk`
    identity, plus the `dependency-risk-collection` provider and
-   `orchestra-risk-collector` identity. Confirm each provider condition names
-   only exact `main`, `workflow_dispatch`, its own protected environment, and
-   its own exact workflow; confirm both identities have no project role.
+   `orchestra-risk-collector` identity, plus the `dependency-risk-custody`
+   provider and `orchestra-custody-verifier` identity. Confirm each provider
+   condition names only exact `main`, `workflow_dispatch`, its own protected
+   environment, and its own exact workflow; confirm all three identities have
+   no project role. Verify all four providers, including the foundation
+   planner, map a distinct provider-prefixed numeric repository/environment
+   `google.subject`, and each service account grants impersonation only to that
+   exact `principal://.../subject/...`. Reject a repository-wide
+   `principalSet` binding.
 5. Configure the foundation GCS backend using the bootstrap outputs. Never
    migrate state to a local backend.
 6. Re-authenticate through WIF and prove the bootstrap credential is no longer
@@ -60,7 +66,15 @@
    only `roles/storage.objectCreator` on the restricted raw-evidence bucket,
    with no read, delete, signed-evidence, mirror, or project grant. Record an
    exact enabled key version and have an independent reviewer derive the
-   public-key PEM digest before following both protected procedures in
+   public-key PEM digest. Verify the separate
+   `dependency-risk-custody-verification-signing` key has the same algorithm,
+   and the custody verifier has only `roles/cloudkms.publicKeyViewer` on the
+   collection key plus `roles/cloudkms.signerVerifier` on the verification
+   key. Confirm managed-folder-scoped `roles/storage.objectViewer` on
+   `dependency-risk/` and create-only `roles/storage.objectCreator` on
+   `dependency-risk-custody/`, with no project, delete, mirror, source
+   admission, or activation grant. Independently bind exact versions and PEM
+   digests for both keys before following all three protected procedures in
    `docs/runbooks/dependency-risk-review.md`.
 6. Exercise backup/export access before considering the retention lock.
 7. In a separately approved change, set certification mode and the exact lock

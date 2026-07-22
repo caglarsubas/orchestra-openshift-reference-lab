@@ -265,7 +265,10 @@ class PrerequisiteObservationTests(unittest.TestCase):
                     "oidc": {"issuerUri": policy["gcp"]["wif"]["issuerUri"]},
                     "attributeCondition": policy["gcp"]["wif"]["attributeCondition"],
                     "attributeMapping": {
-                        "google.subject": "assertion.sub",
+                        "google.subject": (
+                            "'github:' + assertion.repository_id + ':' + "
+                            "assertion.environment"
+                        ),
                         "attribute.actor_id": "assertion.actor_id",
                         "attribute.environment": "assertion.environment",
                         "attribute.event_name": "assertion.event_name",
@@ -295,7 +298,7 @@ class PrerequisiteObservationTests(unittest.TestCase):
                             {
                                 "role": "roles/iam.workloadIdentityUser",
                                 "members": [
-                                    "principalSet://iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/attribute.repository_id/1307302690"
+                                    "principal://iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/subject/github:1307302690:reference-lab-foundation-plan"
                                 ],
                             }
                         ]

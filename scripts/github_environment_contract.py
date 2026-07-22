@@ -23,6 +23,7 @@ ENVIRONMENT_CONTRACTS = (
     "foundation-plan",
     "dependency-risk-preflight",
     "dependency-risk-collection",
+    "dependency-risk-custody-verification",
 )
 
 
@@ -412,6 +413,21 @@ def load_expected_environment(contract: str) -> dict[str, Any]:
             )
         except ModuleNotFoundError:
             from dependency_risk_collection_execution import (
+                load_contract,
+                validate_authority,
+            )
+
+        authority, release_set, risk_policy = load_contract()
+        validate_authority(authority, release_set, risk_policy)
+        return authority["federation"]
+    if contract == "dependency-risk-custody-verification":
+        try:
+            from scripts.dependency_risk_custody_verification import (
+                load_contract,
+                validate_authority,
+            )
+        except ModuleNotFoundError:
+            from dependency_risk_custody_verification import (
                 load_contract,
                 validate_authority,
             )

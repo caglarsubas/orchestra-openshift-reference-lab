@@ -15,7 +15,7 @@ authorization digest, independent timing, and cleanup verification.
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract and offline values candidate implemented; live mirror intake and admitted overlay pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
-| Dependency risk review | Separate preflight and full-collection WIF authorities, protected workflows, atomic signed-runner collector, create-only raw custody, detached verification, builder, strict schemas, and empty intake implemented; Terraform application, external gates/App setup, live runs, independent generation/custody verification, and human reviews pending |
+| Dependency risk review | Separate preflight, full-collection, and independent custody-verification WIF authorities; protected workflows; atomic signed-runner collection; generation-pinned deep replay; signed custody reporting; builder; strict schemas; and empty intake implemented; Terraform application, external gates/App setup, live runs, human reviews, and admission pending |
 | Certification contract intake | Exact platform policy/schema/fixture bytes pinned, semantically CI-validated, and operator source replay implemented; live campaign pending |
 | Release-validation receiver | Procedure implemented; publication and live rehearsal pending |
 | Synthetic tenant and MCP surfaces | Procedure implemented; publication and live rehearsal pending |
