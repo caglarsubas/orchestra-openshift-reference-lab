@@ -114,8 +114,11 @@
     },
     "shortLivedIdentityFederation": {
       "stage": "foundation",
-      "evidenceClass": "gcp-iam-read-only-api",
-      "requiredChecks": ["restricted-wif-no-user-keys"],
+      "evidenceClass": "github-environment-and-gcp-iam-read-only-api",
+      "requiredChecks": [
+        "github-environment-protection",
+        "restricted-wif-no-user-keys"
+      ],
       "independentReviewRequired": true
     },
     "certificationRunner": {
@@ -218,6 +221,10 @@
       "repositoryVisibility": "private",
       "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main",
       "environment": "reference-lab-foundation-plan",
+      "minimumIndependentReviewers": 1,
+      "reviewerType": "User",
+      "preventSelfReview": true,
+      "deploymentBranch": "main",
       "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.repository_id == '1307302690' && assertion.repository_owner_id == '37515097' && assertion.repository_visibility == 'private' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch' && assertion.workflow_ref == 'caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main' && assertion.environment == 'reference-lab-foundation-plan'"
     }
   },

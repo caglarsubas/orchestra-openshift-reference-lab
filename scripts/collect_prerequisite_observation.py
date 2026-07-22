@@ -16,6 +16,14 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from scripts.github_environment_contract import (
+        GithubGetter,
+        fetch_environment_evidence,
+    )
+except ModuleNotFoundError:
+    from github_environment_contract import GithubGetter, fetch_environment_evidence
+
+try:
     from scripts.prerequisite_observation import (
         COLLECTOR_PATH,
         GATE_CHECKS,
@@ -65,6 +73,7 @@ class Inputs:
     pull_secret: Path | None = None
     installer_binary: Path | None = None
     installer_digest: str | None = None
+    github_token_file: Path | None = None
     target_project_id: str | None = None
     services_project_id: str | None = None
     dns_managed_zone: str | None = None
@@ -543,13 +552,34 @@ def observe_dns(
     )
 
 
+def observe_github_environment(
+    token_file: Path | None,
+    now: datetime,
+    policy: dict[str, Any],
+    *,
+    get_json: GithubGetter | None = None,
+) -> dict[str, Any]:
+    check_id = GATE_CHECKS["shortLivedIdentityFederation"][0]
+    if token_file is None:
+        return not_run(check_id, "GITHUB_ENVIRONMENT_TOKEN_MISSING")
+    try:
+        evidence = fetch_environment_evidence(
+            token_file,
+            policy["gcp"]["wif"],
+            get_json=get_json,
+        )
+    except (OSError, ValueError):
+        return failed(check_id, "GITHUB_ENVIRONMENT_PROTECTION_INVALID", now)
+    return passed(check_id, evidence, now)
+
+
 def observe_wif(
     services_project: str | None,
     now: datetime,
     run: CommandRunner,
     policy: dict[str, Any],
 ) -> dict[str, Any]:
-    check_id = GATE_CHECKS["shortLivedIdentityFederation"][0]
+    check_id = GATE_CHECKS["shortLivedIdentityFederation"][1]
     if not services_project:
         return not_run(check_id, "WIF_PROJECT_INPUT_MISSING")
     wif = policy["gcp"]["wif"]
@@ -829,30 +859,35 @@ def collect(
         policy,
     )
     checks = {
-        "redHatEntitlement": observe_entitlement(
-            inputs.red_hat_entitlement_statement, observed
-        ),
-        "openshiftPullSecret": observe_pull_secret(inputs.pull_secret, observed),
-        "openshiftInstaller": observe_installer(
-            inputs.installer_binary, inputs.installer_digest, observed, run
-        ),
-        "gcpBillingAndQuotas": gcp["gcpBillingAndQuotas"],
-        "targetProject": gcp["targetProject"],
-        "servicesEvidenceProject": gcp["servicesEvidenceProject"],
-        "dnsDelegation": observe_dns(
-            inputs.dns_managed_zone,
-            inputs.services_project_id,
-            observed,
-            run,
-            policy,
-        ),
-        "shortLivedIdentityFederation": observe_wif(
-            inputs.services_project_id, observed, run, policy
-        ),
-        "certificationRunner": observe_runner(observed, run, policy),
-        "crossPlaneReleaseSet": observe_release_set(observed),
+        "redHatEntitlement": [
+            observe_entitlement(inputs.red_hat_entitlement_statement, observed)
+        ],
+        "openshiftPullSecret": [observe_pull_secret(inputs.pull_secret, observed)],
+        "openshiftInstaller": [
+            observe_installer(
+                inputs.installer_binary, inputs.installer_digest, observed, run
+            )
+        ],
+        "gcpBillingAndQuotas": [gcp["gcpBillingAndQuotas"]],
+        "targetProject": [gcp["targetProject"]],
+        "servicesEvidenceProject": [gcp["servicesEvidenceProject"]],
+        "dnsDelegation": [
+            observe_dns(
+                inputs.dns_managed_zone,
+                inputs.services_project_id,
+                observed,
+                run,
+                policy,
+            )
+        ],
+        "shortLivedIdentityFederation": [
+            observe_github_environment(inputs.github_token_file, observed, policy),
+            observe_wif(inputs.services_project_id, observed, run, policy),
+        ],
+        "certificationRunner": [observe_runner(observed, run, policy)],
+        "crossPlaneReleaseSet": [observe_release_set(observed)],
     }
-    gates = {name: gate([checks[name]]) for name in GATE_ORDER}
+    gates = {name: gate(checks[name]) for name in GATE_ORDER}
     passed_count = sum(item["status"] == "passed" for item in gates.values())
     live = inputs.execution_mode == "live"
     runner = policy["runner"]
@@ -972,6 +1007,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pull-secret", type=Path)
     parser.add_argument("--installer-binary", type=Path)
     parser.add_argument("--installer-digest")
+    parser.add_argument("--github-token-file", type=Path)
     parser.add_argument("--target-project-id")
     parser.add_argument("--services-project-id")
     parser.add_argument("--dns-managed-zone")
@@ -991,6 +1027,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.red_hat_entitlement_statement,
                 args.pull_secret,
                 args.installer_binary,
+                args.github_token_file,
             ],
         )
         verify_live_runner_environment(policy)
@@ -1003,6 +1040,7 @@ def main(argv: list[str] | None = None) -> int:
             pull_secret=args.pull_secret,
             installer_binary=args.installer_binary,
             installer_digest=args.installer_digest,
+            github_token_file=args.github_token_file,
             target_project_id=args.target_project_id,
             services_project_id=args.services_project_id,
             dns_managed_zone=args.dns_managed_zone,

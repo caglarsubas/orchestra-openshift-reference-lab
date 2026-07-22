@@ -29,7 +29,7 @@
 | Threat | Control |
 |---|---|
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
-| Arbitrary workflow obtains foundation mutation authority | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, separate read-only planner, and no executor WIF binding |
+| Arbitrary workflow obtains foundation mutation authority | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, machine-checked current-run approval, separate read-only planner, and no executor WIF binding |
 | Public control-plane exposure | Private OCP/GKE endpoints, no VM external IP, IAP tunnel only |
 | Peering used as broad trust | Non-transitive peering, explicit port/CIDR firewall, flow logs, namespace default deny |
 | Public DNS takeover or private-name leakage | Terraform-owned exact public zone, external delegation review, no public cluster records, installer-owned private records, and one-way read-only DNS peering |
@@ -54,16 +54,21 @@
 
 ## Explicit residual risks
 
-- A prerequisite observation proves only what the read-only collector saw. It
-  cannot prove reviewer independence or grant provisioning admission. Live
-  observations must be independently reviewed and projected into the separate
-  gate contract; diagnostic `fixture/simulated` output is never admissible.
+- A prerequisite observation proves only what the read-only collector saw. The
+  GitHub check can prove configured non-owner reviewers but, outside a workflow
+  run, cannot prove that one approved a particular operation or grant
+  provisioning admission. Live observations must be independently reviewed and
+  projected into the separate gate contract; diagnostic `fixture/simulated`
+  output is never admissible.
 - Initial project bootstrap necessarily uses a privileged human or enterprise
   provisioning identity before WIF exists. Its token lifecycle and audit trail
   are external prerequisites.
-- GitHub environment protection is external state. The workflow interlock and
-  environment claim do not prove required-reviewer configuration; an
-  independent operator must verify it before enabling the plan lane.
+- GitHub environment protection is external state. The verifier checks the
+  required-reviewer configuration and one current-run approval by a configured
+  non-owner distinct from the initiator. GitHub's read API does not expose the
+  administrator-bypass toggle, so disabling bypass remains a manually reviewed
+  Enterprise-environment precondition. Reruns are rejected because review
+  history is run-scoped rather than attempt-scoped.
 - IP allowlists do not provide domain-aware egress policy. A later proxy lane
   must pin domain/TLS destinations before the frozen campaign.
 - The declared GKE singleton Binary Authorization policy is not equivalent to

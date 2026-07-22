@@ -25,7 +25,7 @@ TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:03aef37f64e0f0dd82b9aa3927914af2433952c5b69d4cea12b101d95811ae0c"
+    "sha256:c04c6038eba4facf57e2b6c7095be7a2e6fbfb9057695af4f6e05998ebfadafe"
 )
 OBSERVATION_ID = re.compile(r"^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$")
 REASON_CODE = re.compile(r"^[A-Z][A-Z0-9_]+$")
@@ -71,7 +71,10 @@ GATE_CHECKS = {
     "targetProject": ("dedicated-target-project",),
     "servicesEvidenceProject": ("dedicated-services-project",),
     "dnsDelegation": ("exact-public-delegation",),
-    "shortLivedIdentityFederation": ("restricted-wif-no-user-keys",),
+    "shortLivedIdentityFederation": (
+        "github-environment-protection",
+        "restricted-wif-no-user-keys",
+    ),
     "certificationRunner": ("signed-runner-provenance",),
     "crossPlaneReleaseSet": ("locked-release-set",),
 }
@@ -295,6 +298,10 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
             "repositoryVisibility",
             "workflowRef",
             "environment",
+            "minimumIndependentReviewers",
+            "reviewerType",
+            "preventSelfReview",
+            "deploymentBranch",
             "attributeCondition",
         },
         "prerequisite_observation_policy_wif_invalid",
@@ -315,6 +322,10 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
             ".github/workflows/foundation-plan.yml@refs/heads/main"
         ),
         "environment": "reference-lab-foundation-plan",
+        "minimumIndependentReviewers": 1,
+        "reviewerType": "User",
+        "preventSelfReview": True,
+        "deploymentBranch": "main",
         "attributeCondition": (
             "assertion.repository == "
             "'caglarsubas/orchestra-openshift-reference-lab' && "
