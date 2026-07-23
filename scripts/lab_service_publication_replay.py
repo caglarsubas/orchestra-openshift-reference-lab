@@ -256,6 +256,7 @@ def validate_declared_implementation(policy: dict[str, Any]) -> None:
         "fetch-depth: 0",
         "registry: ghcr.io",
         "gh run download",
+        "lab_service_publication_replay.py project-origin",
         '[[ "${#artifact_entries[@]}" -eq 1 ]]',
         '[[ -f "$observation" && ! -L "$observation" ]]',
         '[[ "$(wc -c < "$observation")" -le 65536 ]]',
@@ -286,6 +287,7 @@ def validate_declared_implementation(policy: dict[str, Any]) -> None:
         "argocd ",
         "harbor",
         "artifactregistry",
+        "jq ",
     )
     if any(fragment in content.lower() for fragment in forbidden):
         fail("lab_service_publication_replay_workflow_authority_invalid")
@@ -308,9 +310,8 @@ def require_exact_checkout(revision: str) -> None:
         fail("lab_service_publication_replay_checkout_mismatch")
 
 
-def validate_origin(
+def validate_projected_origin(
     origin: dict[str, Any],
-    publication: dict[str, Any],
     *,
     expected_run_id: str,
     expected_revision: str,
@@ -356,10 +357,6 @@ def validate_origin(
         or origin["headBranch"] != "main"
         or origin["path"] != PUBLICATION_WORKFLOW_PATH
         or repository != {"id": REPOSITORY_ID, "fullName": REPOSITORY}
-        or publication["workflow"]["runId"] != expected_run_id
-        or type(publication["workflow"]["runAttempt"]) is not int
-        or publication["workflow"]["runAttempt"] != 1
-        or publication["repository"]["revision"] != expected_revision
         or not isinstance(artifact["id"], int)
         or isinstance(artifact["id"], bool)
         or artifact["id"] <= 0
@@ -370,6 +367,79 @@ def validate_origin(
         or artifact["expired"] is not False
     ):
         fail("lab_service_publication_replay_origin_invalid")
+
+
+def validate_origin(
+    origin: dict[str, Any],
+    publication: dict[str, Any],
+    *,
+    expected_run_id: str,
+    expected_revision: str,
+) -> None:
+    validate_projected_origin(
+        origin,
+        expected_run_id=expected_run_id,
+        expected_revision=expected_revision,
+    )
+    if (
+        publication["workflow"]["runId"] != expected_run_id
+        or type(publication["workflow"]["runAttempt"]) is not int
+        or publication["workflow"]["runAttempt"] != 1
+        or publication["repository"]["revision"] != expected_revision
+    ):
+        fail("lab_service_publication_replay_origin_invalid")
+
+
+def project_origin(
+    *,
+    run_path: Path,
+    inventory_path: Path,
+    expected_run_id: str,
+    expected_revision: str,
+) -> dict[str, Any]:
+    _, run = read_json(run_path, "lab_service_publication_replay_run")
+    _, inventory = read_json(
+        inventory_path, "lab_service_publication_replay_artifact_inventory"
+    )
+    artifacts = inventory.get("artifacts")
+    expected_artifact = f"lab-service-publication-observation-{expected_run_id}-1"
+    if not isinstance(artifacts, list):
+        fail("lab_service_publication_replay_artifact_inventory_invalid")
+    matches = [
+        artifact
+        for artifact in artifacts
+        if isinstance(artifact, dict) and artifact.get("name") == expected_artifact
+    ]
+    if len(matches) != 1 or not isinstance(run.get("repository"), dict):
+        fail("lab_service_publication_replay_artifact_inventory_invalid")
+    artifact = matches[0]
+    repository = run["repository"]
+    origin = {
+        "id": run.get("id"),
+        "runAttempt": run.get("run_attempt"),
+        "event": run.get("event"),
+        "status": run.get("status"),
+        "conclusion": run.get("conclusion"),
+        "headSha": run.get("head_sha"),
+        "headBranch": run.get("head_branch"),
+        "path": run.get("path"),
+        "repository": {
+            "id": repository.get("id"),
+            "fullName": repository.get("full_name"),
+        },
+        "artifact": {
+            "id": artifact.get("id"),
+            "name": artifact.get("name"),
+            "sizeInBytes": artifact.get("size_in_bytes"),
+            "expired": artifact.get("expired"),
+        },
+    }
+    validate_projected_origin(
+        origin,
+        expected_run_id=expected_run_id,
+        expected_revision=expected_revision,
+    )
+    return origin
 
 
 def validate_report(
@@ -689,6 +759,20 @@ def command_validate_policy() -> None:
     print(f"lab_service_publication_replay_policy_valid digest={digest}")
 
 
+def command_project_origin(args: argparse.Namespace) -> None:
+    origin = project_origin(
+        run_path=args.run.resolve(),
+        inventory_path=args.inventory.resolve(),
+        expected_run_id=args.expected_publication_run_id,
+        expected_revision=args.expected_publication_revision,
+    )
+    write_create_only(args.output.resolve(), origin)
+    print(
+        "lab_service_publication_replay_origin_projected "
+        f"runId={origin['id']} artifactId={origin['artifact']['id']}"
+    )
+
+
 def command_replay(args: argparse.Namespace) -> None:
     report = build_replay_report(
         publication_path=args.publication.resolve(),
@@ -730,6 +814,13 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("validate-policy")
 
+    project = commands.add_parser("project-origin")
+    project.add_argument("--run", type=Path, required=True)
+    project.add_argument("--inventory", type=Path, required=True)
+    project.add_argument("--expected-publication-run-id", required=True)
+    project.add_argument("--expected-publication-revision", required=True)
+    project.add_argument("--output", type=Path, required=True)
+
     replay = commands.add_parser("replay")
     replay.add_argument("--publication", type=Path, required=True)
     replay.add_argument("--origin", type=Path, required=True)
@@ -749,6 +840,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "validate-policy":
         command_validate_policy()
+    elif args.command == "project-origin":
+        command_project_origin(args)
     elif args.command == "replay":
         command_replay(args)
     else:

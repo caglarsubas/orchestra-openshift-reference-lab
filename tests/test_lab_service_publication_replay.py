@@ -16,6 +16,7 @@ from scripts.lab_service_publication_replay import (
     build_replay_report,
     expected_claims,
     load_policy,
+    project_origin,
     validate_declared_implementation,
     validate_origin,
     validate_report,
@@ -118,6 +119,14 @@ class LabServicePublicationReplayTests(unittest.TestCase):
         self.assertFalse(self.policy["workflow"]["registryMutation"])
         self.assertFalse(self.policy["workflow"]["imageSigning"])
         validate_declared_implementation(self.policy)
+        replay_workflow = Path(
+            ".github/workflows/lab-service-publication-replay.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "lab_service_publication_replay.py project-origin",
+            replay_workflow,
+        )
+        self.assertNotIn("jq ", replay_workflow)
         makefile = Path("Makefile").read_text(encoding="utf-8")
         workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
         command = "scripts/lab_service_publication_replay.py validate-policy"
@@ -175,6 +184,52 @@ class LabServicePublicationReplayTests(unittest.TestCase):
                 expected_run_id=self.publication_run_id,
                 expected_revision=self.revision,
             )
+
+    def test_github_api_origin_projection_is_strict_and_create_only(self) -> None:
+        run = {
+            "id": int(self.publication_run_id),
+            "run_attempt": 1,
+            "event": "workflow_dispatch",
+            "status": "completed",
+            "conclusion": "success",
+            "head_sha": self.revision,
+            "head_branch": "main",
+            "path": ".github/workflows/lab-service-publication.yml",
+            "repository": {
+                "id": 1307302690,
+                "full_name": "caglarsubas/orchestra-openshift-reference-lab",
+            },
+            "ignored": "github-api-field",
+        }
+        artifact = {
+            "id": self.origin["artifact"]["id"],
+            "name": self.origin["artifact"]["name"],
+            "size_in_bytes": self.origin["artifact"]["sizeInBytes"],
+            "expired": False,
+            "ignored": "github-api-field",
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            run_path = root / "run.json"
+            inventory_path = root / "inventory.json"
+            run_path.write_bytes(canonical_bytes(run))
+            inventory_path.write_bytes(canonical_bytes({"artifacts": [artifact]}))
+            projected = project_origin(
+                run_path=run_path,
+                inventory_path=inventory_path,
+                expected_run_id=self.publication_run_id,
+                expected_revision=self.revision,
+            )
+            self.assertEqual(projected, self.origin)
+            duplicate = {"artifacts": [artifact, copy.deepcopy(artifact)]}
+            inventory_path.write_bytes(canonical_bytes(duplicate))
+            with self.assertRaisesRegex(ValueError, "artifact_inventory_invalid"):
+                project_origin(
+                    run_path=run_path,
+                    inventory_path=inventory_path,
+                    expected_run_id=self.publication_run_id,
+                    expected_revision=self.revision,
+                )
 
     def test_publication_digest_and_source_tree_tamper_are_rejected(self) -> None:
         changed = copy.deepcopy(self.publication)
