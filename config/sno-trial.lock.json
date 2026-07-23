@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "purpose": "cost-bounded-live-engineering-trial",
+  "targetClass": "engineering-trial",
+  "executionMode": "live",
+  "certificationEligible": false,
+  "claim": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false,
+    "highAvailability": false,
+    "rpoRtoVerified": false
+  },
+  "location": {
+    "cloud": "gcp",
+    "region": "europe-west1",
+    "zones": [
+      "europe-west1-b"
+    ],
+    "dnsZone": "ocp-lab.prometa.ai"
+  },
+  "projects": {
+    "count": 1,
+    "role": "trial",
+    "mustBeEphemeral": true
+  },
+  "openshift": {
+    "distribution": "OpenShift Container Platform",
+    "version": "4.20.27",
+    "architecture": "linux/amd64",
+    "installation": "installer-provisioned-single-node",
+    "publish": "External",
+    "cni": "OVN-Kubernetes",
+    "controlPlane": {
+      "count": 1,
+      "machineType": "n2-standard-8",
+      "diskType": "pd-balanced",
+      "diskSizeGB": 150
+    },
+    "workers": {
+      "count": 0
+    }
+  },
+  "dependencyPlane": {
+    "platform": "openshift-sno",
+    "mode": "co-located-single-replica",
+    "nodeCount": 0,
+    "dependencies": [
+      {
+        "kind": "postgresql",
+        "instances": 1
+      },
+      {
+        "kind": "clickhouse",
+        "instances": 1
+      },
+      {
+        "kind": "jetstream",
+        "instances": 1
+      },
+      {
+        "kind": "valkey",
+        "instances": 1
+      },
+      {
+        "kind": "model-backend",
+        "instances": 1
+      },
+      {
+        "kind": "synthetic-mcp",
+        "mode": "read-only"
+      }
+    ],
+    "deferred": [
+      "external-ha-postgresql",
+      "clickhouse-keeper",
+      "valkey-sentinel",
+      "vault",
+      "harbor",
+      "keycloak",
+      "thanos",
+      "external-probes"
+    ]
+  },
+  "access": {
+    "api": "external-ip-allowlisted",
+    "routes": "external",
+    "administration": "short-lived-ip-allowlisted",
+    "publicAdministrativeEndpoints": true,
+    "allowedSourceCidrsRequired": true
+  },
+  "storage": {
+    "applicationDiskType": "pd-balanced",
+    "volumeBindingMode": "WaitForFirstConsumer",
+    "allowExpansion": true,
+    "encryptedAtRest": true
+  },
+  "guardrails": {
+    "budget": {
+      "monthlyUsd": 200,
+      "alertPercentages": [
+        50,
+        75,
+        90,
+        100
+      ],
+      "budgetIsHardCap": false,
+      "maxActiveHoursPerMonth": 120
+    },
+    "lease": {
+      "requiredBeforeRender": true,
+      "maximumHours": 24,
+      "renewalRequiresOperatorAction": true,
+      "expiredLeaseBlocksRender": true
+    },
+    "teardown": {
+      "required": true,
+      "automaticProviderTeardown": false,
+      "deleteClusterBeforeProject": true
+    }
+  },
+  "evidence": {
+    "targetClass": "engineering-trial",
+    "campaignEligible": false,
+    "allowedCertificationSlots": [],
+    "signedRetentionLocked": false,
+    "retentionDays": 7,
+    "cmekRequired": false,
+    "externalProbeRunners": 0
+  },
+  "deploymentAuthority": {
+    "owner": "trial-operator",
+    "orchestraHasCredentials": false,
+    "orchestraMayRecommend": false
+  }
+}

@@ -137,6 +137,22 @@ OpenShift `4.20.27`, `linux/amd64`, active/expiry timestamps, and issuer/account
 identity digests. It is still subject to independent review; the collector does
 not treat the statement's presence as entitlement authority.
 
+Build that statement from restricted source material without writing account
+identity or issuer content into the output:
+
+```bash
+python3 scripts/build_red_hat_entitlement_statement.py \
+  --account-identity-file restricted/red-hat-account-identity.txt \
+  --issuer-evidence restricted/red-hat-trial-confirmation.png \
+  --observed-at '<exact UTC observation time>' \
+  --expires-at '<exact UTC expiry from Red Hat>' \
+  --output restricted/red-hat-entitlement.json
+```
+
+The account identity input must be a non-symlinked mode-`0600` regular file.
+The exact expiry must come from Red Hat's UI or confirmation email; do not infer
+it from a relative “days left” display.
+
 ## Independent gate projection
 
 Copy `config/prerequisites.example.json` to ignored

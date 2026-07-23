@@ -1,0 +1,199 @@
+# Cost-bounded OpenShift SNO trial
+
+## Purpose and boundary
+
+This runbook operates the `orchestra-ocp-sno-trial-amd64-v1` engineering
+profile. It exists to test real OpenShift installation, product manifests, and
+basic integration without funding the six-node OpenShift plus three-node GKE
+production reference topology.
+
+The trial is not a smaller certification profile.
+
+| Property | Trial value |
+|---|---|
+| Target class | `engineering-trial` |
+| Certification eligible | No |
+| Campaign evidence | No |
+| Reference/customer/Red Hat certification | No |
+| Production support or SLA | No |
+| HA or RPO/RTO proof | No |
+| Permitted certification slots | None |
+
+Never copy trial results into an evidence-v2 campaign report. Never change the
+production lock, certification policy, active reference GitOps overlays, or
+production prerequisite projection to accept this profile.
+
+## Supported shape and cost boundary
+
+Red Hat's OpenShift 4.20 SNO documentation lists Google Cloud x86_64 as a
+supported provider. It requires installer-provisioned installation, one
+control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
+and at least 120 GB storage:
+
+- <https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/preparing-to-install-sno>
+- <https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/install-sno-installing-sno>
+
+This profile uses one `n2-standard-8` VM and 150 GB `pd-balanced` storage in
+`europe-west1-b`. The installer also creates temporary bootstrap and networking
+resources. Actual GCP prices, taxes, network egress, DNS, load balancers,
+snapshots, and idle disks remain variable.
+
+The `$200` monthly budget is an alert threshold, not a provider-side hard cap.
+The operational limits are:
+
+- GCP budget alerts at 50, 75, 90, and 100 percent.
+- No more than 120 active node-hours per month.
+- A maximum 24-hour lease for each install or test session.
+- Explicit renewal and explicit teardown.
+- Project deletion only after `openshift-install destroy cluster` succeeds or
+  an operator has reconciled every installer-owned resource.
+
+## Prerequisites
+
+Do not create a lease until all of these are true:
+
+1. The Red Hat OpenShift Container Platform trial is active.
+2. Exact `4.20.27` linux/amd64 installer and client archives pass the official
+   checksum.
+3. The pull secret is mode `0600` under ignored `restricted/` storage and
+   contains `cloud.openshift.com`, `quay.io`, and `registry.redhat.io`.
+4. One dedicated, disposable GCP project has billing enabled.
+5. Project quota supports a temporary bootstrap VM, one `n2-standard-8`,
+   persistent disks, load balancers, forwarding rules, external IPs, and DNS.
+6. The project has a `$200` budget with the four locked alert thresholds.
+7. `ocp-lab.prometa.ai` is available for the `orchestra-trial` cluster DNS
+   namespace.
+8. A Linux AMD64 administration host has short-lived GCP credentials. The
+   downloaded linux binaries do not execute natively on macOS.
+9. The operator has recorded the current public source CIDR and a post-install
+   API/administration allowlist procedure.
+
+The external API and routes reduce trial infrastructure cost. They are an
+explicit security compromise relative to the private production profile.
+Authentication is still required, but do not install until source-IP
+restriction and teardown responsibility have named owners.
+
+## Record the Red Hat trial without identity payload
+
+The statement builder reads a mode-`0600` account identity file and the Red Hat
+trial confirmation image, hashes both, and writes only digests and dates. It
+does not verify or activate the production entitlement gate.
+
+```bash
+python3 scripts/build_red_hat_entitlement_statement.py \
+  --account-identity-file restricted/red-hat-account-identity.txt \
+  --issuer-evidence restricted/red-hat-trial-confirmation.png \
+  --observed-at '<UTC trial observation>' \
+  --expires-at '<UTC trial expiry>' \
+  --output restricted/red-hat-entitlement.json
+```
+
+The exact expiry must come from Red Hat's trial UI or confirmation email. Do
+not infer it by adding 60 days to a screenshot. An independent reviewer must
+inspect the restricted inputs before any production prerequisite gate can be
+projected as verified.
+
+## Create and verify an operator lease
+
+Create a lease immediately before rendering:
+
+```bash
+python3 scripts/trial_lease.py create \
+  --project-id '<ephemeral-trial-project>' \
+  --operator-identity-digest 'sha256:<operator-identity-digest>' \
+  --hours 24 \
+  --output restricted/trial-leases/current.json
+
+python3 scripts/trial_lease.py verify \
+  --lease restricted/trial-leases/current.json \
+  --project-id '<ephemeral-trial-project>'
+```
+
+The lease binds the exact trial-profile digest, project, operator digest,
+budget, active-hour ceiling, and expiry. An expired, not-yet-active, modified,
+or cross-project lease fails closed. A lease is install admission, not an
+automatic shutdown mechanism.
+
+## Render the secret-free installer input
+
+Create an ignored values file:
+
+```json
+{
+  "TARGET_PROJECT_ID": "<ephemeral-trial-project>"
+}
+```
+
+Render only under `install-dir/trial/`:
+
+```bash
+python3 scripts/render_sno_trial_install_config.py \
+  --values restricted/sno-trial-install-values.json \
+  --lease restricted/trial-leases/current.json \
+  --output install-dir/trial/install-config.rendered.yaml
+```
+
+The renderer verifies the active lease and locks one 8-vCPU control-plane
+node, zero workers, 150 GB balanced disk, one zone, OVN-Kubernetes, and
+external publishing. It refuses pull secrets in the values file and leaves
+`${PULL_SECRET_JSON}` and `${SSH_PUBLIC_KEY}` for a final restricted operator
+step.
+
+Use the exact `4.20.27` linux/amd64 installer to validate the materialized
+configuration on the Linux administration host before creating resources.
+Keep the secret-bearing `install-config.yaml`, installer metadata, kubeconfig,
+and auth directory under ignored restricted storage. Never place secret values
+in command history, workflow inputs, logs, or Git.
+
+## Provisioning sequence
+
+1. Verify the lease again.
+2. Verify active billing, quota, budget alerts, DNS authority, and current
+   source CIDR.
+3. Materialize the pull secret and SSH public key only in the ignored
+   installer directory.
+4. Run the installer from a Linux AMD64 administration host.
+5. Record the installer version, archive checksum, project digest, cluster ID,
+   start/end time, and created resource inventory without credentials.
+6. Restrict API and administration ingress to the reviewed source CIDR.
+7. Confirm one schedulable control-plane node, zero workers, healthy cluster
+   operators, default storage, console access, and registry pull.
+8. Deploy only the minimal single-replica engineering dependencies named in
+   the trial lock. Do not deploy Vault, Harbor, Keycloak, Thanos, Sentinel, or
+   any HA topology.
+9. Keep platform production tool execution disabled. Synthetic MCP remains
+   read-only.
+10. Stop testing before the lease expires and begin teardown with enough time
+    to reconcile failures.
+
+No source file currently provisions this trial automatically. Project, budget,
+DNS, installer execution, allowlisting, and teardown remain live operator
+steps until a separately reviewed trial Terraform lane is delivered.
+
+## Teardown and reconciliation
+
+Run the exact installer destroy operation from the original metadata directory.
+Do not delete metadata first.
+
+After destroy completes, independently query the project for remaining:
+
+- Compute instances and instance groups.
+- Disks, snapshots, images, and addresses.
+- Forwarding rules, target pools, health checks, and load balancers.
+- Networks, subnets, routers, NAT, firewall rules, and DNS zones/records.
+- Service accounts, keys, IAM grants, and installer-created buckets.
+
+Delete or reconcile every residual resource, then delete the disposable project
+if policy allows. Close the lease with an operator note kept under
+`restricted/`; do not commit raw provider output. Budget alerts do not prove
+that teardown succeeded.
+
+## Allowed result wording
+
+The maximum valid statement is:
+
+> Orchestra engineering trial exercised on a single-node OpenShift 4.20.27
+> GCP topology.
+
+It must be followed by: non-HA, non-production, non-certifying, no RPO/RTO or
+availability claim, and not the locked reference profile.

@@ -14,6 +14,7 @@ authorization digest, independent timing, and cleanup verification.
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
 | Split-horizon DNS and delegation | Procedure and Terraform contract implemented; live delegation pending |
 | Private OpenShift installation | Template delivered; live procedure pending gates |
+| Cost-bounded SNO engineering trial | Locked non-certifying profile, 24-hour lease, payload-free Red Hat trial statement, and secret-free renderer implemented; GCP project, budget, DNS, allowlist, install, and teardown remain live operator work |
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract and offline values candidate implemented; live mirror intake and admitted overlay pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |

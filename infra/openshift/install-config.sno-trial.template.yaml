@@ -1,0 +1,39 @@
+apiVersion: v1
+baseDomain: ocp-lab.prometa.ai
+metadata:
+  name: orchestra-trial
+compute:
+  - architecture: amd64
+    hyperthreading: Enabled
+    name: worker
+    replicas: 0
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  replicas: 1
+  platform:
+    gcp:
+      osDisk:
+        diskSizeGB: 150
+        diskType: pd-balanced
+      type: n2-standard-8
+      zones:
+        - europe-west1-b
+networking:
+  clusterNetwork:
+    - cidr: 10.128.0.0/14
+      hostPrefix: 23
+  machineNetwork:
+    - cidr: 10.0.0.0/16
+  networkType: OVNKubernetes
+  serviceNetwork:
+    - 172.30.0.0/16
+platform:
+  gcp:
+    projectID: ${TARGET_PROJECT_ID}
+    region: europe-west1
+fips: false
+publish: External
+pullSecret: '${PULL_SECRET_JSON}'
+sshKey: '${SSH_PUBLIC_KEY}'
