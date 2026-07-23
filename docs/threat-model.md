@@ -59,7 +59,7 @@
 | Automated rollback gains deployment authority | External receiver and Argo CD own action; Orchestra sends signed recommendation only |
 | Webhook replay or state regression | Raw-body HMAC with bounded age, event/header binding, PostgreSQL event idempotency, and monotonic validation heads |
 | Receiver crash silently repeats a GitOps action | Transactional inbox/outbox, stable event id, expired claims become `INDETERMINATE`, and evidence-bound operator reconciliation |
-| GitHub App crosses tenant or repository boundary | Single synthetic repository installation, short-lived installation tokens, bounded dispatch payload, and no OpenShift credential |
+| GitHub App crosses tenant or repository boundary | Locked App identity and read-only permissions, complete App-installation enumeration, App-JWT creation of an unrestricted installation token, exact one-repository enumeration before use, mandatory token revocation, repository-narrowed operational tokens, bounded dispatch payload, and no OpenShift credential |
 | Forged or replayed synthetic tenant identity | Exact RS256 issuer/audience/tenant/scope/time checks, strict JWT JSON, bounded JWKS cache, unknown-key refresh, and fail-closed expiry |
 | Tenant gateway becomes an Orchestra proxy | Gateway egress is limited to Keycloak and runtime; it receives no platform credential and exposes only the runtime execute contract |
 | Synthetic MCP accepts cross-tenant or side-effecting calls | Constant-time bearer and tenant binding, one read-only/idempotent tool, protocol-level annotations, and separate failure deployments |
@@ -82,6 +82,14 @@
   administrator-bypass toggle, so disabling bypass remains a manually reviewed
   Enterprise-environment precondition. Reruns are rejected because review
   history is run-scoped rather than attempt-scoped.
+- The operator-control-plane collector verifies all six configured environments,
+  requires the App's complete installation set to contain only the locked
+  account installation, and creates a full-scope installation token to
+  enumerate the real repository set before revoking it. It cannot observe GitHub's administrator
+  bypass setting, prove that a reviewer approved a later workflow, or create
+  provisioning admission. The locked App slug, installation, protected
+  environments, secrets, and live observation remain external state until
+  configured and independently reviewed.
 - The foundation executor retains broad services-project roles, including
   Artifact Registry and storage administration. Source validation forbids
   mirror operations in the apply workflow, but this is not equivalent to an

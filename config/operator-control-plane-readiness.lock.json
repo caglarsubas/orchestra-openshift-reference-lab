@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.reference-lab.operator-control-plane-readiness-policy.v1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "environmentContracts": [
+    "foundation-plan",
+    "foundation-apply",
+    "foundation-observation",
+    "dependency-risk-preflight",
+    "dependency-risk-collection",
+    "dependency-risk-custody-verification"
+  ],
+  "githubApp": {
+    "purpose": "platform-release-and-package-read-only",
+    "slug": "orchestra-reference-lab-release-reader",
+    "owner": {
+      "id": 37515097,
+      "type": "User"
+    },
+    "repositorySelection": "selected",
+    "installationCount": 1,
+    "repository": {
+      "id": 1214962908,
+      "fullName": "caglarsubas/agent-hook-v2",
+      "ownerId": 37515097,
+      "private": true,
+      "visibility": "private",
+      "archived": false
+    },
+    "requiredPermissions": {
+      "contents": "read",
+      "packages": "read"
+    },
+    "optionalPermissions": {
+      "metadata": "read"
+    },
+    "events": []
+  },
+  "observation": {
+    "maxAgeMinutes": 60,
+    "fullInstallationTokenRequired": true,
+    "tokenRevocationRequired": true,
+    "reportSchema": "schemas/operator-control-plane-readiness-v1.schema.json",
+    "reportSchemaDigest": "sha256:0ecbb853930dda39429f34b132c90075ea0791bb6b76e50196aa8802c65c1e27"
+  },
+  "claim": {
+    "independentReviewRequired": true,
+    "provisioningReady": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false
+  }
+}

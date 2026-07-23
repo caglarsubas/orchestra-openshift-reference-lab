@@ -84,6 +84,9 @@ jobs:
       - name: Validate independent foundation observation authority
         run: python3 scripts/validate_foundation_observation.py
 
+      - name: Validate operator control-plane readiness policy
+        run: python3 scripts/operator_control_plane_readiness.py validate-policy
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

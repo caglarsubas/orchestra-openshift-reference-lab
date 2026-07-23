@@ -72,9 +72,11 @@ After independently reviewed bootstrap and foundation applies:
 4. Set environment variables `GCP_DEPENDENCY_RISK_WIF_PROVIDER`,
    `GCP_DEPENDENCY_RISK_COLLECTOR_SERVICE_ACCOUNT`, and
    `GCP_SERVICES_PROJECT_ID` from independently verified live outputs.
-5. Install a dedicated GitHub App on only `agent-hook-v2`, grant only release
-   contents read and package read, and store its App ID/private key as
-   `DEPENDENCY_RISK_GITHUB_APP_ID` and
+5. Follow `docs/runbooks/operator-control-plane-readiness.md` to install the
+   exact dedicated GitHub App on only `agent-hook-v2`, with release contents
+   read and package read. Store its App ID, installation ID, and private key as
+   `DEPENDENCY_RISK_GITHUB_APP_ID`,
+   `DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID`, and
    `DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY` environment secrets. Do not use a
    personal access token or a service-account key.
 6. Select one enabled KMS key version. A reviewer outside the triggering
@@ -96,13 +98,15 @@ gh workflow run dependency-risk-preflight.yml \
   -f reason='Verify dependency risk collection launch prerequisites'
 ```
 
-The workflow re-reads the current environment approval, rejects rerun
-attempts, obtains short-lived WIF and GitHub App tokens, downloads the exact
-five platform release assets, mounts credentials read-only into the pinned
-runner, and invokes `collect_dependency_risk_evidence.sh` exactly once with
-`--preflight-only`. It uploads nothing and removes credentials, release assets,
-and transient logs. A successful log contains `collectionStarted=false`; it is
-an operational readiness observation, not stored campaign evidence.
+The workflow re-reads the current environment approval, rejects rerun attempts,
+mints an unrestricted App installation token to verify the exact one-repository
+and read-only scope, revokes that token, obtains short-lived WIF and
+repository-narrowed App tokens, downloads the exact five platform release
+assets, mounts credentials read-only into the pinned runner, and invokes
+`collect_dependency_risk_evidence.sh` exactly once with `--preflight-only`. It
+uploads nothing and removes credentials, release assets, and transient logs. A
+successful log contains `collectionStarted=false`; it is an operational
+readiness observation, not stored campaign evidence.
 
 Do not dispatch after the locked source-verification window expires. Renew and
 review that source observation first, which changes its digest and all bound
@@ -132,8 +136,8 @@ foundation resources used by preflight:
 4. Set `GCP_DEPENDENCY_RISK_COLLECTION_WIF_PROVIDER`,
    `GCP_DEPENDENCY_RISK_COLLECTION_SERVICE_ACCOUNT`,
    `GCP_SERVICES_PROJECT_ID`, and `GCP_RAW_EVIDENCE_BUCKET` from independently
-   observed live resources. Reuse the narrowly installed GitHub App secrets
-   from preflight; do not broaden its repository or permission scope.
+   observed live resources. Reuse all three narrowly installed GitHub App
+   secrets from preflight; do not broaden its repository or permission scope.
 5. Bind the exact enabled KMS key version and reviewer-derived PEM digest to
    the current environment approval. Never rerun a failed workflow attempt;
    dispatch a new run and obtain a new approval.
@@ -188,8 +192,9 @@ and a new, completed four-object raw prefix exists:
 4. Set `GCP_DEPENDENCY_RISK_CUSTODY_WIF_PROVIDER`,
    `GCP_DEPENDENCY_RISK_CUSTODY_SERVICE_ACCOUNT`, `GCP_SERVICES_PROJECT_ID`,
    `GCP_RAW_EVIDENCE_BUCKET`, and `GCP_SIGNED_EVIDENCE_BUCKET` from
-   independently observed live resources. Reuse the narrowly installed GitHub
-   App; this workflow requests package-read only.
+   independently observed live resources. Reuse all three narrowly installed
+   GitHub App secrets; this workflow requests package-read only after verifying
+   the App's full installation scope.
 5. Independently select enabled collection and verification key versions,
    fetch their exact Cloud KMS public-key PEMs, and bind both PEM digests to the
    current protected-environment approval. Never reuse an approval or rerun a

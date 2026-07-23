@@ -389,6 +389,9 @@ def validate_declared_implementation() -> None:
         "GCP_RAW_EVIDENCE_BUCKET",
         "GCP_SIGNED_EVIDENCE_BUCKET",
         "--contract dependency-risk-custody-verification",
+        "DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID",
+        "operator_control_plane_readiness.py verify-app",
+        "GITHUB_APP_INSTALLATION_DIGEST",
         "scripts/verify_and_publish_dependency_risk_custody.sh",
         "custodyVerified=true",
     )

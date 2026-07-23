@@ -34,7 +34,9 @@ create-only signed saved-plan package lane, a private generation-pinned plan
 review helper, a separately federated saved-plan-only apply lane with signed
 self-attested receipts, a separately federated read-only provider-refresh
 observation lane with create-only signed reports, a payload-free GitHub
-environment/current-run approval verifier, a source-only
+environment/current-run approval verifier, a strict aggregate verifier for all
+six protected environments and the complete read-only platform-release GitHub
+App installation, a source-only
 durable release-validation receiver, and a source-only synthetic tenant kit. It
 does not contain a kubeconfig, provider
 identity, OpenShift pull secret, live prerequisite observation, independent
@@ -199,6 +201,16 @@ prerequisite. This is source declaration and fixture proof only: no observer
 identity, protected environment, provider refresh, signed report, campaign
 evidence, or profile verification exists yet.
 
+The operator control-plane readiness policy digest is
+`sha256:c344bba86571ab5cf347c8c70e0745c6c22afd7cc9fd930f91f7cf5b15db0ec4`.
+Its collector checks all six protected environment contracts and uses the
+GitHub App private key to require exactly one App installation, mint an
+unrestricted installation token, enumerate the real repository set, and revoke
+the token. The report contains only
+digests, expires after one hour, and cannot authorize provisioning or campaign
+evidence. No protected environment, App installation, credential, or live
+report is created by this source declaration.
+
 Each GitHub WIF provider maps a provider-prefixed numeric
 repository/environment subject, and each service-account impersonation grant
 names that single subject. Repository-wide principal sets are rejected, so the
@@ -227,14 +239,14 @@ prerequisites are complete.
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission/GitOps candidate, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, and prerequisite observation policy |
+| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission/GitOps candidate, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, prerequisite observation policy, and operator control-plane readiness policy |
 | `contracts/platform/` | Exact platform-owned policy, schema bundle, and fixture bytes vendored from the pinned release revision; not campaign evidence |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, VPC/DNS peering, public delegation zone, evidence buckets, bastion, probes |
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for prerequisite observations, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for prerequisite observations, operator control-plane readiness, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |
