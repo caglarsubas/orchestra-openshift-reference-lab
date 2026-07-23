@@ -52,6 +52,7 @@
 | Certification contract substitution or semantic widening | Platform revision and release binding, byte and canonical digests, strict semantic validation, fixture/live separation, and operator replay of pinned Git objects |
 | Reviewer substitution | Different identity and key digests, post-window attestations, two-person closure |
 | Supply-chain substitution | Immutable image refs, mirrored signature verification, admission policy, release-set binding |
+| Mutable or substituted lab-owned service publication | Exact-main first-attempt workflow, non-reusable release-plus-revision tags, pre-push absence proof, distinct image/index digests, bound AMD64 and attestation manifests, pinned SBOM generator, maximum provenance, exact-workflow keyless signatures, and post-push registry replay |
 | Harbor bootstrap cycle bypasses admission | Immutable Artifact Registry seed, distinct mirror identity, source/destination digest edge, deny-all dependency AppProject |
 | Secret/payload leakage | No Secret values in Git, payload-free reports, raw/reports split, content scanning |
 | Accidental irreversible bucket lock | Certification-mode precondition plus exact lock acknowledgement and review runbook |
@@ -150,3 +151,12 @@
   admitted, deployed, connected to Keycloak/runtime, fault-tested, or soaked.
   Its local OIDC and official MCP tests are not live identity, PKI, network, or
   tenant-isolation evidence.
+- The lab-service publication lane uses repository-scoped GitHub package write
+  authority and public Sigstore transparency services. Its source contract is
+  CI-tested, but the workflow has not run. A successful run would prove only
+  GHCR source publication, embedded BuildKit attestations, and the exact
+  workflow's keyless signature. The embedded Syft version is not the locked
+  certification scanner, and neither a successful build nor its observation
+  authorizes mirroring, admission, deployment, or campaign evidence. A partial
+  publication leaves immutable unadmitted tags and requires a new release
+  candidate.

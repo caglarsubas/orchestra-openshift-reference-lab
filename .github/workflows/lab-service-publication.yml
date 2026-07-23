@@ -1,0 +1,176 @@
+name: reference-lab-service-publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for publication
+        required: true
+        type: string
+      release:
+        description: Immutable lab service release, for example lab-services-v0.1.0-rc.1
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+concurrency:
+  group: reference-lab-service-publication-${{ inputs.release }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: immutable signed source artifacts
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      RECEIVER_IMAGE: ghcr.io/caglarsubas/orchestra-lab-release-validation-receiver
+      SYNTHETIC_IMAGE: ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit
+
+    steps:
+      - name: Require exact reviewed publication inputs
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$RELEASE" =~ ^lab-services-v0\.1\.0-rc\.[1-9][0-9]*$ ]]
+
+      - name: Check out reviewed main revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate publication policy and workflow
+        run: python3 scripts/lab_service_publication.py validate-policy
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Sign in to GitHub Container Registry
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Prove immutable tags do not exist
+        env:
+          RELEASE: ${{ inputs.release }}
+        run: |
+          set -euo pipefail
+          tag="$RELEASE-$GITHUB_SHA"
+          check_absent() {
+            local reference="$1"
+            local diagnostic
+            local status
+            set +e
+            diagnostic="$(docker buildx imagetools inspect "$reference" 2>&1)"
+            status=$?
+            set -e
+            if [[ "$status" -eq 0 ]]; then
+              echo "immutable image tag already exists: $reference" >&2
+              exit 1
+            fi
+            if [[ "$diagnostic" != *"not found"* && "$diagnostic" != *"manifest unknown"* ]]; then
+              echo "registry could not prove tag absence: $reference" >&2
+              exit 1
+            fi
+          }
+          check_absent "$RECEIVER_IMAGE:$tag"
+          check_absent "$SYNTHETIC_IMAGE:$tag"
+
+      - name: Build and publish release-validation receiver
+        id: receiver
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: services/release-validation-receiver
+          file: services/release-validation-receiver/Containerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.RECEIVER_IMAGE }}:${{ inputs.release }}-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ inputs.release }}
+            org.opencontainers.image.title=Orchestra release-validation receiver
+          attests: |
+            type=provenance,mode=max
+            type=sbom,generator=docker.io/docker/buildkit-syft-scanner@sha256:79e7b013cbec16bbb436f312819a49a4a57752b2270c1a9332ae1a10fcc82a68
+
+      - name: Build and publish synthetic tenant kit
+        id: synthetic
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: services/synthetic-tenant-kit
+          file: services/synthetic-tenant-kit/Containerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.SYNTHETIC_IMAGE }}:${{ inputs.release }}-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ inputs.release }}
+            org.opencontainers.image.title=Orchestra synthetic tenant kit
+          attests: |
+            type=provenance,mode=max
+            type=sbom,generator=docker.io/docker/buildkit-syft-scanner@sha256:79e7b013cbec16bbb436f312819a49a4a57752b2270c1a9332ae1a10fcc82a68
+
+      - name: Set up Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign immutable image indexes
+        env:
+          RECEIVER_DIGEST: ${{ steps.receiver.outputs.digest }}
+          SYNTHETIC_DIGEST: ${{ steps.synthetic.outputs.digest }}
+        run: |
+          set -euo pipefail
+          [[ "$RECEIVER_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ "$SYNTHETIC_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          cosign sign --yes "$RECEIVER_IMAGE@$RECEIVER_DIGEST"
+          cosign sign --yes "$SYNTHETIC_IMAGE@$SYNTHETIC_DIGEST"
+
+      - name: Verify publication and create payload-free observation
+        env:
+          RELEASE: ${{ inputs.release }}
+          RECEIVER_DIGEST: ${{ steps.receiver.outputs.digest }}
+          SYNTHETIC_DIGEST: ${{ steps.synthetic.outputs.digest }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 scripts/lab_service_publication.py observe \
+            --release "$RELEASE" \
+            --repository-revision "$GITHUB_SHA" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --actor-id "$GITHUB_ACTOR_ID" \
+            --published-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --receiver-digest "$RECEIVER_DIGEST" \
+            --synthetic-digest "$SYNTHETIC_DIGEST" \
+            --output "$RUNNER_TEMP/lab-service-publication-observation.json"
+
+      - name: Upload payload-free publication observation
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lab-service-publication-observation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/lab-service-publication-observation.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove local publication material
+        if: always()
+        run: |
+          docker logout ghcr.io >/dev/null 2>&1 || true
+          rm -f "$RUNNER_TEMP/lab-service-publication-observation.json"

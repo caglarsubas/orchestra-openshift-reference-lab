@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometa.ai/schemas/orchestra/lab-service-publication-observation-v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "orchestra.reference-lab.lab-service-publication-observation.v1"
+    },
+    "observationId": {
+      "pattern": "^lab-services-publication-[1-9][0-9]*\\.1$",
+      "type": "string"
+    },
+    "profileId": {
+      "const": "orchestra-ocp-4.20-amd64-v1"
+    },
+    "targetClass": {
+      "const": "vendor-reference-lab"
+    },
+    "executionMode": {
+      "const": "live"
+    },
+    "policyDigest": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "repository": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": 1307302690
+        },
+        "fullName": {
+          "const": "caglarsubas/orchestra-openshift-reference-lab"
+        },
+        "revision": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "fullName",
+        "revision"
+      ],
+      "type": "object"
+    },
+    "workflow": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "const": ".github/workflows/lab-service-publication.yml"
+        },
+        "ref": {
+          "const": "refs/heads/main"
+        },
+        "runId": {
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "runAttempt": {
+          "const": 1
+        },
+        "actorId": {
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "certificateIdentity": {
+          "const": "https://github.com/caglarsubas/orchestra-openshift-reference-lab/.github/workflows/lab-service-publication.yml@refs/heads/main"
+        },
+        "issuer": {
+          "const": "https://token.actions.githubusercontent.com"
+        }
+      },
+      "required": [
+        "path",
+        "ref",
+        "runId",
+        "runAttempt",
+        "actorId",
+        "certificateIdentity",
+        "issuer"
+      ],
+      "type": "object"
+    },
+    "release": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^lab-services-v0\\.1\\.0-rc\\.[1-9][0-9]*$",
+          "type": "string"
+        },
+        "packageVersion": {
+          "const": "0.1.0"
+        }
+      },
+      "required": [
+        "name",
+        "packageVersion"
+      ],
+      "type": "object"
+    },
+    "publishedAt": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$",
+      "type": "string"
+    },
+    "services": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": [
+              "release-validation-receiver",
+              "synthetic-tenant-kit"
+            ],
+            "type": "string"
+          },
+          "sourcePath": {
+            "type": "string"
+          },
+          "sourceTreeDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "packageName": {
+            "type": "string"
+          },
+          "packageVersion": {
+            "const": "0.1.0"
+          },
+          "image": {
+            "additionalProperties": false,
+            "properties": {
+              "repository": {
+                "pattern": "^ghcr\\.io/caglarsubas/orchestra-lab-[a-z0-9-]+$",
+                "type": "string"
+              },
+              "tag": {
+                "pattern": "^lab-services-v0\\.1\\.0-rc\\.[1-9][0-9]*-[a-f0-9]{40}$",
+                "type": "string"
+              },
+              "digest": {
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "type": "string"
+              },
+              "indexMediaType": {
+                "const": "application/vnd.oci.image.index.v1+json"
+              },
+              "platform": {
+                "additionalProperties": false,
+                "properties": {
+                  "os": {
+                    "const": "linux"
+                  },
+                  "architecture": {
+                    "const": "amd64"
+                  }
+                },
+                "required": [
+                  "os",
+                  "architecture"
+                ],
+                "type": "object"
+              },
+              "imageManifestDigest": {
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "type": "string"
+              },
+              "attestationManifestDigest": {
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "repository",
+              "tag",
+              "digest",
+              "indexMediaType",
+              "platform",
+              "imageManifestDigest",
+              "attestationManifestDigest"
+            ],
+            "type": "object"
+          },
+          "attestations": {
+            "additionalProperties": false,
+            "properties": {
+              "sbomPredicate": {
+                "const": "https://spdx.dev/Document"
+              },
+              "sbomDigest": {
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "type": "string"
+              },
+              "provenancePredicate": {
+                "const": "https://slsa.dev/provenance/v1"
+              },
+              "provenanceDigest": {
+                "pattern": "^sha256:[a-f0-9]{64}$",
+                "type": "string"
+              },
+              "sbomGeneratorImage": {
+                "const": "docker.io/docker/buildkit-syft-scanner@sha256:79e7b013cbec16bbb436f312819a49a4a57752b2270c1a9332ae1a10fcc82a68"
+              },
+              "embeddedSyftVersion": {
+                "const": "1.42.3"
+              },
+              "provenanceMode": {
+                "const": "max"
+              }
+            },
+            "required": [
+              "sbomPredicate",
+              "sbomDigest",
+              "provenancePredicate",
+              "provenanceDigest",
+              "sbomGeneratorImage",
+              "embeddedSyftVersion",
+              "provenanceMode"
+            ],
+            "type": "object"
+          },
+          "signature": {
+            "additionalProperties": false,
+            "properties": {
+              "type": {
+                "const": "sigstore-keyless"
+              },
+              "subject": {
+                "pattern": "^ghcr\\.io/caglarsubas/orchestra-lab-[a-z0-9-]+@sha256:[a-f0-9]{64}$",
+                "type": "string"
+              },
+              "certificateIdentity": {
+                "const": "https://github.com/caglarsubas/orchestra-openshift-reference-lab/.github/workflows/lab-service-publication.yml@refs/heads/main"
+              },
+              "issuer": {
+                "const": "https://token.actions.githubusercontent.com"
+              },
+              "verified": {
+                "const": true
+              }
+            },
+            "required": [
+              "type",
+              "subject",
+              "certificateIdentity",
+              "issuer",
+              "verified"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "sourcePath",
+          "sourceTreeDigest",
+          "packageName",
+          "packageVersion",
+          "image",
+          "attestations",
+          "signature"
+        ],
+        "type": "object"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "sourceArtifactsPublished": {
+          "const": true
+        },
+        "digestVerified": {
+          "const": true
+        },
+        "keylessSignatureVerified": {
+          "const": true
+        },
+        "embeddedSbomVerified": {
+          "const": true
+        },
+        "provenanceVerified": {
+          "const": true
+        },
+        "certificationRiskScan": {
+          "const": false
+        },
+        "harborMirrored": {
+          "const": false
+        },
+        "rhtasAdmissionVerified": {
+          "const": false
+        },
+        "gitOpsReferenced": {
+          "const": false
+        },
+        "deployed": {
+          "const": false
+        },
+        "campaignEvidence": {
+          "const": false
+        },
+        "referenceProfileVerified": {
+          "const": false
+        },
+        "customerCertified": {
+          "const": false
+        },
+        "redHatCertified": {
+          "const": false
+        },
+        "contractualSla": {
+          "const": false
+        }
+      },
+      "required": [
+        "sourceArtifactsPublished",
+        "digestVerified",
+        "keylessSignatureVerified",
+        "embeddedSbomVerified",
+        "provenanceVerified",
+        "certificationRiskScan",
+        "harborMirrored",
+        "rhtasAdmissionVerified",
+        "gitOpsReferenced",
+        "deployed",
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "observationId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "policyDigest",
+    "repository",
+    "workflow",
+    "release",
+    "publishedAt",
+    "services",
+    "claims"
+  ],
+  "type": "object"
+}

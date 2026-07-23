@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.reference-lab.lab-service-publication-policy.v1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "repository": {
+    "id": 1307302690,
+    "fullName": "caglarsubas/orchestra-openshift-reference-lab",
+    "visibility": "private",
+    "defaultBranch": "main"
+  },
+  "workflow": {
+    "path": ".github/workflows/lab-service-publication.yml",
+    "ref": "refs/heads/main",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "certificateIdentity": "https://github.com/caglarsubas/orchestra-openshift-reference-lab/.github/workflows/lab-service-publication.yml@refs/heads/main",
+    "requiredRunAttempt": 1
+  },
+  "release": {
+    "pattern": "^lab-services-v0\\.1\\.0-rc\\.[1-9][0-9]*$",
+    "packageVersion": "0.1.0",
+    "tagTemplate": "{release}-{revision}"
+  },
+  "build": {
+    "platform": {
+      "os": "linux",
+      "architecture": "amd64"
+    },
+    "indexMediaType": "application/vnd.oci.image.index.v1+json",
+    "imageManifestMediaType": "application/vnd.oci.image.manifest.v1+json",
+    "attestationMediaType": "application/vnd.in-toto+json",
+    "attestationManifestType": "attestation-manifest",
+    "provenanceMode": "max",
+    "requiredPredicates": [
+      "https://spdx.dev/Document",
+      "https://slsa.dev/provenance/v1"
+    ],
+    "sbomGenerator": {
+      "image": "docker.io/docker/buildkit-syft-scanner@sha256:79e7b013cbec16bbb436f312819a49a4a57752b2270c1a9332ae1a10fcc82a68",
+      "scannerVersion": "1.11.0",
+      "embeddedSyftVersion": "1.42.3",
+      "certificationScanner": false
+    }
+  },
+  "services": [
+    {
+      "id": "release-validation-receiver",
+      "sourcePath": "services/release-validation-receiver",
+      "containerfile": "services/release-validation-receiver/Containerfile",
+      "packageName": "orchestra-reference-lab-release-receiver",
+      "imageRepository": "ghcr.io/caglarsubas/orchestra-lab-release-validation-receiver"
+    },
+    {
+      "id": "synthetic-tenant-kit",
+      "sourcePath": "services/synthetic-tenant-kit",
+      "containerfile": "services/synthetic-tenant-kit/Containerfile",
+      "packageName": "orchestra-reference-lab-synthetic-tenant-kit",
+      "imageRepository": "ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit"
+    }
+  ],
+  "observation": {
+    "schema": "schemas/lab-service-publication-observation-v1.schema.json",
+    "schemaDigest": "sha256:b8df76857d6d8f2d501a2a57a8a008b8888fc5545958f841ebcde916eb993259"
+  },
+  "requiredClaims": {
+    "sourceArtifactsPublished": true,
+    "digestVerified": true,
+    "keylessSignatureVerified": true,
+    "embeddedSbomVerified": true,
+    "provenanceVerified": true,
+    "certificationRiskScan": false,
+    "harborMirrored": false,
+    "rhtasAdmissionVerified": false,
+    "gitOpsReferenced": false,
+    "deployed": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false
+  }
+}

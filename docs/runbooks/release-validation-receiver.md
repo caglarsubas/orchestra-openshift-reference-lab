@@ -5,6 +5,8 @@ campaign, publish an image, mutate GitOps, or certify a target by itself.
 
 ## Preconditions
 
+- The source-artifact stage in `docs/runbooks/lab-service-publication.md` has
+  completed for the exact release and revision.
 - The receiver image is built from reviewed source, scanned, signed, mirrored
   by digest, and admitted by the lab policy controller.
 - External PostgreSQL backup, PITR, TLS, and least-privilege roles are ready.

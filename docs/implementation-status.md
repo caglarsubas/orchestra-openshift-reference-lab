@@ -57,6 +57,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Platform router-to-pod TLS | Yes | Yes | No | No | No |
 | Durable release-validation receiver and GitHub App executor | Yes | Yes | No | No | No |
 | Synthetic tenant gateway and read-only MCP fault surfaces | Yes | Yes | No | No | No |
+| Immutable lab service publication and verification lane | Yes | Yes | No | No | No |
+| Published signed lab service image indexes | No | N/A | No | No | No |
 | Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
@@ -179,7 +181,17 @@ disposable PostgreSQL tests. The synthetic tenant kit now has strict Keycloak
 JWT/JWKS verification, an HTTPS-only runtime proxy, official read-only MCP
 Streamable HTTP behavior, and normal/slow/unavailable/wrong-tenant fault
 lanes. Both services have hash-locked UBI AMD64 builds, but neither has a
-published or mirrored image or GitOps reference. Live activation remains
+published or mirrored image or GitOps reference. A separate exact-main,
+first-attempt-only publication lane is now source-declared and CI-validated.
+It derives immutable release-plus-revision GHCR tags, embeds pinned BuildKit
+SPDX and `mode=max` provenance attestations, keyless-signs the exact image
+indexes, and emits a strict payload-free observation after registry and
+signature replay. The embedded Syft result is transport metadata, not the
+certification risk scan. No publication workflow has run, so the service
+inventory remains `source-only` and its `published-signed-image` blockers
+remain accurate. Even a successful publication would not establish Harbor
+mirroring, RHTAS admission, GitOps reference, deployment, live testing, or
+campaign evidence. Live activation remains
 behind Red Hat, GCP, DNS, PKI, Keycloak, and short-lived identity gates; no
 dependency or product declaration has been applied.
 
