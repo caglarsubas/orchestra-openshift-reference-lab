@@ -58,7 +58,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Durable release-validation receiver and GitHub App executor | Yes | Yes | No | No | No |
 | Synthetic tenant gateway and read-only MCP fault surfaces | Yes | Yes | No | No | No |
 | Immutable publication and read-only replay lanes | Yes | Yes | No | No | No |
-| Published signed lab service image indexes | Yes | N/A | N/A | Partial | No |
+| Published signed lab service image indexes | Yes | N/A | N/A | Yes | No |
 | Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
@@ -194,11 +194,15 @@ The embedded Syft result is transport metadata, not the certification risk
 scan. A separate read-only workflow and strict statement contract are now
 source-declared to replay the prior run, artifact, source, registry,
 attestations, and signatures without package-write, image-signing, OIDC, or
-deployment authority. That replay has not run, so
-`config/lab-services.lock.json` intentionally remains `source-only` pending a
-separate reviewed digest intake. The successful publication does not establish
-Harbor mirroring, RHTAS admission, GitOps reference, deployment, full live
-testing, or campaign evidence. Live activation remains
+deployment authority. Replay run `30006907539` completed against exact-main
+revision `79186ace0d8bfdc2ad378bff3be96c3653f24aa4`; the locally validated
+statement digest is
+`sha256:9480ed84fc9ea802f7fb6aeaf73912788b2764598685d269145cd642fcb13ab9`.
+`config/lab-services.lock.json` now records both services as digest-bound
+`published` artifacts and removes only the `published-signed-image` blocker.
+The successful publication and replay do not establish certification risk
+review, Harbor mirroring, RHTAS admission, GitOps reference, deployment, full
+live testing, or campaign evidence. Live activation remains
 behind Red Hat, GCP, DNS, PKI, Keycloak, and short-lived identity gates; no
 dependency or product declaration has been applied.
 

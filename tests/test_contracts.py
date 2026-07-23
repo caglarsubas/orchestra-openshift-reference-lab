@@ -10,6 +10,7 @@ from pathlib import Path
 from scripts.render_install_config import load_values, render
 from scripts.validate_repository import (
     ROOT,
+    EXPECTED_LAB_SERVICES_DIGEST,
     canonical_digest,
     load_json,
     validate_lock,
@@ -42,19 +43,35 @@ class ContractTests(unittest.TestCase):
             },
         )
 
-    def test_lab_receiver_remains_source_only(self) -> None:
+    def test_lab_receiver_records_published_but_unadmitted_image(self) -> None:
         validate_lab_services(self.services)
+        self.assertEqual(
+            canonical_digest(self.services),
+            EXPECTED_LAB_SERVICES_DIGEST,
+        )
         receiver = self.services["services"][0]
-        self.assertEqual(receiver["activation"], "source-only")
-        self.assertIsNone(receiver["image"])
+        self.assertEqual(receiver["activation"], "published")
+        self.assertEqual(
+            receiver["image"]["digest"],
+            "sha256:93dfd0b60b352526949c62dce2c3f34496e28317336a367ee78c7a6ffac123ef",
+        )
+        self.assertNotIn("published-signed-image", receiver["blockedOn"])
+        self.assertIn("mirror-admission", receiver["blockedOn"])
         self.assertFalse(receiver["gitOpsReferenced"])
 
-    def test_synthetic_tenant_kit_remains_source_only(self) -> None:
+    def test_synthetic_tenant_kit_records_published_but_unadmitted_image(
+        self,
+    ) -> None:
         validate_lab_services(self.services)
         synthetic = self.services["services"][1]
         self.assertEqual(synthetic["id"], "synthetic-tenant-kit")
-        self.assertEqual(synthetic["activation"], "source-only")
-        self.assertIsNone(synthetic["image"])
+        self.assertEqual(synthetic["activation"], "published")
+        self.assertEqual(
+            synthetic["image"]["digest"],
+            "sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69",
+        )
+        self.assertNotIn("published-signed-image", synthetic["blockedOn"])
+        self.assertIn("mirror-admission", synthetic["blockedOn"])
         self.assertFalse(synthetic["gitOpsReferenced"])
 
     def test_lab_receiver_cannot_activate_without_publication(self) -> None:
@@ -62,6 +79,22 @@ class ContractTests(unittest.TestCase):
         changed["services"][0]["activation"] = "active"
         changed["services"][0]["gitOpsReferenced"] = True
         with self.assertRaisesRegex(ValueError, "lab_service_activation_invalid"):
+            validate_lab_services(changed)
+
+    def test_lab_service_publication_lineage_and_claims_are_fail_closed(
+        self,
+    ) -> None:
+        changed = copy.deepcopy(self.services)
+        changed["readOnlyReplay"]["statement"]["digest"] = "sha256:" + ("f" * 64)
+        with self.assertRaisesRegex(ValueError, "lab_services_shape_invalid"):
+            validate_lab_services(changed)
+        changed = copy.deepcopy(self.services)
+        changed["claims"]["harborMirrored"] = True
+        with self.assertRaisesRegex(ValueError, "lab_services_shape_invalid"):
+            validate_lab_services(changed)
+        changed = copy.deepcopy(self.services)
+        changed["claims"]["sourceArtifactsPublished"] = 1
+        with self.assertRaisesRegex(ValueError, "lab_services_shape_invalid"):
             validate_lab_services(changed)
 
     def test_topology_drift_is_rejected(self) -> None:

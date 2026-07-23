@@ -17,14 +17,15 @@ Before adding any GitOps reference:
 
 1. Complete `docs/runbooks/lab-service-publication.md` for the exact reviewed
    source revision. This produces the immutable GHCR image, embedded SBOM and
-   provenance, keyless signature, and source-publication observation.
+   provenance, keyless signature, source-publication observation, separate
+   read-only replay, and digest-bound `published` inventory entry.
 2. Run the separate certification risk collector against that exact digest.
    Resolve critical/high findings or record an approved, time-bounded waiver.
 3. Sign the image with the lab KMS identity, record source and destination
    digests, mirror by digest into Harbor, and prove RHTAS admission rejection
    for unsigned and wrong-key images.
-4. Update `config/lab-services.lock.json` in a reviewed change with the release
-   and immutable image digest. Do not set `gitOpsReferenced` until Keycloak,
+4. Update the inventory with the Harbor destination and admission evidence in a
+   separate reviewed change. Do not set `gitOpsReferenced` until Keycloak,
    Vault/ESO, PKI, runtime TLS, and network policy gates are independently
    verified.
 

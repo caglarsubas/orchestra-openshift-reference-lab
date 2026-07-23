@@ -156,6 +156,9 @@
   attestations, and the exact workflow's keyless signatures. The embedded Syft
   version is not the locked certification scanner, and neither the build nor
   its observation authorizes mirroring, admission, deployment, or campaign
-  evidence. The separate read-only replay lane is source-declared and
-  fixture-tested but has not run. It intentionally cannot sign its own
-  statement or claim independent human review.
+  evidence. Separate read-only replay run `30006907539` revalidated the
+  publication artifact, source trees, registry indexes, attestations, and
+  signatures. Its statement is intentionally unsigned and does not claim
+  independent human review. The inventory records those source-publication
+  facts while keeping certification scan, mirror, admission, GitOps,
+  deployment, and campaign claims false.
