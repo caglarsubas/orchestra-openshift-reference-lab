@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.reference-lab.lab-service-publication-replay-policy.v1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "repository": {
+    "id": 1307302690,
+    "fullName": "caglarsubas/orchestra-openshift-reference-lab",
+    "defaultBranch": "main"
+  },
+  "publication": {
+    "policyDigest": "sha256:61e1af0f3c2874df6ec8077e3ac03f2a036197e0998d224a7cafea8c5130b8e1",
+    "workflowPath": ".github/workflows/lab-service-publication.yml",
+    "artifactNameTemplate": "lab-service-publication-observation-{runId}-1",
+    "maximumAgeDays": 14
+  },
+  "workflow": {
+    "path": ".github/workflows/lab-service-publication-replay.yml",
+    "ref": "refs/heads/main",
+    "requiredRunAttempt": 1,
+    "permissions": {
+      "actions": "read",
+      "contents": "read",
+      "packages": "read"
+    },
+    "idTokenPermission": false,
+    "registryMutation": false,
+    "imageSigning": false
+  },
+  "services": [
+    {
+      "id": "release-validation-receiver",
+      "sourcePath": "services/release-validation-receiver",
+      "packageName": "orchestra-reference-lab-release-receiver",
+      "imageRepository": "ghcr.io/caglarsubas/orchestra-lab-release-validation-receiver"
+    },
+    {
+      "id": "synthetic-tenant-kit",
+      "sourcePath": "services/synthetic-tenant-kit",
+      "packageName": "orchestra-reference-lab-synthetic-tenant-kit",
+      "imageRepository": "ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit"
+    }
+  ],
+  "observation": {
+    "schema": "schemas/lab-service-publication-replay-v1.schema.json",
+    "schemaDigest": "sha256:f63b9f77fde75023926cefd1437f9d88d51537ad315e64f894590bebef8c3149"
+  },
+  "requiredClaims": {
+    "separateWorkflowReplay": true,
+    "sourceArtifactsPublished": true,
+    "sourceTreeReplayed": true,
+    "registryDigestReplayed": true,
+    "embeddedSbomReplayed": true,
+    "provenanceReplayed": true,
+    "keylessSignatureReplayed": true,
+    "independentHumanReview": false,
+    "signedVerificationStatement": false,
+    "certificationRiskScan": false,
+    "harborMirrored": false,
+    "rhtasAdmissionVerified": false,
+    "gitOpsReferenced": false,
+    "deployed": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false
+  }
+}

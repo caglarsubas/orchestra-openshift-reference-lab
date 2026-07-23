@@ -499,6 +499,22 @@ def validate_lab_service_publication_workflow() -> None:
     validate_declared_implementation(policy)
 
 
+def validate_lab_service_publication_replay_workflow() -> None:
+    try:
+        from scripts.lab_service_publication_replay import (
+            load_policy,
+            validate_declared_implementation,
+        )
+    except ModuleNotFoundError:
+        from lab_service_publication_replay import (
+            load_policy,
+            validate_declared_implementation,
+        )
+
+    policy, _ = load_policy()
+    validate_declared_implementation(policy)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--prerequisites", type=Path)
@@ -527,6 +543,7 @@ def main(argv: list[str] | None = None) -> int:
     validate_dependency_risk_collection_workflow()
     validate_dependency_risk_custody_verification_workflow()
     validate_lab_service_publication_workflow()
+    validate_lab_service_publication_replay_workflow()
     validate_prerequisites(
         load_json(args.prerequisites.resolve())
         if args.prerequisites

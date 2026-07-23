@@ -144,19 +144,18 @@
 - GitHub `repository_dispatch` has no provider-side idempotency guarantee. The
   tenant workflow must durably deduplicate the stable event id; ambiguous
   dispatches remain blocked until reconciliation.
-- The receiver source has not yet been published, mirrored, admitted, deployed,
-  restored, fault-tested, or soaked. CI and a successful image build are not
-  live reference-lab evidence.
-- The synthetic tenant kit source has not yet been published, mirrored,
-  admitted, deployed, connected to Keycloak/runtime, fault-tested, or soaked.
-  Its local OIDC and official MCP tests are not live identity, PKI, network, or
-  tenant-isolation evidence.
+- The receiver and synthetic tenant kit `rc.1` source images are published in
+  private GHCR with embedded BuildKit attestations and exact-workflow keyless
+  signatures. They have not been mirrored, admitted, deployed, restored,
+  connected to live dependencies, fault-tested, or soaked. Their local tests
+  and source publication are not live identity, PKI, network,
+  tenant-isolation, or reference-lab evidence.
 - The lab-service publication lane uses repository-scoped GitHub package write
-  authority and public Sigstore transparency services. Its source contract is
-  CI-tested, but the workflow has not run. A successful run would prove only
-  GHCR source publication, embedded BuildKit attestations, and the exact
-  workflow's keyless signature. The embedded Syft version is not the locked
-  certification scanner, and neither a successful build nor its observation
-  authorizes mirroring, admission, deployment, or campaign evidence. A partial
-  publication leaves immutable unadmitted tags and requires a new release
-  candidate.
+  authority and public Sigstore transparency services. Run `30002879030`
+  succeeded and proved only GHCR source publication, embedded BuildKit
+  attestations, and the exact workflow's keyless signatures. The embedded Syft
+  version is not the locked certification scanner, and neither the build nor
+  its observation authorizes mirroring, admission, deployment, or campaign
+  evidence. The separate read-only replay lane is source-declared and
+  fixture-tested but has not run. It intentionally cannot sign its own
+  statement or claim independent human review.

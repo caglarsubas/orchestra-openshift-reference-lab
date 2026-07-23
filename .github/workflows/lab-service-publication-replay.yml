@@ -1,0 +1,186 @@
+name: reference-lab-service-publication-replay
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for replay
+        required: true
+        type: string
+      publication_run_id:
+        description: Successful first-attempt publication workflow run id
+        required: true
+        type: string
+      expected_publication_revision:
+        description: Exact source revision bound by the publication
+        required: true
+        type: string
+      expected_observation_digest:
+        description: Reviewed canonical digest of the publication observation
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  packages: read
+
+concurrency:
+  group: reference-lab-service-publication-replay-${{ inputs.publication_run_id }}
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    name: read-only registry and signature replay
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RECEIVER_IMAGE: ghcr.io/caglarsubas/orchestra-lab-release-validation-receiver
+      SYNTHETIC_IMAGE: ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit
+
+    steps:
+      - name: Require exact reviewed replay inputs
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
+          EXPECTED_PUBLICATION_REVISION: ${{ inputs.expected_publication_revision }}
+          EXPECTED_OBSERVATION_DIGEST: ${{ inputs.expected_observation_digest }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$PUBLICATION_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_PUBLICATION_REVISION" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_OBSERVATION_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+
+      - name: Check out exact replay implementation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate read-only replay policy and workflow
+        run: python3 scripts/lab_service_publication_replay.py validate-policy
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Sign in to GitHub Container Registry read-only
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Set up Cosign for verification only
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Pin publication run and artifact origin
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
+        run: |
+          set -euo pipefail
+          umask 077
+          artifact_name="lab-service-publication-observation-$PUBLICATION_RUN_ID-1"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$PUBLICATION_RUN_ID" \
+            > "$RUNNER_TEMP/publication-run.json"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$PUBLICATION_RUN_ID/artifacts" \
+            > "$RUNNER_TEMP/publication-artifacts.json"
+          jq -S \
+            --arg artifactName "$artifact_name" \
+            --slurpfile run "$RUNNER_TEMP/publication-run.json" \
+            --slurpfile inventory "$RUNNER_TEMP/publication-artifacts.json" \
+            '
+              ($run[0]) as $source |
+              ([ $inventory[0].artifacts[] | select(.name == $artifactName) ]) as $matches |
+              if ($matches | length) != 1 then
+                error("publication_artifact_inventory_invalid")
+              else
+                ($matches[0]) as $artifact |
+                {
+                  id: $source.id,
+                  runAttempt: $source.run_attempt,
+                  event: $source.event,
+                  status: $source.status,
+                  conclusion: $source.conclusion,
+                  headSha: $source.head_sha,
+                  headBranch: $source.head_branch,
+                  path: $source.path,
+                  repository: {
+                    id: $source.repository.id,
+                    fullName: $source.repository.full_name
+                  },
+                  artifact: {
+                    id: $artifact.id,
+                    name: $artifact.name,
+                    sizeInBytes: $artifact.size_in_bytes,
+                    expired: $artifact.expired
+                  }
+                }
+              end
+            ' > "$RUNNER_TEMP/publication-origin.json"
+          mkdir -m 0700 "$RUNNER_TEMP/publication-observation"
+          gh run download "$PUBLICATION_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "$artifact_name" \
+            --dir "$RUNNER_TEMP/publication-observation"
+          mapfile -t artifact_entries < <(
+            find "$RUNNER_TEMP/publication-observation" \
+              -mindepth 1 -maxdepth 1 -print
+          )
+          [[ "${#artifact_entries[@]}" -eq 1 ]]
+          observation="${artifact_entries[0]}"
+          [[ "$observation" == "$RUNNER_TEMP/publication-observation/lab-service-publication-observation.json" ]]
+          [[ -f "$observation" && ! -L "$observation" ]]
+          [[ "$(wc -c < "$observation")" -le 65536 ]]
+          chmod 0600 "$observation"
+
+      - name: Replay source, registry, attestations, and signatures
+        env:
+          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
+          EXPECTED_PUBLICATION_REVISION: ${{ inputs.expected_publication_revision }}
+          EXPECTED_OBSERVATION_DIGEST: ${{ inputs.expected_observation_digest }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 scripts/lab_service_publication_replay.py replay \
+            --publication "$RUNNER_TEMP/publication-observation/lab-service-publication-observation.json" \
+            --origin "$RUNNER_TEMP/publication-origin.json" \
+            --expected-observation-digest "$EXPECTED_OBSERVATION_DIGEST" \
+            --expected-publication-run-id "$PUBLICATION_RUN_ID" \
+            --expected-publication-revision "$EXPECTED_PUBLICATION_REVISION" \
+            --verifier-revision "$GITHUB_SHA" \
+            --verifier-run-id "$GITHUB_RUN_ID" \
+            --verifier-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --verifier-actor-id "$GITHUB_ACTOR_ID" \
+            --verified-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --output "$RUNNER_TEMP/lab-service-publication-replay.json"
+
+      - name: Upload payload-free replay statement
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lab-service-publication-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/lab-service-publication-replay.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove local registry and replay material
+        if: always()
+        run: |
+          docker logout ghcr.io >/dev/null 2>&1 || true
+          rm -f \
+            "$RUNNER_TEMP/publication-run.json" \
+            "$RUNNER_TEMP/publication-artifacts.json" \
+            "$RUNNER_TEMP/publication-origin.json" \
+            "$RUNNER_TEMP/publication-observation/lab-service-publication-observation.json" \
+            "$RUNNER_TEMP/lab-service-publication-replay.json"

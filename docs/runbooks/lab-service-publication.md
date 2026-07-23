@@ -59,7 +59,7 @@ manifest, attestation, workflow, and policy digests. It contains no registry
 credential, OIDC token, image payload, application payload, Secret, or
 certification claim.
 
-## Independent verification
+## Separate read-only replay
 
 Download the observation from the exact successful run and verify its strict
 contract:
@@ -68,12 +68,38 @@ contract:
 make verify-lab-service-publication REPORT=restricted/lab-service-publication-observation.json
 ```
 
-Independently replay each image signature against the exact workflow identity
-and issuer, and inspect the release-plus-revision tag and digest. Record the
-workflow URL and report digest in the change review; do not commit the
-downloaded observation.
+Then dispatch the exact-main read-only replay workflow. Use the canonical
+observation digest printed by the local verification:
 
-Only after this verification may a separate reviewed change move
+```bash
+verifier_sha="$(git rev-parse origin/main)"
+publication_run_id="30002879030"
+publication_revision="a54ca86f2c7e4746b85110bb29052f836401ec9c"
+observation_digest="sha256:36fe99667ea6fe4ea8d019b28e10dc899804c4ebb7d8485149fbec83ba40d4bf"
+
+gh workflow run lab-service-publication-replay.yml \
+  --ref main \
+  -f expected_main_sha="$verifier_sha" \
+  -f publication_run_id="$publication_run_id" \
+  -f expected_publication_revision="$publication_revision" \
+  -f expected_observation_digest="$observation_digest"
+```
+
+The replay identity has only Actions, source, and package read permissions. It
+cannot mint OIDC credentials, push or sign an image, or mutate a deployment.
+It replays the original run/artifact origin, source trees, package identities,
+OCI indexes, SBOM/provenance descriptors, and exact-workflow keyless
+signatures. Its statement explicitly records that no independent human review
+or portable statement signature was produced.
+
+Download and validate the replay statement, then record both workflow URLs and
+statement digests in the change review:
+
+```bash
+make verify-lab-service-publication-replay REPORT=restricted/lab-service-publication-replay.json
+```
+
+Only after this separate replay may a reviewed change move
 `config/lab-services.lock.json` from `source-only` to a digest-bound
 `published` state. That change must remove only the
 `published-signed-image` blocker. Harbor mirroring, certification risk review,
