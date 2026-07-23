@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/foundation-observation-v1.schema.json",
+  "title": "Orchestra independent foundation observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "observationId",
+    "applyId",
+    "planId",
+    "bindings",
+    "source",
+    "receiptCustody",
+    "planCustody",
+    "state",
+    "providerRefresh",
+    "observerAuthority",
+    "signer",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.reference-lab.foundation-observation.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "observationId": {
+      "type": "string",
+      "pattern": "^orchestra-foundation-observation-[1-9][0-9]*\\.[1-9][0-9]*$"
+    },
+    "applyId": {
+      "type": "string",
+      "pattern": "^orchestra-foundation-apply-[1-9][0-9]*\\.[1-9][0-9]*$"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^orchestra-foundation-plan-[1-9][0-9]*\\.[1-9][0-9]*$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "source": {"$ref": "#/$defs/source"},
+    "receiptCustody": {"$ref": "#/$defs/receiptCustody"},
+    "planCustody": {"$ref": "#/$defs/planCustody"},
+    "state": {"$ref": "#/$defs/state"},
+    "providerRefresh": {"$ref": "#/$defs/providerRefresh"},
+    "observerAuthority": {"$ref": "#/$defs/observerAuthority"},
+    "signer": {"$ref": "#/$defs/signer"},
+    "claims": {"$ref": "#/$defs/claims"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "positiveIntegerString": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "releaseSetDigest",
+        "prerequisitePolicyDigest",
+        "foundationApplyAuthorityDigest",
+        "foundationObservationAuthorityDigest",
+        "reportSchemaDigest",
+        "applyReceiptDigest",
+        "applyReceiptSignatureDigest",
+        "planPackageStatementDigest",
+        "planPackageSignatureDigest",
+        "planSummaryCanonicalDigest",
+        "observerAuthorityObservationDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "prerequisitePolicyDigest": {"$ref": "#/$defs/digest"},
+        "foundationApplyAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "foundationObservationAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "reportSchemaDigest": {"$ref": "#/$defs/digest"},
+        "applyReceiptDigest": {"$ref": "#/$defs/digest"},
+        "applyReceiptSignatureDigest": {"$ref": "#/$defs/digest"},
+        "planPackageStatementDigest": {"$ref": "#/$defs/digest"},
+        "planPackageSignatureDigest": {"$ref": "#/$defs/digest"},
+        "planSummaryCanonicalDigest": {"$ref": "#/$defs/digest"},
+        "observerAuthorityObservationDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "revision",
+        "ref",
+        "workflowRef",
+        "environment",
+        "workflowRunId",
+        "workflowRunAttempt",
+        "environmentApprovalDigest",
+        "actorIdentityDigest",
+        "authorizationReasonDigest",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "repository": {"const": "caglarsubas/orchestra-openshift-reference-lab"},
+        "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "ref": {"const": "refs/heads/main"},
+        "workflowRef": {
+          "const": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-observation.yml@refs/heads/main"
+        },
+        "environment": {"const": "reference-lab-foundation-observation"},
+        "workflowRunId": {"$ref": "#/$defs/positiveIntegerString"},
+        "workflowRunAttempt": {"const": "1"},
+        "environmentApprovalDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "authorizationReasonDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "receiptCustody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "inventoryDigest",
+        "receiptDigest",
+        "publicKeyDigest",
+        "signatureBundleDigest",
+        "completionMarkerGeneration",
+        "signatureVerified",
+        "selfAttestedReceiptAcknowledged"
+      ],
+      "properties": {
+        "bucket": {"type": "string", "minLength": 3, "maxLength": 63},
+        "prefix": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "inventoryDigest": {"$ref": "#/$defs/digest"},
+        "receiptDigest": {"$ref": "#/$defs/digest"},
+        "publicKeyDigest": {"$ref": "#/$defs/digest"},
+        "signatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "completionMarkerGeneration": {
+          "$ref": "#/$defs/positiveIntegerString"
+        },
+        "signatureVerified": {"const": true},
+        "selfAttestedReceiptAcknowledged": {"const": true}
+      }
+    },
+    "planCustody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "inventoryDigest",
+        "statementDigest",
+        "summaryCanonicalDigest",
+        "publicKeyDigest",
+        "signatureBundleDigest",
+        "completionMarkerGeneration",
+        "signatureVerified"
+      ],
+      "properties": {
+        "bucket": {"type": "string", "minLength": 3, "maxLength": 63},
+        "prefix": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "inventoryDigest": {"$ref": "#/$defs/digest"},
+        "statementDigest": {"$ref": "#/$defs/digest"},
+        "summaryCanonicalDigest": {"$ref": "#/$defs/digest"},
+        "publicKeyDigest": {"$ref": "#/$defs/digest"},
+        "signatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "completionMarkerGeneration": {
+          "$ref": "#/$defs/positiveIntegerString"
+        },
+        "signatureVerified": {"const": true}
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "object",
+        "generation",
+        "metageneration",
+        "sizeBytes",
+        "rawObjectDigest",
+        "statePullDigest",
+        "serial",
+        "lineageDigest",
+        "generationStable",
+        "matchesApplyReceipt"
+      ],
+      "properties": {
+        "bucket": {"type": "string", "minLength": 3, "maxLength": 63},
+        "object": {"const": "foundation/default.tfstate"},
+        "generation": {"$ref": "#/$defs/positiveIntegerString"},
+        "metageneration": {"$ref": "#/$defs/positiveIntegerString"},
+        "sizeBytes": {"type": "integer", "minimum": 1, "maximum": 67108864},
+        "rawObjectDigest": {"$ref": "#/$defs/digest"},
+        "statePullDigest": {"$ref": "#/$defs/digest"},
+        "serial": {"type": "integer", "minimum": 1},
+        "lineageDigest": {"$ref": "#/$defs/digest"},
+        "generationStable": {"const": true},
+        "matchesApplyReceipt": {"const": true}
+      }
+    },
+    "providerRefresh": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terraformVersion",
+        "formatVersion",
+        "refreshOnly",
+        "stateLockUsed",
+        "detailedExitCode",
+        "driftDetected",
+        "managedResourceCount",
+        "dataResourceCount",
+        "resourceIdentityDigest",
+        "sourcePlanResourceIdentityDigest",
+        "resourceIdentitySetMatches"
+      ],
+      "properties": {
+        "terraformVersion": {"const": "1.14.6"},
+        "formatVersion": {"type": "string", "minLength": 1, "maxLength": 32},
+        "refreshOnly": {"const": true},
+        "stateLockUsed": {"const": false},
+        "detailedExitCode": {"const": 0},
+        "driftDetected": {"const": false},
+        "managedResourceCount": {"type": "integer", "minimum": 1},
+        "dataResourceCount": {"type": "integer", "minimum": 0},
+        "resourceIdentityDigest": {"$ref": "#/$defs/digest"},
+        "sourcePlanResourceIdentityDigest": {"$ref": "#/$defs/digest"},
+        "resourceIdentitySetMatches": {"const": true}
+      }
+    },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "keyVersionResource",
+        "publicKeyDigest"
+      ],
+      "properties": {
+        "executionClass": {"const": "github-hosted-read-only-observer"},
+        "keyVersionResource": {
+          "type": "string",
+          "pattern": "^gcpkms://projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/locations/europe-west1/keyRings/orchestra-lab-foundation-execution/cryptoKeys/foundation-observation-signing/cryptoKeyVersions/[1-9][0-9]*$"
+        },
+        "publicKeyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "observerAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observationDigest",
+        "providerConditionExact",
+        "impersonationBindingExact",
+        "noUserManagedKeys",
+        "directProjectAndAncestorRolesExact",
+        "customStorageRoleExact",
+        "storageRolesExact",
+        "kmsRolesExact",
+        "directReadOnlyBoundaryObserved"
+      ],
+      "properties": {
+        "observationDigest": {"$ref": "#/$defs/digest"},
+        "providerConditionExact": {"const": true},
+        "impersonationBindingExact": {"const": true},
+        "noUserManagedKeys": {"const": true},
+        "directProjectAndAncestorRolesExact": {"const": true},
+        "customStorageRoleExact": {"const": true},
+        "storageRolesExact": {"const": true},
+        "kmsRolesExact": {"const": true},
+        "directReadOnlyBoundaryObserved": {"const": true}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "applyReceiptSignatureVerified",
+        "planPackageSignatureVerified",
+        "observerDirectReadOnlyAuthorityVerified",
+        "stateGenerationStable",
+        "stateMatchesApplyReceipt",
+        "providerRefreshCompleted",
+        "terraformDriftDetected",
+        "foundationPostApplyObserved",
+        "independentlyObserved",
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla"
+      ],
+      "properties": {
+        "applyReceiptSignatureVerified": {"const": true},
+        "planPackageSignatureVerified": {"const": true},
+        "observerDirectReadOnlyAuthorityVerified": {"const": true},
+        "stateGenerationStable": {"const": true},
+        "stateMatchesApplyReceipt": {"const": true},
+        "providerRefreshCompleted": {"const": true},
+        "terraformDriftDetected": {"const": false},
+        "foundationPostApplyObserved": {"const": true},
+        "independentlyObserved": {"const": true},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false}
+      }
+    }
+  }
+}

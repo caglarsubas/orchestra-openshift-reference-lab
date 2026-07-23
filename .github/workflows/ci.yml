@@ -81,6 +81,9 @@ jobs:
       - name: Validate review-bound foundation apply authority
         run: python3 scripts/validate_foundation_apply_execution.py
 
+      - name: Validate independent foundation observation authority
+        run: python3 scripts/validate_foundation_observation.py
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

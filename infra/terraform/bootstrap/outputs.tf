@@ -22,6 +22,10 @@ output "foundation_apply_workload_identity_provider" {
   value = google_iam_workload_identity_pool_provider.foundation_apply.name
 }
 
+output "foundation_observation_workload_identity_provider" {
+  value = google_iam_workload_identity_pool_provider.foundation_observation.name
+}
+
 output "dependency_risk_workload_identity_provider" {
   value = google_iam_workload_identity_pool_provider.dependency_risk.name
 }
@@ -44,6 +48,10 @@ output "foundation_plan_service_account" {
 
 output "foundation_plan_packager_service_account" {
   value = google_service_account.foundation_plan_packager.email
+}
+
+output "foundation_observation_service_account" {
+  value = google_service_account.foundation_observer.email
 }
 
 output "dependency_risk_service_account" {
@@ -72,6 +80,11 @@ output "foundation_identity_contract" {
     executor_workflow_ref         = local.foundation_apply_workflow_ref
     executor_federated_subject    = local.foundation_apply_subject
     executor_federated            = true
+    observer_service_account      = google_service_account.foundation_observer.email
+    observer_environment          = local.foundation_observation_environment
+    observer_workflow_ref         = local.foundation_observation_workflow_ref
+    observer_federated_subject    = local.foundation_observation_subject
+    observer_state_access         = "read-only-without-lock"
   }
 }
 
@@ -91,6 +104,31 @@ output "foundation_apply_execution_contract" {
     plan_signing_key                       = google_kms_crypto_key.foundation_plan_signing.id
     apply_receipt_signing_key              = google_kms_crypto_key.foundation_apply_receipt_signing.id
     campaign_authority                     = false
+  }
+}
+
+output "foundation_observation_contract" {
+  value = {
+    service_account                     = google_service_account.foundation_observer.email
+    workload_identity_provider          = google_iam_workload_identity_pool_provider.foundation_observation.name
+    environment                         = local.foundation_observation_environment
+    workflow_ref                        = local.foundation_observation_workflow_ref
+    federated_subject                   = local.foundation_observation_subject
+    declared_project_roles              = sort(flatten([tolist(local.foundation_planner_roles.target), tolist(local.foundation_planner_roles.services)]))
+    declared_custom_project_roles       = [google_project_iam_custom_role.foundation_storage_metadata_observer.name]
+    state_managed_folder                = google_storage_managed_folder.foundation_state.name
+    plan_managed_folder                 = google_storage_managed_folder.foundation_plans.name
+    apply_report_managed_folder         = google_storage_managed_folder.foundation_apply_reports.name
+    observation_report_managed_folder   = google_storage_managed_folder.foundation_observations.name
+    declared_source_object_role         = "roles/storage.objectViewer"
+    declared_report_object_role         = "roles/storage.objectCreator"
+    declared_source_object_write_grant  = false
+    declared_source_object_delete_grant = false
+    declared_report_object_read_grant   = false
+    declared_report_object_delete_grant = false
+    observation_signing_key             = google_kms_crypto_key.foundation_observation_signing.id
+    infrastructure_mutation_granted     = false
+    campaign_authority                  = false
   }
 }
 
