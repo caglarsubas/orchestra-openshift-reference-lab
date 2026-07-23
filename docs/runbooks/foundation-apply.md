@@ -164,8 +164,9 @@ It must state:
 
 The executor signs its own result and has broad storage authority, so the
 receipt is execution custody, not independent proof. A different read-only
-observer must run the live prerequisite and foundation checks before any
-downstream operation treats the infrastructure as available.
+observer must run the live prerequisite checks and the procedure in
+[`foundation-observation.md`](foundation-observation.md) before any downstream
+operation treats the infrastructure as available.
 
 ## Failure handling
 

@@ -32,7 +32,8 @@ payload-free read-only collector, gate-controlled product and dependency
 GitOps floors, an environment-bound read-only Terraform planning lane, a
 create-only signed saved-plan package lane, a private generation-pinned plan
 review helper, a separately federated saved-plan-only apply lane with signed
-self-attested receipts, a payload-free GitHub
+self-attested receipts, a separately federated read-only provider-refresh
+observation lane with create-only signed reports, a payload-free GitHub
 environment/current-run approval verifier, a source-only
 durable release-validation receiver, and a source-only synthetic tenant kit. It
 does not contain a kubeconfig, provider
@@ -169,7 +170,7 @@ live identity, raw-custody verification, report publication, or downstream
 authorization is claimed.
 
 The review-bound foundation-apply authority digest is
-`sha256:544c1a914120c31eeddb00437f739cbd15894d0c18bb393d2bc8b6e4a79dc1d2`.
+`sha256:6d658bc8cba37642dbca5bf7370c00dced6b1f312e71ad2c4f531101f2ab4d7d`.
 It separates the read-only planner, create-only `orchestra-plan-packager`,
 group-only private plan reviewers, and the exact-workflow apply executor. Plan
 packages and receipts use distinct asymmetric KMS keys, immutable
@@ -182,12 +183,28 @@ mirror commands but this is not an IAM denial. Terraform and workflows are
 source declarations only: no package, apply, receipt, independent observation,
 campaign evidence, or profile verification is claimed.
 
+The independent foundation-observation authority digest is
+`sha256:6506655bee4b63e6636bb47211aceebf03ef0603aae5f398cd0c5fd7d3b9a524`.
+It declares the exact-main `foundation-observation` provider and a dedicated
+`orchestra-foundation-observer` identity. The observer has read-only provider
+roles, a metadata-only storage custom role, managed-folder reads for state,
+plans, and receipts, create-only report access, public-key access to prior
+keys, and a separate observation-signing key. Its workflow verifies the live
+direct observer boundary including ancestor IAM, pins and verifies the plan
+and receipt, requires current state to match the receipt, and runs only a
+lock-free refresh-only Terraform plan. Drift, resource-identity mismatch,
+state-generation change, direct role expansion, or signature substitution
+fails closed. Group-transitive IAM remains an independently reviewed live
+prerequisite. This is source declaration and fixture proof only: no observer
+identity, protected environment, provider refresh, signed report, campaign
+evidence, or profile verification exists yet.
+
 Each GitHub WIF provider maps a provider-prefixed numeric
 repository/environment subject, and each service-account impersonation grant
 names that single subject. Repository-wide principal sets are rejected, so the
-foundation planner/packager, apply executor, preflight signer, collector, and
-custody verifier cannot cross-assume one another merely because they share a
-workload identity pool.
+foundation planner/packager, apply executor, foundation observer, preflight
+signer, collector, and custody verifier cannot cross-assume one another merely
+because they share a workload identity pool.
 
 The source-only dependency GitOps candidate digest is
 `sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
@@ -217,7 +234,7 @@ prerequisites are complete.
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for prerequisite observations, foundation plan/apply custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for prerequisite observations, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |

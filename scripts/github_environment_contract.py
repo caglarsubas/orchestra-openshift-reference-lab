@@ -22,6 +22,7 @@ GithubGetter = Callable[[str, str], Any]
 ENVIRONMENT_CONTRACTS = (
     "foundation-plan",
     "foundation-apply",
+    "foundation-observation",
     "dependency-risk-preflight",
     "dependency-risk-collection",
     "dependency-risk-custody-verification",
@@ -406,6 +407,18 @@ def load_expected_environment(contract: str) -> dict[str, Any]:
         authority, release_set, policy = load_contract()
         validate_authority(authority, release_set, policy)
         return authority["applyFederation"]
+    if contract == "foundation-observation":
+        try:
+            from scripts.foundation_observation import (
+                load_contract,
+                validate_authority,
+            )
+        except ModuleNotFoundError:
+            from foundation_observation import load_contract, validate_authority
+
+        authority, release_set, policy, apply_authority = load_contract()
+        validate_authority(authority, release_set, policy, apply_authority)
+        return authority["federation"]
     if contract == "dependency-risk-preflight":
         try:
             from scripts.dependency_risk_execution import (

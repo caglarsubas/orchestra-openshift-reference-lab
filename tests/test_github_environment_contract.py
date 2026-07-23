@@ -352,6 +352,26 @@ class GithubEnvironmentContractTests(unittest.TestCase):
         )
         self.assertNotEqual(expected["workflowRef"], self.expected["workflowRef"])
 
+    def test_foundation_observation_environment_uses_read_only_authority(
+        self,
+    ) -> None:
+        expected = load_expected_environment("foundation-observation")
+        self.assertEqual(
+            expected["environment"], "reference-lab-foundation-observation"
+        )
+        self.assertEqual(expected["providerId"], "foundation-observation")
+        self.assertEqual(
+            expected["subject"],
+            (
+                "foundation-observation:1307302690:"
+                "reference-lab-foundation-observation"
+            ),
+        )
+        self.assertNotEqual(
+            expected["workflowRef"],
+            load_expected_environment("foundation-apply")["workflowRef"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

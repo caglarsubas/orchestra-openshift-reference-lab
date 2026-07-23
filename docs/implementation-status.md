@@ -15,7 +15,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Immutable signed saved-plan package and private review path | Yes | Yes | No | No | No |
 | Separately federated exact saved-plan foundation apply | Yes | Yes | No | No | No |
 | Signed self-attested foundation apply receipt | Yes | Yes | No | No | No |
-| Independent post-apply foundation observation | No | N/A | No | No | No |
+| Independent post-apply foundation observation | Yes | Yes | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
 | Public delegation zone and private DNS peering | Yes | Yes | No | No | No |
@@ -132,7 +132,7 @@ archive-traversal, report-tamper, invalid-report-signature, and
 failed-final-upload cases. This remains local source evidence: no Terraform
 resource or protected environment has been created, and no live raw prefix or
 signed custody report has been verified.
-All five GitHub providers use distinct provider-prefixed subjects, and IAM
+All six GitHub providers use distinct provider-prefixed subjects, and IAM
 impersonation binds each service account to one exact subject instead of a
 repository-wide principal set. The planner and create-only packager share only
 the exact plan subject; the executor uses the separate apply subject. This
@@ -153,9 +153,9 @@ CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
 
 The next live increment is bootstrap/foundation application and independent
-verification of all five WIF providers, six service accounts, foundation and
+verification of all six WIF providers, seven service accounts, foundation and
 dependency-risk KMS versions/public-key digests, managed-folder and bucket IAM,
-all five protected environments, reviewer-group plan access, and the GitHub
+all six protected environments, reviewer-group plan access, and the GitHub
 App installation. The
 protected launch preflight executes first; a successful result still does not
 start collection. A separately approved full-collection run may then publish
@@ -207,3 +207,21 @@ whose contract explicitly remains self-attested and
 non-owner collaborator, reviewer group, bootstrap resources, KMS versions, and
 live prerequisite evidence do not exist in this source checkout. No live plan,
 apply, receipt, or independent post-apply observation exists.
+
+The independent foundation-observation lane is now also source-declared and
+CI-validated. A sixth exact-workflow WIF provider binds a dedicated observer
+identity with read-only provider roles, a metadata-only storage custom role,
+generation-pinned state/plan/receipt reads, create-only observation writes,
+public-key access to prior signing keys, and a separate report key. Before
+trusting itself, the lane verifies the deployed provider, exact
+service-account impersonation, absence of user-managed keys, project and
+direct ancestor role boundaries, custom-role permissions, managed-folder
+grants, and KMS grants. Group-transitive access remains an independent live
+review prerequisite. The lane then verifies both prior signatures, binds the
+current state to the receipt, runs a lock-free refresh-only Terraform plan,
+rejects drift or a resource-identity mismatch, and uploads its signature last.
+A valid live report can assert only the narrow foundation
+`independentlyObserved` state; campaign and certification claims remain false.
+No Terraform resource,
+protected environment, plan, apply receipt, provider refresh, or report has
+been created by this source-only increment.

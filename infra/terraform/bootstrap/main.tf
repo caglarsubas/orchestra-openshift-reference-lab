@@ -134,6 +134,19 @@ locals {
     "assertion.workflow_ref == '${local.foundation_apply_workflow_ref}'",
     "assertion.environment == '${local.foundation_apply_environment}'",
   ])
+  foundation_observation_environment  = "reference-lab-foundation-observation"
+  foundation_observation_workflow_ref = "${var.github_repository}/.github/workflows/foundation-observation.yml@refs/heads/main"
+  foundation_observation_subject      = "foundation-observation:${var.github_repository_id}:${local.foundation_observation_environment}"
+  foundation_observation_wif_condition = join(" && ", [
+    "assertion.repository == '${var.github_repository}'",
+    "assertion.repository_id == '${var.github_repository_id}'",
+    "assertion.repository_owner_id == '${var.github_repository_owner_id}'",
+    "assertion.repository_visibility == 'private'",
+    "assertion.ref == 'refs/heads/main'",
+    "assertion.event_name == 'workflow_dispatch'",
+    "assertion.workflow_ref == '${local.foundation_observation_workflow_ref}'",
+    "assertion.environment == '${local.foundation_observation_environment}'",
+  ])
   dependency_risk_preflight_environment  = "reference-lab-dependency-risk-preflight"
   dependency_risk_preflight_workflow_ref = "${var.github_repository}/.github/workflows/dependency-risk-preflight.yml@refs/heads/main"
   dependency_risk_preflight_subject      = "dependency-risk-preflight:${var.github_repository_id}:${local.dependency_risk_preflight_environment}"
@@ -330,6 +343,27 @@ resource "google_kms_crypto_key" "foundation_apply_receipt_signing" {
   }
 }
 
+resource "google_kms_crypto_key" "foundation_observation_signing" {
+  name     = "foundation-observation-signing"
+  key_ring = google_kms_key_ring.foundation_execution.id
+  purpose  = "ASYMMETRIC_SIGN"
+
+  version_template {
+    algorithm        = "EC_SIGN_P256_SHA256"
+    protection_level = "SOFTWARE"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_storage_managed_folder" "foundation_state" {
+  bucket        = google_storage_bucket.state.name
+  name          = "foundation/"
+  force_destroy = false
+}
+
 resource "google_storage_managed_folder" "foundation_plans" {
   bucket        = google_storage_bucket.state.name
   name          = "foundation-plans/"
@@ -339,6 +373,12 @@ resource "google_storage_managed_folder" "foundation_plans" {
 resource "google_storage_managed_folder" "foundation_apply_reports" {
   bucket        = google_storage_bucket.state.name
   name          = "foundation-apply-reports/"
+  force_destroy = false
+}
+
+resource "google_storage_managed_folder" "foundation_observations" {
+  bucket        = google_storage_bucket.state.name
+  name          = "foundation-observations/"
   force_destroy = false
 }
 
@@ -396,6 +436,32 @@ resource "google_iam_workload_identity_pool_provider" "foundation_apply" {
     "attribute.workflow_ref"          = "assertion.workflow_ref"
   }
   attribute_condition = local.foundation_apply_wif_condition
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_iam_workload_identity_pool_provider" "foundation_observation" {
+  project                            = google_project.services.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "foundation-observation"
+  display_name                       = "Foundation observation"
+  description                        = "Exact-main read-only post-apply observer; no infrastructure, state, mirror, or campaign mutation."
+
+  attribute_mapping = {
+    "google.subject"                  = "'foundation-observation:' + assertion.repository_id + ':' + assertion.environment"
+    "attribute.actor_id"              = "assertion.actor_id"
+    "attribute.environment"           = "assertion.environment"
+    "attribute.event_name"            = "assertion.event_name"
+    "attribute.ref"                   = "assertion.ref"
+    "attribute.repository"            = "assertion.repository"
+    "attribute.repository_id"         = "assertion.repository_id"
+    "attribute.repository_owner_id"   = "assertion.repository_owner_id"
+    "attribute.repository_visibility" = "assertion.repository_visibility"
+    "attribute.workflow_ref"          = "assertion.workflow_ref"
+  }
+  attribute_condition = local.foundation_observation_wif_condition
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -501,6 +567,28 @@ resource "google_service_account" "foundation_plan_packager" {
   description  = "Short-lived plan signer and create-only package writer. No infrastructure or state permissions."
 }
 
+resource "google_service_account" "foundation_observer" {
+  project      = google_project.services.project_id
+  account_id   = "orchestra-foundation-observer"
+  display_name = "Orchestra foundation post-apply observer"
+  description  = "Short-lived read-only provider observer and create-only signed report writer."
+}
+
+resource "google_project_iam_custom_role" "foundation_storage_metadata_observer" {
+  project     = google_project.services.project_id
+  role_id     = "orchestraFoundationStorageMetadataObserver"
+  title       = "Orchestra foundation storage metadata observer"
+  description = "Read bucket and managed-folder metadata and IAM without reading object contents."
+  stage       = "GA"
+  permissions = [
+    "storage.buckets.get",
+    "storage.buckets.getIamPolicy",
+    "storage.managedFolders.get",
+    "storage.managedFolders.getIamPolicy",
+    "storage.managedFolders.list",
+  ]
+}
+
 resource "google_service_account" "dependency_risk" {
   project      = google_project.services.project_id
   account_id   = "orchestra-dependency-risk"
@@ -540,6 +628,12 @@ resource "google_service_account_iam_member" "foundation_apply_wif" {
   member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_apply_subject}"
 }
 
+resource "google_service_account_iam_member" "foundation_observation_wif" {
+  service_account_id = google_service_account.foundation_observer.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_observation_subject}"
+}
+
 resource "google_service_account_iam_member" "dependency_risk_wif" {
   service_account_id = google_service_account.dependency_risk.name
   role               = "roles/iam.workloadIdentityUser"
@@ -574,6 +668,26 @@ resource "google_project_iam_member" "foundation_planner" {
   member  = "serviceAccount:${google_service_account.foundation_planner.email}"
 }
 
+resource "google_project_iam_member" "foundation_observer" {
+  for_each = local.planner_role_bindings
+
+  project = each.value.project
+  role    = each.value.role
+  member  = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
+resource "google_project_iam_member" "foundation_planner_storage_metadata" {
+  project = google_project.services.project_id
+  role    = google_project_iam_custom_role.foundation_storage_metadata_observer.name
+  member  = "serviceAccount:${google_service_account.foundation_planner.email}"
+}
+
+resource "google_project_iam_member" "foundation_observer_storage_metadata" {
+  project = google_project.services.project_id
+  role    = google_project_iam_custom_role.foundation_storage_metadata_observer.name
+  member  = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
 resource "google_storage_bucket_iam_member" "foundation_planner_state" {
   for_each = toset([
     "roles/storage.legacyBucketReader",
@@ -603,6 +717,24 @@ resource "google_kms_crypto_key_iam_member" "foundation_executor_receipt_signer"
   member        = "serviceAccount:${google_service_account.foundation_executor.email}"
 }
 
+resource "google_kms_crypto_key_iam_member" "foundation_observer_plan_public_key" {
+  crypto_key_id = google_kms_crypto_key.foundation_plan_signing.id
+  role          = "roles/cloudkms.publicKeyViewer"
+  member        = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "foundation_observer_receipt_public_key" {
+  crypto_key_id = google_kms_crypto_key.foundation_apply_receipt_signing.id
+  role          = "roles/cloudkms.publicKeyViewer"
+  member        = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "foundation_observer_report_signer" {
+  crypto_key_id = google_kms_crypto_key.foundation_observation_signing.id
+  role          = "roles/cloudkms.signerVerifier"
+  member        = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
 resource "google_storage_managed_folder_iam_member" "foundation_plan_packager_writer" {
   bucket         = google_storage_bucket.state.name
   managed_folder = google_storage_managed_folder.foundation_plans.name
@@ -617,6 +749,34 @@ resource "google_storage_managed_folder_iam_member" "foundation_plan_reviewer" {
   managed_folder = google_storage_managed_folder.foundation_plans.name
   role           = "roles/storage.objectViewer"
   member         = each.value
+}
+
+resource "google_storage_managed_folder_iam_member" "foundation_observer_state_reader" {
+  bucket         = google_storage_bucket.state.name
+  managed_folder = google_storage_managed_folder.foundation_state.name
+  role           = "roles/storage.objectViewer"
+  member         = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
+resource "google_storage_managed_folder_iam_member" "foundation_observer_plan_reader" {
+  bucket         = google_storage_bucket.state.name
+  managed_folder = google_storage_managed_folder.foundation_plans.name
+  role           = "roles/storage.objectViewer"
+  member         = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
+resource "google_storage_managed_folder_iam_member" "foundation_observer_receipt_reader" {
+  bucket         = google_storage_bucket.state.name
+  managed_folder = google_storage_managed_folder.foundation_apply_reports.name
+  role           = "roles/storage.objectViewer"
+  member         = "serviceAccount:${google_service_account.foundation_observer.email}"
+}
+
+resource "google_storage_managed_folder_iam_member" "foundation_observer_report_writer" {
+  bucket         = google_storage_bucket.state.name
+  managed_folder = google_storage_managed_folder.foundation_observations.name
+  role           = "roles/storage.objectCreator"
+  member         = "serviceAccount:${google_service_account.foundation_observer.email}"
 }
 
 resource "google_billing_budget" "reference_lab" {

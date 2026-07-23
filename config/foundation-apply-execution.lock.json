@@ -16,9 +16,9 @@
     "planVerifierDigest": "sha256:58876f4313c972e49b1925783f1c9922bf0384d42a2a9feade7e20052a0210cc",
     "applyReceiptModuleDigest": "sha256:ecf1a2f5bc32a8aeb6a4f593450d3ab7fa9451ed584ada50a08b0efebfad9ff1",
     "applyScriptDigest": "sha256:d8f6d495d017bc74f5fd0661e4b12e3aa39bfa89cc77bc53667f952dd58fccb1",
-    "bootstrapTerraformDigest": "sha256:d12967d97f22db9e5d150200c388b47bada5bc525be294da02cc456cf82432fb",
+    "bootstrapTerraformDigest": "sha256:4a8ab0d5bf995a45aba0211f60fdffb48e503a5e7f959802e9947ace2d795d42",
     "bootstrapVariablesDigest": "sha256:da11b3c7212989d3e4bba034a1bbf4d84a69749dddf2c38e6f0ece028ae80e97",
-    "bootstrapOutputsDigest": "sha256:6b1cf5a1e8dc5087a415c1c600b63012f85dedf350171526b281c07787558f8b",
+    "bootstrapOutputsDigest": "sha256:139faac68901e36eb38694ae9536f42ca365b847b708c538cdf3f9db9319d1ce",
     "planWorkflowDigest": "sha256:109cbf0bc172a88489beb66d85fd64917cf90445fc6fb5b7b075c726593c1b3c",
     "applyWorkflowDigest": "sha256:ccaa779c9f677fbe18b5e53841effde21e8ec759b52341663773ece8c872a1c3"
   },

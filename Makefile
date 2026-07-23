@@ -17,6 +17,7 @@ validate:
 	$(PYTHON) scripts/validate_dependency_gitops_candidate.py
 	$(PYTHON) scripts/validate_prerequisite_policy.py
 	$(PYTHON) scripts/validate_foundation_apply_execution.py
+	$(PYTHON) scripts/validate_foundation_observation.py
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
 	kubectl kustomize gitops/dependencies/reference-lab | $(PYTHON) scripts/validate_dependency_gitops.py
 	kubectl kustomize gitops/products/reference-lab | $(PYTHON) scripts/validate_product_gitops.py

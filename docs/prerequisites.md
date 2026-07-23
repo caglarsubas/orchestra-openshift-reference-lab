@@ -19,7 +19,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
 | DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
-| WIF | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, separate plan/apply workflow restrictions, exact planner/packager/executor bindings, and no user-managed key |
+| WIF | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, separate plan/apply workflow restrictions, exact planner/packager/executor bindings, and no user-managed key; the post-apply observer verifies its additional WIF/IAM boundary separately |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
 
@@ -109,6 +109,13 @@ bindings for the plan workflow, the single-subject executor binding for the
 separate apply workflow, and absence of user-managed keys on all three service
 accounts. Managed-folder reviewer/package IAM and KMS key-level roles are
 separate foundation-apply checks; WIF success alone does not prove them.
+
+The later `foundation-observation` provider is intentionally outside this
+pre-bootstrap WIF gate. Its protected workflow performs a stronger post-apply
+check of its exact provider, impersonation binding, user-managed keys, project
+and ancestor roles, metadata-only custom role, managed-folder grants, and KMS
+grants before it observes provider state. See
+`docs/runbooks/foundation-observation.md`.
 
 The standalone collector proves the environment configuration only because it
 is not executing inside an approved workflow run. The foundation-plan workflow

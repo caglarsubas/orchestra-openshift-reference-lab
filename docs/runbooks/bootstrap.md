@@ -48,6 +48,17 @@
    read-only managed-folder access and no state access. Confirm the executor
    can view the plan public key and sign only with
    `foundation-apply-receipt-signing`.
+   Finally verify the `foundation-observation` provider and
+   `orchestra-foundation-observer` identity. Confirm its metadata-only custom
+   storage role cannot read object contents; source state/plan/receipt folders
+   are read-only; `foundation-observations/` is create-only; the prior keys are
+   public-key-only; and only `foundation-observation-signing` is usable for
+   signing. Grant and independently review `roles/iam.securityReviewer` on
+   every project ancestor so the observer can inspect its direct inherited
+   authority. Reject any additional direct ancestor, service-account
+   impersonation, or WIF-pool binding. Independently review Google Workspace
+   group membership because the narrow observer has no group-expansion
+   authority.
 5. Configure the foundation GCS backend using the bootstrap outputs. Never
    migrate state to a local backend.
 6. Re-authenticate through WIF and prove the bootstrap credential is no longer
@@ -59,20 +70,22 @@
 
 1. Pin immutable bastion/probe OS images and probe container image.
 2. Review every egress CIDR and its business purpose. `0.0.0.0/0` is rejected.
-3. Configure both independently protected GitHub environments, then follow
+3. Configure all three independently protected foundation GitHub
+   environments, then follow
    `docs/runbooks/foundation-plan.md` and
    `docs/runbooks/foundation-apply.md`. The planner remains read-only; the
    create-only packager publishes the private saved-plan package; the separate
    executor applies only that exact package with
    `certification_mode=false` and
    `lock_signed_evidence_bucket=false`.
-4. Treat the signed apply receipt as self-attested execution custody. Use a
-   separate read-only identity to prove no VM has an external IP, both flow-log
-   sinks receive traffic, the two probes are in distinct zones, GKE has
-   exactly three standard nodes, the immutable `orchestra-bootstrap` Artifact
-   Registry repository exists, VPC peering is active in both directions, the
-   public DNS zone has only its managed SOA/NS records, and the services-to-
-   target DNS peering zone has no writable records.
+4. Treat the signed apply receipt as self-attested execution custody. Run
+   `docs/runbooks/foundation-observation.md` to verify the deployed observer
+   boundary, prior signatures, stable state generation, receipt/state match,
+   provider refresh, and exact resource identity set. Use later slot-specific
+   probes to prove operational properties such as external-IP absence,
+   flow-log delivery, zonal probe independence, GKE node health, peering,
+   public DNS contents, and private DNS behavior; the Terraform observation
+   does not replace those live checks.
 5. Verify the separate `dependency-risk-collection-signing` key uses
    `ASYMMETRIC_SIGN` and `EC_SIGN_P256_SHA256`. Confirm the preflight identity
    has only `roles/cloudkms.signerVerifier` on that key and no bucket or mirror
