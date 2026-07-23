@@ -1,0 +1,277 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometa.ai/schemas/orchestra/lab-service-publication-replay-v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "orchestra.reference-lab.lab-service-publication-replay.v1"
+    },
+    "verificationId": {
+      "pattern": "^lab-services-publication-replay-[1-9][0-9]*\\.1$",
+      "type": "string"
+    },
+    "profileId": {
+      "const": "orchestra-ocp-4.20-amd64-v1"
+    },
+    "targetClass": {
+      "const": "vendor-reference-lab"
+    },
+    "executionMode": {
+      "const": "live"
+    },
+    "policyDigest": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "publication": {
+      "additionalProperties": false,
+      "properties": {
+        "observationId": {
+          "pattern": "^lab-services-publication-[1-9][0-9]*\\.1$",
+          "type": "string"
+        },
+        "observationDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "workflowRunId": {
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "artifactId": {
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "artifactName": {
+          "pattern": "^lab-service-publication-observation-[1-9][0-9]*-1$",
+          "type": "string"
+        },
+        "repositoryRevision": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        "release": {
+          "pattern": "^lab-services-v0\\.1\\.0-rc\\.[1-9][0-9]*$",
+          "type": "string"
+        },
+        "publishedAt": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observationId",
+        "observationDigest",
+        "workflowRunId",
+        "artifactId",
+        "artifactName",
+        "repositoryRevision",
+        "release",
+        "publishedAt"
+      ],
+      "type": "object"
+    },
+    "verifier": {
+      "additionalProperties": false,
+      "properties": {
+        "repositoryRevision": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        "workflowPath": {
+          "const": ".github/workflows/lab-service-publication-replay.yml"
+        },
+        "ref": {
+          "const": "refs/heads/main"
+        },
+        "runId": {
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "runAttempt": {
+          "const": 1
+        },
+        "actorId": {
+          "pattern": "^[1-9][0-9]*$",
+          "type": "string"
+        },
+        "verifiedAt": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repositoryRevision",
+        "workflowPath",
+        "ref",
+        "runId",
+        "runAttempt",
+        "actorId",
+        "verifiedAt"
+      ],
+      "type": "object"
+    },
+    "services": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "enum": [
+              "release-validation-receiver",
+              "synthetic-tenant-kit"
+            ],
+            "type": "string"
+          },
+          "sourceTreeDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "imageRepository": {
+            "pattern": "^ghcr\\.io/caglarsubas/orchestra-lab-[a-z0-9-]+$",
+            "type": "string"
+          },
+          "imageDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "imageManifestDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "attestationManifestDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "sbomDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "provenanceDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "signatureSubject": {
+            "pattern": "^ghcr\\.io/caglarsubas/orchestra-lab-[a-z0-9-]+@sha256:[a-f0-9]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sourceTreeDigest",
+          "imageRepository",
+          "imageDigest",
+          "imageManifestDigest",
+          "attestationManifestDigest",
+          "sbomDigest",
+          "provenanceDigest",
+          "signatureSubject"
+        ],
+        "type": "object"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "separateWorkflowReplay": {
+          "const": true
+        },
+        "sourceArtifactsPublished": {
+          "const": true
+        },
+        "sourceTreeReplayed": {
+          "const": true
+        },
+        "registryDigestReplayed": {
+          "const": true
+        },
+        "embeddedSbomReplayed": {
+          "const": true
+        },
+        "provenanceReplayed": {
+          "const": true
+        },
+        "keylessSignatureReplayed": {
+          "const": true
+        },
+        "independentHumanReview": {
+          "const": false
+        },
+        "signedVerificationStatement": {
+          "const": false
+        },
+        "certificationRiskScan": {
+          "const": false
+        },
+        "harborMirrored": {
+          "const": false
+        },
+        "rhtasAdmissionVerified": {
+          "const": false
+        },
+        "gitOpsReferenced": {
+          "const": false
+        },
+        "deployed": {
+          "const": false
+        },
+        "campaignEvidence": {
+          "const": false
+        },
+        "referenceProfileVerified": {
+          "const": false
+        },
+        "customerCertified": {
+          "const": false
+        },
+        "redHatCertified": {
+          "const": false
+        },
+        "contractualSla": {
+          "const": false
+        }
+      },
+      "required": [
+        "separateWorkflowReplay",
+        "sourceArtifactsPublished",
+        "sourceTreeReplayed",
+        "registryDigestReplayed",
+        "embeddedSbomReplayed",
+        "provenanceReplayed",
+        "keylessSignatureReplayed",
+        "independentHumanReview",
+        "signedVerificationStatement",
+        "certificationRiskScan",
+        "harborMirrored",
+        "rhtasAdmissionVerified",
+        "gitOpsReferenced",
+        "deployed",
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "verificationId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "policyDigest",
+    "publication",
+    "verifier",
+    "services",
+    "claims"
+  ],
+  "type": "object"
+}

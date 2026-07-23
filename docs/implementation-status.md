@@ -57,8 +57,8 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Platform router-to-pod TLS | Yes | Yes | No | No | No |
 | Durable release-validation receiver and GitHub App executor | Yes | Yes | No | No | No |
 | Synthetic tenant gateway and read-only MCP fault surfaces | Yes | Yes | No | No | No |
-| Immutable lab service publication and verification lane | Yes | Yes | No | No | No |
-| Published signed lab service image indexes | No | N/A | No | No | No |
+| Immutable publication and read-only replay lanes | Yes | Yes | No | No | No |
+| Published signed lab service image indexes | Yes | N/A | N/A | Partial | No |
 | Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
@@ -180,18 +180,25 @@ dispatcher, indeterminate-delivery reconciliation, pinned UBI build, and
 disposable PostgreSQL tests. The synthetic tenant kit now has strict Keycloak
 JWT/JWKS verification, an HTTPS-only runtime proxy, official read-only MCP
 Streamable HTTP behavior, and normal/slow/unavailable/wrong-tenant fault
-lanes. Both services have hash-locked UBI AMD64 builds, but neither has a
-published or mirrored image or GitOps reference. A separate exact-main,
+lanes. Both services have hash-locked UBI AMD64 builds. Neither has a mirrored
+image or GitOps reference. A separate exact-main,
 first-attempt-only publication lane is now source-declared and CI-validated.
 It derives immutable release-plus-revision GHCR tags, embeds pinned BuildKit
 SPDX and `mode=max` provenance attestations, keyless-signs the exact image
 indexes, and emits a strict payload-free observation after registry and
-signature replay. The embedded Syft result is transport metadata, not the
-certification risk scan. No publication workflow has run, so the service
-inventory remains `source-only` and its `published-signed-image` blockers
-remain accurate. Even a successful publication would not establish Harbor
-mirroring, RHTAS admission, GitOps reference, deployment, live testing, or
-campaign evidence. Live activation remains
+signature replay. Publication run `30002879030` succeeded against revision
+`a54ca86f2c7e4746b85110bb29052f836401ec9c` and produced distinct signed
+indexes for both services plus observation digest
+`sha256:36fe99667ea6fe4ea8d019b28e10dc899804c4ebb7d8485149fbec83ba40d4bf`.
+The embedded Syft result is transport metadata, not the certification risk
+scan. A separate read-only workflow and strict statement contract are now
+source-declared to replay the prior run, artifact, source, registry,
+attestations, and signatures without package-write, image-signing, OIDC, or
+deployment authority. That replay has not run, so
+`config/lab-services.lock.json` intentionally remains `source-only` pending a
+separate reviewed digest intake. The successful publication does not establish
+Harbor mirroring, RHTAS admission, GitOps reference, deployment, full live
+testing, or campaign evidence. Live activation remains
 behind Red Hat, GCP, DNS, PKI, Keycloak, and short-lived identity gates; no
 dependency or product declaration has been applied.
 

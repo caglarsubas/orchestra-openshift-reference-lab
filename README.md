@@ -222,7 +222,22 @@ run can assert only that the two source artifacts were published and their
 digests, embedded attestations, and keyless signatures were replayed. It cannot
 assert a certification risk scan, Harbor mirror, RHTAS admission, GitOps
 reference, deployment, campaign evidence, or profile verification. The
-workflow has not run, so both services remain `source-only`.
+exact workflow succeeded as run `30002879030` for release
+`lab-services-v0.1.0-rc.1` at revision
+`a54ca86f2c7e4746b85110bb29052f836401ec9c`; its locally validated
+observation digest is
+`sha256:36fe99667ea6fe4ea8d019b28e10dc899804c4ebb7d8485149fbec83ba40d4bf`.
+The service inventory remains `source-only` until a separate read-only replay
+and reviewed digest intake complete.
+
+The lab service publication replay policy digest is
+`sha256:0607daa157b5a0a49284305d8216d6ecf98019eb25a5d48032c26bc09e050317`.
+Its separate exact-main workflow can read the prior Actions artifact, source,
+and private GHCR packages. It has no package-write, OIDC, image-signing, GitOps,
+or deployment authority. A valid statement replays the prior run/artifact,
+source trees, OCI indexes, embedded attestations, and keyless signatures while
+keeping human-review, admission, deployment, campaign, and certification
+claims false. The replay workflow has not run.
 
 Each GitHub WIF provider maps a provider-prefixed numeric
 repository/environment subject, and each service-account impersonation grant
@@ -245,8 +260,9 @@ Valkey/Sentinel, remain unresolved.
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
 release-validation receiver and synthetic tenant kit remain `source-only`:
-neither has a release, image, or GitOps reference until publication and live
-prerequisites are complete.
+neither lock entry has ingested the externally published `rc.1` release and
+image digests or gained a GitOps reference. Separate replay and reviewed intake
+must complete before that source truth changes.
 
 ## Layout
 

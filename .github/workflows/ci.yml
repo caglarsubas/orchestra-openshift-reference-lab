@@ -90,6 +90,9 @@ jobs:
       - name: Validate immutable lab service publication policy
         run: python3 scripts/lab_service_publication.py validate-policy
 
+      - name: Validate read-only lab service publication replay
+        run: python3 scripts/lab_service_publication_replay.py validate-policy
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 
