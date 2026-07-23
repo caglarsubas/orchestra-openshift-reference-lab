@@ -38,14 +38,13 @@ jobs:
     env:
       RECEIVER_IMAGE: ghcr.io/caglarsubas/orchestra-lab-release-validation-receiver
       SYNTHETIC_IMAGE: ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit
+      EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+      PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
+      EXPECTED_PUBLICATION_REVISION: ${{ inputs.expected_publication_revision }}
+      EXPECTED_OBSERVATION_DIGEST: ${{ inputs.expected_observation_digest }}
 
     steps:
       - name: Require exact reviewed replay inputs
-        env:
-          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
-          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
-          EXPECTED_PUBLICATION_REVISION: ${{ inputs.expected_publication_revision }}
-          EXPECTED_OBSERVATION_DIGEST: ${{ inputs.expected_observation_digest }}
         run: |
           set -euo pipefail
           [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
@@ -85,7 +84,6 @@ jobs:
       - name: Pin publication run and artifact origin
         env:
           GH_TOKEN: ${{ github.token }}
-          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
         run: |
           set -euo pipefail
           umask 077
@@ -119,10 +117,6 @@ jobs:
           chmod 0600 "$observation"
 
       - name: Replay source, registry, attestations, and signatures
-        env:
-          PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}
-          EXPECTED_PUBLICATION_REVISION: ${{ inputs.expected_publication_revision }}
-          EXPECTED_OBSERVATION_DIGEST: ${{ inputs.expected_observation_digest }}
         run: |
           set -euo pipefail
           umask 077
