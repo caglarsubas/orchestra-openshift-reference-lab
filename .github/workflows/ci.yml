@@ -87,6 +87,9 @@ jobs:
       - name: Validate operator control-plane readiness policy
         run: python3 scripts/operator_control_plane_readiness.py validate-policy
 
+      - name: Validate immutable lab service publication policy
+        run: python3 scripts/lab_service_publication.py validate-policy
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

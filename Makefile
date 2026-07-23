@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate test verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness terraform-fmt terraform-validate
+.PHONY: validate test verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -19,6 +19,7 @@ validate:
 	$(PYTHON) scripts/validate_foundation_apply_execution.py
 	$(PYTHON) scripts/validate_foundation_observation.py
 	$(PYTHON) scripts/operator_control_plane_readiness.py validate-policy
+	$(PYTHON) scripts/lab_service_publication.py validate-policy
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
 	kubectl kustomize gitops/dependencies/reference-lab | $(PYTHON) scripts/validate_dependency_gitops.py
 	kubectl kustomize gitops/products/reference-lab | $(PYTHON) scripts/validate_product_gitops.py
@@ -46,6 +47,10 @@ verify-operator-control-plane-readiness:
 	test -n "$(REPORT)"
 	test -n "$(ASSESSED_AT)"
 	$(PYTHON) scripts/operator_control_plane_readiness.py verify --report "$(REPORT)" --at "$(ASSESSED_AT)"
+
+verify-lab-service-publication:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/lab_service_publication.py verify --report "$(REPORT)"
 
 terraform-fmt:
 	$(TERRAFORM) fmt -check -recursive infra/terraform

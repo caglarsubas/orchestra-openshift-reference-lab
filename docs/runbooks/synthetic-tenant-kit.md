@@ -15,10 +15,11 @@ material. No Secret value is accepted through Git.
 
 Before adding any GitOps reference:
 
-1. Build `services/synthetic-tenant-kit/Containerfile` for `linux/amd64` from
-   the reviewed source revision and hash-locked dependency file.
-2. Generate an SBOM and vulnerability report. Resolve critical/high findings
-   or record an approved, time-bounded waiver.
+1. Complete `docs/runbooks/lab-service-publication.md` for the exact reviewed
+   source revision. This produces the immutable GHCR image, embedded SBOM and
+   provenance, keyless signature, and source-publication observation.
+2. Run the separate certification risk collector against that exact digest.
+   Resolve critical/high findings or record an approved, time-bounded waiver.
 3. Sign the image with the lab KMS identity, record source and destination
    digests, mirror by digest into Harbor, and prove RHTAS admission rejection
    for unsigned and wrong-key images.
