@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometa.ai/schemas/orchestra/operator-control-plane-readiness-v1.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "campaignEvidence": {
+          "const": false
+        },
+        "contractualSla": {
+          "const": false
+        },
+        "customerCertified": {
+          "const": false
+        },
+        "githubAppCredentialsRetained": {
+          "const": false
+        },
+        "independentReviewRequired": {
+          "const": true
+        },
+        "operatorControlPlaneObserved": {
+          "const": true
+        },
+        "provisioningReady": {
+          "const": false
+        },
+        "redHatCertified": {
+          "const": false
+        },
+        "referenceProfileVerified": {
+          "const": false
+        }
+      },
+      "required": [
+        "operatorControlPlaneObserved",
+        "independentReviewRequired",
+        "githubAppCredentialsRetained",
+        "provisioningReady",
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla"
+      ],
+      "type": "object"
+    },
+    "environmentObservations": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "contract": {
+            "enum": [
+              "foundation-plan",
+              "foundation-apply",
+              "foundation-observation",
+              "dependency-risk-preflight",
+              "dependency-risk-collection",
+              "dependency-risk-custody-verification"
+            ],
+            "type": "string"
+          },
+          "contractDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "deploymentBranchPolicyDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "environmentIdentityDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "preventSelfReview": {
+            "const": true
+          },
+          "repositoryIdentityDigest": {
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "type": "string"
+          },
+          "reviewerCount": {
+            "maximum": 6,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "reviewerIdentityDigests": {
+            "items": {
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "type": "string"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "contract",
+          "contractDigest",
+          "repositoryIdentityDigest",
+          "environmentIdentityDigest",
+          "reviewerIdentityDigests",
+          "reviewerCount",
+          "preventSelfReview",
+          "deploymentBranchPolicyDigest"
+        ],
+        "type": "object"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "type": "array"
+    },
+    "githubAppObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "applicationIdentityDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "applicationInstallationCount": {
+          "const": 1
+        },
+        "applicationInstallationSetDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "eventsDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "installationIdentityDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "installationSuspended": {
+          "const": false
+        },
+        "permissionDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "repositoryIdentityDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "repositorySelection": {
+          "const": "selected"
+        },
+        "repositorySetDigest": {
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "repositoryCount": {
+          "const": 1
+        },
+        "tokenRevoked": {
+          "const": true
+        }
+      },
+      "required": [
+        "applicationIdentityDigest",
+        "installationIdentityDigest",
+        "applicationInstallationSetDigest",
+        "applicationInstallationCount",
+        "repositoryIdentityDigest",
+        "repositorySetDigest",
+        "permissionDigest",
+        "eventsDigest",
+        "repositorySelection",
+        "repositoryCount",
+        "installationSuspended",
+        "tokenRevoked"
+      ],
+      "type": "object"
+    },
+    "kind": {
+      "const": "orchestra.reference-lab.operator-control-plane-readiness.v1"
+    },
+    "observationId": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$",
+      "type": "string"
+    },
+    "observedAt": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$",
+      "type": "string"
+    },
+    "policyDigest": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "profileId": {
+      "const": "orchestra-ocp-4.20-amd64-v1"
+    },
+    "repositoryRevision": {
+      "pattern": "^[a-f0-9]{40}$",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "validUntil": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "observationId",
+    "profileId",
+    "policyDigest",
+    "repositoryRevision",
+    "observedAt",
+    "validUntil",
+    "environmentObservations",
+    "githubAppObservation",
+    "claims"
+  ],
+  "type": "object"
+}

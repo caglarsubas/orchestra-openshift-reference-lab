@@ -49,6 +49,7 @@ jobs:
           COLLECTOR_SERVICE_ACCOUNT: ${{ vars.GCP_DEPENDENCY_RISK_COLLECTOR_SERVICE_ACCOUNT }}
           GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
           GITHUB_APP_ID: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_ID }}
+          GITHUB_APP_INSTALLATION_ID: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID }}
           GITHUB_APP_PRIVATE_KEY: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY }}
         run: |
           set -euo pipefail
@@ -62,6 +63,7 @@ jobs:
           [[ "$WIF_PROVIDER" =~ ^projects/[1-9][0-9]*/locations/global/workloadIdentityPools/orchestra-lab-github/providers/dependency-risk-preflight$ ]]
           [[ "$COLLECTOR_SERVICE_ACCOUNT" == "orchestra-dependency-risk@$GCP_SERVICES_PROJECT_ID.iam.gserviceaccount.com" ]]
           [[ "$GITHUB_APP_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$GITHUB_APP_INSTALLATION_ID" =~ ^[1-9][0-9]*$ ]]
           [[ "$GITHUB_APP_PRIVATE_KEY" == *"BEGIN"*"PRIVATE KEY"* ]]
 
       - name: Check out reviewed main revision
@@ -79,6 +81,7 @@ jobs:
           python3 scripts/validate_repository.py
           python3 scripts/validate_dependency_risk_execution.py
           python3 scripts/validate_dependency_risk_intake.py
+          python3 scripts/operator_control_plane_readiness.py validate-policy
 
       - name: Verify independent environment protection for this run
         env:
@@ -97,6 +100,25 @@ jobs:
           printf '%s\n' "$verification"
           [[ "$verification" =~ digest=(sha256:[a-f0-9]{64}) ]]
           printf 'ENVIRONMENT_APPROVAL_DIGEST=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+
+      - name: Verify full GitHub App installation scope
+        env:
+          GITHUB_APP_ID: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_ID }}
+          GITHUB_APP_INSTALLATION_ID: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID }}
+          GITHUB_APP_PRIVATE_KEY: ${{ secrets.DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          key_file="$RUNNER_TEMP/github-app-private-key.pem"
+          trap 'rm -f "$key_file"' EXIT
+          printf '%s' "$GITHUB_APP_PRIVATE_KEY" > "$key_file"
+          verification="$(python3 scripts/operator_control_plane_readiness.py verify-app \
+            --app-private-key-file "$key_file" \
+            --app-id "$GITHUB_APP_ID" \
+            --installation-id "$GITHUB_APP_INSTALLATION_ID")"
+          printf '%s\n' "$verification"
+          [[ "$verification" =~ digest=(sha256:[a-f0-9]{64}) ]]
+          printf 'GITHUB_APP_INSTALLATION_DIGEST=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
 
       - name: Authenticate as the preflight-only KMS signer
         id: gcp-auth
@@ -162,8 +184,9 @@ jobs:
             --arg actorId "$GITHUB_ACTOR_ID" \
             --arg sourceRevision "$GITHUB_SHA" \
             --arg environmentApprovalDigest "$ENVIRONMENT_APPROVAL_DIGEST" \
+            --arg githubAppInstallationDigest "$GITHUB_APP_INSTALLATION_DIGEST" \
             --arg reasonDigest "$reason_digest" \
-            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,environmentApprovalDigest:$environmentApprovalDigest,reasonDigest:$reasonDigest}' \
+            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,environmentApprovalDigest:$environmentApprovalDigest,githubAppInstallationDigest:$githubAppInstallationDigest,reasonDigest:$reasonDigest}' \
             | sha256sum | cut -d' ' -f1)"
           DOCKER_CONFIG="$RUNNER_TEMP/docker" docker pull "$runner" >/dev/null
           docker run --rm --platform linux/amd64 \
@@ -201,6 +224,7 @@ jobs:
           rm -rf \
             "$RUNNER_TEMP/docker" \
             "$RUNNER_TEMP/github-token" \
+            "$RUNNER_TEMP/github-app-private-key.pem" \
             "$RUNNER_TEMP/dependency-risk-preflight.log" \
             "$GITHUB_WORKSPACE/restricted"
           find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

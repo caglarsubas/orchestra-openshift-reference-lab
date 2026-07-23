@@ -19,7 +19,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
 | DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
-| WIF | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, separate plan/apply workflow restrictions, exact planner/packager/executor bindings, and no user-managed key; the post-apply observer verifies its additional WIF/IAM boundary separately |
+| WIF and operator GitHub controls | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, separate plan/apply workflow restrictions, exact planner/packager/executor bindings, no user-managed key, all six protected environments, and the exact read-only platform-release GitHub App installation; the post-apply observer verifies its additional WIF/IAM boundary separately |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
 
@@ -123,6 +123,14 @@ adds a current-run check against GitHub's approval-history API and requires one
 approved event from a configured non-owner reviewer distinct from the workflow
 initiator. Neither path claims to attest the administrator-bypass UI setting,
 which remains an independently reviewed Enterprise-environment precondition.
+
+The aggregate operator-control-plane collector in
+`docs/runbooks/operator-control-plane-readiness.md` separately checks all six
+environment contracts and the complete GitHub App installation repository set.
+It mints and revokes an unrestricted installation token so a narrowed token
+cannot hide a broader installation. Its payload-free report expires after one
+hour and still requires independent review before any prerequisite gate changes
+to `verified`.
 
 The Red Hat input is a payload-free external statement with exact product,
 OpenShift `4.20.27`, `linux/amd64`, active/expiry timestamps, and issuer/account

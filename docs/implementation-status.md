@@ -16,6 +16,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Separately federated exact saved-plan foundation apply | Yes | Yes | No | No | No |
 | Signed self-attested foundation apply receipt | Yes | Yes | No | No | No |
 | Independent post-apply foundation observation | Yes | Yes | No | No | No |
+| Aggregate six-environment and GitHub App installation observation | Yes | Yes | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
 | Public delegation zone and private DNS peering | Yes | Yes | No | No | No |
@@ -156,7 +157,11 @@ The next live increment is bootstrap/foundation application and independent
 verification of all six WIF providers, seven service accounts, foundation and
 dependency-risk KMS versions/public-key digests, managed-folder and bucket IAM,
 all six protected environments, reviewer-group plan access, and the GitHub
-App installation. The
+App installation. The aggregate operator-control-plane collector and strict
+one-hour report are now source-declared and CI-tested. The App verifier mints an
+unrestricted installation token, rejects a broader repository set or any write
+permission, and requires revocation, but no environment, App, secret, or live
+observation exists merely because the verifier is present. The
 protected launch preflight executes first; a successful result still does not
 start collection. A separately approved full-collection run may then publish
 only a completed raw prefix. A third approval runs the independent custody lane
