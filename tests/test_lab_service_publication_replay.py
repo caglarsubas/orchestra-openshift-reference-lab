@@ -126,6 +126,29 @@ class LabServicePublicationReplayTests(unittest.TestCase):
             "lab_service_publication_replay.py project-origin",
             replay_workflow,
         )
+        self.assertEqual(
+            replay_workflow.count("EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}"),
+            1,
+        )
+        self.assertEqual(
+            replay_workflow.count(
+                "EXPECTED_PUBLICATION_REVISION: "
+                "${{ inputs.expected_publication_revision }}"
+            ),
+            1,
+        )
+        self.assertEqual(
+            replay_workflow.count(
+                "EXPECTED_OBSERVATION_DIGEST: ${{ inputs.expected_observation_digest }}"
+            ),
+            1,
+        )
+        self.assertEqual(
+            replay_workflow.count(
+                "PUBLICATION_RUN_ID: ${{ inputs.publication_run_id }}"
+            ),
+            1,
+        )
         self.assertNotIn("jq ", replay_workflow)
         makefile = Path("Makefile").read_text(encoding="utf-8")
         workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
