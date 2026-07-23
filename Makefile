@@ -1,10 +1,11 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate test verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial test verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
+	$(PYTHON) scripts/validate_sno_trial_profile.py
 	$(PYTHON) scripts/validate_release_set.py
 	$(PYTHON) scripts/validate_reference_lab_contract_intake.py
 	$(PYTHON) scripts/validate_dependency_bom.py
@@ -24,6 +25,9 @@ validate:
 	kubectl kustomize gitops/clusters/reference-lab | $(PYTHON) scripts/validate_rendered_gitops.py
 	kubectl kustomize gitops/dependencies/reference-lab | $(PYTHON) scripts/validate_dependency_gitops.py
 	kubectl kustomize gitops/products/reference-lab | $(PYTHON) scripts/validate_product_gitops.py
+
+validate-sno-trial:
+	$(PYTHON) scripts/validate_sno_trial_profile.py
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v

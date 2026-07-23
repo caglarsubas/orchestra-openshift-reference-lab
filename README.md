@@ -56,6 +56,37 @@ diagnostic output is always `fixture/simulated`, while live output must bind the
 published certification runner. Neither output can verify a gate or authorize
 provisioning.
 
+## Cost-bounded SNO engineering trial
+
+The separate `orchestra-ocp-sno-trial-amd64-v1` profile provides a live,
+non-certifying path for the current Red Hat trial and a maximum `$200` monthly
+budget. It does not alter or weaken `orchestra-ocp-4.20-amd64-v1`.
+
+- One OpenShift `4.20.27` `n2-standard-8` control-plane node in
+  `europe-west1-b`, 150 GB `pd-balanced`, and zero workers.
+- No GKE dependency plane; only named single-replica engineering dependencies
+  may be co-located on SNO.
+- A 24-hour operator lease is required before installer rendering, with no more
+  than 120 active node-hours per month.
+- Budget alerts fire at 50, 75, 90, and 100 percent. GCP budgets are alerts,
+  not hard spending caps, and the source lease does not automatically destroy
+  provider resources.
+- All certification, HA, RPO/RTO, production-support, and SLA claims remain
+  false. The profile has no allowed certification evidence slots.
+
+The locked trial contract is
+[`config/sno-trial.lock.json`](config/sno-trial.lock.json), with canonical
+digest
+`sha256:83b8a9142906b36cc9d3e289e61b0eb0f149f26e1ba3641dfb6dcdb8f53e9cd5`.
+The complete source-to-destroy procedure is in
+[`docs/runbooks/sno-trial.md`](docs/runbooks/sno-trial.md).
+
+Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
+control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
+and at least 120 GB storage. The trial profile deliberately uses 8 vCPU and
+150 GB. This establishes a supported installation shape, not production
+certification.
+
 ## Locked topology
 
 - GCP `europe-west1`, zones `b`, `c`, and `d`.
@@ -349,6 +380,25 @@ python3 scripts/render_install_config.py \
 The renderer refuses to overwrite files, validates exact topology values, and
 does not accept a pull secret in its values file. Pull secret and SSH public
 key injection remain an operator step immediately before installer execution.
+
+The SNO trial uses a separate renderer and requires a valid, project-bound
+operator lease:
+
+```bash
+python3 scripts/trial_lease.py create \
+  --project-id '<ephemeral-trial-project>' \
+  --operator-identity-digest 'sha256:<operator-identity-digest>' \
+  --hours 24 \
+  --output restricted/trial-leases/current.json
+
+python3 scripts/render_sno_trial_install_config.py \
+  --values restricted/sno-trial-install-values.json \
+  --lease restricted/trial-leases/current.json \
+  --output install-dir/trial/install-config.rendered.yaml
+```
+
+This only renders a secret-free input. It neither creates a GCP project nor
+runs the installer.
 
 ## Delivery boundary
 

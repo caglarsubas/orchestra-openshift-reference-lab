@@ -65,6 +65,27 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | 30-day soak | No | N/A | No | No | No |
 | Reference verification BOM | No | N/A | No | No | No |
 
+## Separate SNO engineering trial
+
+The following lane is deliberately outside the table above and cannot satisfy
+any certification campaign slot.
+
+| Trial capability | Declared | CI-validated | Applied | Live-tested | Campaign evidence |
+|---|---:|---:|---:|---:|---:|
+| Distinct non-certifying SNO profile and digest | Yes | Yes | No | No | Not eligible |
+| One 8-vCPU control-plane node, zero workers, 150 GB balanced disk | Yes | Yes | No | No | Not eligible |
+| `$200` alert ceiling and 120 active-hour limit | Yes | Yes | No | No | Not eligible |
+| 24-hour project-bound operator lease | Yes | Yes | No | No | Not eligible |
+| Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
+| Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
+| GCP project, budget, DNS, and source-IP allowlist | No | N/A | No | No | Not eligible |
+| OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
+| Minimal co-located trial dependencies | No | N/A | No | No | Not eligible |
+| Verified teardown and residual-resource reconciliation | No | N/A | No | No | Not eligible |
+
+The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
+policy, prerequisite gates, and active GitOps overlays remain unchanged.
+
 The platform-owned certification intake now pins the exact policy, strict
 schema bundle, and fixture bytes from platform release
 `platform-v0.1.0-rc.10` at revision
