@@ -96,39 +96,12 @@ jobs:
           gh api \
             "repos/$GITHUB_REPOSITORY/actions/runs/$PUBLICATION_RUN_ID/artifacts" \
             > "$RUNNER_TEMP/publication-artifacts.json"
-          jq -S \
-            --arg artifactName "$artifact_name" \
-            --slurpfile run "$RUNNER_TEMP/publication-run.json" \
-            --slurpfile inventory "$RUNNER_TEMP/publication-artifacts.json" \
-            '
-              ($run[0]) as $source |
-              ([ $inventory[0].artifacts[] | select(.name == $artifactName) ]) as $matches |
-              if ($matches | length) != 1 then
-                error("publication_artifact_inventory_invalid")
-              else
-                ($matches[0]) as $artifact |
-                {
-                  id: $source.id,
-                  runAttempt: $source.run_attempt,
-                  event: $source.event,
-                  status: $source.status,
-                  conclusion: $source.conclusion,
-                  headSha: $source.head_sha,
-                  headBranch: $source.head_branch,
-                  path: $source.path,
-                  repository: {
-                    id: $source.repository.id,
-                    fullName: $source.repository.full_name
-                  },
-                  artifact: {
-                    id: $artifact.id,
-                    name: $artifact.name,
-                    sizeInBytes: $artifact.size_in_bytes,
-                    expired: $artifact.expired
-                  }
-                }
-              end
-            ' > "$RUNNER_TEMP/publication-origin.json"
+          python3 scripts/lab_service_publication_replay.py project-origin \
+            --run "$RUNNER_TEMP/publication-run.json" \
+            --inventory "$RUNNER_TEMP/publication-artifacts.json" \
+            --expected-publication-run-id "$PUBLICATION_RUN_ID" \
+            --expected-publication-revision "$EXPECTED_PUBLICATION_REVISION" \
+            --output "$RUNNER_TEMP/publication-origin.json"
           mkdir -m 0700 "$RUNNER_TEMP/publication-observation"
           gh run download "$PUBLICATION_RUN_ID" \
             --repo "$GITHUB_REPOSITORY" \
