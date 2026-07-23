@@ -19,9 +19,9 @@ authorization digest, independent timing, and cleanup verification.
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
 | Dependency risk review | Separate preflight, full-collection, and independent custody-verification WIF authorities; protected workflows; atomic signed-runner collection; generation-pinned deep replay; signed custody reporting; builder; strict schemas; and empty intake implemented; Terraform application, external gates/App setup, live runs, human reviews, and admission pending |
 | Certification contract intake | Exact platform policy/schema/fixture bytes pinned, semantically CI-validated, and operator source replay implemented; live campaign pending |
-| Lab service publication | Exact-main immutable GHCR build, embedded SBOM/provenance, keyless signing, strict observation, and separate read-only replay implemented; `rc.1` published, replay pending |
-| Release-validation receiver | Procedure implemented; publication and live rehearsal pending |
-| Synthetic tenant and MCP surfaces | Procedure implemented; publication and live rehearsal pending |
+| Lab service publication | `rc.1` published and separately replayed; immutable digests recorded, certification scan/mirror/admission pending |
+| Release-validation receiver | Published source artifact and procedure implemented; scan, mirror, admission, and live rehearsal pending |
+| Synthetic tenant and MCP surfaces | Published source artifact and procedure implemented; scan, mirror, identity/PKI gates, and live rehearsal pending |
 | Upgrade and rollback | Pending immutable release publication |
 | Backup and restore | Pending dependency operators and backup targets |
 | Credential/certificate rotation | Pending Vault/ESO deployment |

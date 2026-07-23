@@ -46,7 +46,6 @@ PREREQUISITE_STAGE_GATES = {
     "all": EXPECTED_GATES,
 }
 EXPECTED_RECEIVER_BLOCKERS = [
-    "published-signed-image",
     "mirror-admission",
     "external-postgresql",
     "vault-external-secrets",
@@ -54,7 +53,6 @@ EXPECTED_RECEIVER_BLOCKERS = [
     "live-campaign",
 ]
 EXPECTED_SYNTHETIC_BLOCKERS = [
-    "published-signed-image",
     "mirror-admission",
     "vault-external-secrets",
     "keycloak-identity",
@@ -62,6 +60,83 @@ EXPECTED_SYNTHETIC_BLOCKERS = [
     "lab-pki",
     "live-campaign",
 ]
+LAB_SERVICE_RELEASE = "lab-services-v0.1.0-rc.1"
+LAB_SERVICE_SOURCE_REVISION = "a54ca86f2c7e4746b85110bb29052f836401ec9c"
+LAB_SERVICE_TAG = f"{LAB_SERVICE_RELEASE}-{LAB_SERVICE_SOURCE_REVISION}"
+EXPECTED_LAB_SERVICES_DIGEST = (
+    "sha256:bcb33ebb8ff8d539780ed4fdfb728196744832491e5aa61ad714613d968a290e"
+)
+EXPECTED_LAB_SERVICE_PUBLICATION = {
+    "release": LAB_SERVICE_RELEASE,
+    "sourceRevision": LAB_SERVICE_SOURCE_REVISION,
+    "policyDigest": (
+        "sha256:61e1af0f3c2874df6ec8077e3ac03f2a036197e0998d224a7cafea8c5130b8e1"
+    ),
+    "workflow": {
+        "path": ".github/workflows/lab-service-publication.yml",
+        "runId": "30002879030",
+        "runAttempt": 1,
+    },
+    "observation": {
+        "id": "lab-services-publication-30002879030.1",
+        "artifactId": "8561772783",
+        "artifactName": "lab-service-publication-observation-30002879030-1",
+        "digest": (
+            "sha256:36fe99667ea6fe4ea8d019b28e10dc899804c4ebb7d8485149fbec83ba40d4bf"
+        ),
+        "publishedAt": "2026-07-23T11:24:13Z",
+    },
+    "signature": {
+        "type": "sigstore-keyless",
+        "certificateIdentity": (
+            "https://github.com/caglarsubas/"
+            "orchestra-openshift-reference-lab/.github/workflows/"
+            "lab-service-publication.yml@refs/heads/main"
+        ),
+        "issuer": "https://token.actions.githubusercontent.com",
+    },
+}
+EXPECTED_LAB_SERVICE_REPLAY = {
+    "policyDigest": (
+        "sha256:0607daa157b5a0a49284305d8216d6ecf98019eb25a5d48032c26bc09e050317"
+    ),
+    "workflow": {
+        "path": ".github/workflows/lab-service-publication-replay.yml",
+        "runId": "30006907539",
+        "runAttempt": 1,
+        "repositoryRevision": "79186ace0d8bfdc2ad378bff3be96c3653f24aa4",
+    },
+    "statement": {
+        "verificationId": "lab-services-publication-replay-30006907539.1",
+        "digest": (
+            "sha256:9480ed84fc9ea802f7fb6aeaf73912788b2764598685d269145cd642fcb13ab9"
+        ),
+        "verifiedAt": "2026-07-23T12:25:47Z",
+        "signed": False,
+        "independentHumanReview": False,
+    },
+}
+EXPECTED_LAB_SERVICE_CLAIMS = {
+    "separateWorkflowReplay": True,
+    "sourceArtifactsPublished": True,
+    "sourceTreeReplayed": True,
+    "registryDigestReplayed": True,
+    "embeddedSbomReplayed": True,
+    "provenanceReplayed": True,
+    "keylessSignatureReplayed": True,
+    "independentHumanReview": False,
+    "signedVerificationStatement": False,
+    "certificationRiskScan": False,
+    "harborMirrored": False,
+    "rhtasAdmissionVerified": False,
+    "gitOpsReferenced": False,
+    "deployed": False,
+    "campaignEvidence": False,
+    "referenceProfileVerified": False,
+    "customerCertified": False,
+    "redHatCertified": False,
+    "contractualSla": False,
+}
 
 
 def fail(code: str) -> NoReturn:
@@ -264,7 +339,37 @@ def validate_prerequisites(
 
 
 def validate_lab_services(value: dict[str, Any]) -> None:
-    if set(value) != {"schemaVersion", "services"} or value["schemaVersion"] != 1:
+    if (
+        set(value)
+        != {
+            "schemaVersion",
+            "sourcePublication",
+            "readOnlyReplay",
+            "claims",
+            "services",
+        }
+        or type(value["schemaVersion"]) is not int
+        or value["schemaVersion"] != 2
+        or value["sourcePublication"] != EXPECTED_LAB_SERVICE_PUBLICATION
+        or value["readOnlyReplay"] != EXPECTED_LAB_SERVICE_REPLAY
+        or not isinstance(value["claims"], dict)
+        or not all(type(claim) is bool for claim in value["claims"].values())
+        or value["claims"] != EXPECTED_LAB_SERVICE_CLAIMS
+    ):
+        fail("lab_services_shape_invalid")
+    publication = value["sourcePublication"]
+    replay = value["readOnlyReplay"]
+    if (
+        not isinstance(publication, dict)
+        or not isinstance(publication.get("workflow"), dict)
+        or type(publication["workflow"].get("runAttempt")) is not int
+        or not isinstance(replay, dict)
+        or not isinstance(replay.get("workflow"), dict)
+        or type(replay["workflow"].get("runAttempt")) is not int
+        or not isinstance(replay.get("statement"), dict)
+        or type(replay["statement"].get("signed")) is not bool
+        or type(replay["statement"].get("independentHumanReview")) is not bool
+    ):
         fail("lab_services_shape_invalid")
     services = value["services"]
     if not isinstance(services, list) or len(services) != 2:
@@ -274,9 +379,37 @@ def validate_lab_services(value: dict[str, Any]) -> None:
             "id": "release-validation-receiver",
             "owner": "tenant-ci-cd-or-gitops",
             "sourcePath": "services/release-validation-receiver",
-            "activation": "source-only",
-            "release": None,
-            "image": None,
+            "activation": "published",
+            "release": LAB_SERVICE_RELEASE,
+            "sourceTreeDigest": (
+                "sha256:80d73d0cddfab7af3bd7dcf5673145e6278b553876f13072e4804cf45ea17d83"
+            ),
+            "image": {
+                "repository": (
+                    "ghcr.io/caglarsubas/orchestra-lab-release-validation-receiver"
+                ),
+                "tag": LAB_SERVICE_TAG,
+                "digest": (
+                    "sha256:93dfd0b60b352526949c62dce2c3f34496e28317336a367ee78c7a6ffac123ef"
+                ),
+                "imageManifestDigest": (
+                    "sha256:cb541c3cdf19e0cb1754a4f8c53a37cbbf9ad5233c0259116a588b465e31c456"
+                ),
+                "attestationManifestDigest": (
+                    "sha256:8b74c0c2f6c6fc2dd81261aee49ca699357c2569163bdb9cc2e2bbf76a5c1754"
+                ),
+                "sbomDigest": (
+                    "sha256:53753b3362b57ec5d9a8c1b6f7d8e3c845931f18311f9350307d95dcf30bf059"
+                ),
+                "provenanceDigest": (
+                    "sha256:b52465cf62e8ec47412b7c6937dc8683c2621ec15c7b69a363311a4c8d6a18b6"
+                ),
+                "signatureSubject": (
+                    "ghcr.io/caglarsubas/"
+                    "orchestra-lab-release-validation-receiver@"
+                    "sha256:93dfd0b60b352526949c62dce2c3f34496e28317336a367ee78c7a6ffac123ef"
+                ),
+            },
             "gitOpsReferenced": False,
             "deploymentAuthority": "openshift-gitops",
             "platformHasDeploymentCredentials": False,
@@ -286,9 +419,36 @@ def validate_lab_services(value: dict[str, Any]) -> None:
             "id": "synthetic-tenant-kit",
             "owner": "reference-lab-operator",
             "sourcePath": "services/synthetic-tenant-kit",
-            "activation": "source-only",
-            "release": None,
-            "image": None,
+            "activation": "published",
+            "release": LAB_SERVICE_RELEASE,
+            "sourceTreeDigest": (
+                "sha256:7ed4945a3579350be343b08530dc5fa99a99f6d3c9466f3edd1e9caaa6fa10dd"
+            ),
+            "image": {
+                "repository": (
+                    "ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit"
+                ),
+                "tag": LAB_SERVICE_TAG,
+                "digest": (
+                    "sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69"
+                ),
+                "imageManifestDigest": (
+                    "sha256:640d358472d017afa5f36779e4da4e858395f6557b0cb40c21d9e42ee197b8ac"
+                ),
+                "attestationManifestDigest": (
+                    "sha256:af21b1e0a36990c542841cb20a84ad5e724b534db48a12273aa060fb111df8a4"
+                ),
+                "sbomDigest": (
+                    "sha256:c2a39d9aee5bb1032d6774a337d90ca769ebdb7c192db9c572616644bed022a8"
+                ),
+                "provenanceDigest": (
+                    "sha256:a957b169f23d8327c7ce4658def394c4a1c5c514e9907cede2391450582216ad"
+                ),
+                "signatureSubject": (
+                    "ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit@"
+                    "sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69"
+                ),
+            },
             "gitOpsReferenced": False,
             "deploymentAuthority": "openshift-gitops",
             "platformHasDeploymentCredentials": False,
@@ -303,7 +463,14 @@ def validate_lab_services(value: dict[str, Any]) -> None:
         fail("lab_service_shape_invalid")
     if services != expected:
         fail("lab_service_activation_invalid")
+    if canonical_digest(value) != EXPECTED_LAB_SERVICES_DIGEST:
+        fail("lab_services_digest_invalid")
     for service in services:
+        if (
+            type(service["gitOpsReferenced"]) is not bool
+            or type(service["platformHasDeploymentCredentials"]) is not bool
+        ):
+            fail("lab_service_activation_invalid")
         if not (ROOT / service["sourcePath"] / "Containerfile").is_file():
             fail("lab_service_source_missing")
         for directory in (

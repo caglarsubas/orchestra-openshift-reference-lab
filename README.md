@@ -38,9 +38,9 @@ environment/current-run approval verifier, a strict aggregate verifier for all
 six protected environments and the complete read-only platform-release GitHub
 App installation, an exact-main immutable GHCR publication lane for the two
 lab-owned services with pinned embedded SBOM/provenance and keyless signatures,
-a source-only
-durable release-validation receiver, and a source-only synthetic tenant kit. It
-does not contain a kubeconfig, provider
+a separately executed read-only publication replay, and digest-bound
+published-but-unadmitted receiver and synthetic tenant-kit inventories. It does
+not contain a kubeconfig, provider
 identity, OpenShift pull secret, live prerequisite observation, independent
 prerequisite review, live risk scan, approved source exception, live campaign,
 campaign evidence report, or completed soak. No declaration has been applied
@@ -227,8 +227,6 @@ exact workflow succeeded as run `30002879030` for release
 `a54ca86f2c7e4746b85110bb29052f836401ec9c`; its locally validated
 observation digest is
 `sha256:36fe99667ea6fe4ea8d019b28e10dc899804c4ebb7d8485149fbec83ba40d4bf`.
-The service inventory remains `source-only` until a separate read-only replay
-and reviewed digest intake complete.
 
 The lab service publication replay policy digest is
 `sha256:0607daa157b5a0a49284305d8216d6ecf98019eb25a5d48032c26bc09e050317`.
@@ -237,7 +235,10 @@ and private GHCR packages. It has no package-write, OIDC, image-signing, GitOps,
 or deployment authority. A valid statement replays the prior run/artifact,
 source trees, OCI indexes, embedded attestations, and keyless signatures while
 keeping human-review, admission, deployment, campaign, and certification
-claims false. The replay workflow has not run.
+claims false. Run `30006907539` completed that replay from exact-main revision
+`79186ace0d8bfdc2ad378bff3be96c3653f24aa4`. Its locally validated statement
+digest is
+`sha256:9480ed84fc9ea802f7fb6aeaf73912788b2764598685d269145cd642fcb13ab9`.
 
 Each GitHub WIF provider maps a provider-prefixed numeric
 repository/environment subject, and each service-account impersonation grant
@@ -259,16 +260,19 @@ Valkey/Sentinel, remain unresolved.
 
 Lab-owned service admission is locked separately in
 [`config/lab-services.lock.json`](config/lab-services.lock.json). The durable
-release-validation receiver and synthetic tenant kit remain `source-only`:
-neither lock entry has ingested the externally published `rc.1` release and
-image digests or gained a GitOps reference. Separate replay and reviewed intake
-must complete before that source truth changes.
+release-validation receiver and synthetic tenant kit are now `published`: the
+lock binds the exact `rc.1` release, source revision, source-tree digests, GHCR
+index and manifest digests, embedded SBOM/provenance descriptors, signature
+subjects, publication observation, and separate replay statement. They remain
+unmirrored, unadmitted, absent from GitOps, undeployed, and outside campaign
+evidence. The canonical inventory digest is
+`sha256:bcb33ebb8ff8d539780ed4fdfb728196744832491e5aa61ad714613d968a290e`.
 
 ## Layout
 
 | Path | Ownership |
 |---|---|
-| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission/GitOps candidate, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, prerequisite observation policy, operator control-plane readiness policy, and lab service publication policy |
+| `config/` | Independently locked topology, release set, certification contract intake, dependency BOM/admission/GitOps candidate, source observation, risk policy, empty exception/mirror intakes, prerequisite gates, prerequisite observation policy, operator control-plane readiness policy, lab service publication/replay policies, and published service inventory |
 | `contracts/platform/` | Exact platform-owned policy, schema bundle, and fixture bytes vendored from the pinned release revision; not campaign evidence |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, VPC/DNS peering, public delegation zone, evidence buckets, bastion, probes |

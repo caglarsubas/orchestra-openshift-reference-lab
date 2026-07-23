@@ -99,12 +99,18 @@ statement digests in the change review:
 make verify-lab-service-publication-replay REPORT=restricted/lab-service-publication-replay.json
 ```
 
-Only after this separate replay may a reviewed change move
+Only after a successful separate replay may a reviewed change move
 `config/lab-services.lock.json` from `source-only` to a digest-bound
 `published` state. That change must remove only the
 `published-signed-image` blocker. Harbor mirroring, certification risk review,
 RHTAS admission, GitOps reference, deployment, and campaign evidence remain
 separate later states.
+
+For `lab-services-v0.1.0-rc.1`, publication run `30002879030` and replay run
+`30006907539` completed this intake. The inventory binds replay-statement digest
+`sha256:9480ed84fc9ea802f7fb6aeaf73912788b2764598685d269145cd642fcb13ab9`.
+The replay statement is payload-free and unsigned, and it does not claim
+independent human review.
 
 ## Partial failure
 
