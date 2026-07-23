@@ -121,6 +121,19 @@ locals {
     "assertion.workflow_ref == '${local.foundation_plan_workflow_ref}'",
     "assertion.environment == '${local.foundation_plan_environment}'",
   ])
+  foundation_apply_environment  = "reference-lab-foundation-apply"
+  foundation_apply_workflow_ref = "${var.github_repository}/.github/workflows/foundation-apply.yml@refs/heads/main"
+  foundation_apply_subject      = "foundation-apply:${var.github_repository_id}:${local.foundation_apply_environment}"
+  foundation_apply_wif_condition = join(" && ", [
+    "assertion.repository == '${var.github_repository}'",
+    "assertion.repository_id == '${var.github_repository_id}'",
+    "assertion.repository_owner_id == '${var.github_repository_owner_id}'",
+    "assertion.repository_visibility == 'private'",
+    "assertion.ref == 'refs/heads/main'",
+    "assertion.event_name == 'workflow_dispatch'",
+    "assertion.workflow_ref == '${local.foundation_apply_workflow_ref}'",
+    "assertion.environment == '${local.foundation_apply_environment}'",
+  ])
   dependency_risk_preflight_environment  = "reference-lab-dependency-risk-preflight"
   dependency_risk_preflight_workflow_ref = "${var.github_repository}/.github/workflows/dependency-risk-preflight.yml@refs/heads/main"
   dependency_risk_preflight_subject      = "dependency-risk-preflight:${var.github_repository_id}:${local.dependency_risk_preflight_environment}"
@@ -279,6 +292,56 @@ resource "google_storage_bucket" "state" {
   depends_on = [google_kms_crypto_key_iam_member.state_storage_agent]
 }
 
+resource "google_kms_key_ring" "foundation_execution" {
+  project  = google_project.services.project_id
+  name     = "orchestra-lab-foundation-execution"
+  location = var.region
+
+  depends_on = [google_project_service.services]
+}
+
+resource "google_kms_crypto_key" "foundation_plan_signing" {
+  name     = "foundation-plan-signing"
+  key_ring = google_kms_key_ring.foundation_execution.id
+  purpose  = "ASYMMETRIC_SIGN"
+
+  version_template {
+    algorithm        = "EC_SIGN_P256_SHA256"
+    protection_level = "SOFTWARE"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_kms_crypto_key" "foundation_apply_receipt_signing" {
+  name     = "foundation-apply-receipt-signing"
+  key_ring = google_kms_key_ring.foundation_execution.id
+  purpose  = "ASYMMETRIC_SIGN"
+
+  version_template {
+    algorithm        = "EC_SIGN_P256_SHA256"
+    protection_level = "SOFTWARE"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "google_storage_managed_folder" "foundation_plans" {
+  bucket        = google_storage_bucket.state.name
+  name          = "foundation-plans/"
+  force_destroy = false
+}
+
+resource "google_storage_managed_folder" "foundation_apply_reports" {
+  bucket        = google_storage_bucket.state.name
+  name          = "foundation-apply-reports/"
+  force_destroy = false
+}
+
 resource "google_iam_workload_identity_pool" "github" {
   project                   = google_project.services.project_id
   workload_identity_pool_id = "orchestra-lab-github"
@@ -307,6 +370,32 @@ resource "google_iam_workload_identity_pool_provider" "github" {
     "attribute.workflow_ref"          = "assertion.workflow_ref"
   }
   attribute_condition = local.foundation_plan_wif_condition
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_iam_workload_identity_pool_provider" "foundation_apply" {
+  project                            = google_project.services.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
+  workload_identity_pool_provider_id = "foundation-apply"
+  display_name                       = "Foundation apply"
+  description                        = "Exact-main, reviewed saved-plan apply identity; no campaign authority."
+
+  attribute_mapping = {
+    "google.subject"                  = "'foundation-apply:' + assertion.repository_id + ':' + assertion.environment"
+    "attribute.actor_id"              = "assertion.actor_id"
+    "attribute.environment"           = "assertion.environment"
+    "attribute.event_name"            = "assertion.event_name"
+    "attribute.ref"                   = "assertion.ref"
+    "attribute.repository"            = "assertion.repository"
+    "attribute.repository_id"         = "assertion.repository_id"
+    "attribute.repository_owner_id"   = "assertion.repository_owner_id"
+    "attribute.repository_visibility" = "assertion.repository_visibility"
+    "attribute.workflow_ref"          = "assertion.workflow_ref"
+  }
+  attribute_condition = local.foundation_apply_wif_condition
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -405,6 +494,13 @@ resource "google_service_account" "foundation_planner" {
   description  = "Read-only Terraform planner. No key creation or apply permissions are permitted."
 }
 
+resource "google_service_account" "foundation_plan_packager" {
+  project      = google_project.services.project_id
+  account_id   = "orchestra-plan-packager"
+  display_name = "Orchestra foundation plan packager"
+  description  = "Short-lived plan signer and create-only package writer. No infrastructure or state permissions."
+}
+
 resource "google_service_account" "dependency_risk" {
   project      = google_project.services.project_id
   account_id   = "orchestra-dependency-risk"
@@ -430,6 +526,18 @@ resource "google_service_account_iam_member" "foundation_plan_wif" {
   service_account_id = google_service_account.foundation_planner.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_plan_subject}"
+}
+
+resource "google_service_account_iam_member" "foundation_plan_packager_wif" {
+  service_account_id = google_service_account.foundation_plan_packager.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_plan_subject}"
+}
+
+resource "google_service_account_iam_member" "foundation_apply_wif" {
+  service_account_id = google_service_account.foundation_executor.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_apply_subject}"
 }
 
 resource "google_service_account_iam_member" "dependency_risk_wif" {
@@ -475,6 +583,40 @@ resource "google_storage_bucket_iam_member" "foundation_planner_state" {
   bucket = google_storage_bucket.state.name
   role   = each.value
   member = "serviceAccount:${google_service_account.foundation_planner.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "foundation_plan_packager_signer" {
+  crypto_key_id = google_kms_crypto_key.foundation_plan_signing.id
+  role          = "roles/cloudkms.signerVerifier"
+  member        = "serviceAccount:${google_service_account.foundation_plan_packager.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "foundation_executor_plan_public_key" {
+  crypto_key_id = google_kms_crypto_key.foundation_plan_signing.id
+  role          = "roles/cloudkms.publicKeyViewer"
+  member        = "serviceAccount:${google_service_account.foundation_executor.email}"
+}
+
+resource "google_kms_crypto_key_iam_member" "foundation_executor_receipt_signer" {
+  crypto_key_id = google_kms_crypto_key.foundation_apply_receipt_signing.id
+  role          = "roles/cloudkms.signerVerifier"
+  member        = "serviceAccount:${google_service_account.foundation_executor.email}"
+}
+
+resource "google_storage_managed_folder_iam_member" "foundation_plan_packager_writer" {
+  bucket         = google_storage_bucket.state.name
+  managed_folder = google_storage_managed_folder.foundation_plans.name
+  role           = "roles/storage.objectCreator"
+  member         = "serviceAccount:${google_service_account.foundation_plan_packager.email}"
+}
+
+resource "google_storage_managed_folder_iam_member" "foundation_plan_reviewer" {
+  for_each = var.foundation_plan_reviewer_members
+
+  bucket         = google_storage_bucket.state.name
+  managed_folder = google_storage_managed_folder.foundation_plans.name
+  role           = "roles/storage.objectViewer"
+  member         = each.value
 }
 
 resource "google_billing_budget" "reference_lab" {

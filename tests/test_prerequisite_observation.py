@@ -259,14 +259,23 @@ class PrerequisiteObservationTests(unittest.TestCase):
                 "providers",
                 "describe",
             ]:
+                provider_id = command[5]
+                is_apply = provider_id == policy["gcp"]["wif"]["applyProviderId"]
                 output = {
-                    "name": "projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/providers/github",
+                    "name": (
+                        "projects/123456/locations/global/workloadIdentityPools/"
+                        f"orchestra-lab-github/providers/{provider_id}"
+                    ),
                     "state": "ACTIVE",
                     "oidc": {"issuerUri": policy["gcp"]["wif"]["issuerUri"]},
-                    "attributeCondition": policy["gcp"]["wif"]["attributeCondition"],
+                    "attributeCondition": policy["gcp"]["wif"][
+                        "applyAttributeCondition"
+                        if is_apply
+                        else "attributeCondition"
+                    ],
                     "attributeMapping": {
                         "google.subject": (
-                            "'github:' + assertion.repository_id + ':' + "
+                            f"'{provider_id}:' + assertion.repository_id + ':' + "
                             "assertion.environment"
                         ),
                         "attribute.actor_id": "assertion.actor_id",
@@ -303,8 +312,22 @@ class PrerequisiteObservationTests(unittest.TestCase):
                             }
                         ]
                     }
-                    if command[4].startswith("orchestra-lab-foundation-plan@")
-                    else {"bindings": []}
+                    if command[4].startswith(
+                        (
+                            "orchestra-lab-foundation-plan@",
+                            "orchestra-plan-packager@",
+                        )
+                    )
+                    else {
+                        "bindings": [
+                            {
+                                "role": "roles/iam.workloadIdentityUser",
+                                "members": [
+                                    "principal://iam.googleapis.com/projects/123456/locations/global/workloadIdentityPools/orchestra-lab-github/subject/foundation-apply:1307302690:reference-lab-foundation-apply"
+                                ],
+                            }
+                        ]
+                    }
                 )
             else:
                 raise AssertionError(f"unexpected_command:{command}")

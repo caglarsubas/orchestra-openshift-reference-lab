@@ -21,6 +21,7 @@ API_VERSION = "2026-03-10"
 GithubGetter = Callable[[str, str], Any]
 ENVIRONMENT_CONTRACTS = (
     "foundation-plan",
+    "foundation-apply",
     "dependency-risk-preflight",
     "dependency-risk-collection",
     "dependency-risk-custody-verification",
@@ -393,6 +394,18 @@ def load_expected_environment(contract: str) -> dict[str, Any]:
         policy, release_set = load_contract()
         validate_policy(policy, release_set)
         return policy["gcp"]["wif"]
+    if contract == "foundation-apply":
+        try:
+            from scripts.foundation_apply_execution import (
+                load_contract,
+                validate_authority,
+            )
+        except ModuleNotFoundError:
+            from foundation_apply_execution import load_contract, validate_authority
+
+        authority, release_set, policy = load_contract()
+        validate_authority(authority, release_set, policy)
+        return authority["applyFederation"]
     if contract == "dependency-risk-preflight":
         try:
             from scripts.dependency_risk_execution import (

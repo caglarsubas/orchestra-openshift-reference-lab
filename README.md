@@ -30,7 +30,10 @@ candidate, an atomic signed-runner scan collector and detached
 attestation verifier, a stage-aware prerequisite observation policy and
 payload-free read-only collector, gate-controlled product and dependency
 GitOps floors, an environment-bound read-only Terraform planning lane, a
-payload-free GitHub environment/current-run approval verifier, a source-only
+create-only signed saved-plan package lane, a private generation-pinned plan
+review helper, a separately federated saved-plan-only apply lane with signed
+self-attested receipts, a payload-free GitHub
+environment/current-run approval verifier, a source-only
 durable release-validation receiver, and a source-only synthetic tenant kit. It
 does not contain a kubeconfig, provider
 identity, OpenShift pull secret, live prerequisite observation, independent
@@ -165,11 +168,26 @@ environment protection, and workflow execution remain source declarations: no
 live identity, raw-custody verification, report publication, or downstream
 authorization is claimed.
 
-Each GitHub WIF provider now maps a provider-prefixed numeric
+The review-bound foundation-apply authority digest is
+`sha256:544c1a914120c31eeddb00437f739cbd15894d0c18bb393d2bc8b6e4a79dc1d2`.
+It separates the read-only planner, create-only `orchestra-plan-packager`,
+group-only private plan reviewers, and the exact-workflow apply executor. Plan
+packages and receipts use distinct asymmetric KMS keys, immutable
+generation-zero prefixes, and detached signatures uploaded last. Apply accepts
+only a generation-pinned, signature-verified, non-destructive saved plan from
+the exact current main revision, acquires the Terraform state lock, and checks
+state serial/lineage. The executor retains broad foundation and Artifact
+Registry authority, which the contract records honestly; the workflow forbids
+mirror commands but this is not an IAM denial. Terraform and workflows are
+source declarations only: no package, apply, receipt, independent observation,
+campaign evidence, or profile verification is claimed.
+
+Each GitHub WIF provider maps a provider-prefixed numeric
 repository/environment subject, and each service-account impersonation grant
 names that single subject. Repository-wide principal sets are rejected, so the
-foundation planner, preflight signer, collector, and custody verifier cannot
-cross-assume one another merely because they share a workload identity pool.
+foundation planner/packager, apply executor, preflight signer, collector, and
+custody verifier cannot cross-assume one another merely because they share a
+workload identity pool.
 
 The source-only dependency GitOps candidate digest is
 `sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
@@ -199,7 +217,7 @@ prerequisites are complete.
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for prerequisite observations, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for prerequisite observations, foundation plan/apply custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |
@@ -224,7 +242,8 @@ platform-owned certification contract intake, dependency BOM, fail-closed
 dependency admission, bounded signature observation, unsigned-source risk
 policy, empty exception intake, empty mirror intake, and source-only dependency
 GitOps candidate, plus the staged
-prerequisite observation policy. It rejects
+prerequisite observation policy and review-bound foundation-apply authority.
+It rejects
 mutable product tags, missing planes, an unbound runner, changed chart or image
 subjects, wildcard signing identities, silently
 omitted dependencies, populated approvals, self-review, stale evidence,

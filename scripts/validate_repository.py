@@ -378,6 +378,9 @@ def validate_foundation_plan_workflow() -> None:
         "persist-credentials: false",
         "FOUNDATION_PLAN_REVIEW_GATE_CONFIGURED",
         "GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT",
+        "GCP_FOUNDATION_PLAN_PACKAGER_SERVICE_ACCOUNT",
+        "plan_kms_key_version:",
+        "expected_plan_public_key_digest:",
         "github_environment_contract.py verify",
         "github-token",
         '--workflow-run-id "$GITHUB_RUN_ID"',
@@ -388,6 +391,8 @@ def validate_foundation_plan_workflow() -> None:
         "--execution-mode live",
         "foundation-plan.log",
         "foundation-plan-summary.json",
+        "publish_foundation_plan_package.sh",
+        "ENVIRONMENT_APPROVAL_DIGEST",
     )
     if any(fragment not in content for fragment in required):
         fail("foundation_plan_workflow_contract_invalid")
@@ -418,6 +423,25 @@ def validate_dependency_risk_preflight_workflow() -> None:
 
     authority, release_set, risk_policy = load_contract()
     validate_authority(authority, release_set, risk_policy)
+    validate_declared_implementation()
+
+
+def validate_foundation_apply_workflow() -> None:
+    try:
+        from scripts.foundation_apply_execution import (
+            load_contract,
+            validate_authority,
+            validate_declared_implementation,
+        )
+    except ModuleNotFoundError:
+        from foundation_apply_execution import (
+            load_contract,
+            validate_authority,
+            validate_declared_implementation,
+        )
+
+    authority, release_set, policy = load_contract()
+    validate_authority(authority, release_set, policy)
     validate_declared_implementation()
 
 
@@ -482,6 +506,7 @@ def main(argv: list[str] | None = None) -> int:
     validate_repository_safety(policy)
     validate_workflow_pins()
     validate_foundation_plan_workflow()
+    validate_foundation_apply_workflow()
     validate_dependency_risk_preflight_workflow()
     validate_dependency_risk_collection_workflow()
     validate_dependency_risk_custody_verification_workflow()

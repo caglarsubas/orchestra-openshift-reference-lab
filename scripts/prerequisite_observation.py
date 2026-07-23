@@ -25,7 +25,7 @@ TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:496471c4c7d35fba78c6e37acf82388099bc01b3485f9972d92056ab729aefda"
+    "sha256:7180d1007ead2bdc4ca3511235366e7c2e54425012f3a3db1b375f2785948b5e"
 )
 OBSERVATION_ID = re.compile(r"^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$")
 REASON_CODE = re.compile(r"^[A-Z][A-Z0-9_]+$")
@@ -289,6 +289,7 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
             "poolId",
             "providerId",
             "serviceAccountId",
+            "planPackagerServiceAccountId",
             "executorServiceAccountId",
             "executorFederated",
             "issuerUri",
@@ -303,6 +304,11 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
             "preventSelfReview",
             "deploymentBranch",
             "attributeCondition",
+            "applyProviderId",
+            "applyWorkflowRef",
+            "applyEnvironment",
+            "applySubject",
+            "applyAttributeCondition",
         },
         "prerequisite_observation_policy_wif_invalid",
     )
@@ -310,8 +316,9 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
         "poolId": "orchestra-lab-github",
         "providerId": "github",
         "serviceAccountId": "orchestra-lab-foundation-plan",
+        "planPackagerServiceAccountId": "orchestra-plan-packager",
         "executorServiceAccountId": "orchestra-lab-foundation",
-        "executorFederated": False,
+        "executorFederated": True,
         "issuerUri": "https://token.actions.githubusercontent.com",
         "repository": "caglarsubas/orchestra-openshift-reference-lab",
         "repositoryId": "1307302690",
@@ -338,6 +345,28 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
             "'caglarsubas/orchestra-openshift-reference-lab/"
             ".github/workflows/foundation-plan.yml@refs/heads/main' && "
             "assertion.environment == 'reference-lab-foundation-plan'"
+        ),
+        "applyProviderId": "foundation-apply",
+        "applyWorkflowRef": (
+            "caglarsubas/orchestra-openshift-reference-lab/"
+            ".github/workflows/foundation-apply.yml@refs/heads/main"
+        ),
+        "applyEnvironment": "reference-lab-foundation-apply",
+        "applySubject": (
+            "foundation-apply:1307302690:reference-lab-foundation-apply"
+        ),
+        "applyAttributeCondition": (
+            "assertion.repository == "
+            "'caglarsubas/orchestra-openshift-reference-lab' && "
+            "assertion.repository_id == '1307302690' && "
+            "assertion.repository_owner_id == '37515097' && "
+            "assertion.repository_visibility == 'private' && "
+            "assertion.ref == 'refs/heads/main' && "
+            "assertion.event_name == 'workflow_dispatch' && "
+            "assertion.workflow_ref == "
+            "'caglarsubas/orchestra-openshift-reference-lab/"
+            ".github/workflows/foundation-apply.yml@refs/heads/main' && "
+            "assertion.environment == 'reference-lab-foundation-apply'"
         ),
     }:
         fail("prerequisite_observation_policy_wif_invalid")

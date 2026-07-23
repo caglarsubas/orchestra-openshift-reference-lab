@@ -8,7 +8,8 @@ authorization digest, independent timing, and cleanup verification.
 |---|---|
 | Prerequisite verification | Implemented in `docs/prerequisites.md` |
 | Project/state bootstrap | Procedure implemented; live rehearsal pending |
-| Read-only foundation plan | Workflow and payload-free summary implemented; protected GitHub environment and live run pending |
+| Immutable foundation plan | Read-only planner, create-only signer/publisher, private generation-pinned review helper, strict package contract, and payload-free summary implemented; bootstrap/environment/live run pending |
+| Review-bound foundation apply | Separate exact-subject executor, saved-plan-only workflow, state-lock/lineage checks, and signed self-attested receipt implemented; secure review, live apply, and independent observation pending |
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
 | Split-horizon DNS and delegation | Procedure and Terraform contract implemented; live delegation pending |
 | Private OpenShift installation | Template delivered; live procedure pending gates |

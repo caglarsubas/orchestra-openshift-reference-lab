@@ -1,0 +1,283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/foundation-apply-receipt-v1.schema.json",
+  "title": "Orchestra reference-lab foundation apply receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "applyId",
+    "planId",
+    "bindings",
+    "source",
+    "planCustody",
+    "terraform",
+    "signer",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.reference-lab.foundation-apply-receipt.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "applyId": {
+      "type": "string",
+      "pattern": "^orchestra-foundation-apply-[1-9][0-9]*\\.[1-9][0-9]*$"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^orchestra-foundation-plan-[1-9][0-9]*\\.[1-9][0-9]*$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "source": {"$ref": "#/$defs/source"},
+    "planCustody": {"$ref": "#/$defs/planCustody"},
+    "terraform": {"$ref": "#/$defs/terraform"},
+    "signer": {"$ref": "#/$defs/signer"},
+    "claims": {"$ref": "#/$defs/claims"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "object": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "name",
+        "generation",
+        "metageneration",
+        "sizeBytes",
+        "crc32c",
+        "md5Hash",
+        "etag",
+        "contentDigest",
+        "timeCreated",
+        "updated"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "saved-plan",
+            "plan-summary",
+            "plan-signing-public-key",
+            "plan-package-statement",
+            "completion-marker"
+          ]
+        },
+        "name": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "generation": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "metageneration": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "sizeBytes": {"type": "integer", "minimum": 1},
+        "crc32c": {"type": "string", "pattern": "^[A-Za-z0-9+/]{6}==$"},
+        "md5Hash": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9+/]{22}==$"
+        },
+        "etag": {"type": "string", "minLength": 1, "maxLength": 256},
+        "contentDigest": {"$ref": "#/$defs/digest"},
+        "timeCreated": {"$ref": "#/$defs/timestamp"},
+        "updated": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "releaseSetDigest",
+        "prerequisitePolicyDigest",
+        "prerequisiteProjectionDigest",
+        "foundationApplyAuthorityDigest",
+        "planPackageSchemaDigest",
+        "applyReceiptSchemaDigest",
+        "planPackageStatementDigest",
+        "planDigest",
+        "planSummaryCanonicalDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "prerequisitePolicyDigest": {"$ref": "#/$defs/digest"},
+        "prerequisiteProjectionDigest": {"$ref": "#/$defs/digest"},
+        "foundationApplyAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "planPackageSchemaDigest": {"$ref": "#/$defs/digest"},
+        "applyReceiptSchemaDigest": {"$ref": "#/$defs/digest"},
+        "planPackageStatementDigest": {"$ref": "#/$defs/digest"},
+        "planDigest": {"$ref": "#/$defs/digest"},
+        "planSummaryCanonicalDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "revision",
+        "ref",
+        "workflowRef",
+        "environment",
+        "workflowRunId",
+        "workflowRunAttempt",
+        "environmentApprovalDigest",
+        "actorIdentityDigest",
+        "authorizationReasonDigest",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "repository": {"const": "caglarsubas/orchestra-openshift-reference-lab"},
+        "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "ref": {"const": "refs/heads/main"},
+        "workflowRef": {
+          "const": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-apply.yml@refs/heads/main"
+        },
+        "environment": {"const": "reference-lab-foundation-apply"},
+        "workflowRunId": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "workflowRunAttempt": {"const": "1"},
+        "environmentApprovalDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "authorizationReasonDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "planCustody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "managedFolder",
+        "objectCount",
+        "objects",
+        "completionMarkerObject",
+        "completionMarkerGeneration",
+        "planPackageSignatureVerified",
+        "exactPlanReplayed"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$"
+        },
+        "prefix": {
+          "type": "string",
+          "pattern": "^foundation-plans/v1/orchestra-ocp-4\\.20-amd64-v1/[a-f0-9]{40}/orchestra-foundation-plan-[1-9][0-9]*\\.[1-9][0-9]*$"
+        },
+        "managedFolder": {"const": "foundation-plans/"},
+        "objectCount": {"const": 5},
+        "objects": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/object"}
+        },
+        "completionMarkerObject": {"const": "foundation-plan-package-signature.sigstore.json"},
+        "completionMarkerGeneration": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "planPackageSignatureVerified": {"const": true},
+        "exactPlanReplayed": {"const": true}
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["present", "serial", "lineageDigest", "stateDigest"],
+      "properties": {
+        "present": {"type": "boolean"},
+        "serial": {"type": "integer", "minimum": 0},
+        "lineageDigest": {
+          "oneOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]
+        },
+        "stateDigest": {
+          "oneOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]
+        }
+      }
+    },
+    "actionCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["noOp", "create", "read", "update", "delete", "replace"],
+      "properties": {
+        "noOp": {"type": "integer", "minimum": 0},
+        "create": {"type": "integer", "minimum": 0},
+        "read": {"type": "integer", "minimum": 0},
+        "update": {"type": "integer", "minimum": 0},
+        "delete": {"const": 0},
+        "replace": {"const": 0}
+      }
+    },
+    "terraform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "stateLockUsed",
+        "lockTimeoutSeconds",
+        "applyExitCode",
+        "resourceChangeCount",
+        "actionCounts",
+        "stateBefore",
+        "stateAfter"
+      ],
+      "properties": {
+        "version": {"const": "1.14.6"},
+        "stateLockUsed": {"const": true},
+        "lockTimeoutSeconds": {"const": 300},
+        "applyExitCode": {"const": 0},
+        "resourceChangeCount": {"type": "integer", "minimum": 1},
+        "actionCounts": {"$ref": "#/$defs/actionCounts"},
+        "stateBefore": {"$ref": "#/$defs/state"},
+        "stateAfter": {"$ref": "#/$defs/state"}
+      }
+    },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "keyVersionResource",
+        "publicKeyDigest"
+      ],
+      "properties": {
+        "executionClass": {"const": "github-hosted-runner"},
+        "keyVersionResource": {
+          "type": "string",
+          "pattern": "^gcpkms://projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/locations/europe-west1/keyRings/orchestra-lab-foundation-execution/cryptoKeys/foundation-apply-receipt-signing/cryptoKeyVersions/[1-9][0-9]*$"
+        },
+        "publicKeyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exactReviewedPlanApplied",
+        "infrastructureApplied",
+        "receiptSelfAttested",
+        "independentlyObserved",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "exactReviewedPlanApplied": {"const": true},
+        "infrastructureApplied": {"const": true},
+        "receiptSelfAttested": {"const": true},
+        "independentlyObserved": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  }
+}

@@ -342,6 +342,16 @@ class GithubEnvironmentContractTests(unittest.TestCase):
     def test_default_foundation_environment_loader_is_unchanged(self) -> None:
         self.assertEqual(load_expected_environment("foundation-plan"), self.expected)
 
+    def test_foundation_apply_environment_uses_separate_authority(self) -> None:
+        expected = load_expected_environment("foundation-apply")
+        self.assertEqual(expected["environment"], "reference-lab-foundation-apply")
+        self.assertEqual(expected["providerId"], "foundation-apply")
+        self.assertEqual(
+            expected["subject"],
+            "foundation-apply:1307302690:reference-lab-foundation-apply",
+        )
+        self.assertNotEqual(expected["workflowRef"], self.expected["workflowRef"])
+
 
 if __name__ == "__main__":
     unittest.main()

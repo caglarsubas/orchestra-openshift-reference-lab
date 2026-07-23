@@ -29,7 +29,10 @@
 | Threat | Control |
 |---|---|
 | Static cloud credential disclosure | GitHub OIDC WIF, short-lived tokens, no service-account key resource, repository scan |
-| Arbitrary workflow obtains or cross-assumes a lab service account | Numeric repository/owner claims, exact workflow/ref/environment WIF condition, provider-prefixed subject mapping, single-subject impersonation grants, machine-checked current-run approval, separate read-only planner, and no executor WIF binding |
+| Arbitrary workflow obtains or cross-assumes a lab service account | Numeric repository/owner claims, exact workflow/ref/environment WIF conditions, provider-prefixed subject mapping, single-subject impersonation grants, machine-checked current-run approvals, and separate plan/apply providers |
+| Value-bearing saved plan leaks through Actions or broad reviewer access | Plan/log/JSON excluded from GitHub artifacts, private CMEK state bucket, create-only package publisher, group-only managed-folder viewer, restricted local review path, and explicit post-review deletion |
+| A substituted, stale, partial, destructive, or unreviewed plan is applied | Exact main/run/package ID and statement digest, five-object inventory, pre-download size limits, generation/metageneration-pinned downloads, last-marker ordering, detached signature, 24-hour age, replayed action summary, delete/replace rejection, and a separate current-run approval |
+| The apply executor upgrades its own receipt into independent evidence | Separate receipt key and prefix, strict `receiptSelfAttested: true` and `independentlyObserved: false`, no campaign claims, and mandatory post-apply read-only observation |
 | Preflight identity is reused for scanning, mirroring, or evidence mutation | Separate exact-workflow WIF provider, current-run non-owner approval, key-level signer role only, no project/bucket/mirror grant, short-lived release token, and a statically enforced `--preflight-only` workflow |
 | Full-collection identity overwrites, reads back, deletes, or promotes evidence | Separate exact-workflow WIF provider and current-run approval, no project role, key-level signer plus raw-bucket object-creator only, generation-zero uploads, detached signature uploaded last, and no signed-evidence or mirror grant |
 | Partial raw upload is mistaken for a completed collection | Unique evidence prefix, create-only writes, detached signature as the last completion marker, no success output after a failed marker upload, and later independent generation/signature verification |
@@ -77,6 +80,17 @@
   administrator-bypass toggle, so disabling bypass remains a manually reviewed
   Enterprise-environment precondition. Reruns are rejected because review
   history is run-scoped rather than attempt-scoped.
+- The foundation executor retains broad services-project roles, including
+  Artifact Registry and storage administration. Source validation forbids
+  mirror operations in the apply workflow, but this is not equivalent to an
+  IAM deny. Its receipt is therefore self-attested. A purpose-specific custom
+  executor role and an independently signed post-apply observation remain
+  hardening and readiness requirements.
+- Saved Terraform plans can contain sensitive values. The reviewer group and
+  apply executor can read private plan packages by design. Membership,
+  short-lived authentication, endpoint hygiene, review-directory deletion,
+  and access-log review are external operational controls; no plan package may
+  enter GitHub artifacts or campaign evidence.
 - IP allowlists do not provide domain-aware egress policy. A later proxy lane
   must pin domain/TLS destinations before the frozen campaign.
 - The declared GKE singleton Binary Authorization policy is not equivalent to
