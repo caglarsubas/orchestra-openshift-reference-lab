@@ -586,11 +586,15 @@ def observe_wif(
     planner_service_account = (
         f"{wif['serviceAccountId']}@{services_project}.iam.gserviceaccount.com"
     )
+    packager_service_account = (
+        f"{wif['planPackagerServiceAccountId']}@"
+        f"{services_project}.iam.gserviceaccount.com"
+    )
     executor_service_account = (
         f"{wif['executorServiceAccountId']}@{services_project}.iam.gserviceaccount.com"
     )
     try:
-        provider = run_json(
+        plan_provider = run_json(
             run,
             [
                 "gcloud",
@@ -599,6 +603,21 @@ def observe_wif(
                 "providers",
                 "describe",
                 wif["providerId"],
+                f"--workload-identity-pool={wif['poolId']}",
+                "--location=global",
+                f"--project={services_project}",
+                "--format=json",
+            ],
+        )
+        apply_provider = run_json(
+            run,
+            [
+                "gcloud",
+                "iam",
+                "workload-identity-pools",
+                "providers",
+                "describe",
+                wif["applyProviderId"],
                 f"--workload-identity-pool={wif['poolId']}",
                 "--location=global",
                 f"--project={services_project}",
@@ -614,6 +633,19 @@ def observe_wif(
                 "keys",
                 "list",
                 f"--iam-account={planner_service_account}",
+                f"--project={services_project}",
+                "--format=json",
+            ],
+        )
+        packager_keys = run_json(
+            run,
+            [
+                "gcloud",
+                "iam",
+                "service-accounts",
+                "keys",
+                "list",
+                f"--iam-account={packager_service_account}",
                 f"--project={services_project}",
                 "--format=json",
             ],
@@ -643,6 +675,18 @@ def observe_wif(
                 "--format=json",
             ],
         )
+        packager_iam_policy = run_json(
+            run,
+            [
+                "gcloud",
+                "iam",
+                "service-accounts",
+                "get-iam-policy",
+                packager_service_account,
+                f"--project={services_project}",
+                "--format=json",
+            ],
+        )
         executor_iam_policy = run_json(
             run,
             [
@@ -655,17 +699,29 @@ def observe_wif(
                 "--format=json",
             ],
         )
-        provider_name = provider.get("name", "")
-        expected_subject = (
+        plan_provider_name = plan_provider.get("name", "")
+        apply_provider_name = apply_provider.get("name", "")
+        expected_plan_subject = (
             f"{wif['providerId']}:{wif['repositoryId']}:{wif['environment']}"
         )
-        expected_member = (
-            f"principal://iam.googleapis.com/{provider_name.rsplit('/providers/', 1)[0]}"
-            f"/subject/{expected_subject}"
+        expected_plan_member = (
+            "principal://iam.googleapis.com/"
+            f"{plan_provider_name.rsplit('/providers/', 1)[0]}"
+            f"/subject/{expected_plan_subject}"
+        )
+        expected_apply_member = (
+            "principal://iam.googleapis.com/"
+            f"{apply_provider_name.rsplit('/providers/', 1)[0]}"
+            f"/subject/{wif['applySubject']}"
         )
         planner_bindings = (
             planner_iam_policy.get("bindings", [])
             if isinstance(planner_iam_policy, dict)
+            else []
+        )
+        packager_bindings = (
+            packager_iam_policy.get("bindings", [])
+            if isinstance(packager_iam_policy, dict)
             else []
         )
         executor_bindings = (
@@ -703,9 +759,16 @@ def observe_wif(
             return sorted(result)
 
         planner_federated = federated_members(planner_bindings)
+        packager_federated = federated_members(packager_bindings)
         executor_federated = federated_members(executor_bindings)
         planner_binding_exact = planner_federated == [
-            ("roles/iam.workloadIdentityUser", expected_member)
+            ("roles/iam.workloadIdentityUser", expected_plan_member)
+        ]
+        packager_binding_exact = packager_federated == [
+            ("roles/iam.workloadIdentityUser", expected_plan_member)
+        ]
+        executor_binding_exact = executor_federated == [
+            ("roles/iam.workloadIdentityUser", expected_apply_member)
         ]
 
         def user_managed_keys(keys: Any) -> list[Any]:
@@ -720,15 +783,19 @@ def observe_wif(
             )
 
         planner_user_keys = user_managed_keys(planner_keys)
+        packager_user_keys = user_managed_keys(packager_keys)
         executor_user_keys = user_managed_keys(executor_keys)
-        mapping = (
-            provider.get("attributeMapping", {}) if isinstance(provider, dict) else {}
+        plan_mapping = (
+            plan_provider.get("attributeMapping", {})
+            if isinstance(plan_provider, dict)
+            else {}
         )
-        expected_mapping = {
-            "google.subject": (
-                f"'{wif['providerId']}:' + assertion.repository_id + ':' + "
-                "assertion.environment"
-            ),
+        apply_mapping = (
+            apply_provider.get("attributeMapping", {})
+            if isinstance(apply_provider, dict)
+            else {}
+        )
+        expected_common_mapping = {
             "attribute.actor_id": "assertion.actor_id",
             "attribute.environment": "assertion.environment",
             "attribute.event_name": "assertion.event_name",
@@ -739,30 +806,64 @@ def observe_wif(
             "attribute.repository_visibility": "assertion.repository_visibility",
             "attribute.workflow_ref": "assertion.workflow_ref",
         }
+        expected_plan_mapping = {
+            "google.subject": (
+                f"'{wif['providerId']}:' + assertion.repository_id + ':' + "
+                "assertion.environment"
+            ),
+            **expected_common_mapping,
+        }
+        expected_apply_mapping = {
+            "google.subject": (
+                f"'{wif['applyProviderId']}:' + assertion.repository_id + ':' + "
+                "assertion.environment"
+            ),
+            **expected_common_mapping,
+        }
         valid = (
-            provider.get("state", "ACTIVE") == "ACTIVE"
-            and provider.get("oidc", {}).get("issuerUri") == wif["issuerUri"]
-            and provider.get("attributeCondition") == wif["attributeCondition"]
-            and mapping == expected_mapping
+            plan_provider.get("state", "ACTIVE") == "ACTIVE"
+            and apply_provider.get("state", "ACTIVE") == "ACTIVE"
+            and plan_provider.get("oidc", {}).get("issuerUri") == wif["issuerUri"]
+            and apply_provider.get("oidc", {}).get("issuerUri") == wif["issuerUri"]
+            and plan_provider.get("attributeCondition") == wif["attributeCondition"]
+            and apply_provider.get("attributeCondition")
+            == wif["applyAttributeCondition"]
+            and plan_mapping == expected_plan_mapping
+            and apply_mapping == expected_apply_mapping
             and planner_binding_exact
-            and not executor_federated
-            and wif["executorFederated"] is False
+            and packager_binding_exact
+            and executor_binding_exact
+            and wif["executorFederated"] is True
             and not planner_user_keys
+            and not packager_user_keys
             and not executor_user_keys
         )
         evidence = {
-            "providerIdentityDigest": payload_digest(provider_name),
+            "planProviderIdentityDigest": payload_digest(plan_provider_name),
+            "applyProviderIdentityDigest": payload_digest(apply_provider_name),
             "plannerServiceAccountIdentityDigest": payload_digest(
                 planner_service_account
+            ),
+            "planPackagerServiceAccountIdentityDigest": payload_digest(
+                packager_service_account
             ),
             "executorServiceAccountIdentityDigest": payload_digest(
                 executor_service_account
             ),
-            "conditionDigest": payload_digest(provider.get("attributeCondition")),
+            "planConditionDigest": payload_digest(
+                plan_provider.get("attributeCondition")
+            ),
+            "applyConditionDigest": payload_digest(
+                apply_provider.get("attributeCondition")
+            ),
             "plannerBindingExact": planner_binding_exact,
+            "planPackagerBindingExact": packager_binding_exact,
+            "executorBindingExact": executor_binding_exact,
             "plannerFederatedBindingCount": len(planner_federated),
+            "planPackagerFederatedBindingCount": len(packager_federated),
             "executorFederatedBindingCount": len(executor_federated),
             "plannerUserManagedKeyCount": len(planner_user_keys),
+            "planPackagerUserManagedKeyCount": len(packager_user_keys),
             "executorUserManagedKeyCount": len(executor_user_keys),
         }
     except (OSError, subprocess.SubprocessError, json.JSONDecodeError, ValueError):

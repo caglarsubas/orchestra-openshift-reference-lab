@@ -11,6 +11,14 @@ on:
         description: Bounded operator reason for generating the plan
         required: true
         type: string
+      plan_kms_key_version:
+        description: Exact enabled foundation-plan-signing KMS key version
+        required: true
+        type: string
+      expected_plan_public_key_digest:
+        description: Reviewed sha256 digest of the exact KMS public key
+        required: true
+        type: string
 
 permissions:
   actions: read
@@ -52,7 +60,10 @@ jobs:
           REVIEW_GATE_CONFIGURED: ${{ vars.FOUNDATION_PLAN_REVIEW_GATE_CONFIGURED }}
           WIF_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           PLAN_SERVICE_ACCOUNT: ${{ vars.GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT }}
+          PLAN_PACKAGER_SERVICE_ACCOUNT: ${{ vars.GCP_FOUNDATION_PLAN_PACKAGER_SERVICE_ACCOUNT }}
           STATE_BUCKET: ${{ vars.GCP_TERRAFORM_STATE_BUCKET }}
+          PLAN_KMS_KEY_VERSION: ${{ inputs.plan_kms_key_version }}
+          EXPECTED_PLAN_PUBLIC_KEY_DIGEST: ${{ inputs.expected_plan_public_key_digest }}
         run: |
           set -euo pipefail
           [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
@@ -60,13 +71,16 @@ jobs:
           [[ ${#PLAN_REASON} -ge 12 && ${#PLAN_REASON} -le 500 ]]
           [[ "$REVIEW_GATE_CONFIGURED" == "true" ]]
           for name in \
-            WIF_PROVIDER PLAN_SERVICE_ACCOUNT STATE_BUCKET \
+            WIF_PROVIDER PLAN_SERVICE_ACCOUNT PLAN_PACKAGER_SERVICE_ACCOUNT \
+            STATE_BUCKET \
             TF_VAR_target_project_id TF_VAR_services_project_id \
             TF_VAR_signed_evidence_bucket_name TF_VAR_raw_evidence_bucket_name \
             TF_VAR_bastion_source_image TF_VAR_probe_source_image \
             TF_VAR_probe_container_image TF_VAR_approved_egress_cidrs; do
             [[ -n "${!name:-}" ]] || { echo "required configuration missing: $name" >&2; exit 1; }
           done
+          [[ "$PLAN_KMS_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_PLAN_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
 
       - name: Check out reviewed main revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -91,11 +105,16 @@ jobs:
           umask 077
           [[ -n "$GITHUB_ENVIRONMENT_READ_TOKEN" ]]
           printf '%s' "$GITHUB_ENVIRONMENT_READ_TOKEN" > "$RUNNER_TEMP/github-token"
-          python3 scripts/github_environment_contract.py verify \
+          verification="$(python3 scripts/github_environment_contract.py verify \
             --token-file "$RUNNER_TEMP/github-token" \
             --workflow-run-id "$GITHUB_RUN_ID" \
             --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
-            --workflow-actor-id "$GITHUB_ACTOR_ID"
+            --workflow-actor-id "$GITHUB_ACTOR_ID")"
+          printf '%s\n' "$verification"
+          approval_digest="${verification#* digest=}"
+          approval_digest="${approval_digest%% *}"
+          [[ "$approval_digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "ENVIRONMENT_APPROVAL_DIGEST=$approval_digest" >> "$GITHUB_ENV"
 
       - name: Validate independently reviewed foundation admission
         env:
@@ -176,6 +195,39 @@ jobs:
             --output "$RUNNER_TEMP/foundation-plan-summary.json"
           python3 scripts/foundation_plan_summary.py validate \
             --summary "$RUNNER_TEMP/foundation-plan-summary.json"
+
+      - name: Authenticate as the create-only plan packager
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_FOUNDATION_PLAN_PACKAGER_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+
+      - name: Set up Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Publish immutable signed plan package
+        env:
+          STATE_BUCKET: ${{ vars.GCP_TERRAFORM_STATE_BUCKET }}
+          SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          PLAN_KMS_KEY_VERSION: ${{ inputs.plan_kms_key_version }}
+          EXPECTED_PLAN_PUBLIC_KEY_DIGEST: ${{ inputs.expected_plan_public_key_digest }}
+        run: |
+          set -euo pipefail
+          plan_id="orchestra-foundation-plan-$GITHUB_RUN_ID.$GITHUB_RUN_ATTEMPT"
+          signing_key="gcpkms://projects/$SERVICES_PROJECT_ID/locations/europe-west1/keyRings/orchestra-lab-foundation-execution/cryptoKeys/foundation-plan-signing/cryptoKeyVersions/$PLAN_KMS_KEY_VERSION"
+          scripts/publish_foundation_plan_package.sh \
+            --plan "$RUNNER_TEMP/foundation.tfplan" \
+            --summary "$RUNNER_TEMP/foundation-plan-summary.json" \
+            --state-bucket "$STATE_BUCKET" \
+            --plan-id "$plan_id" \
+            --signing-key "$signing_key" \
+            --expected-signing-public-key-digest "$EXPECTED_PLAN_PUBLIC_KEY_DIGEST" \
+            --environment-approval-digest "$ENVIRONMENT_APPROVAL_DIGEST"
 
       - name: Upload payload-free plan summary
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

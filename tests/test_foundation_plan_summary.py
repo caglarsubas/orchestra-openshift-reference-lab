@@ -148,7 +148,7 @@ class FoundationPlanSummaryTests(unittest.TestCase):
         self.assertIn("path: ${{ runner.temp }}/foundation-plan-summary.json", workflow)
         self.assertNotIn("path: ${{ runner.temp }}/foundation.tfplan", workflow)
 
-    def test_bootstrap_keeps_apply_identity_out_of_github_wif(self) -> None:
+    def test_bootstrap_uses_separate_exact_plan_and_apply_subjects(self) -> None:
         bootstrap = (ROOT / "infra" / "terraform" / "bootstrap" / "main.tf").read_text(
             encoding="utf-8"
         )
@@ -159,8 +159,12 @@ class FoundationPlanSummaryTests(unittest.TestCase):
             'resource "google_service_account_iam_member" "foundation_plan_wif"',
             bootstrap,
         )
-        self.assertNotIn(
-            'resource "google_service_account_iam_member" "foundation_wif"',
+        self.assertIn(
+            'resource "google_service_account_iam_member" "foundation_plan_packager_wif"',
+            bootstrap,
+        )
+        self.assertIn(
+            'resource "google_service_account_iam_member" "foundation_apply_wif"',
             bootstrap,
         )
         self.assertIn(
@@ -170,6 +174,15 @@ class FoundationPlanSummaryTests(unittest.TestCase):
         )
         self.assertIn(
             "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_plan_subject}",
+            bootstrap,
+        )
+        self.assertIn(
+            "principal://iam.googleapis.com/${google_iam_workload_identity_pool.github.name}/subject/${local.foundation_apply_subject}",
+            bootstrap,
+        )
+        self.assertIn(
+            '"google.subject"                  = "\'foundation-apply:\' + '
+            "assertion.repository_id + ':' + assertion.environment\"",
             bootstrap,
         )
         self.assertNotIn(

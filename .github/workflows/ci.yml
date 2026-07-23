@@ -78,6 +78,9 @@ jobs:
       - name: Validate staged prerequisite observation policy
         run: python3 scripts/validate_prerequisite_policy.py
 
+      - name: Validate review-bound foundation apply authority
+        run: python3 scripts/validate_foundation_apply_execution.py
+
       - name: Run contract tests
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
 

@@ -1,15 +1,22 @@
-# Read-only foundation plan runbook
+# Immutable foundation plan runbook
 
 This workflow previews the foundation against live GCP state. It cannot apply
 Terraform, write Terraform state, authorize an apply, satisfy a campaign slot,
-or verify the reference profile.
+or verify the reference profile. It may publish a signed saved-plan package
+for the separately reviewed apply lane.
 
-The bootstrap module separates two identities:
+The bootstrap module separates four boundaries:
 
 - `orchestra-lab-foundation-plan` has read-oriented project permissions and
   read-only access to the foundation state bucket.
+- `orchestra-plan-packager` can sign a package statement and create, but not
+  read or delete, objects under `foundation-plans/`. It has no state or project
+  role.
+- Approved `group:` reviewers can read only the private plan-package managed
+  folder for full value-bearing review.
 - `orchestra-lab-foundation` retains the permissions eventually required for
-  apply, but has no GitHub WIF binding in this phase.
+  apply and is federated only through the separate apply workflow and
+  environment.
 
 ## External GitHub environment gate
 
@@ -58,6 +65,7 @@ it must not be described as an API attestation of that toggle.
 |---|---|
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | Bootstrap output `workload_identity_provider` |
 | `GCP_FOUNDATION_PLAN_SERVICE_ACCOUNT` | Bootstrap output `foundation_plan_service_account` |
+| `GCP_FOUNDATION_PLAN_PACKAGER_SERVICE_ACCOUNT` | Bootstrap output `foundation_plan_packager_service_account` |
 | `GCP_TERRAFORM_STATE_BUCKET` | Bootstrap output `state_bucket` |
 | `GCP_TARGET_PROJECT_ID` | Exact dedicated OpenShift project |
 | `GCP_SERVICES_PROJECT_ID` | Exact services/evidence project |
@@ -100,7 +108,9 @@ that the deployed provider has these restrictions.
    gh workflow run foundation-plan.yml \
      --ref main \
      -f expected_main_sha="$revision" \
-     -f reason='Preview the independently reviewed foundation inputs'
+     -f reason='Preview the independently reviewed foundation inputs' \
+     -f plan_kms_key_version='<reviewed-version>' \
+     -f expected_plan_public_key_digest='sha256:<public-key-digest>'
    ```
 
 3. The protected-environment reviewer compares the revision, reason, gate
@@ -109,14 +119,20 @@ that the deployed provider has these restrictions.
    single approved event for this run to a configured non-owner reviewer who
    did not trigger the run. It then validates the repository and independently
    reviewed `foundation` gate before requesting a GCP token.
-5. Terraform refreshes live state with `-lock=false`. This avoids granting the
-   planner state-write authority; therefore the result is a preview and cannot
-   be promoted into an apply artifact.
-6. Download and validate only the seven-day
+5. Terraform refreshes live state with `-lock=false`. The planner cannot lock
+   or write state. A second identity then signs the package statement and
+   creates exactly five non-overwritable objects under the unique
+   `foundation-plans/` prefix. The detached signature is uploaded last.
+6. Download and validate the seven-day
    `foundation-plan-summary-<run>-<attempt>` artifact. It contains resource
    address digests, action classes, immutable bindings, and negative authority
    claims. Terraform's value-bearing plan output is withheld from Actions logs;
-   its log, plan JSON, and binary are removed and never uploaded.
+   its log, plan JSON, and binary are removed from the runner and never
+   uploaded to GitHub.
+7. The summary is not sufficient for full review. Follow
+   [`foundation-apply.md`](foundation-apply.md) to generation-pin, verify, and
+   render the private saved plan under ignored `restricted/` storage before
+   approving an apply.
 
 ## Review and failure handling
 
@@ -132,7 +148,7 @@ that the deployed provider has these restrictions.
   `workflow_dispatch` so it receives a new run ID and independent review.
 - Never rerun against a different main revision using the previous reason or
   summary.
-- A successful preview does not authorize infrastructure changes. A future
-  apply lane must use a separately federated executor, acquire the state lock,
-  bind an exact saved plan and digest, require independent approval, and emit a
-  distinct non-campaign execution report.
+- A successful package does not authorize infrastructure changes. Only the
+  separate apply workflow may consume it, after private full-plan review and a
+  new current-run approval. Its signed receipt is self-attested and remains
+  non-campaign evidence.

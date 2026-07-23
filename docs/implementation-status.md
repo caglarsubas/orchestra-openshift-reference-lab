@@ -12,6 +12,10 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Stage-aware payload-free prerequisite observation | Yes | Yes | No | No | No |
 | Project/API/state/KMS/WIF bootstrap | Yes | Yes | No | No | No |
 | Environment/current-review-bound read-only foundation plan | Yes | Yes | No | No | No |
+| Immutable signed saved-plan package and private review path | Yes | Yes | No | No | No |
+| Separately federated exact saved-plan foundation apply | Yes | Yes | No | No | No |
+| Signed self-attested foundation apply receipt | Yes | Yes | No | No | No |
+| Independent post-apply foundation observation | No | N/A | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
 | Public delegation zone and private DNS peering | Yes | Yes | No | No | No |
@@ -128,11 +132,13 @@ archive-traversal, report-tamper, invalid-report-signature, and
 failed-final-upload cases. This remains local source evidence: no Terraform
 resource or protected environment has been created, and no live raw prefix or
 signed custody report has been verified.
-All four GitHub providers now use distinct provider-prefixed subjects, and IAM
+All five GitHub providers use distinct provider-prefixed subjects, and IAM
 impersonation binds each service account to one exact subject instead of a
-repository-wide principal set. This removes cross-assumption between the
-foundation planner and the three dependency-risk authorities in the shared
-pool; the live bindings still require independent verification after apply.
+repository-wide principal set. The planner and create-only packager share only
+the exact plan subject; the executor uses the separate apply subject. This
+removes cross-assumption between foundation execution and the three
+dependency-risk authorities in the shared pool; the live bindings still
+require independent verification after apply.
 
 No live scan or human review is checked in, so no exception is approved. The
 mirror intake is intentionally empty. No destination mirror, lab
@@ -146,10 +152,11 @@ and requires external cert-manager issuance for the External Secrets webhook.
 CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
 
-The next dependency increment is bootstrap/foundation application and
-independent verification of all three dedicated WIF providers and service
-accounts, both exact key versions/public-key digests, managed-folder and bucket
-IAM, all three protected environments, and the GitHub App installation. The
+The next live increment is bootstrap/foundation application and independent
+verification of all five WIF providers, six service accounts, foundation and
+dependency-risk KMS versions/public-key digests, managed-folder and bucket IAM,
+all five protected environments, reviewer-group plan access, and the GitHub
+App installation. The
 protected launch preflight executes first; a successful result still does not
 start collection. A separately approved full-collection run may then publish
 only a completed raw prefix. A third approval runs the independent custody lane
@@ -189,11 +196,14 @@ claim that either resolution path works live. Those states require the
 foundation apply, external NS update, installer-created private zone, and the
 independent checks in the DNS runbook.
 
-The foundation planning lane now has a separate read-only service account,
-repository-ID/workflow/environment-bound WIF policy, machine-checked
-required-reviewer and exact-main environment configuration, current-run
-approval binding, a strict payload-free plan summary, and no `terraform apply`
-path. The required GitHub environment is not configured, the private repository
-does not yet have the Enterprise required-reviewer capability or a non-owner
-collaborator, the bootstrap has not been applied, and no live plan exists. The
-apply-capable service account has no GitHub WIF binding.
+The foundation execution lane is source-declared and CI-validated. A read-only
+planner produces a saved plan without locking state; a create-only identity
+signs and publishes an immutable five-object package; group-only reviewers can
+generation-pin, verify, and render the full value-bearing plan under ignored
+restricted storage; and a separate exact-workflow executor can apply only that
+non-destructive plan with state locking. It emits a distinct signed receipt
+whose contract explicitly remains self-attested and
+`independentlyObserved: false`. The required GitHub Enterprise environments,
+non-owner collaborator, reviewer group, bootstrap resources, KMS versions, and
+live prerequisite evidence do not exist in this source checkout. No live plan,
+apply, receipt, or independent post-apply observation exists.

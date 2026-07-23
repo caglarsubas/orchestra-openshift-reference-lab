@@ -92,3 +92,19 @@ variable "monthly_budget_usd" {
     error_message = "monthly_budget_usd must be an integer of at least 1000."
   }
 }
+
+variable "foundation_plan_reviewer_members" {
+  description = "Approved human groups allowed to read immutable foundation plan packages for review."
+  type        = set(string)
+
+  validation {
+    condition = (
+      length(var.foundation_plan_reviewer_members) >= 1
+      && alltrue([
+        for member in var.foundation_plan_reviewer_members :
+        can(regex("^group:[^@]+@[^@]+$", member))
+      ])
+    )
+    error_message = "At least one foundation plan reviewer is required, and every member must use group: IAM syntax."
+  }
+}

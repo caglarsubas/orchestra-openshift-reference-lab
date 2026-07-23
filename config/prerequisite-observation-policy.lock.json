@@ -212,8 +212,9 @@
       "poolId": "orchestra-lab-github",
       "providerId": "github",
       "serviceAccountId": "orchestra-lab-foundation-plan",
+      "planPackagerServiceAccountId": "orchestra-plan-packager",
       "executorServiceAccountId": "orchestra-lab-foundation",
-      "executorFederated": false,
+      "executorFederated": true,
       "issuerUri": "https://token.actions.githubusercontent.com",
       "repository": "caglarsubas/orchestra-openshift-reference-lab",
       "repositoryId": "1307302690",
@@ -225,7 +226,12 @@
       "reviewerType": "User",
       "preventSelfReview": true,
       "deploymentBranch": "main",
-      "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.repository_id == '1307302690' && assertion.repository_owner_id == '37515097' && assertion.repository_visibility == 'private' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch' && assertion.workflow_ref == 'caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main' && assertion.environment == 'reference-lab-foundation-plan'"
+      "attributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.repository_id == '1307302690' && assertion.repository_owner_id == '37515097' && assertion.repository_visibility == 'private' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch' && assertion.workflow_ref == 'caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main' && assertion.environment == 'reference-lab-foundation-plan'",
+      "applyProviderId": "foundation-apply",
+      "applyWorkflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-apply.yml@refs/heads/main",
+      "applyEnvironment": "reference-lab-foundation-apply",
+      "applySubject": "foundation-apply:1307302690:reference-lab-foundation-apply",
+      "applyAttributeCondition": "assertion.repository == 'caglarsubas/orchestra-openshift-reference-lab' && assertion.repository_id == '1307302690' && assertion.repository_owner_id == '37515097' && assertion.repository_visibility == 'private' && assertion.ref == 'refs/heads/main' && assertion.event_name == 'workflow_dispatch' && assertion.workflow_ref == 'caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-apply.yml@refs/heads/main' && assertion.environment == 'reference-lab-foundation-apply'"
     }
   },
   "dns": {

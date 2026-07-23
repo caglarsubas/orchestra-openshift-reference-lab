@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/foundation-plan-package-v1.schema.json",
+  "title": "Orchestra reference-lab foundation plan package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "planId",
+    "bindings",
+    "source",
+    "package",
+    "signer",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.reference-lab.foundation-plan-package.v1"},
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live"},
+    "planId": {
+      "type": "string",
+      "pattern": "^orchestra-foundation-plan-[1-9][0-9]*\\.[1-9][0-9]*$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "source": {"$ref": "#/$defs/source"},
+    "package": {"$ref": "#/$defs/package"},
+    "signer": {"$ref": "#/$defs/signer"},
+    "claims": {"$ref": "#/$defs/claims"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "topologyDigest",
+        "releaseSetDigest",
+        "prerequisitePolicyDigest",
+        "prerequisiteProjectionDigest",
+        "foundationApplyAuthorityDigest",
+        "foundationPlanSummarySchemaDigest",
+        "planPackageSchemaDigest"
+      ],
+      "properties": {
+        "topologyDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "prerequisitePolicyDigest": {"$ref": "#/$defs/digest"},
+        "prerequisiteProjectionDigest": {"$ref": "#/$defs/digest"},
+        "foundationApplyAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "foundationPlanSummarySchemaDigest": {"$ref": "#/$defs/digest"},
+        "planPackageSchemaDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "revision",
+        "ref",
+        "workflowRef",
+        "environment",
+        "workflowRunId",
+        "workflowRunAttempt",
+        "environmentApprovalDigest",
+        "actorIdentityDigest",
+        "authorizationReasonDigest"
+      ],
+      "properties": {
+        "repository": {"const": "caglarsubas/orchestra-openshift-reference-lab"},
+        "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "ref": {"const": "refs/heads/main"},
+        "workflowRef": {
+          "const": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/foundation-plan.yml@refs/heads/main"
+        },
+        "environment": {"const": "reference-lab-foundation-plan"},
+        "workflowRunId": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "workflowRunAttempt": {"const": "1"},
+        "environmentApprovalDigest": {"$ref": "#/$defs/digest"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "authorizationReasonDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "managedFolder",
+        "requiredObjectCount",
+        "planObject",
+        "planDigest",
+        "planSizeBytes",
+        "summaryObject",
+        "summaryDigest",
+        "summaryCanonicalDigest",
+        "summarySizeBytes",
+        "signingPublicKeyObject",
+        "statementObject",
+        "signatureObject",
+        "createOnly",
+        "signatureUploadedLast"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$"
+        },
+        "prefix": {
+          "type": "string",
+          "pattern": "^foundation-plans/v1/orchestra-ocp-4\\.20-amd64-v1/[a-f0-9]{40}/orchestra-foundation-plan-[1-9][0-9]*\\.[1-9][0-9]*$"
+        },
+        "managedFolder": {"const": "foundation-plans/"},
+        "requiredObjectCount": {"const": 5},
+        "planObject": {"const": "foundation.tfplan"},
+        "planDigest": {"$ref": "#/$defs/digest"},
+        "planSizeBytes": {"type": "integer", "minimum": 1, "maximum": 1073741824},
+        "summaryObject": {"const": "foundation-plan-summary.json"},
+        "summaryDigest": {"$ref": "#/$defs/digest"},
+        "summaryCanonicalDigest": {"$ref": "#/$defs/digest"},
+        "summarySizeBytes": {"type": "integer", "minimum": 1, "maximum": 16777216},
+        "signingPublicKeyObject": {"const": "foundation-plan-package-public-key.pem"},
+        "statementObject": {"const": "foundation-plan-package-statement.json"},
+        "signatureObject": {"const": "foundation-plan-package-signature.sigstore.json"},
+        "createOnly": {"const": true},
+        "signatureUploadedLast": {"const": true}
+      }
+    },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "keyVersionResource",
+        "publicKeyDigest",
+        "signedAt"
+      ],
+      "properties": {
+        "executionClass": {"const": "github-hosted-runner"},
+        "keyVersionResource": {
+          "type": "string",
+          "pattern": "^gcpkms://projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/locations/europe-west1/keyRings/orchestra-lab-foundation-execution/cryptoKeys/foundation-plan-signing/cryptoKeyVersions/[1-9][0-9]*$"
+        },
+        "publicKeyDigest": {"$ref": "#/$defs/digest"},
+        "signedAt": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewablePlanPackage",
+        "applyAuthorized",
+        "infrastructureApplied",
+        "independentlyObserved",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "reviewablePlanPackage": {"const": true},
+        "applyAuthorized": {"const": false},
+        "infrastructureApplied": {"const": false},
+        "independentlyObserved": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  }
+}

@@ -19,8 +19,9 @@
 ## Bootstrap apply
 
 1. Create `restricted/bootstrap.auto.tfvars.json` with non-secret project and
-   topology inputs. Keep the billing account input in the protected execution
-   environment rather than shell history.
+   topology inputs, including at least one approved `group:` entry in
+   `foundation_plan_reviewer_members`. Keep the billing account input in the
+   protected execution environment rather than shell history.
 2. Run repository validation and both Terraform validations.
 3. Produce a saved bootstrap plan under ignored `artifacts/`, record its
    digest, and obtain two-person approval.
@@ -38,6 +39,15 @@
    `google.subject`, and each service account grants impersonation only to that
    exact `principal://.../subject/...`. Reject a repository-wide
    `principalSet` binding.
+   Also verify the separate `foundation-apply` provider and
+   `orchestra-plan-packager` identity. The planner and packager share only the
+   exact plan-workflow subject; the executor accepts only the exact
+   apply-workflow subject. Confirm the packager has no project or state role,
+   can create but not read/delete `foundation-plans/`, and can sign only with
+   `foundation-plan-signing`. Confirm the approved reviewer groups have
+   read-only managed-folder access and no state access. Confirm the executor
+   can view the plan public key and sign only with
+   `foundation-apply-receipt-signing`.
 5. Configure the foundation GCS backend using the bootstrap outputs. Never
    migrate state to a local backend.
 6. Re-authenticate through WIF and prove the bootstrap credential is no longer
@@ -49,11 +59,15 @@
 
 1. Pin immutable bastion/probe OS images and probe container image.
 2. Review every egress CIDR and its business purpose. `0.0.0.0/0` is rejected.
-3. Configure the independently protected GitHub environment, then follow
-   `docs/runbooks/foundation-plan.md`. The plan identity must remain read-only,
-   use `certification_mode=false` and `lock_signed_evidence_bucket=false`, and
-   must not produce an apply artifact.
-4. Apply the reviewed plan, then prove no VM has an external IP, both flow-log
+3. Configure both independently protected GitHub environments, then follow
+   `docs/runbooks/foundation-plan.md` and
+   `docs/runbooks/foundation-apply.md`. The planner remains read-only; the
+   create-only packager publishes the private saved-plan package; the separate
+   executor applies only that exact package with
+   `certification_mode=false` and
+   `lock_signed_evidence_bucket=false`.
+4. Treat the signed apply receipt as self-attested execution custody. Use a
+   separate read-only identity to prove no VM has an external IP, both flow-log
    sinks receive traffic, the two probes are in distinct zones, GKE has
    exactly three standard nodes, the immutable `orchestra-bootstrap` Artifact
    Registry repository exists, VPC peering is active in both directions, the

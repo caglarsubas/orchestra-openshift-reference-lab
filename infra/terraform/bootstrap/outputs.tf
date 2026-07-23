@@ -18,6 +18,10 @@ output "workload_identity_provider" {
   value = google_iam_workload_identity_pool_provider.github.name
 }
 
+output "foundation_apply_workload_identity_provider" {
+  value = google_iam_workload_identity_pool_provider.foundation_apply.name
+}
+
 output "dependency_risk_workload_identity_provider" {
   value = google_iam_workload_identity_pool_provider.dependency_risk.name
 }
@@ -38,6 +42,10 @@ output "foundation_plan_service_account" {
   value = google_service_account.foundation_planner.email
 }
 
+output "foundation_plan_packager_service_account" {
+  value = google_service_account.foundation_plan_packager.email
+}
+
 output "dependency_risk_service_account" {
   value = google_service_account.dependency_risk.email
 }
@@ -52,13 +60,37 @@ output "dependency_risk_custody_verification_service_account" {
 
 output "foundation_identity_contract" {
   value = {
-    planner_service_account   = google_service_account.foundation_planner.email
-    planner_environment       = local.foundation_plan_environment
-    planner_workflow_ref      = local.foundation_plan_workflow_ref
-    planner_federated_subject = local.foundation_plan_subject
-    planner_state_access      = "read-only-without-lock"
-    executor_service_account  = google_service_account.foundation_executor.email
-    executor_federated        = false
+    planner_service_account       = google_service_account.foundation_planner.email
+    planner_environment           = local.foundation_plan_environment
+    planner_workflow_ref          = local.foundation_plan_workflow_ref
+    planner_federated_subject     = local.foundation_plan_subject
+    planner_state_access          = "read-only-without-lock"
+    plan_packager_service_account = google_service_account.foundation_plan_packager.email
+    plan_packager_state_access    = "none"
+    executor_service_account      = google_service_account.foundation_executor.email
+    executor_environment          = local.foundation_apply_environment
+    executor_workflow_ref         = local.foundation_apply_workflow_ref
+    executor_federated_subject    = local.foundation_apply_subject
+    executor_federated            = true
+  }
+}
+
+output "foundation_apply_execution_contract" {
+  value = {
+    plan_managed_folder                    = google_storage_managed_folder.foundation_plans.name
+    apply_report_managed_folder            = google_storage_managed_folder.foundation_apply_reports.name
+    plan_packager_project_roles            = []
+    plan_packager_object_create_only       = true
+    plan_packager_state_access             = false
+    plan_reviewer_members                  = sort(tolist(var.foundation_plan_reviewer_members))
+    plan_reviewer_package_read_only        = true
+    plan_reviewer_state_access             = false
+    executor_has_foundation_project_roles  = true
+    executor_has_artifact_mirror_authority = true
+    workflow_permits_artifact_mirroring    = false
+    plan_signing_key                       = google_kms_crypto_key.foundation_plan_signing.id
+    apply_receipt_signing_key              = google_kms_crypto_key.foundation_apply_receipt_signing.id
+    campaign_authority                     = false
   }
 }
 

@@ -19,7 +19,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
 | DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
-| WIF | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, plan workflow restriction, planner binding, and no user-managed key |
+| WIF | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, separate plan/apply workflow restrictions, exact planner/packager/executor bindings, and no user-managed key |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
 
@@ -43,7 +43,7 @@ as independent verification of its own outputs.
 
 The locked policy is
 `config/prerequisite-observation-policy.lock.json`; its canonical digest is
-`sha256:496471c4c7d35fba78c6e37acf82388099bc01b3485f9972d92056ab729aefda`.
+`sha256:7180d1007ead2bdc4ca3511235366e7c2e54425012f3a3db1b375f2785948b5e`.
 It requires a maximum 30-minute read-only collection window and expires an
 observation after 24 hours.
 
@@ -103,10 +103,12 @@ independent verification sequence.
 The foundation WIF gate has two required observations. The GitHub observation
 requires the exact private repository IDs, environment, non-owner reviewer,
 self-review prevention, and exact `main` deployment policy. The GCP observation
-requires the exact workflow/ref/event condition, provider-prefixed numeric
-repository/environment subject mapping, single-subject planner binding, and
-absence of user-managed keys. It also proves that the apply executor has no
-federated principal or user-managed key.
+requires both exact workflow/ref/event conditions, provider-prefixed numeric
+repository/environment subject mappings, single-subject planner and packager
+bindings for the plan workflow, the single-subject executor binding for the
+separate apply workflow, and absence of user-managed keys on all three service
+accounts. Managed-folder reviewer/package IAM and KMS key-level roles are
+separate foundation-apply checks; WIF success alone does not prove them.
 
 The standalone collector proves the environment configuration only because it
 is not executing inside an approved workflow run. The foundation-plan workflow
