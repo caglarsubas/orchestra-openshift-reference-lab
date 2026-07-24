@@ -62,7 +62,7 @@ TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_AUTHORITY_DIGEST = (
-    "sha256:6506655bee4b63e6636bb47211aceebf03ef0603aae5f398cd0c5fd7d3b9a524"
+    "sha256:5a8a47822df9010bdae994d64fcee0d30cccc07eb3e279af75f635492d4ea08f"
 )
 REPOSITORY = "caglarsubas/orchestra-openshift-reference-lab"
 REPOSITORY_ID = "1307302690"
