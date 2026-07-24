@@ -104,6 +104,23 @@ claim.
 Use a globally unique project ID and short-lived user access token. Keep state,
 plans, and rendered outputs under ignored `restricted/` storage:
 
+Before planning, inspect every project currently linked to the chosen billing
+account and confirm that the account can accept one more association:
+
+```bash
+gcloud billing projects list \
+  --billing-account="$(
+    gcloud billing accounts list \
+      --filter='displayName=agentic-hook-billing AND open=true' \
+      --format='value(name)'
+  )"
+```
+
+The list is an inventory, not proof of available quota. A billing account can
+still enforce a lower undisclosed project-association limit. If GCP reports
+`Cloud billing quota exceeded`, stop; do not move an existing project or use a
+different billing account implicitly.
+
 ```bash
 mkdir -p restricted/terraform/sno-trial
 
@@ -139,6 +156,28 @@ terraform -chdir=infra/terraform/sno-trial output -json \
 
 unset GOOGLE_OAUTH_ACCESS_TOKEN TF_VAR_billing_account TF_VAR_project_id
 ```
+
+If project creation succeeds but billing association fails, Terraform can
+retain the unbilled project shell in state. Verify that partial state before
+doing anything else:
+
+```bash
+terraform -chdir=infra/terraform/sno-trial state list
+gcloud projects describe '<disposable-project-id>'
+gcloud billing projects describe '<disposable-project-id>'
+```
+
+An unbilled shell with no enabled trial APIs, budget, DNS zone, or workloads
+incurs no trial infrastructure spend. Keep it only while requesting additional
+billing-project quota. After the quota is granted, discard the old saved plan,
+refresh credentials, generate and review a new plan, and apply that new plan.
+Alternatively, delete the shell through the explicit project-deletion path.
+
+For the Google quota request, request only one additional project, select
+`Paid Services`, and choose `Associating more projects with my billing
+account`. Explain that the project is a temporary single-node OpenShift
+engineering trial, has a `$75` alert ceiling, starts with no compute resources,
+and is destroyed after the bounded test window.
 
 The module supports projects outside a GCP organization because this
 engineering account currently has no visible organization parent. That is a

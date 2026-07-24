@@ -71,6 +71,8 @@ resource "google_project_service" "required" {
 }
 
 resource "google_billing_budget" "trial" {
+  provider = google.trial
+
   billing_account = var.billing_account
   display_name    = "Orchestra OpenShift SNO trial - ${google_project.trial.project_id}"
 
@@ -98,6 +100,8 @@ resource "google_billing_budget" "trial" {
 }
 
 resource "google_dns_managed_zone" "public_base_domain" {
+  provider = google.trial
+
   project = google_project.trial.project_id
 
   name          = "orchestra-ocp-sno-trial-public"
