@@ -7,7 +7,7 @@
     "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "prerequisitePolicyDigest": "sha256:7180d1007ead2bdc4ca3511235366e7c2e54425012f3a3db1b375f2785948b5e",
-    "foundationApplyAuthorityDigest": "sha256:6d658bc8cba37642dbca5bf7370c00dced6b1f312e71ad2c4f531101f2ab4d7d",
+    "foundationApplyAuthorityDigest": "sha256:04a0b003d99e45bb4ad3976002e4819ece5ec2abeb00a30963907b4fb6a809b6",
     "reportSchemaDigest": "sha256:3069b119579d2f96365675bbf0bd7b6af158b70733481af21b887e2f8bc50054",
     "reportModuleDigest": "sha256:9c979c4d7a8f0942e10ba88beb72123b74bf08bb7871abb54c7013936799c1b7",
     "observerAuthorityCollectorDigest": "sha256:50ff624d288e368eb424dd2cf69eaef7fa5e1625469c014aad6420dd6e25d0d8",
