@@ -59,25 +59,26 @@ provisioning.
 ## Cost-bounded SNO engineering trial
 
 The separate `orchestra-ocp-sno-trial-amd64-v1` profile provides a live,
-non-certifying path for the current Red Hat trial and a maximum `$200` monthly
-budget. It does not alter or weaken `orchestra-ocp-4.20-amd64-v1`.
+non-certifying path for the current Red Hat trial and a `$75` monthly budget
+alert ceiling. It does not alter or weaken `orchestra-ocp-4.20-amd64-v1`.
 
 - One OpenShift `4.20.27` `n2-standard-8` control-plane node in
   `europe-west1-b`, 150 GB `pd-balanced`, and zero workers.
 - No GKE dependency plane; only named single-replica engineering dependencies
   may be co-located on SNO.
-- A 24-hour operator lease is required before installer rendering, with no more
-  than 120 active node-hours per month.
-- Budget alerts fire at 50, 75, 90, and 100 percent. GCP budgets are alerts,
-  not hard spending caps, and the source lease does not automatically destroy
-  provider resources.
+- A maximum 12-hour operator lease is required before installer rendering,
+  with an 8-hour first-session recommendation and no more than 48 active
+  node-hours per month.
+- Budget alerts fire at 10, 25, 50, 75, 90, and 100 percent. GCP budgets are
+  alerts, not hard spending caps, and the source lease does not automatically
+  destroy provider resources.
 - All certification, HA, RPO/RTO, production-support, and SLA claims remain
   false. The profile has no allowed certification evidence slots.
 
 The locked trial contract is
 [`config/sno-trial.lock.json`](config/sno-trial.lock.json), with canonical
 digest
-`sha256:83b8a9142906b36cc9d3e289e61b0eb0f149f26e1ba3641dfb6dcdb8f53e9cd5`.
+`sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b`.
 The complete source-to-destroy procedure is in
 [`docs/runbooks/sno-trial.md`](docs/runbooks/sno-trial.md).
 
@@ -388,7 +389,7 @@ operator lease:
 python3 scripts/trial_lease.py create \
   --project-id '<ephemeral-trial-project>' \
   --operator-identity-digest 'sha256:<operator-identity-digest>' \
-  --hours 24 \
+  --hours 8 \
   --output restricted/trial-leases/current.json
 
 python3 scripts/render_sno_trial_install_config.py \
