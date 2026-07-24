@@ -199,6 +199,13 @@ jobs:
           terraform init -backend=false -input=false -lockfile=readonly
           terraform validate
 
+      - name: Validate cost-bounded trial module
+        working-directory: infra/terraform/sno-trial
+        run: |
+          terraform init -backend=false -input=false -lockfile=readonly
+          terraform validate
+          terraform test
+
       - name: Prove fixture prerequisites cannot enter ready state
         run: |
           if python3 scripts/validate_repository.py \

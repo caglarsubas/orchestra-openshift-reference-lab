@@ -308,6 +308,7 @@ evidence. The canonical inventory digest is
 | `contracts/platform/` | Exact platform-owned policy, schema bundle, and fixture bytes vendored from the pinned release revision; not campaign evidence |
 | `infra/terraform/bootstrap/` | Projects, APIs, state custody, KMS, WIF bootstrap |
 | `infra/terraform/foundation/` | Private networks, GKE, VPC/DNS peering, public delegation zone, evidence buckets, bastion, probes |
+| `infra/terraform/sno-trial/` | Isolated non-certifying trial project, APIs, `$75` budget, and public delegation zone |
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |

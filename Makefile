@@ -69,3 +69,6 @@ terraform-validate:
 	$(TERRAFORM) -chdir=infra/terraform/bootstrap validate
 	$(TERRAFORM) -chdir=infra/terraform/foundation init -backend=false -input=false
 	$(TERRAFORM) -chdir=infra/terraform/foundation validate
+	$(TERRAFORM) -chdir=infra/terraform/sno-trial init -backend=false -input=false
+	$(TERRAFORM) -chdir=infra/terraform/sno-trial validate
+	$(TERRAFORM) -chdir=infra/terraform/sno-trial test

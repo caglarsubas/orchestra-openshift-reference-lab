@@ -78,6 +78,7 @@ any certification campaign slot.
 | 12-hour maximum project-bound operator lease | Yes | Yes | No | No | Not eligible |
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
+| Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
 | GCP project, budget, DNS, and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
 | Minimal co-located trial dependencies | No | N/A | No | No | Not eligible |

@@ -94,6 +94,75 @@ not infer it by adding 60 days to a screenshot. An independent reviewer must
 inspect the restricted inputs before any production prerequisite gate can be
 projected as verified.
 
+## Create the disposable GCP foundation
+
+The isolated Terraform module creates only the disposable project, required
+APIs, project-scoped budget, and public delegation zone. It does not create a
+cluster, network, service-account key, parent-domain delegation, or evidence
+claim.
+
+Use a globally unique project ID and short-lived user access token. Keep state,
+plans, and rendered outputs under ignored `restricted/` storage:
+
+```bash
+mkdir -p restricted/terraform/sno-trial
+
+export GOOGLE_OAUTH_ACCESS_TOKEN="$(gcloud auth print-access-token)"
+export TF_VAR_billing_account="$(
+  gcloud billing accounts list \
+    --filter='displayName=agentic-hook-billing AND open=true' \
+    --format='value(name)'
+)"
+export TF_VAR_project_id='<globally-unique-disposable-project-id>'
+
+terraform -chdir=infra/terraform/sno-trial init -input=false
+terraform -chdir=infra/terraform/sno-trial plan \
+  -out=../../../restricted/terraform/sno-trial/foundation.tfplan
+terraform -chdir=infra/terraform/sno-trial show -no-color \
+  ../../../restricted/terraform/sno-trial/foundation.tfplan \
+  > restricted/terraform/sno-trial/foundation.txt
+```
+
+Review the plan before applying it. It must create one project, the locked API
+set, one project-filtered `$75` budget with six thresholds, and one public
+`ocp-lab.prometa.ai.` zone. It must not create compute instances, disks, load
+balancers, networks, credentials, or production-reference resources.
+
+Apply exactly the reviewed plan, capture only restricted output, and remove the
+short-lived environment values:
+
+```bash
+terraform -chdir=infra/terraform/sno-trial apply \
+  ../../../restricted/terraform/sno-trial/foundation.tfplan
+terraform -chdir=infra/terraform/sno-trial output -json \
+  > restricted/terraform/sno-trial/foundation-output.json
+
+unset GOOGLE_OAUTH_ACCESS_TOKEN TF_VAR_billing_account TF_VAR_project_id
+```
+
+The module supports projects outside a GCP organization because this
+engineering account currently has no visible organization parent. That is a
+trial-only concession and does not alter the production profile's organization
+and folder requirements.
+
+The budget is alerting, not a hard provider cap. The profile lease and explicit
+teardown remain the operational controls. `allow_project_delete` defaults to
+false so an ordinary Terraform destroy cannot delete the project before the
+OpenShift installer and residual-resource checks have completed.
+
+## Delegate the trial DNS zone
+
+Read the generated nameservers from the restricted Terraform output and
+delegate `ocp-lab.prometa.ai.` at the `prometa.ai` parent. Do not install until
+an external authoritative lookup returns the complete generated NS set:
+
+```bash
+dig +short NS ocp-lab.prometa.ai. | sort
+```
+
+The Terraform output proves only that the managed zone exists. The external
+lookup proves only delegation. Neither is certification evidence.
+
 ## Create and verify an operator lease
 
 Create a lease immediately before rendering:
@@ -167,9 +236,9 @@ in command history, workflow inputs, logs, or Git.
 10. Stop testing before the lease expires and begin teardown with enough time
     to reconcile failures.
 
-No source file currently provisions this trial automatically. Project, budget,
-DNS, installer execution, allowlisting, and teardown remain live operator
-steps until a separately reviewed trial Terraform lane is delivered.
+The Terraform module provisions the bounded project foundation only. DNS
+delegation, installer execution, source-IP allowlisting, cluster workloads,
+and teardown remain explicit live operator steps.
 
 ## Teardown and reconciliation
 
@@ -185,9 +254,11 @@ After destroy completes, independently query the project for remaining:
 - Service accounts, keys, IAM grants, and installer-created buckets.
 
 Delete or reconcile every residual resource, then delete the disposable project
-if policy allows. Close the lease with an operator note kept under
-`restricted/`; do not commit raw provider output. Budget alerts do not prove
-that teardown succeeded.
+if policy allows. Project deletion requires a final Terraform plan with
+`-var='allow_project_delete=true'`, reviewed only after the installer destroy
+and residual inventory are clean. Close the lease with an operator note kept
+under `restricted/`; do not commit raw provider output. Budget alerts do not
+prove that teardown succeeded.
 
 ## Allowed result wording
 
