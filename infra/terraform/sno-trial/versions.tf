@@ -8,11 +8,20 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "= 7.40.0"
+      version = "7.41.0"
     }
   }
 }
 
 provider "google" {
   region = var.region
+}
+
+provider "google" {
+  alias = "trial"
+
+  project               = var.project_id
+  region                = var.region
+  billing_project       = var.project_id
+  user_project_override = true
 }
