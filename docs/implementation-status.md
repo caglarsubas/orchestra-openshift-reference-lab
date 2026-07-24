@@ -74,8 +74,8 @@ any certification campaign slot.
 |---|---:|---:|---:|---:|---:|
 | Distinct non-certifying SNO profile and digest | Yes | Yes | No | No | Not eligible |
 | One 8-vCPU control-plane node, zero workers, 150 GB balanced disk | Yes | Yes | No | No | Not eligible |
-| `$200` alert ceiling and 120 active-hour limit | Yes | Yes | No | No | Not eligible |
-| 24-hour project-bound operator lease | Yes | Yes | No | No | Not eligible |
+| `$75` alert ceiling and 48 active-hour limit | Yes | Yes | No | No | Not eligible |
+| 12-hour maximum project-bound operator lease | Yes | Yes | No | No | Not eligible |
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | GCP project, budget, DNS, and source-IP allowlist | No | N/A | No | No | Not eligible |

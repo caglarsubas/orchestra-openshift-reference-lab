@@ -44,7 +44,7 @@ class SnoTrialProfileTests(unittest.TestCase):
             "prometa-orch-ocp-trial",
             f"sha256:{1:064x}",
             self.starts_at,
-            24,
+            8,
             "sno-trial-contract-test-001",
         )
 
@@ -80,7 +80,7 @@ class SnoTrialProfileTests(unittest.TestCase):
 
     def test_budget_or_claim_escalation_is_rejected(self) -> None:
         changed = copy.deepcopy(self.profile)
-        changed["guardrails"]["budget"]["monthlyUsd"] = 201
+        changed["guardrails"]["budget"]["monthlyUsd"] = 76
         with self.assertRaisesRegex(ValueError, "trial_guardrails_invalid"):
             validate_profile(changed, self.production)
         changed = copy.deepcopy(self.profile)
@@ -125,7 +125,8 @@ class SnoTrialProfileTests(unittest.TestCase):
             "prometa-orch-ocp-trial",
         )
         self.assertEqual(lease["profileDigest"], EXPECTED_TRIAL_DIGEST)
-        self.assertEqual(lease["maximumMonthlyBudgetUsd"], 200)
+        self.assertEqual(lease["maximumMonthlyBudgetUsd"], 75)
+        self.assertEqual(lease["maximumActiveHoursPerMonth"], 48)
         self.assertFalse(lease["certificationEligible"])
         self.assertFalse(lease["automaticProviderTeardown"])
 
@@ -141,7 +142,7 @@ class SnoTrialProfileTests(unittest.TestCase):
             validate_lease(
                 lease,
                 self.profile,
-                self.starts_at + timedelta(hours=24),
+                self.starts_at + timedelta(hours=8),
             )
 
     def test_lease_rejects_project_substitution_and_claim_escalation(self) -> None:
@@ -162,14 +163,14 @@ class SnoTrialProfileTests(unittest.TestCase):
                 self.starts_at + timedelta(hours=1),
             )
 
-    def test_lease_duration_is_capped_at_twenty_four_hours(self) -> None:
+    def test_lease_duration_is_capped_at_twelve_hours(self) -> None:
         with self.assertRaisesRegex(ValueError, "trial_lease_duration_invalid"):
             build_lease(
                 self.profile,
                 "prometa-orch-ocp-trial",
                 f"sha256:{1:064x}",
                 self.starts_at,
-                25,
+                13,
                 "sno-trial-contract-test-002",
             )
 

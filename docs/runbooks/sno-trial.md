@@ -38,12 +38,13 @@ This profile uses one `n2-standard-8` VM and 150 GB `pd-balanced` storage in
 resources. Actual GCP prices, taxes, network egress, DNS, load balancers,
 snapshots, and idle disks remain variable.
 
-The `$200` monthly budget is an alert threshold, not a provider-side hard cap.
+The `$75` monthly budget is an alert threshold, not a provider-side hard cap.
 The operational limits are:
 
-- GCP budget alerts at 50, 75, 90, and 100 percent.
-- No more than 120 active node-hours per month.
-- A maximum 24-hour lease for each install or test session.
+- GCP budget alerts at 10, 25, 50, 75, 90, and 100 percent.
+- No more than 48 active node-hours per month.
+- An 8-hour first-session recommendation and a maximum 12-hour lease for each
+  install or test session.
 - Explicit renewal and explicit teardown.
 - Project deletion only after `openshift-install destroy cluster` succeeds or
   an operator has reconciled every installer-owned resource.
@@ -60,7 +61,7 @@ Do not create a lease until all of these are true:
 4. One dedicated, disposable GCP project has billing enabled.
 5. Project quota supports a temporary bootstrap VM, one `n2-standard-8`,
    persistent disks, load balancers, forwarding rules, external IPs, and DNS.
-6. The project has a `$200` budget with the four locked alert thresholds.
+6. The project has a `$75` budget with the six locked alert thresholds.
 7. `ocp-lab.prometa.ai` is available for the `orchestra-trial` cluster DNS
    namespace.
 8. A Linux AMD64 administration host has short-lived GCP credentials. The
@@ -101,7 +102,7 @@ Create a lease immediately before rendering:
 python3 scripts/trial_lease.py create \
   --project-id '<ephemeral-trial-project>' \
   --operator-identity-digest 'sha256:<operator-identity-digest>' \
-  --hours 24 \
+  --hours 8 \
   --output restricted/trial-leases/current.json
 
 python3 scripts/trial_lease.py verify \

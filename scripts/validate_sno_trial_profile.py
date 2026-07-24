@@ -19,7 +19,7 @@ EXPECTED_PRODUCTION_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_TRIAL_DIGEST = (
-    "sha256:83b8a9142906b36cc9d3e289e61b0eb0f149f26e1ba3641dfb6dcdb8f53e9cd5"
+    "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b"
 )
 PROTECTED_PRODUCTION_PATHS = (
     ROOT / ".github" / "workflows",
@@ -178,14 +178,14 @@ def validate_profile(
         fail("trial_storage_invalid")
     if value["guardrails"] != {
         "budget": {
-            "monthlyUsd": 200,
-            "alertPercentages": [50, 75, 90, 100],
+            "monthlyUsd": 75,
+            "alertPercentages": [10, 25, 50, 75, 90, 100],
             "budgetIsHardCap": False,
-            "maxActiveHoursPerMonth": 120,
+            "maxActiveHoursPerMonth": 48,
         },
         "lease": {
             "requiredBeforeRender": True,
-            "maximumHours": 24,
+            "maximumHours": 12,
             "renewalRequiresOperatorAction": True,
             "expiredLeaseBlocksRender": True,
         },
