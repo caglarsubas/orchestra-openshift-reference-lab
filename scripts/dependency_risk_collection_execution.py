@@ -340,7 +340,7 @@ def validate_declared_implementation() -> None:
         "DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID",
         "operator_control_plane_readiness.py verify-app",
         "GITHUB_APP_INSTALLATION_DIGEST",
-        "actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349",
+        "actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1",
         "permission-contents: read",
         "permission-packages: read",
         "scripts/publish_dependency_risk_collection.sh",
