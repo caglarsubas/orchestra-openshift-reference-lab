@@ -21,6 +21,25 @@ mock_provider "google" {
   }
 }
 
+mock_provider "google" {
+  alias = "trial"
+
+  mock_resource "google_billing_budget" {
+    defaults = {
+      name = "billingAccounts/000000-000000-000000/budgets/mock"
+    }
+  }
+
+  mock_resource "google_dns_managed_zone" {
+    defaults = {
+      name_servers = [
+        "ns-cloud-a1.googledomains.com.",
+        "ns-cloud-a2.googledomains.com.",
+      ]
+    }
+  }
+}
+
 run "locked_cost_boundary" {
   command = plan
 
