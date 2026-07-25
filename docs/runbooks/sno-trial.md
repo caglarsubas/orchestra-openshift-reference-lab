@@ -173,6 +173,40 @@ billing-project quota. After the quota is granted, discard the old saved plan,
 refresh credentials, generate and review a new plan, and apply that new plan.
 Alternatively, delete the shell through the explicit project-deletion path.
 
+While the provider review is pending, collect a payload-free diagnostic instead
+of repeatedly planning or applying:
+
+```bash
+READINESS_ID=sno-readiness-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-readiness \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  QUOTA_REQUEST_STATUS=pending \
+  ASSESSMENT_ID="$READINESS_ID" \
+  OUTPUT="restricted/$READINESS_ID.json"
+
+make verify-sno-trial-readiness \
+  REPORT="restricted/$READINESS_ID.json"
+```
+
+The collector executes exactly three read-only operations: project describe,
+billing-project describe, and enabled-services list. It reduces the project
+number to a digest, drops billing-account identity and raw provider output, and
+binds the locked SNO profile plus the exact three-plane release set. Even when
+the quota status is `approved`, the report cannot authorize mutation, create a
+lease, produce campaign evidence, or reuse the old Terraform plan.
+The quota status is an operator-declared input because the three read-only
+commands do not observe Google's support-request workflow; independently check
+the approval message before changing it to `approved`.
+
+After Google approves the request, run the collector again with
+`QUOTA_REQUEST_STATUS=approved`. A valid result with detached billing reports
+`READY_FOR_FRESH_PLAN`; this means only that the old plan must be discarded and
+a new plan may enter operator review. It does not mean the plan was approved or
+applied. After applying the newly reviewed foundation plan, run the diagnostic
+again and separately verify the budget, DNS delegation, source CIDR, installer,
+pull secret, and active operator lease before creating any compute resource.
+
 For the Google quota request, request only one additional project, select
 `Paid Services`, and choose `Associating more projects with my billing
 account`. Explain that the project is a temporary single-node OpenShift

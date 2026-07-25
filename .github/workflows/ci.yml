@@ -45,6 +45,15 @@ jobs:
       - name: Validate locked topology and repository safety
         run: python3 scripts/validate_repository.py
 
+      - name: Prove pending SNO state cannot authorize cloud mutation
+        run: |
+          python3 scripts/sno_trial_readiness.py assess \
+            --snapshot tests/fixtures/sno-trial-cloud-pending.json \
+            --assessment-id sno-readiness-ci-pending.1 \
+            --output "${RUNNER_TEMP}/sno-trial-readiness.json"
+          python3 scripts/sno_trial_readiness.py verify \
+            --report "${RUNNER_TEMP}/sno-trial-readiness.json"
+
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 

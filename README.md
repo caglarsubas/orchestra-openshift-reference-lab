@@ -43,8 +43,9 @@ published-but-unadmitted receiver and synthetic tenant-kit inventories. It does
 not contain a kubeconfig, provider
 identity, OpenShift pull secret, live prerequisite observation, independent
 prerequisite review, live risk scan, approved source exception, live campaign,
-campaign evidence report, or completed soak. No declaration has been applied
-to a target, so the reference profile is not verified.
+campaign evidence report, or completed soak. No production-reference
+declaration has been applied to a target, so the reference profile is not
+verified.
 
 Hard gates are recorded in
 [`config/prerequisites.example.json`](config/prerequisites.example.json). A
@@ -81,6 +82,32 @@ digest
 `sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b`.
 The complete source-to-destroy procedure is in
 [`docs/runbooks/sno-trial.md`](docs/runbooks/sno-trial.md).
+
+As of the 2026-07-25 read-only observation, the disposable trial project shell
+`prometa-orch-sno-499235` is active, billing is detached, zero APIs are enabled,
+and the request for one additional billing-project association is pending
+Google review. The shell has no trial workloads, budget, or delegated DNS and
+does not constitute an applied SNO foundation. Re-run the payload-free
+readiness diagnostic before relying on this point-in-time statement:
+
+```bash
+READINESS_ID=sno-readiness-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-readiness \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  QUOTA_REQUEST_STATUS=pending \
+  ASSESSMENT_ID="$READINESS_ID" \
+  OUTPUT="restricted/$READINESS_ID.json"
+
+make verify-sno-trial-readiness \
+  REPORT="restricted/$READINESS_ID.json"
+```
+
+The diagnostic runs only read-only `gcloud` describe/list commands. It stores
+neither raw provider output nor billing-account identity and always reports
+`cloudMutationAuthorized: false`, `campaignEvidence: false`, and no
+certification slots. The quota-review status is explicitly operator-declared;
+it is not represented as a `gcloud` or Google attestation.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
@@ -312,7 +339,7 @@ evidence. The canonical inventory digest is
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for SNO readiness diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |
