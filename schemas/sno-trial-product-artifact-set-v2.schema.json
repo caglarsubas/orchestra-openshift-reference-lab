@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-product-artifact-set-v2.schema.json",
+  "title": "Orchestra OpenShift SNO trial three-plane product artifact set v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "artifactSetId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "completeness",
+    "bindings",
+    "artifacts",
+    "activation",
+    "controls",
+    "claims",
+    "artifactSetDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 2},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-product-artifact-set.v2"
+    },
+    "artifactSetId": {
+      "const": "orchestra-sno-trial-products-2026-07-25.3"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "source-observation"},
+    "completeness": {
+      "const": "published-three-plane-not-trial-admitted"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "artifacts": {
+      "type": "array",
+      "prefixItems": [
+        {"$ref": "#/$defs/platformArtifact"},
+        {"$ref": "#/$defs/runtimeArtifact"},
+        {"$ref": "#/$defs/modelArtifact"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "activation": {"$ref": "#/$defs/activation"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "artifactSetDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workloadCandidateDigest"],
+      "properties": {
+        "workloadCandidateDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "revision": {"$ref": "#/$defs/revision"}
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "digest",
+        "reference",
+        "platform",
+        "platformManifestDigest",
+        "variant"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+$"
+        },
+        "digest": {"$ref": "#/$defs/digest"},
+        "reference": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@sha256:[a-f0-9]{64}$"
+        },
+        "platform": {"const": "linux/amd64"},
+        "platformManifestDigest": {"$ref": "#/$defs/digest"},
+        "variant": {"const": "ubi9"}
+      }
+    },
+    "chart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "digest",
+        "reference",
+        "name",
+        "version",
+        "appVersion",
+        "packageDigest",
+        "trialValuesPath",
+        "trialValuesDigest"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+$"
+        },
+        "digest": {"$ref": "#/$defs/digest"},
+        "reference": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@sha256:[a-f0-9]{64}$"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]+$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-rc\\.[0-9]+)?$"
+        },
+        "appVersion": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-rc\\.[0-9]+)?$"
+        },
+        "packageDigest": {"$ref": "#/$defs/digest"},
+        "trialValuesPath": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9.-]+/values\\.openshift-sno-trial\\.yaml$"
+        },
+        "trialValuesDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow",
+        "workflowName",
+        "runId",
+        "runAttempt",
+        "runUrl",
+        "tag",
+        "signatureIdentity",
+        "oidcIssuer"
+      ],
+      "properties": {
+        "workflow": {
+          "type": "string",
+          "pattern": "^\\.github/workflows/[A-Za-z0-9_.-]+\\.yml$"
+        },
+        "workflowName": {"type": "string", "minLength": 1},
+        "runId": {"type": "integer", "minimum": 1},
+        "runAttempt": {"type": "integer", "minimum": 1},
+        "runUrl": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/actions/runs/[0-9]+$"
+        },
+        "tag": {"type": "string", "minLength": 1},
+        "signatureIdentity": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\\.github/workflows/[A-Za-z0-9_.-]+\\.yml@refs/(?:tags/.+|heads/main)$"
+        },
+        "oidcIssuer": {
+          "const": "https://token.actions.githubusercontent.com"
+        }
+      }
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "sourceOnly",
+        "publicReplayRequired",
+        "destinationMirrorVerified",
+        "liveClusterPullVerified",
+        "secretReferencesResolved",
+        "serverSideDryRunVerified",
+        "activationAuthorized"
+      ],
+      "properties": {
+        "state": {"const": "published-not-trial-admitted"},
+        "sourceOnly": {"const": true},
+        "publicReplayRequired": {"const": true},
+        "destinationMirrorVerified": {"const": false},
+        "liveClusterPullVerified": {"const": false},
+        "secretReferencesResolved": {"const": false},
+        "serverSideDryRunVerified": {"const": false},
+        "activationAuthorized": {"const": false}
+      }
+    },
+    "artifactBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plane",
+        "release",
+        "source",
+        "image",
+        "chart",
+        "publication",
+        "admission"
+      ],
+      "properties": {
+        "plane": {"type": "string"},
+        "release": {"type": "string", "minLength": 1},
+        "source": {"$ref": "#/$defs/source"},
+        "image": {"$ref": "#/$defs/image"},
+        "chart": {"$ref": "#/$defs/chart"},
+        "publication": {"$ref": "#/$defs/publication"},
+        "admission": {"$ref": "#/$defs/admission"}
+      }
+    },
+    "platformArtifact": {
+      "allOf": [
+        {"$ref": "#/$defs/artifactBase"},
+        {
+          "type": "object",
+          "properties": {"plane": {"const": "platform"}}
+        }
+      ]
+    },
+    "runtimeArtifact": {
+      "allOf": [
+        {"$ref": "#/$defs/artifactBase"},
+        {
+          "type": "object",
+          "properties": {"plane": {"const": "runtimeHost"}}
+        }
+      ]
+    },
+    "modelArtifact": {
+      "allOf": [
+        {"$ref": "#/$defs/artifactBase"},
+        {
+          "type": "object",
+          "properties": {"plane": {"const": "modelPlane"}}
+        }
+      ]
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reasonCodes"],
+      "properties": {
+        "state": {"const": "blocked"},
+        "reasonCodes": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "product-artifact-replay-review-missing"},
+            {"const": "destination-mirror-verification-missing"},
+            {"const": "live-cluster-pull-verification-missing"},
+            {"const": "operator-secret-and-ca-inputs-missing"},
+            {"const": "openshift-server-side-dry-run-missing"},
+            {"const": "provider-readiness-not-approved"}
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productionReleaseSetMutated",
+        "manifestsEmitted",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "productionReleaseSetMutated": {"const": false},
+        "manifestsEmitted": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {"type": "array", "maxItems": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false}
+      }
+    }
+  }
+}

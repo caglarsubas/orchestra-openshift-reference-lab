@@ -152,12 +152,12 @@ persistent volumes.
 Do not render or apply this file. It contains artifact observations and
 capacity assumptions, not Kubernetes resources. The production chart profiles
 cannot be reused because their replica and availability contracts differ.
-Before a future activation review, product owners must add explicit
-non-production SNO values, dependency owners must define direct
+Before a future activation review, dependency owners must define direct
 single-instance runtime contracts, and operators must resolve immutable Valkey
-and CPU model-backend artifacts by digest. Secret/TLS references, source
-admission, destination pull proofs, live allocatable capacity, calibration,
-and OpenShift server-side dry runs must also pass.
+and CPU model-backend artifacts by digest. The three product planes now expose
+source-only SNO values, but their registry replay, human admission, Secret/TLS
+references, destination pull proofs, live allocatable capacity, calibration,
+and OpenShift server-side dry runs must still pass.
 
 After a live cluster exists, compare the candidate reserve against
 `oc describe node` allocatable capacity and measured idle system usage. Any
@@ -165,10 +165,12 @@ resource, image, mode, storage, or blocker change requires a new candidate ID
 and digest. The current candidate always remains blocked and cannot produce
 campaign evidence.
 
-## Replay the published model-plane trial artifact
+## Replay the published three-plane trial artifacts
 
-The model-plane owner has published release `v0.1.11` and chart `0.1.3` with
-the source-only SNO values contract. The partial artifact set is locked in
+The platform, runtime, and model-plane owners publish independent UBI images
+and charts with source-only SNO values contracts. Their exact releases,
+sources, linux/amd64 image manifests, chart packages, and publication runs are
+locked in
 `config/sno-trial-product-artifacts.lock.json` without changing the production
 cross-plane release set:
 
@@ -176,23 +178,30 @@ cross-plane release set:
 make validate-sno-trial-product-artifacts
 ```
 
-After the lock is merged to `main`, dispatch
-`SNO trial product artifact replay` with the exact reviewed main SHA. The
-workflow reads the public release run and GHCR only. It requires the successful
-first-attempt tag workflow, verifies the UBI image and Helm chart keyless
-signatures and CycloneDX attestations, pulls the exact chart package, and
-checks the package digest plus the SNO values member digest. Its downloadable
-report contains no registry credentials, signature payloads, SBOM payloads,
-Secrets, or customer data.
+Create the `sno-trial-product-artifact-replay` GitHub environment and populate
+only its `SNO_ARTIFACT_READ_TOKEN` secret. The token must be dedicated to this
+replay and limited to package-read access across the three locked repositories;
+it receives no package-write, signing, OIDC, deployment, or cloud authority.
+The environment and secret are operator state and never enter Git.
 
-A successful replay proves only that this one public model-plane artifact
-matches its source and signed publication. An operator must review and accept
-the payload-free report in a later admission step; the workflow cannot mutate
-the lock or admit the artifact. The artifact set remains `partial` and
-activation remains blocked while platform/runtime SNO profiles,
-destination mirror and live cluster pulls, operator Secret/CA inputs,
-OpenShift server-side dry runs, and provider readiness are absent. It is not
-installation, campaign, reference-profile, customer, Red Hat, or SLA evidence.
+After the lock is merged to `main`, dispatch `SNO trial product artifact
+replay` with the exact reviewed main SHA. The workflow requires each exact
+successful tag publication attempt pinned by the lock. Platform and model
+artifacts bind attempt 1; runtime binds attempt 1 of run `30171938726` after
+publication and verification with the supported Cosign v3 toolchain. The
+workflow verifies every UBI image and Helm chart
+keyless signature and CycloneDX attestation, checks the exact linux/amd64 child
+manifest, pulls each chart package, and validates both package and SNO values
+member digests. Its downloadable report contains no registry credentials,
+signature payloads, SBOM payloads, Secrets, or customer data.
+
+A successful replay proves only that the three locked artifacts match their
+sources and signed publications. An operator must review and accept the
+payload-free report in a later admission step; the workflow cannot mutate the
+lock or admit an artifact. Activation remains blocked while destination mirror
+and live-cluster pulls, operator Secret/CA inputs, OpenShift server-side dry
+runs, and provider readiness are absent. It is not installation, campaign,
+reference-profile, customer, Red Hat, or SLA evidence.
 
 ## Record the Red Hat trial without identity payload
 

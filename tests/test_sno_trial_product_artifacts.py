@@ -16,6 +16,7 @@ from scripts.sno_trial_product_artifacts import (
     CANDIDATE_PATH,
     CLAIMS,
     CONTROLS,
+    EXPECTED_PLANES,
     LOCK_PATH,
     REPORT_CONTROLS,
     REPORT_EXECUTION_MODE,
@@ -43,11 +44,19 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
     def setUp(self) -> None:
         self.lock = load_json(LOCK_PATH)
         self.candidate = load_json(CANDIDATE_PATH)
-        self.artifact = self.lock["artifacts"][0]
+        self.artifacts = self.lock["artifacts"]
+        self.model_artifact = self.artifacts[-1]
 
-    def test_lock_is_valid_partial_and_non_authorizing(self) -> None:
+    def test_lock_is_three_plane_and_non_authorizing(self) -> None:
         validate_lock(self.lock, self.candidate)
-        self.assertEqual(self.lock["completeness"], "partial")
+        self.assertEqual(
+            self.lock["completeness"],
+            "published-three-plane-not-trial-admitted",
+        )
+        self.assertEqual(
+            tuple(artifact["plane"] for artifact in self.artifacts),
+            EXPECTED_PLANES,
+        )
         self.assertEqual(
             self.lock["artifactSetDigest"],
             unsigned_digest(self.lock, "artifactSetDigest"),
@@ -62,48 +71,59 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         self.assertFalse(self.lock["controls"]["cloudMutationAuthorized"])
         self.assertFalse(self.lock["controls"]["deploymentAuthorized"])
 
+    def test_lock_requires_exact_unique_plane_order(self) -> None:
+        for artifacts in (
+            list(reversed(self.artifacts)),
+            self.artifacts[:2],
+            [self.artifacts[0], self.artifacts[0], self.artifacts[2]],
+        ):
+            with self.subTest(planes=[item["plane"] for item in artifacts]):
+                changed = copy.deepcopy(self.lock)
+                changed["artifacts"] = copy.deepcopy(artifacts)
+                changed["artifactSetDigest"] = unsigned_digest(
+                    changed, "artifactSetDigest"
+                )
+                with self.assertRaisesRegex(
+                    ValueError, "artifacts_invalid|release_invalid"
+                ):
+                    validate_lock(changed, self.candidate)
+
     def test_lock_does_not_mutate_production_release_lineage(self) -> None:
         release_set = load_json(ROOT / "config" / "cross-plane-release-set.lock.json")
-        model = next(
-            item for item in release_set["planes"] if item["plane"] == "modelPlane"
-        )
-        self.assertEqual(model["release"], "v0.1.10")
-        self.assertNotEqual(
-            model["deploymentImage"],
-            self.artifact["image"]["reference"],
-        )
+        production = {item["plane"]: item for item in release_set["planes"]}
+        for artifact in self.artifacts:
+            with self.subTest(plane=artifact["plane"]):
+                self.assertNotEqual(
+                    production[artifact["plane"]]["deploymentImage"],
+                    artifact["image"]["reference"],
+                )
 
     def test_source_image_chart_and_publication_drift_fail_closed(self) -> None:
         changes = [
             ("source", "revision", "f" * 40, "source_invalid"),
-            (
-                "image",
-                "digest",
-                f"sha256:{1:064x}",
-                "image_invalid",
-            ),
-            (
-                "chart",
-                "version",
-                "0.1.4",
-                "chart_invalid",
-            ),
-            (
-                "publication",
-                "runAttempt",
-                2,
-                "publication_invalid",
-            ),
+            ("image", "digest", f"sha256:{1:064x}", "image_invalid"),
+            ("chart", "version", "99.0.0", "chart_invalid"),
         ]
-        for section, field, value, code in changes:
-            with self.subTest(section=section, field=field):
-                changed = copy.deepcopy(self.lock)
-                changed["artifacts"][0][section][field] = value
-                changed["artifactSetDigest"] = unsigned_digest(
-                    changed, "artifactSetDigest"
+        for artifact_index, artifact in enumerate(self.artifacts):
+            artifact_changes = changes + [
+                (
+                    "publication",
+                    "runAttempt",
+                    artifact["publication"]["runAttempt"] + 1,
+                    "publication_invalid",
                 )
-                with self.assertRaisesRegex(ValueError, code):
-                    validate_lock(changed, self.candidate)
+            ]
+            for section, field, value, code in artifact_changes:
+                with self.subTest(
+                    plane=artifact["plane"], section=section, field=field
+                ):
+                    changed = copy.deepcopy(self.lock)
+                    changed["artifacts"][artifact_index][section][field] = value
+                    changed["artifactSetDigest"] = unsigned_digest(
+                        changed, "artifactSetDigest"
+                    )
+                    with self.assertRaisesRegex(ValueError, code):
+                        validate_lock(changed, self.candidate)
 
     def test_admission_activation_controls_and_claims_cannot_escalate(self) -> None:
         changes = [
@@ -139,9 +159,12 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "digest_mismatch"):
             validate_lock(changed, self.candidate)
 
-    def test_publication_origin_requires_exact_successful_first_attempt(self) -> None:
-        publication = self.artifact["publication"]
-        source = self.artifact["source"]
+    def test_publication_origin_requires_exact_repository_and_attempt(
+        self,
+    ) -> None:
+        artifact = self.artifacts[0]
+        publication = artifact["publication"]
+        source = artifact["source"]
         response = {
             "id": publication["runId"],
             "run_attempt": 1,
@@ -158,21 +181,54 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
             command: list[str], cwd: Path | None
         ) -> subprocess.CompletedProcess[str]:
             self.assertIsNone(cwd)
+            self.assertIn(f"repos/{source['repository']}/actions/runs/", command[-1])
             return completed(command, json.dumps(response))
 
-        result = verify_publication_run(self.artifact, run)
+        result = verify_publication_run(artifact, run)
         self.assertEqual(result["conclusion"], "success")
 
         response["run_attempt"] = 2
         with self.assertRaisesRegex(ValueError, "publication_origin_invalid"):
-            verify_publication_run(self.artifact, run)
+            verify_publication_run(artifact, run)
+
+    def test_dispatched_publication_binds_main_and_exact_source_tag(
+        self,
+    ) -> None:
+        artifact = self.artifacts[1]
+        publication = artifact["publication"]
+        source = artifact["source"]
+        response = {
+            "id": publication["runId"],
+            "run_attempt": publication["runAttempt"],
+            "event": "workflow_dispatch",
+            "status": "completed",
+            "conclusion": "success",
+            "head_branch": "main",
+            "head_sha": source["revision"],
+            "path": publication["workflow"],
+            "html_url": publication["runUrl"],
+        }
+
+        def run(
+            command: list[str], cwd: Path | None
+        ) -> subprocess.CompletedProcess[str]:
+            self.assertIsNone(cwd)
+            return completed(command, json.dumps(response))
+
+        result = verify_publication_run(artifact, run)
+        self.assertEqual(result["tag"], "v0.18.7")
+
+        response["head_sha"] = "f" * 40
+        with self.assertRaisesRegex(ValueError, "publication_origin_invalid"):
+            verify_publication_run(artifact, run)
 
     def test_signature_requires_exact_repository_digest_and_workflow_claims(
         self,
     ) -> None:
-        image = self.artifact["image"]
-        source = self.artifact["source"]
-        publication = self.artifact["publication"]
+        artifact = self.artifacts[0]
+        image = artifact["image"]
+        source = artifact["source"]
+        publication = artifact["publication"]
         signature = [
             {
                 "critical": {
@@ -202,7 +258,30 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
             publication,
             run,
         )
-        signature[0]["critical"]["image"]["docker-manifest-digest"] = f"sha256:{4:064x}"
+        signature[0]["critical"]["identity"]["docker-reference"] = image["reference"]
+        signature[0]["optional"] = {}
+        verify_signature(
+            image["reference"],
+            image["repository"],
+            image["digest"],
+            source,
+            publication,
+            run,
+        )
+        signature[0]["critical"]["identity"]["docker-reference"] = "wrong/reference"
+        with self.assertRaisesRegex(ValueError, "signature_claims_invalid"):
+            verify_signature(
+                image["reference"],
+                image["repository"],
+                image["digest"],
+                source,
+                publication,
+                run,
+            )
+        signature[0]["critical"]["identity"]["docker-reference"] = image["repository"]
+        signature[0]["optional"] = {
+            "githubWorkflowRepository": "wrong/repository"
+        }
         with self.assertRaisesRegex(ValueError, "signature_claims_invalid"):
             verify_signature(
                 image["reference"],
@@ -214,7 +293,7 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
             )
 
     def test_image_index_requires_exact_single_amd64_manifest(self) -> None:
-        image = self.artifact["image"]
+        image = self.artifacts[0]["image"]
         index = {
             "mediaType": "application/vnd.oci.image.index.v1+json",
             "manifests": [
@@ -241,8 +320,8 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
             verify_image_index(image, run)
 
     def test_attestation_requires_cyclonedx_subject_digest(self) -> None:
-        image = self.artifact["image"]
-        publication = self.artifact["publication"]
+        image = self.artifacts[0]["image"]
+        publication = self.artifacts[0]["publication"]
         statement = {
             "predicateType": "https://cyclonedx.org/bom",
             "subject": [
@@ -257,9 +336,7 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
             command: list[str], cwd: Path | None
         ) -> subprocess.CompletedProcess[str]:
             self.assertIsNone(cwd)
-            payload = base64.b64encode(json.dumps(statement).encode("utf-8")).decode(
-                "ascii"
-            )
+            payload = base64.b64encode(json.dumps(statement).encode()).decode()
             return completed(command, json.dumps({"payload": payload}))
 
         verify_attestation(
@@ -280,23 +357,20 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
             )
 
     def test_chart_package_is_inspected_without_extraction(self) -> None:
+        artifact = self.model_artifact
+        chart = copy.deepcopy(artifact["chart"])
         trial_values = (
             "engineeringTrialProfile:\n"
             "  enabled: true\n"
             "  profileId: orchestra-ocp-sno-trial-amd64-v1\n"
             "  sourceOnlyAcknowledged: true\n"
-            "otel:\n"
-            "  protocol: http/protobuf\n"
-        ).encode("utf-8")
+        ).encode()
         with tempfile.TemporaryDirectory() as directory:
-            package = Path(directory) / "orchestra-inference-engine-0.1.3.tgz"
+            package = Path(directory) / f"{chart['name']}-{chart['version']}.tgz"
             with tarfile.open(package, mode="w:gz") as archive:
-                member = tarfile.TarInfo(
-                    "orchestra-inference-engine/values.openshift-sno-trial.yaml"
-                )
+                member = tarfile.TarInfo(chart["trialValuesPath"])
                 member.size = len(trial_values)
                 archive.addfile(member, io.BytesIO(trial_values))
-            chart = copy.deepcopy(self.artifact["chart"])
             chart["packageDigest"] = bytes_digest(package.read_bytes())
             chart["trialValuesDigest"] = bytes_digest(trial_values)
 
@@ -306,25 +380,62 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
                 self.assertIsNone(cwd)
                 return completed(
                     command,
-                    "name: orchestra-inference-engine\n"
-                    "version: 0.1.3\n"
-                    "appVersion: 0.1.11\n",
+                    f"name: {chart['name']}\n"
+                    f"version: {chart['version']}\n"
+                    f"appVersion: {chart['appVersion']}\n",
                 )
 
             result = inspect_chart_package(package, chart, run)
             self.assertTrue(result["trialValuesVerified"])
-
             chart["trialValuesDigest"] = f"sha256:{5:064x}"
             with self.assertRaisesRegex(ValueError, "trial_values_digest_invalid"):
                 inspect_chart_package(package, chart, run)
 
     def valid_report(self) -> dict[str, object]:
-        publication = self.artifact["publication"]
-        source = self.artifact["source"]
-        image = self.artifact["image"]
-        chart = self.artifact["chart"]
+        report_artifacts = []
+        for artifact in self.artifacts:
+            publication = artifact["publication"]
+            source = artifact["source"]
+            image = artifact["image"]
+            chart = artifact["chart"]
+            report_artifacts.append(
+                {
+                    "plane": artifact["plane"],
+                    "publication": {
+                        "runId": publication["runId"],
+                        "runAttempt": publication["runAttempt"],
+                        "runUrl": publication["runUrl"],
+                        "tag": publication["tag"],
+                        "sourceRevision": source["revision"],
+                        "workflow": publication["workflow"],
+                        "workflowName": publication["workflowName"],
+                        "conclusion": "success",
+                    },
+                    "image": {
+                        **image,
+                        "platformManifestVerified": True,
+                        "signatureVerified": True,
+                        "cycloneDxAttestationVerified": True,
+                    },
+                    "chart": {
+                        "reference": chart["reference"],
+                        "digest": chart["digest"],
+                        "name": chart["name"],
+                        "version": chart["version"],
+                        "appVersion": chart["appVersion"],
+                        "packageDigest": chart["packageDigest"],
+                        "trialValuesPath": chart["trialValuesPath"],
+                        "trialValuesDigest": chart["trialValuesDigest"],
+                        "signatureVerified": True,
+                        "cycloneDxAttestationVerified": True,
+                        "packagePulled": True,
+                        "trialValuesVerified": True,
+                    },
+                    "admission": copy.deepcopy(artifact["admission"]),
+                }
+            )
         report: dict[str, object] = {
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "kind": REPORT_KIND,
             "verificationId": "sno-product-replay-test-001",
             "generatedAt": "2026-07-25T09:00:00Z",
@@ -339,37 +450,7 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
                 "verifierRunId": 1,
                 "verifierRunAttempt": 1,
             },
-            "publication": {
-                "runId": publication["runId"],
-                "runAttempt": publication["runAttempt"],
-                "runUrl": publication["runUrl"],
-                "tag": publication["tag"],
-                "sourceRevision": source["revision"],
-                "workflow": publication["workflow"],
-                "workflowName": publication["workflowName"],
-                "conclusion": "success",
-            },
-            "image": {
-                **image,
-                "platformManifestVerified": True,
-                "signatureVerified": True,
-                "cycloneDxAttestationVerified": True,
-            },
-            "chart": {
-                "reference": chart["reference"],
-                "digest": chart["digest"],
-                "name": chart["name"],
-                "version": chart["version"],
-                "appVersion": chart["appVersion"],
-                "packageDigest": chart["packageDigest"],
-                "trialValuesPath": chart["trialValuesPath"],
-                "trialValuesDigest": chart["trialValuesDigest"],
-                "signatureVerified": True,
-                "cycloneDxAttestationVerified": True,
-                "packagePulled": True,
-                "trialValuesVerified": True,
-            },
-            "admission": copy.deepcopy(self.artifact["admission"]),
+            "artifacts": report_artifacts,
             "activation": copy.deepcopy(self.lock["activation"]),
             "controls": copy.deepcopy(REPORT_CONTROLS),
             "claims": copy.deepcopy(CLAIMS),
@@ -383,7 +464,7 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         self.assertFalse(report["controls"]["payloadsCollected"])
         self.assertFalse(report["controls"]["secretsCollected"])
         self.assertTrue(report["controls"]["githubApiTokenUsed"])
-        self.assertFalse(report["controls"]["registryCredentialsRequired"])
+        self.assertTrue(report["controls"]["registryCredentialsRequired"])
         self.assertFalse(report["controls"]["providerCredentialsUsed"])
         self.assertFalse(report["controls"]["deploymentAuthorized"])
         self.assertFalse(report["claims"]["campaignEvidence"])
@@ -394,11 +475,17 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "report_controls_invalid"):
             validate_report(changed, self.lock, self.candidate)
 
-    def test_report_rejects_digest_and_first_attempt_drift(self) -> None:
+    def test_report_rejects_digest_order_and_attempt_drift(self) -> None:
         report = self.valid_report()
-        report["image"]["digest"] = f"sha256:{6:064x}"
+        report["artifacts"][0]["image"]["digest"] = f"sha256:{6:064x}"
         report["reportDigest"] = report_digest(report)
         with self.assertRaisesRegex(ValueError, "report_image_invalid"):
+            validate_report(report, self.lock, self.candidate)
+
+        report = self.valid_report()
+        report["artifacts"] = list(reversed(report["artifacts"]))
+        report["reportDigest"] = report_digest(report)
+        with self.assertRaisesRegex(ValueError, "report_artifacts_invalid"):
             validate_report(report, self.lock, self.candidate)
 
         report = self.valid_report()
@@ -407,10 +494,10 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "report_bindings_invalid"):
             validate_report(report, self.lock, self.candidate)
 
-    def test_schemas_are_strict_at_every_object_boundary(self) -> None:
+    def test_v2_schemas_are_strict_at_every_object_boundary(self) -> None:
         for name in (
-            "sno-trial-product-artifact-set-v1.schema.json",
-            "sno-trial-product-artifact-replay-v1.schema.json",
+            "sno-trial-product-artifact-set-v2.schema.json",
+            "sno-trial-product-artifact-replay-v2.schema.json",
         ):
             with self.subTest(name=name):
                 schema = json.loads(
