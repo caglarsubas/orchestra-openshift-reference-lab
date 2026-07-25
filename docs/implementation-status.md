@@ -77,6 +77,7 @@ any certification campaign slot.
 | `$75` alert ceiling and 48 active-hour limit | Yes | Yes | No | No | Not eligible |
 | 12-hour maximum project-bound operator lease | Yes | Yes | No | No | Not eligible |
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
+| Exact public `4.20.27` installer/client archive lock and local integrity intake | Yes | Yes | Local archive only | Yes | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
@@ -93,6 +94,14 @@ request pending Google review. It does not mark the combined project, budget,
 DNS, and allowlist foundation as applied. The observation must be refreshed
 with `scripts/sno_trial_readiness.py`; its output is a non-certifying
 diagnostic, never campaign evidence or mutation authority.
+
+The public-toolchain row records local archive integrity only. On 2026-07-25,
+the exact versioned linux/amd64 installer and client archives matched Red Hat's
+OpenPGP-signed SHA-256 document, official release-key fingerprint, and locked
+tar-member inventories. The payload-free report deliberately leaves Linux
+binary execution, entitlement, pull-secret observation, cloud mutation, and
+campaign eligibility false. These remaining prerequisites cannot be inferred
+from a successful archive inspection.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.
