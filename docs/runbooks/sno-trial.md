@@ -133,6 +133,38 @@ secret is account-gated and is never stored in this report. Archive inspection
 creates no lease and grants no cloud, installation, campaign, or certification
 authority.
 
+## Review the inert workload candidate
+
+Before authoring any trial values or dependency manifests, validate the locked
+source-only capacity candidate:
+
+```bash
+make validate-sno-trial-workload-candidate
+```
+
+The candidate assigns one replica each to the platform, runtime host, model
+plane, PostgreSQL, ClickHouse, JetStream, Valkey, CPU model backend, and
+synthetic tenant kit. It reserves 3 vCPU and 12 GiB for OpenShift/system
+services, limits steady workload requests to 3.4 vCPU and 14.375 GiB, allows
+only one serial 250m/256 MiB transient operation, and records 48 GiB of
+persistent volumes.
+
+Do not render or apply this file. It contains artifact observations and
+capacity assumptions, not Kubernetes resources. The production chart profiles
+cannot be reused because their replica and availability contracts differ.
+Before a future activation review, product owners must add explicit
+non-production SNO values, dependency owners must define direct
+single-instance runtime contracts, and operators must resolve immutable Valkey
+and CPU model-backend artifacts by digest. Secret/TLS references, source
+admission, destination pull proofs, live allocatable capacity, calibration,
+and OpenShift server-side dry runs must also pass.
+
+After a live cluster exists, compare the candidate reserve against
+`oc describe node` allocatable capacity and measured idle system usage. Any
+resource, image, mode, storage, or blocker change requires a new candidate ID
+and digest. The current candidate always remains blocked and cannot produce
+campaign evidence.
+
 ## Record the Red Hat trial without identity payload
 
 The statement builder reads a mode-`0600` account identity file and the Red Hat

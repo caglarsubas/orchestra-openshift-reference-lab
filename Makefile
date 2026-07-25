@@ -1,12 +1,13 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain test observe-sno-trial-readiness verify-sno-trial-readiness inspect-sno-trial-toolchain verify-sno-trial-toolchain verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate test observe-sno-trial-readiness verify-sno-trial-readiness inspect-sno-trial-toolchain verify-sno-trial-toolchain verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
 	$(PYTHON) scripts/validate_sno_trial_profile.py
 	$(PYTHON) scripts/openshift_toolchain_intake.py validate-lock
+	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
 	$(PYTHON) scripts/validate_release_set.py
 	$(PYTHON) scripts/validate_reference_lab_contract_intake.py
 	$(PYTHON) scripts/validate_dependency_bom.py
@@ -32,6 +33,9 @@ validate-sno-trial:
 
 validate-sno-trial-toolchain:
 	$(PYTHON) scripts/openshift_toolchain_intake.py validate-lock
+
+validate-sno-trial-workload-candidate:
+	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
 
 observe-sno-trial-readiness:
 	test -n "$(PROJECT_ID)"

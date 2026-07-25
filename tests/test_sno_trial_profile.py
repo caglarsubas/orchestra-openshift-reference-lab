@@ -67,6 +67,9 @@ class SnoTrialProfileTests(unittest.TestCase):
             (config / "sno-trial-openshift-toolchain.lock.json").write_text(
                 TRIAL_PROFILE_ID, encoding="utf-8"
             )
+            (config / "sno-trial-workload-candidate.lock.json").write_text(
+                TRIAL_PROFILE_ID, encoding="utf-8"
+            )
             validate_production_isolation(root)
             (config / "production-like.json").write_text(
                 TRIAL_PROFILE_ID, encoding="utf-8"

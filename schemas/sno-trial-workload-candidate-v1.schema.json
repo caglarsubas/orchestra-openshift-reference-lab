@@ -1,0 +1,459 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-workload-candidate-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial workload candidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "candidateId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "architecture",
+    "bindings",
+    "nodeEnvelope",
+    "workloads",
+    "activation",
+    "controls",
+    "claims",
+    "candidateDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-workload-candidate.v1"
+    },
+    "candidateId": {
+      "const": "orchestra-sno-trial-workload-candidate-2026-07-25.1"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "source-only"},
+    "architecture": {"const": "linux/amd64"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "nodeEnvelope": {"$ref": "#/$defs/nodeEnvelope"},
+    "workloads": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/workload"}
+    },
+    "activation": {"$ref": "#/$defs/activation"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "candidateDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trialProfileDigest",
+        "toolchainLockDigest",
+        "artifactReleaseSetDigest",
+        "dependencySourceDigest",
+        "labServicesDigest"
+      ],
+      "properties": {
+        "trialProfileDigest": {"$ref": "#/$defs/digest"},
+        "toolchainLockDigest": {"$ref": "#/$defs/digest"},
+        "artifactReleaseSetDigest": {"$ref": "#/$defs/digest"},
+        "dependencySourceDigest": {"$ref": "#/$defs/digest"},
+        "labServicesDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "quantities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpuMillicores", "memoryMiB"],
+      "properties": {
+        "cpuMillicores": {"type": "integer", "minimum": 1},
+        "memoryMiB": {"type": "integer", "minimum": 1}
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests", "limits"],
+      "properties": {
+        "requests": {"$ref": "#/$defs/quantities"},
+        "limits": {"$ref": "#/$defs/quantities"}
+      }
+    },
+    "transient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpuMillicores", "memoryMiB", "scheduling"],
+      "properties": {
+        "cpuMillicores": {"type": "integer", "minimum": 1},
+        "memoryMiB": {"type": "integer", "minimum": 1},
+        "scheduling": {"const": "serial-only"}
+      }
+    },
+    "nodeEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "machineType",
+        "physical",
+        "systemReserve",
+        "workloadRequestBudget",
+        "steadyRequests",
+        "transientPeakAllowance",
+        "peakRequests",
+        "requestHeadroom",
+        "aggregateLimits",
+        "persistentVolumeGiB"
+      ],
+      "properties": {
+        "machineType": {"const": "n2-standard-8"},
+        "physical": {"$ref": "#/$defs/quantities"},
+        "systemReserve": {"$ref": "#/$defs/quantities"},
+        "workloadRequestBudget": {"$ref": "#/$defs/quantities"},
+        "steadyRequests": {"$ref": "#/$defs/quantities"},
+        "transientPeakAllowance": {"$ref": "#/$defs/transient"},
+        "peakRequests": {"$ref": "#/$defs/quantities"},
+        "requestHeadroom": {"$ref": "#/$defs/quantities"},
+        "aggregateLimits": {"$ref": "#/$defs/quantities"},
+        "persistentVolumeGiB": {"const": 48}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceClass",
+        "sourceId",
+        "reference",
+        "platformDigest",
+        "admissionState",
+        "usableForCapacityOnly"
+      ],
+      "properties": {
+        "sourceClass": {
+          "enum": [
+            "cross-plane-release",
+            "dependency-source",
+            "lab-service-publication",
+            "unresolved"
+          ]
+        },
+        "sourceId": {"type": "string", "minLength": 1},
+        "reference": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "platformDigest": {
+          "anyOf": [
+            {"$ref": "#/$defs/digest"},
+            {"type": "null"}
+          ]
+        },
+        "admissionState": {
+          "enum": [
+            "published-not-trial-admitted",
+            "source-resolved-not-mirrored",
+            "unresolved"
+          ]
+        },
+        "usableForCapacityOnly": {"const": true}
+      }
+    },
+    "platformMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observeFirst",
+        "agentQuerying",
+        "toolExecution",
+        "orchestrationRun"
+      ],
+      "properties": {
+        "observeFirst": {"const": true},
+        "agentQuerying": {"const": false},
+        "toolExecution": {"const": false},
+        "orchestrationRun": {"const": false}
+      }
+    },
+    "runtimeMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modelCalls",
+        "mcp",
+        "writeTools",
+        "productionHostedByPlatform"
+      ],
+      "properties": {
+        "modelCalls": {"const": true},
+        "mcp": {"const": "read-only"},
+        "writeTools": {"const": false},
+        "productionHostedByPlatform": {"const": false}
+      }
+    },
+    "modelPlaneMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "backend",
+        "routingPolicyRequired",
+        "rateLimitScope",
+        "fallbackRequired"
+      ],
+      "properties": {
+        "backend": {"const": "remote-in-cluster"},
+        "routingPolicyRequired": {"const": true},
+        "rateLimitScope": {"const": "deployment-shared"},
+        "fallbackRequired": {"const": true}
+      }
+    },
+    "postgresMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation",
+        "logicalDatabases",
+        "backup",
+        "highAvailability"
+      ],
+      "properties": {
+        "implementation": {"const": "trial-direct-single-instance"},
+        "logicalDatabases": {"const": 2},
+        "backup": {"const": false},
+        "highAvailability": {"const": false}
+      }
+    },
+    "clickhouseMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation",
+        "keeper",
+        "backup",
+        "highAvailability"
+      ],
+      "properties": {
+        "implementation": {"const": "trial-direct-single-instance"},
+        "keeper": {"const": false},
+        "backup": {"const": false},
+        "highAvailability": {"const": false}
+      }
+    },
+    "jetstreamMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation",
+        "streamReplicas",
+        "durableTelemetry",
+        "highAvailability"
+      ],
+      "properties": {
+        "implementation": {"const": "trial-direct-single-instance"},
+        "streamReplicas": {"const": 1},
+        "durableTelemetry": {"const": true},
+        "highAvailability": {"const": false}
+      }
+    },
+    "valkeyMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation",
+        "sentinel",
+        "aof",
+        "highAvailability"
+      ],
+      "properties": {
+        "implementation": {"const": "trial-direct-single-instance"},
+        "sentinel": {"const": false},
+        "aof": {"const": true},
+        "highAvailability": {"const": false}
+      }
+    },
+    "modelBackendMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implementation",
+        "quantizationRequired",
+        "maximumModelBytes",
+        "chatRequired",
+        "embeddingQualityCertifying"
+      ],
+      "properties": {
+        "implementation": {"const": "cpu-only-single-backend"},
+        "quantizationRequired": {"const": true},
+        "maximumModelBytes": {"const": 4294967296},
+        "chatRequired": {"const": true},
+        "embeddingQualityCertifying": {"const": false}
+      }
+    },
+    "syntheticMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tenantGateway",
+        "mcp",
+        "faultSurfaces",
+        "customerData"
+      ],
+      "properties": {
+        "tenantGateway": {"const": true},
+        "mcp": {"const": "read-only"},
+        "faultSurfaces": {"const": true},
+        "customerData": {"const": false}
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "replicas",
+        "resources",
+        "persistentVolumeGiB",
+        "artifact",
+        "mode"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "platform",
+            "runtime-host",
+            "model-plane",
+            "postgresql",
+            "clickhouse",
+            "jetstream",
+            "valkey",
+            "model-backend",
+            "synthetic-tenant-kit"
+          ]
+        },
+        "category": {
+          "enum": ["product", "dependency", "synthetic-surface"]
+        },
+        "replicas": {"const": 1},
+        "resources": {"$ref": "#/$defs/resources"},
+        "persistentVolumeGiB": {"type": "integer", "minimum": 0},
+        "artifact": {"$ref": "#/$defs/artifact"},
+        "mode": {
+          "oneOf": [
+            {"$ref": "#/$defs/platformMode"},
+            {"$ref": "#/$defs/runtimeMode"},
+            {"$ref": "#/$defs/modelPlaneMode"},
+            {"$ref": "#/$defs/postgresMode"},
+            {"$ref": "#/$defs/clickhouseMode"},
+            {"$ref": "#/$defs/jetstreamMode"},
+            {"$ref": "#/$defs/valkeyMode"},
+            {"$ref": "#/$defs/modelBackendMode"},
+            {"$ref": "#/$defs/syntheticMode"}
+          ]
+        }
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reasonCodes"],
+      "properties": {
+        "state": {"const": "blocked"},
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 17,
+          "maxItems": 17,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]+$"
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileScope",
+        "registryMode",
+        "secretStrategy",
+        "tlsStrategy",
+        "backupMode",
+        "replicaPolicy",
+        "autoscalingEnabled",
+        "podDisruptionBudgetsEnabled",
+        "topologySpreadEnabled",
+        "platformInSynchronousRuntimePath",
+        "platformProductionToolExecution",
+        "runtimeMcpMode",
+        "manifestsEmitted",
+        "argocdApplicationsEmitted",
+        "kustomizationReferenced",
+        "secretValuesStored",
+        "cloudMutationAuthorized",
+        "installAuthorized",
+        "activationAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "profileScope": {"const": "sno-engineering-trial-only"},
+        "registryMode": {"const": "direct-source-by-digest-after-review"},
+        "secretStrategy": {
+          "const": "operator-created-existing-secret-references"
+        },
+        "tlsStrategy": {
+          "const": "operator-provided-trial-secret-references"
+        },
+        "backupMode": {"const": "none-ephemeral-trial"},
+        "replicaPolicy": {"const": "single-replica-no-ha"},
+        "autoscalingEnabled": {"const": false},
+        "podDisruptionBudgetsEnabled": {"const": false},
+        "topologySpreadEnabled": {"const": false},
+        "platformInSynchronousRuntimePath": {"const": false},
+        "platformProductionToolExecution": {"const": false},
+        "runtimeMcpMode": {"const": "read-only"},
+        "manifestsEmitted": {"const": false},
+        "argocdApplicationsEmitted": {"const": false},
+        "kustomizationReferenced": {"const": false},
+        "secretValuesStored": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "installAuthorized": {"const": false},
+        "activationAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {"type": "array", "maxItems": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}
