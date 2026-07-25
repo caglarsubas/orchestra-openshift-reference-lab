@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate and replay public SNO product artifacts without deployment authority."""
+"""Validate and replay locked SNO product artifacts without deployment authority."""
 
 from __future__ import annotations
 
@@ -26,29 +26,134 @@ except ModuleNotFoundError:
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "config" / "sno-trial-product-artifacts.lock.json"
 CANDIDATE_PATH = ROOT / "config" / "sno-trial-workload-candidate.lock.json"
-LOCK_KIND = "orchestra.openshift.sno-trial-product-artifact-set.v1"
-REPORT_KIND = "orchestra.openshift.sno-trial-product-artifact-replay.v1"
+LOCK_KIND = "orchestra.openshift.sno-trial-product-artifact-set.v2"
+REPORT_KIND = "orchestra.openshift.sno-trial-product-artifact-replay.v2"
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
-ARTIFACT_SET_ID = "orchestra-sno-trial-products-2026-07-25.1"
+ARTIFACT_SET_ID = "orchestra-sno-trial-products-2026-07-25.3"
 TARGET_CLASS = "engineering-trial"
 LOCK_EXECUTION_MODE = "source-observation"
-REPORT_EXECUTION_MODE = "live-public-artifact-replay"
+REPORT_EXECUTION_MODE = "live-registry-artifact-replay"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 REVISION = re.compile(r"^[a-f0-9]{40}$")
 VERIFICATION_ID = re.compile(r"^sno-product-replay-[a-z0-9][a-z0-9.-]{5,79}$")
-REPOSITORY = "caglarsubas/llm_inference_engine"
-SOURCE_REVISION = "6c3f2a0cb34ca5110760b53d9cc8d65a3a5c2df2"
-IMAGE_DIGEST = "sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549"
-IMAGE_PLATFORM_DIGEST = (
-    "sha256:52e9da1065dfa539c70aae79beccafc58a47db17f5422bc500e3ab9b3c394c7a"
-)
-CHART_DIGEST = "sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637"
-CHART_PACKAGE_DIGEST = (
-    "sha256:bde3db9f6849e3a25a19d5671b0db4e8f14e14f96218b0552920f182fe8467b3"
-)
-TRIAL_VALUES_DIGEST = (
-    "sha256:21affdee56d51be89396a209819d6a5b0a6d74fe6aa4210b1bd0096384023c1c"
-)
+EXPECTED_PLANES = ("platform", "runtimeHost", "modelPlane")
+EXPECTED_ARTIFACTS: dict[str, dict[str, Any]] = {
+    "platform": {
+        "release": "platform-v0.1.0-rc.11",
+        "source": {
+            "repository": "caglarsubas/agent-hook-v2",
+            "revision": "13fcacafedd16eb88a0bf0f3b49e176625e15e02",
+        },
+        "image": {
+            "repository": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi",
+            "digest": "sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
+            "platformManifestDigest": "sha256:998db0c5a1110bbaf551e44d362af63e4d844db8d115380ec7215680ad564a14",
+            "variant": "ubi9",
+        },
+        "chart": {
+            "repository": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa",
+            "digest": "sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
+            "name": "prometa",
+            "version": "0.3.0-rc.11",
+            "appVersion": "0.1.0",
+            "packageDigest": "sha256:baed4c981742e8179edc752da261c0bb811736372bdfa46d72dbcc9487ee3d84",
+            "trialValuesPath": "prometa/values.openshift-sno-trial.yaml",
+            "trialValuesDigest": "sha256:3b5e5150afc64141a4a0487241b041111712983cdb5b0dc89e9bd3e3d1e44d2b",
+        },
+        "publication": {
+            "workflow": ".github/workflows/publish-platform-release.yml",
+            "workflowName": "publish-platform-release",
+            "runId": 30157474312,
+            "runAttempt": 1,
+            "signatureIdentity": (
+                "https://github.com/caglarsubas/agent-hook-v2/"
+                ".github/workflows/publish-platform-release.yml"
+                "@refs/tags/platform-v0.1.0-rc.11"
+            ),
+        },
+    },
+    "runtimeHost": {
+        "release": "v0.18.7",
+        "source": {
+            "repository": "prometa-ai/orchestra-python-sdk",
+            "revision": "2dbbbe13bc1764ed8bd5225dc8214906acd3310b",
+        },
+        "image": {
+            "repository": (
+                "ghcr.io/prometa-ai/orchestra-python-sdk/"
+                "prometa-runtime-host-ubi9"
+            ),
+            "digest": "sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
+            "platformManifestDigest": "sha256:5f397db663f26d7e33a01faf656a8fa3eebee73ccdb348e4dfae84d7f2ec713f",
+            "variant": "ubi9",
+        },
+        "chart": {
+            "repository": (
+                "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime"
+            ),
+            "name": "prometa-runtime",
+            "version": "0.3.8",
+            "appVersion": "0.18.7",
+            "digest": "sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
+            "packageDigest": "sha256:dc77a8e181729ac91e6453a48e1f9b78c1fbae561f43d9e0717d72ff4c16f6b6",
+            "trialValuesPath": (
+                "prometa-runtime/values.openshift-sno-trial.yaml"
+            ),
+            "trialValuesDigest": "sha256:11fe28f037b111fee2723a09999f913a220dbd5c07b28458f340b6d883027b63",
+        },
+        "publication": {
+            "workflow": ".github/workflows/publish-runtime-artifacts.yml",
+            "workflowName": "Publish runtime artifacts",
+            "runId": 30171938726,
+            "runAttempt": 1,
+            "signatureIdentity": (
+                "https://github.com/prometa-ai/orchestra-python-sdk/"
+                ".github/workflows/publish-runtime-artifacts.yml"
+                "@refs/heads/main"
+            ),
+        },
+    },
+    "modelPlane": {
+        "release": "v0.1.11",
+        "source": {
+            "repository": "caglarsubas/llm_inference_engine",
+            "revision": "6c3f2a0cb34ca5110760b53d9cc8d65a3a5c2df2",
+        },
+        "image": {
+            "repository": (
+                "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi"
+            ),
+            "digest": "sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
+            "platformManifestDigest": "sha256:52e9da1065dfa539c70aae79beccafc58a47db17f5422bc500e3ab9b3c394c7a",
+            "variant": "ubi9",
+        },
+        "chart": {
+            "repository": (
+                "ghcr.io/caglarsubas/llm_inference_engine/"
+                "charts/orchestra-inference-engine"
+            ),
+            "digest": "sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
+            "name": "orchestra-inference-engine",
+            "version": "0.1.3",
+            "appVersion": "0.1.11",
+            "packageDigest": "sha256:bde3db9f6849e3a25a19d5671b0db4e8f14e14f96218b0552920f182fe8467b3",
+            "trialValuesPath": (
+                "orchestra-inference-engine/values.openshift-sno-trial.yaml"
+            ),
+            "trialValuesDigest": "sha256:21affdee56d51be89396a209819d6a5b0a6d74fe6aa4210b1bd0096384023c1c",
+        },
+        "publication": {
+            "workflow": ".github/workflows/publish-images.yml",
+            "workflowName": "publish-release-artifacts",
+            "runId": 30151836099,
+            "runAttempt": 1,
+            "signatureIdentity": (
+                "https://github.com/caglarsubas/llm_inference_engine/"
+                ".github/workflows/publish-images.yml@refs/tags/v0.1.11"
+            ),
+        },
+    },
+}
 
 LOCK_KEYS = {
     "schemaVersion",
@@ -115,8 +220,6 @@ ADMISSION_KEYS = {
     "activationAuthorized",
 }
 ACTIVATION_REASONS = [
-    "platform-sno-profile-missing",
-    "runtime-sno-profile-missing",
     "product-artifact-replay-review-missing",
     "destination-mirror-verification-missing",
     "live-cluster-pull-verification-missing",
@@ -142,7 +245,7 @@ CLAIMS = {
 }
 REPORT_CONTROLS = {
     "registryReadOnly": True,
-    "registryCredentialsRequired": False,
+    "registryCredentialsRequired": True,
     "githubApiTokenUsed": True,
     "providerCredentialsUsed": False,
     "payloadsCollected": False,
@@ -164,6 +267,21 @@ def fail(code: str) -> NoReturn:
 def exact_keys(value: dict[str, Any], expected: set[str], code: str) -> None:
     if set(value) != expected:
         fail(code)
+
+
+def require_expected_subset(
+    value: dict[str, Any],
+    expected: dict[str, Any],
+    code: str,
+) -> None:
+    for key, expected_value in expected.items():
+        actual_value = value.get(key)
+        if isinstance(expected_value, dict):
+            if not isinstance(actual_value, dict):
+                fail(code)
+            require_expected_subset(actual_value, expected_value, code)
+        elif actual_value != expected_value:
+            fail(code)
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -228,13 +346,13 @@ def validate_lock(
 ) -> None:
     exact_keys(value, LOCK_KEYS, "sno_product_artifact_lock_keys_invalid")
     if (
-        value["schemaVersion"] != 1
+        value["schemaVersion"] != 2
         or value["kind"] != LOCK_KIND
         or value["artifactSetId"] != ARTIFACT_SET_ID
         or value["profileId"] != PROFILE_ID
         or value["targetClass"] != TARGET_CLASS
         or value["executionMode"] != LOCK_EXECUTION_MODE
-        or value["completeness"] != "partial"
+        or value["completeness"] != "published-three-plane-not-trial-admitted"
     ):
         fail("sno_product_artifact_lock_identity_invalid")
     if value["bindings"] != {
@@ -247,110 +365,151 @@ def validate_lock(
     )
 
     artifacts = value["artifacts"]
-    if not isinstance(artifacts, list) or len(artifacts) != 1:
+    if not isinstance(artifacts, list) or len(artifacts) != len(EXPECTED_PLANES):
         fail("sno_product_artifact_lock_artifacts_invalid")
-    artifact = artifacts[0]
-    if not isinstance(artifact, dict):
-        fail("sno_product_artifact_lock_artifacts_invalid")
-    exact_keys(
-        artifact,
-        ARTIFACT_KEYS,
-        "sno_product_artifact_lock_artifact_keys_invalid",
-    )
-    if artifact["plane"] != "modelPlane" or artifact["release"] != "v0.1.11":
+    planes = []
+    for artifact in artifacts:
+        if not isinstance(artifact, dict):
+            fail("sno_product_artifact_lock_artifacts_invalid")
+        exact_keys(
+            artifact,
+            ARTIFACT_KEYS,
+            "sno_product_artifact_lock_artifact_keys_invalid",
+        )
+        plane = artifact["plane"]
+        if not isinstance(plane, str):
+            fail("sno_product_artifact_lock_release_invalid")
+        planes.append(plane)
+        expected_artifact = EXPECTED_ARTIFACTS.get(plane)
+        if (
+            expected_artifact is None
+            or artifact["release"] != expected_artifact["release"]
+        ):
+            fail("sno_product_artifact_lock_release_invalid")
+
+        source = artifact["source"]
+        if not isinstance(source, dict):
+            fail("sno_product_artifact_lock_source_invalid")
+        exact_keys(
+            source,
+            SOURCE_KEYS,
+            "sno_product_artifact_lock_source_keys_invalid",
+        )
+        if (
+            not isinstance(source["repository"], str)
+            or not isinstance(source["revision"], str)
+            or not REVISION.fullmatch(source["revision"])
+        ):
+            fail("sno_product_artifact_lock_source_invalid")
+        require_expected_subset(
+            source,
+            expected_artifact["source"],
+            "sno_product_artifact_lock_source_invalid",
+        )
+
+        image = artifact["image"]
+        if not isinstance(image, dict):
+            fail("sno_product_artifact_lock_image_invalid")
+        exact_keys(image, IMAGE_KEYS, "sno_product_artifact_lock_image_keys_invalid")
+        for field in ("digest", "platformManifestDigest"):
+            validate_digest(image[field], "sno_product_artifact_lock_image_invalid")
+        if (
+            not isinstance(image["repository"], str)
+            or image["reference"] != f"{image['repository']}@{image['digest']}"
+            or image["platform"] != "linux/amd64"
+            or image["variant"] != "ubi9"
+        ):
+            fail("sno_product_artifact_lock_image_invalid")
+        require_expected_subset(
+            image,
+            expected_artifact["image"],
+            "sno_product_artifact_lock_image_invalid",
+        )
+
+        chart = artifact["chart"]
+        if not isinstance(chart, dict):
+            fail("sno_product_artifact_lock_chart_invalid")
+        exact_keys(chart, CHART_KEYS, "sno_product_artifact_lock_chart_keys_invalid")
+        for field in ("digest", "packageDigest", "trialValuesDigest"):
+            validate_digest(chart[field], "sno_product_artifact_lock_chart_invalid")
+        if (
+            not isinstance(chart["repository"], str)
+            or chart["reference"] != f"{chart['repository']}@{chart['digest']}"
+            or not all(
+                isinstance(chart[field], str)
+                for field in (
+                    "name",
+                    "version",
+                    "appVersion",
+                    "trialValuesPath",
+                )
+            )
+        ):
+            fail("sno_product_artifact_lock_chart_invalid")
+        require_expected_subset(
+            chart,
+            expected_artifact["chart"],
+            "sno_product_artifact_lock_chart_invalid",
+        )
+
+        publication = artifact["publication"]
+        if not isinstance(publication, dict):
+            fail("sno_product_artifact_lock_publication_invalid")
+        exact_keys(
+            publication,
+            PUBLICATION_KEYS,
+            "sno_product_artifact_lock_publication_keys_invalid",
+        )
+        expected_identity = expected_artifact["publication"][
+            "signatureIdentity"
+        ]
+        expected_url = (
+            f"https://github.com/{source['repository']}/"
+            f"actions/runs/{publication['runId']}"
+        )
+        if (
+            publication["tag"] != artifact["release"]
+            or not isinstance(publication["runAttempt"], int)
+            or publication["runAttempt"] <= 0
+            or not isinstance(publication["runId"], int)
+            or publication["runId"] <= 0
+            or publication["runUrl"] != expected_url
+            or publication["signatureIdentity"] != expected_identity
+            or publication["oidcIssuer"]
+            != "https://token.actions.githubusercontent.com"
+            or not isinstance(publication["workflowName"], str)
+        ):
+            fail("sno_product_artifact_lock_publication_invalid")
+        require_expected_subset(
+            publication,
+            expected_artifact["publication"],
+            "sno_product_artifact_lock_publication_invalid",
+        )
+
+        admission = artifact["admission"]
+        if not isinstance(admission, dict):
+            fail("sno_product_artifact_lock_admission_invalid")
+        exact_keys(
+            admission,
+            ADMISSION_KEYS,
+            "sno_product_artifact_lock_admission_keys_invalid",
+        )
+        if admission != {
+            "state": "published-not-trial-admitted",
+            "sourceOnly": True,
+            "publicReplayRequired": True,
+            "destinationMirrorVerified": False,
+            "liveClusterPullVerified": False,
+            "secretReferencesResolved": False,
+            "serverSideDryRunVerified": False,
+            "activationAuthorized": False,
+        }:
+            fail("sno_product_artifact_lock_admission_invalid")
+
+    if tuple(planes) != EXPECTED_PLANES:
         fail("sno_product_artifact_lock_release_invalid")
-
-    source = artifact["source"]
-    if not isinstance(source, dict):
-        fail("sno_product_artifact_lock_source_invalid")
-    exact_keys(source, SOURCE_KEYS, "sno_product_artifact_lock_source_keys_invalid")
-    if source["repository"] != REPOSITORY or source["revision"] != SOURCE_REVISION:
-        fail("sno_product_artifact_lock_source_invalid")
-
-    image = artifact["image"]
-    if not isinstance(image, dict):
-        fail("sno_product_artifact_lock_image_invalid")
-    exact_keys(image, IMAGE_KEYS, "sno_product_artifact_lock_image_keys_invalid")
-    for field in ("digest", "platformManifestDigest"):
-        validate_digest(image[field], "sno_product_artifact_lock_image_invalid")
-    if (
-        image["repository"]
-        != "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi"
-        or image["digest"] != IMAGE_DIGEST
-        or image["reference"] != f"{image['repository']}@{image['digest']}"
-        or image["platform"] != "linux/amd64"
-        or image["platformManifestDigest"] != IMAGE_PLATFORM_DIGEST
-        or image["variant"] != "ubi9"
-    ):
-        fail("sno_product_artifact_lock_image_invalid")
-
-    chart = artifact["chart"]
-    if not isinstance(chart, dict):
-        fail("sno_product_artifact_lock_chart_invalid")
-    exact_keys(chart, CHART_KEYS, "sno_product_artifact_lock_chart_keys_invalid")
-    for field in ("digest", "packageDigest", "trialValuesDigest"):
-        validate_digest(chart[field], "sno_product_artifact_lock_chart_invalid")
-    if (
-        chart["repository"]
-        != "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine"
-        or chart["digest"] != CHART_DIGEST
-        or chart["reference"] != f"{chart['repository']}@{chart['digest']}"
-        or chart["name"] != "orchestra-inference-engine"
-        or chart["version"] != "0.1.3"
-        or chart["appVersion"] != "0.1.11"
-        or chart["packageDigest"] != CHART_PACKAGE_DIGEST
-        or chart["trialValuesPath"]
-        != "orchestra-inference-engine/values.openshift-sno-trial.yaml"
-        or chart["trialValuesDigest"] != TRIAL_VALUES_DIGEST
-    ):
-        fail("sno_product_artifact_lock_chart_invalid")
-
-    publication = artifact["publication"]
-    if not isinstance(publication, dict):
-        fail("sno_product_artifact_lock_publication_invalid")
-    exact_keys(
-        publication,
-        PUBLICATION_KEYS,
-        "sno_product_artifact_lock_publication_keys_invalid",
-    )
-    expected_identity = (
-        "https://github.com/caglarsubas/llm_inference_engine/"
-        ".github/workflows/publish-images.yml@refs/tags/v0.1.11"
-    )
-    if publication != {
-        "workflow": ".github/workflows/publish-images.yml",
-        "workflowName": "publish-release-artifacts",
-        "runId": 30151836099,
-        "runAttempt": 1,
-        "runUrl": (
-            "https://github.com/caglarsubas/llm_inference_engine/"
-            "actions/runs/30151836099"
-        ),
-        "tag": artifact["release"],
-        "signatureIdentity": expected_identity,
-        "oidcIssuer": "https://token.actions.githubusercontent.com",
-    }:
-        fail("sno_product_artifact_lock_publication_invalid")
-
-    admission = artifact["admission"]
-    if not isinstance(admission, dict):
-        fail("sno_product_artifact_lock_admission_invalid")
-    exact_keys(
-        admission,
-        ADMISSION_KEYS,
-        "sno_product_artifact_lock_admission_keys_invalid",
-    )
-    if admission != {
-        "state": "published-not-trial-admitted",
-        "sourceOnly": True,
-        "publicReplayRequired": True,
-        "destinationMirrorVerified": False,
-        "liveClusterPullVerified": False,
-        "secretReferencesResolved": False,
-        "serverSideDryRunVerified": False,
-        "activationAuthorized": False,
-    }:
-        fail("sno_product_artifact_lock_admission_invalid")
+    if len(set(planes)) != len(planes):
+        fail("sno_product_artifact_lock_artifacts_invalid")
     if value["activation"] != {
         "state": "blocked",
         "reasonCodes": ACTIVATION_REASONS,
@@ -416,20 +575,29 @@ def verify_publication_run(
         [
             "gh",
             "api",
-            f"repos/{REPOSITORY}/actions/runs/{publication['runId']}",
+            f"repos/{source['repository']}/actions/runs/{publication['runId']}",
         ],
         "sno_product_artifact_publication_query_failed",
     )
     value = parse_json(result.stdout, "sno_product_artifact_publication_json_invalid")
     if not isinstance(value, dict):
         fail("sno_product_artifact_publication_json_invalid")
+    identity_ref = publication["signatureIdentity"].rsplit("@", 1)[-1]
+    if identity_ref == f"refs/tags/{publication['tag']}":
+        expected_event = "push"
+        expected_branch = publication["tag"]
+    elif identity_ref == "refs/heads/main":
+        expected_event = "workflow_dispatch"
+        expected_branch = "main"
+    else:
+        fail("sno_product_artifact_publication_origin_invalid")
     expected = {
         "id": publication["runId"],
         "run_attempt": publication["runAttempt"],
-        "event": "push",
+        "event": expected_event,
         "status": "completed",
         "conclusion": "success",
-        "head_branch": publication["tag"],
+        "head_branch": expected_branch,
         "head_sha": source["revision"],
         "path": publication["workflow"],
         "html_url": publication["runUrl"],
@@ -507,15 +675,22 @@ def verify_signature(
             continue
         identity = critical.get("identity")
         image = critical.get("image")
+        workflow_claims = {
+            "githubWorkflowSha": source["revision"],
+            "githubWorkflowRef": f"refs/tags/{publication['tag']}",
+            "githubWorkflowRepository": source["repository"],
+            "githubWorkflowName": publication["workflowName"],
+        }
+        claims_match = not optional or all(
+            optional.get(key) == expected
+            for key, expected in workflow_claims.items()
+        )
         if (
             isinstance(identity, dict)
             and isinstance(image, dict)
-            and identity.get("docker-reference") == repository
+            and identity.get("docker-reference") in {repository, reference}
             and image.get("docker-manifest-digest") == digest
-            and optional.get("githubWorkflowSha") == source["revision"]
-            and optional.get("githubWorkflowRef") == f"refs/tags/{publication['tag']}"
-            and optional.get("githubWorkflowRepository") == REPOSITORY
-            and optional.get("githubWorkflowName") == publication["workflowName"]
+            and claims_match
         ):
             return
     fail("sno_product_artifact_signature_claims_invalid")
@@ -629,7 +804,6 @@ def inspect_chart_package(
         "  enabled: true",
         f"  profileId: {PROFILE_ID}",
         "  sourceOnlyAcknowledged: true",
-        "  protocol: http/protobuf",
     }
     if not required_lines.issubset(set(text.splitlines())):
         fail("sno_product_artifact_trial_values_invalid")
@@ -776,9 +950,19 @@ def build_report(
         fail("sno_product_artifact_verifier_revision_invalid")
     if verifier_run_id <= 0 or verifier_run_attempt != 1:
         fail("sno_product_artifact_verifier_run_invalid")
-    artifact = lock["artifacts"][0]
+    artifacts = []
+    for artifact in lock["artifacts"]:
+        artifacts.append(
+            {
+                "plane": artifact["plane"],
+                "publication": verify_publication_run(artifact, run),
+                "image": verify_image(artifact, run),
+                "chart": verify_chart(artifact, run),
+                "admission": dict(artifact["admission"]),
+            }
+        )
     report = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "kind": REPORT_KIND,
         "verificationId": verification_id,
         "generatedAt": utc_text(generated_at),
@@ -793,10 +977,7 @@ def build_report(
             "verifierRunId": verifier_run_id,
             "verifierRunAttempt": verifier_run_attempt,
         },
-        "publication": verify_publication_run(artifact, run),
-        "image": verify_image(artifact, run),
-        "chart": verify_chart(artifact, run),
-        "admission": dict(artifact["admission"]),
+        "artifacts": artifacts,
         "activation": dict(lock["activation"]),
         "controls": dict(REPORT_CONTROLS),
         "claims": dict(CLAIMS),
@@ -822,10 +1003,7 @@ def validate_report(
             "targetClass",
             "executionMode",
             "bindings",
-            "publication",
-            "image",
-            "chart",
-            "admission",
+            "artifacts",
             "activation",
             "controls",
             "claims",
@@ -834,7 +1012,7 @@ def validate_report(
         "sno_product_artifact_report_keys_invalid",
     )
     if (
-        value["schemaVersion"] != 1
+        value["schemaVersion"] != 2
         or value["kind"] != REPORT_KIND
         or not isinstance(value["verificationId"], str)
         or not VERIFICATION_ID.fullmatch(value["verificationId"])
@@ -871,46 +1049,62 @@ def validate_report(
         or bindings["verifierRunAttempt"] != 1
     ):
         fail("sno_product_artifact_report_bindings_invalid")
-    artifact = lock["artifacts"][0]
-    publication = artifact["publication"]
-    source = artifact["source"]
-    if value["publication"] != {
-        "runId": publication["runId"],
-        "runAttempt": publication["runAttempt"],
-        "runUrl": publication["runUrl"],
-        "tag": publication["tag"],
-        "sourceRevision": source["revision"],
-        "workflow": publication["workflow"],
-        "workflowName": publication["workflowName"],
-        "conclusion": "success",
-    }:
-        fail("sno_product_artifact_report_publication_invalid")
-    image = artifact["image"]
-    if value["image"] != {
-        **image,
-        "platformManifestVerified": True,
-        "signatureVerified": True,
-        "cycloneDxAttestationVerified": True,
-    }:
-        fail("sno_product_artifact_report_image_invalid")
-    chart = artifact["chart"]
-    if value["chart"] != {
-        "reference": chart["reference"],
-        "digest": chart["digest"],
-        "name": chart["name"],
-        "version": chart["version"],
-        "appVersion": chart["appVersion"],
-        "packageDigest": chart["packageDigest"],
-        "trialValuesPath": chart["trialValuesPath"],
-        "trialValuesDigest": chart["trialValuesDigest"],
-        "signatureVerified": True,
-        "cycloneDxAttestationVerified": True,
-        "packagePulled": True,
-        "trialValuesVerified": True,
-    }:
-        fail("sno_product_artifact_report_chart_invalid")
-    if value["admission"] != artifact["admission"]:
-        fail("sno_product_artifact_report_admission_invalid")
+    report_artifacts = value["artifacts"]
+    if not isinstance(report_artifacts, list) or len(report_artifacts) != len(
+        lock["artifacts"]
+    ):
+        fail("sno_product_artifact_report_artifacts_invalid")
+    for artifact, report_artifact in zip(
+        lock["artifacts"], report_artifacts, strict=True
+    ):
+        if not isinstance(report_artifact, dict):
+            fail("sno_product_artifact_report_artifacts_invalid")
+        exact_keys(
+            report_artifact,
+            {"plane", "publication", "image", "chart", "admission"},
+            "sno_product_artifact_report_artifact_keys_invalid",
+        )
+        if report_artifact["plane"] != artifact["plane"]:
+            fail("sno_product_artifact_report_artifacts_invalid")
+        publication = artifact["publication"]
+        source = artifact["source"]
+        if report_artifact["publication"] != {
+            "runId": publication["runId"],
+            "runAttempt": publication["runAttempt"],
+            "runUrl": publication["runUrl"],
+            "tag": publication["tag"],
+            "sourceRevision": source["revision"],
+            "workflow": publication["workflow"],
+            "workflowName": publication["workflowName"],
+            "conclusion": "success",
+        }:
+            fail("sno_product_artifact_report_publication_invalid")
+        image = artifact["image"]
+        if report_artifact["image"] != {
+            **image,
+            "platformManifestVerified": True,
+            "signatureVerified": True,
+            "cycloneDxAttestationVerified": True,
+        }:
+            fail("sno_product_artifact_report_image_invalid")
+        chart = artifact["chart"]
+        if report_artifact["chart"] != {
+            "reference": chart["reference"],
+            "digest": chart["digest"],
+            "name": chart["name"],
+            "version": chart["version"],
+            "appVersion": chart["appVersion"],
+            "packageDigest": chart["packageDigest"],
+            "trialValuesPath": chart["trialValuesPath"],
+            "trialValuesDigest": chart["trialValuesDigest"],
+            "signatureVerified": True,
+            "cycloneDxAttestationVerified": True,
+            "packagePulled": True,
+            "trialValuesVerified": True,
+        }:
+            fail("sno_product_artifact_report_chart_invalid")
+        if report_artifact["admission"] != artifact["admission"]:
+            fail("sno_product_artifact_report_admission_invalid")
     if value["activation"] != lock["activation"]:
         fail("sno_product_artifact_report_activation_invalid")
     if value["controls"] != REPORT_CONTROLS:

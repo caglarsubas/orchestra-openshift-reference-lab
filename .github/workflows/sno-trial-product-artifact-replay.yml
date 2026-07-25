@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: sno-trial-product-artifact-replay-${{ github.ref }}
@@ -17,12 +18,14 @@ concurrency:
 
 jobs:
   replay:
-    name: read-only public model-plane artifact replay
+    name: read-only three-plane product artifact replay
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
+    environment: sno-trial-product-artifact-replay
     env:
       EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+      SNO_ARTIFACT_READ_TOKEN: ${{ secrets.SNO_ARTIFACT_READ_TOKEN }}
 
     steps:
       - name: Require exact reviewed first-attempt main execution
@@ -53,7 +56,19 @@ jobs:
       - name: Set up Docker Buildx for read-only index inspection
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Validate locked partial artifact set
+      - name: Require dedicated read-only registry credential
+        run: |
+          set -euo pipefail
+          test -n "$SNO_ARTIFACT_READ_TOKEN"
+
+      - name: Log in to GHCR for read-only cross-repository verification
+        uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4.5.1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ env.SNO_ARTIFACT_READ_TOKEN }}
+
+      - name: Validate locked three-plane artifact set
         run: python3 scripts/sno_trial_product_artifacts.py validate-lock
 
       - name: Replay publication, signatures, attestations, and chart package

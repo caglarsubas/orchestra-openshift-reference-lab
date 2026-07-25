@@ -1,15 +1,109 @@
 {
-  "schemaVersion": 1,
-  "kind": "orchestra.openshift.sno-trial-product-artifact-set.v1",
-  "artifactSetId": "orchestra-sno-trial-products-2026-07-25.1",
+  "schemaVersion": 2,
+  "kind": "orchestra.openshift.sno-trial-product-artifact-set.v2",
+  "artifactSetId": "orchestra-sno-trial-products-2026-07-25.3",
   "profileId": "orchestra-ocp-sno-trial-amd64-v1",
   "targetClass": "engineering-trial",
   "executionMode": "source-observation",
-  "completeness": "partial",
+  "completeness": "published-three-plane-not-trial-admitted",
   "bindings": {
     "workloadCandidateDigest": "sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a"
   },
   "artifacts": [
+    {
+      "plane": "platform",
+      "release": "platform-v0.1.0-rc.11",
+      "source": {
+        "repository": "caglarsubas/agent-hook-v2",
+        "revision": "13fcacafedd16eb88a0bf0f3b49e176625e15e02"
+      },
+      "image": {
+        "repository": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi",
+        "digest": "sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
+        "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
+        "platform": "linux/amd64",
+        "platformManifestDigest": "sha256:998db0c5a1110bbaf551e44d362af63e4d844db8d115380ec7215680ad564a14",
+        "variant": "ubi9"
+      },
+      "chart": {
+        "repository": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa",
+        "digest": "sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
+        "reference": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa@sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
+        "name": "prometa",
+        "version": "0.3.0-rc.11",
+        "appVersion": "0.1.0",
+        "packageDigest": "sha256:baed4c981742e8179edc752da261c0bb811736372bdfa46d72dbcc9487ee3d84",
+        "trialValuesPath": "prometa/values.openshift-sno-trial.yaml",
+        "trialValuesDigest": "sha256:3b5e5150afc64141a4a0487241b041111712983cdb5b0dc89e9bd3e3d1e44d2b"
+      },
+      "publication": {
+        "workflow": ".github/workflows/publish-platform-release.yml",
+        "workflowName": "publish-platform-release",
+        "runId": 30157474312,
+        "runAttempt": 1,
+        "runUrl": "https://github.com/caglarsubas/agent-hook-v2/actions/runs/30157474312",
+        "tag": "platform-v0.1.0-rc.11",
+        "signatureIdentity": "https://github.com/caglarsubas/agent-hook-v2/.github/workflows/publish-platform-release.yml@refs/tags/platform-v0.1.0-rc.11",
+        "oidcIssuer": "https://token.actions.githubusercontent.com"
+      },
+      "admission": {
+        "state": "published-not-trial-admitted",
+        "sourceOnly": true,
+        "publicReplayRequired": true,
+        "destinationMirrorVerified": false,
+        "liveClusterPullVerified": false,
+        "secretReferencesResolved": false,
+        "serverSideDryRunVerified": false,
+        "activationAuthorized": false
+      }
+    },
+    {
+      "plane": "runtimeHost",
+      "release": "v0.18.7",
+      "source": {
+        "repository": "prometa-ai/orchestra-python-sdk",
+        "revision": "2dbbbe13bc1764ed8bd5225dc8214906acd3310b"
+      },
+      "image": {
+        "repository": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9",
+        "digest": "sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
+        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
+        "platform": "linux/amd64",
+        "platformManifestDigest": "sha256:5f397db663f26d7e33a01faf656a8fa3eebee73ccdb348e4dfae84d7f2ec713f",
+        "variant": "ubi9"
+      },
+      "chart": {
+        "repository": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime",
+        "digest": "sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
+        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime@sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
+        "name": "prometa-runtime",
+        "version": "0.3.8",
+        "appVersion": "0.18.7",
+        "packageDigest": "sha256:dc77a8e181729ac91e6453a48e1f9b78c1fbae561f43d9e0717d72ff4c16f6b6",
+        "trialValuesPath": "prometa-runtime/values.openshift-sno-trial.yaml",
+        "trialValuesDigest": "sha256:11fe28f037b111fee2723a09999f913a220dbd5c07b28458f340b6d883027b63"
+      },
+      "publication": {
+        "workflow": ".github/workflows/publish-runtime-artifacts.yml",
+        "workflowName": "Publish runtime artifacts",
+        "runId": 30171938726,
+        "runAttempt": 1,
+        "runUrl": "https://github.com/prometa-ai/orchestra-python-sdk/actions/runs/30171938726",
+        "tag": "v0.18.7",
+        "signatureIdentity": "https://github.com/prometa-ai/orchestra-python-sdk/.github/workflows/publish-runtime-artifacts.yml@refs/heads/main",
+        "oidcIssuer": "https://token.actions.githubusercontent.com"
+      },
+      "admission": {
+        "state": "published-not-trial-admitted",
+        "sourceOnly": true,
+        "publicReplayRequired": true,
+        "destinationMirrorVerified": false,
+        "liveClusterPullVerified": false,
+        "secretReferencesResolved": false,
+        "serverSideDryRunVerified": false,
+        "activationAuthorized": false
+      }
+    },
     {
       "plane": "modelPlane",
       "release": "v0.1.11",
@@ -61,8 +155,6 @@
   "activation": {
     "state": "blocked",
     "reasonCodes": [
-      "platform-sno-profile-missing",
-      "runtime-sno-profile-missing",
       "product-artifact-replay-review-missing",
       "destination-mirror-verification-missing",
       "live-cluster-pull-verification-missing",
@@ -87,5 +179,5 @@
     "contractualSla": false,
     "productionSupported": false
   },
-  "artifactSetDigest": "sha256:ef79767052d9738b3b1e42a8bf231d013d6a08e386cd12d8993ed0ed434f05ac"
+  "artifactSetDigest": "sha256:2e6507fad12d56a5f0ddcd90259bb24eb5550f8047b285a812e9888ad82df9ef"
 }

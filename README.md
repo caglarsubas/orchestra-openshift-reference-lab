@@ -192,13 +192,21 @@ The current canonical release-set digest is
 It records published artifacts only; it is not deployment, drill, soak, or
 verification evidence.
 
-The isolated SNO lane does not rewrite that production lineage. Its partial
-product artifact set is
-`sha256:ef79767052d9738b3b1e42a8bf231d013d6a08e386cd12d8993ed0ed434f05ac`.
-It binds the signed model-plane `v0.1.11` image and chart for read-only public
-replay while retaining blocked activation and all non-certifying claim flags.
-Platform and runtime SNO profiles, destination/live pull admission, operator
-inputs, server-side dry runs, and provider readiness remain absent.
+The isolated SNO lane does not rewrite that production lineage. Its v2 product
+artifact set is independently digested in
+[`config/sno-trial-product-artifacts.lock.json`](config/sno-trial-product-artifacts.lock.json).
+It binds the platform `platform-v0.1.0-rc.11`, runtime `v0.18.7`, and model-plane
+`v0.1.11` UBI images, charts, exact source revisions, exact publication
+attempts, and source-only SNO values for read-only registry replay. Every
+artifact binds its first successful publication attempt. Runtime `v0.18.7`
+also binds the supported Cosign v3 publisher used by the independent replay.
+The artifact-set digest is
+`sha256:2e6507fad12d56a5f0ddcd90259bb24eb5550f8047b285a812e9888ad82df9ef`.
+The replay uses
+a dedicated environment credential with package-read access only because the
+artifacts cross personal and organization GHCR namespaces. Destination mirror
+and live-cluster pulls, operator inputs, server-side dry runs, and provider
+readiness remain absent; activation and every certifying claim remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
