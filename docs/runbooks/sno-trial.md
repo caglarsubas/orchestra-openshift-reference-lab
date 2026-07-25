@@ -74,6 +74,65 @@ explicit security compromise relative to the private production profile.
 Authentication is still required, but do not install until source-IP
 restriction and teardown responsibility have named owners.
 
+## Acquire and verify the public OpenShift toolchain
+
+The installer and client archives do not require a paid Red Hat account. Fetch
+only the exact versioned linux/amd64 names from the public OpenShift mirror;
+do not use the unversioned aliases:
+
+```bash
+mkdir -p restricted/redhat/4.20.27
+
+curl --fail --show-error --location \
+  --output restricted/redhat/4.20.27/sha256sum.txt \
+  https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/sha256sum.txt
+
+curl --fail --show-error --location \
+  --output restricted/redhat/4.20.27/sha256sum.txt.gpg \
+  https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/sha256sum.txt.gpg
+
+curl --fail --show-error --location \
+  --output restricted/redhat/4.20.27/red-hat-release-key-2.asc \
+  https://www.redhat.com/security/data/fd431d51.txt
+
+curl --fail --show-error --location --continue-at - \
+  --output restricted/redhat/4.20.27/openshift-install-linux-4.20.27.tar.gz \
+  https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/openshift-install-linux-4.20.27.tar.gz
+
+curl --fail --show-error --location --continue-at - \
+  --output restricted/redhat/4.20.27/openshift-client-linux-4.20.27.tar.gz \
+  https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/openshift-client-linux-4.20.27.tar.gz
+```
+
+Inspect the files against the immutable repository lock:
+
+```bash
+TOOLCHAIN_ID=sno-toolchain-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make inspect-sno-trial-toolchain \
+  ARCHIVE_DIR=restricted/redhat/4.20.27 \
+  INTAKE_ID="$TOOLCHAIN_ID" \
+  OUTPUT="restricted/$TOOLCHAIN_ID.json"
+
+make verify-sno-trial-toolchain \
+  REPORT="restricted/$TOOLCHAIN_ID.json"
+```
+
+The verifier imports the exact locked Red Hat release key into a fresh
+temporary GnuPG home, requires fingerprint
+`567E347AD0044ADE55BA8A5F199E2F91FD431D51`, verifies the signed checksum
+payload byte-for-byte, and checks both exact archive sizes and SHA-256 values
+plus the complete tar-member shape without extraction. It rejects aliases,
+key or signature substitution, signed-payload drift, path traversal, symbolic
+links, unexpected members, and digest or size drift.
+
+The result is deliberately not the `openshiftInstaller` prerequisite
+observation. The extracted `openshift-install version` plus ELF linux/amd64
+identity must still pass in the downstream trusted Linux lane. The Red Hat pull
+secret is account-gated and is never stored in this report. Archive inspection
+creates no lease and grants no cloud, installation, campaign, or certification
+authority.
+
 ## Record the Red Hat trial without identity payload
 
 The statement builder reads a mode-`0600` account identity file and the Red Hat

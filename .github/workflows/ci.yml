@@ -45,6 +45,9 @@ jobs:
       - name: Validate locked topology and repository safety
         run: python3 scripts/validate_repository.py
 
+      - name: Validate exact SNO OpenShift public toolchain lock
+        run: python3 scripts/openshift_toolchain_intake.py validate-lock
+
       - name: Prove pending SNO state cannot authorize cloud mutation
         run: |
           python3 scripts/sno_trial_readiness.py assess \

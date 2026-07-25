@@ -27,7 +27,8 @@ source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, a digest-bound source-only dependency GitOps
 candidate, an atomic signed-runner scan collector and detached
-attestation verifier, a stage-aware prerequisite observation policy and
+attestation verifier, an exact public OpenShift SNO toolchain archive lock and
+payload-free local intake verifier, a stage-aware prerequisite observation policy and
 payload-free read-only collector, gate-controlled product and dependency
 GitOps floors, an environment-bound read-only Terraform planning lane, a
 create-only signed saved-plan package lane, a private generation-pinned plan
@@ -108,6 +109,31 @@ neither raw provider output nor billing-account identity and always reports
 `cloudMutationAuthorized: false`, `campaignEvidence: false`, and no
 certification slots. The quota-review status is explicitly operator-declared;
 it is not represented as a `gcloud` or Google attestation.
+
+The exact versioned OpenShift `4.20.27` linux/amd64 installer and client
+archives are independently available from Red Hat's public mirror. Their URLs,
+byte sizes, OpenPGP-signed published checksums, signing-key fingerprint, and
+permitted tar members are locked in
+[`config/sno-trial-openshift-toolchain.lock.json`](config/sno-trial-openshift-toolchain.lock.json).
+The local intake verifies those facts without extracting binaries or reading a
+pull secret:
+
+```bash
+TOOLCHAIN_ID=sno-toolchain-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make inspect-sno-trial-toolchain \
+  ARCHIVE_DIR=restricted/redhat/4.20.27 \
+  INTAKE_ID="$TOOLCHAIN_ID" \
+  OUTPUT="restricted/$TOOLCHAIN_ID.json"
+
+make verify-sno-trial-toolchain \
+  REPORT="restricted/$TOOLCHAIN_ID.json"
+```
+
+This is signed archive-integrity evidence only. Extracted ELF architecture and
+version on a Linux AMD64 administration host, active entitlement, and pull
+secret remain separate downstream prerequisites. The report always denies
+cloud mutation and all campaign or certification use.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,

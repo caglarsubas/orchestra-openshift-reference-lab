@@ -56,6 +56,27 @@ class SnoTrialProfileTests(unittest.TestCase):
         self.assertEqual(canonical_digest(self.profile), EXPECTED_TRIAL_DIGEST)
         self.assertEqual(canonical_digest(self.production), EXPECTED_PRODUCTION_DIGEST)
 
+    def test_only_named_trial_locks_may_reference_trial_profile_in_config(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "config"
+            config.mkdir()
+            (config / "sno-trial.lock.json").write_text(
+                TRIAL_PROFILE_ID, encoding="utf-8"
+            )
+            (config / "sno-trial-openshift-toolchain.lock.json").write_text(
+                TRIAL_PROFILE_ID, encoding="utf-8"
+            )
+            validate_production_isolation(root)
+            (config / "production-like.json").write_text(
+                TRIAL_PROFILE_ID, encoding="utf-8"
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                "trial_profile_referenced_by_production_config:production-like.json",
+            ):
+                validate_production_isolation(root)
+
     def test_profile_cannot_make_certification_or_production_claims(self) -> None:
         self.assertFalse(self.profile["certificationEligible"])
         self.assertTrue(

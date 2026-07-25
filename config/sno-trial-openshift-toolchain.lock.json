@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-toolchain-lock.v1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "version": "4.20.27",
+  "architecture": "linux/amd64",
+  "mirrorBaseUrl": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27",
+  "checksumDocument": {
+    "fileName": "sha256sum.txt",
+    "sizeBytes": 6068,
+    "digest": "sha256:7b6eb2ee150d8a48583a0baf2b25b21dbf382a97c38e122179c7d216d1584902",
+    "sourceUrl": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/sha256sum.txt"
+  },
+  "signatureDocument": {
+    "fileName": "sha256sum.txt.gpg",
+    "sizeBytes": 2281,
+    "digest": "sha256:919bdd806f41b48dc9a92ac19dd83896bcd51507860e0d751c0c636255f49624",
+    "sourceUrl": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/sha256sum.txt.gpg",
+    "format": "openpgp-signed-message"
+  },
+  "signingKey": {
+    "fileName": "red-hat-release-key-2.asc",
+    "sizeBytes": 1855,
+    "digest": "sha256:d4b2543626bee31d9438d4a31731aae712c072893c7aed8854f16c42fafc742b",
+    "sourceUrl": "https://www.redhat.com/security/data/fd431d51.txt",
+    "fingerprint": "567E347AD0044ADE55BA8A5F199E2F91FD431D51",
+    "identity": "Red Hat, Inc. (release key 2) <security@redhat.com>"
+  },
+  "artifacts": [
+    {
+      "role": "installer",
+      "fileName": "openshift-install-linux-4.20.27.tar.gz",
+      "sizeBytes": 414760801,
+      "digest": "sha256:99b859b5453668d422356abf051ec2ae2501a13d0155a518af9f49989914a596",
+      "sourceUrl": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/openshift-install-linux-4.20.27.tar.gz",
+      "members": [
+        {
+          "name": "README.md",
+          "type": "regular",
+          "sizeBytes": 706,
+          "mode": 420,
+          "linkName": null
+        },
+        {
+          "name": "openshift-install",
+          "type": "regular",
+          "sizeBytes": 631505080,
+          "mode": 493,
+          "linkName": null
+        }
+      ]
+    },
+    {
+      "role": "client",
+      "fileName": "openshift-client-linux-4.20.27.tar.gz",
+      "sizeBytes": 43386638,
+      "digest": "sha256:cac1364153e7afc2ebd2eef9b7d0ce6b06d1721b035feba9d846433a7ed4db81",
+      "sourceUrl": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/openshift-client-linux-4.20.27.tar.gz",
+      "members": [
+        {
+          "name": "README.md",
+          "type": "regular",
+          "sizeBytes": 950,
+          "mode": 420,
+          "linkName": null
+        },
+        {
+          "name": "oc",
+          "type": "regular",
+          "sizeBytes": 138128200,
+          "mode": 493,
+          "linkName": null
+        },
+        {
+          "name": "kubectl",
+          "type": "hardlink",
+          "sizeBytes": 0,
+          "mode": 493,
+          "linkName": "oc"
+        }
+      ]
+    }
+  ],
+  "controls": {
+    "scope": "engineering-trial-archive-intake",
+    "integrityModel": "official-red-hat-openpgp-plus-sha256",
+    "versionedArchiveNamesRequired": true,
+    "archiveMembersPinned": true,
+    "checksumSignatureRequired": true,
+    "binaryExecutionRequiredDownstream": true,
+    "pullSecretRequiredDownstream": true,
+    "entitlementRequiredDownstream": true,
+    "cloudMutationAuthorized": false,
+    "campaignEligible": false
+  }
+}

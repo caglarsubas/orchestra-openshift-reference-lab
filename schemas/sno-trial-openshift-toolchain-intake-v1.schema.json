@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-openshift-toolchain-intake-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial toolchain intake v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "intakeId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "checksumDocument",
+    "signatureDocument",
+    "signingKey",
+    "artifacts",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-toolchain-intake.v1"},
+    "intakeId": {
+      "type": "string",
+      "pattern": "^sno-toolchain-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"$ref": "#/$defs/timestamp"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"enum": ["simulated", "live-local"]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "checksumDocument": {"$ref": "#/$defs/checksumDocument"},
+    "signatureDocument": {"$ref": "#/$defs/signatureDocument"},
+    "signingKey": {"$ref": "#/$defs/signingKey"},
+    "artifacts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {"properties": {"role": {"const": "installer"}}}
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {"properties": {"role": {"const": "client"}}}
+          ]
+        }
+      ],
+      "items": false
+    },
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "toolchainLockDigest",
+        "version",
+        "architecture"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "toolchainLockDigest": {"$ref": "#/$defs/digest"},
+        "version": {"const": "4.20.27"},
+        "architecture": {"const": "linux/amd64"}
+      }
+    },
+    "checksumDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName",
+        "sourceUrl",
+        "sizeBytes",
+        "digest",
+        "signatureVerified"
+      ],
+      "properties": {
+        "fileName": {"const": "sha256sum.txt"},
+        "sourceUrl": {
+          "const": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/sha256sum.txt"
+        },
+        "sizeBytes": {"const": 6068},
+        "digest": {"$ref": "#/$defs/digest"},
+        "signatureVerified": {"const": true}
+      }
+    },
+    "signatureDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName",
+        "sourceUrl",
+        "sizeBytes",
+        "digest",
+        "format",
+        "signedPayloadDigest",
+        "validSignature"
+      ],
+      "properties": {
+        "fileName": {"const": "sha256sum.txt.gpg"},
+        "sourceUrl": {
+          "const": "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.20.27/sha256sum.txt.gpg"
+        },
+        "sizeBytes": {"const": 2281},
+        "digest": {"$ref": "#/$defs/digest"},
+        "format": {"const": "openpgp-signed-message"},
+        "signedPayloadDigest": {"$ref": "#/$defs/digest"},
+        "validSignature": {"const": true}
+      }
+    },
+    "signingKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName",
+        "sourceUrl",
+        "sizeBytes",
+        "digest",
+        "fingerprint",
+        "identity",
+        "fingerprintVerified"
+      ],
+      "properties": {
+        "fileName": {"const": "red-hat-release-key-2.asc"},
+        "sourceUrl": {
+          "const": "https://www.redhat.com/security/data/fd431d51.txt"
+        },
+        "sizeBytes": {"const": 1855},
+        "digest": {"$ref": "#/$defs/digest"},
+        "fingerprint": {"const": "567E347AD0044ADE55BA8A5F199E2F91FD431D51"},
+        "identity": {
+          "const": "Red Hat, Inc. (release key 2) <security@redhat.com>"
+        },
+        "fingerprintVerified": {"const": true}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "fileName",
+        "sourceUrl",
+        "sizeBytes",
+        "publishedDigest",
+        "actualDigest",
+        "checksumMatch",
+        "members"
+      ],
+      "properties": {
+        "role": {"enum": ["installer", "client"]},
+        "fileName": {
+          "type": "string",
+          "pattern": "^openshift-(install|client)-linux-4\\.20\\.27\\.tar\\.gz$"
+        },
+        "sourceUrl": {
+          "type": "string",
+          "pattern": "^https://mirror\\.openshift\\.com/pub/openshift-v4/clients/ocp/4\\.20\\.27/openshift-(install|client)-linux-4\\.20\\.27\\.tar\\.gz$"
+        },
+        "sizeBytes": {"type": "integer", "minimum": 1},
+        "publishedDigest": {"$ref": "#/$defs/digest"},
+        "actualDigest": {"$ref": "#/$defs/digest"},
+        "checksumMatch": {"const": true},
+        "members": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/member"}
+        }
+      }
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "sizeBytes", "mode", "linkName"],
+      "properties": {
+        "name": {"enum": ["README.md", "openshift-install", "oc", "kubectl"]},
+        "type": {"enum": ["regular", "hardlink"]},
+        "sizeBytes": {"type": "integer", "minimum": 0},
+        "mode": {"enum": [420, 493]},
+        "linkName": {"type": ["string", "null"]}
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archiveIntegrityVerified",
+        "checksumSignatureVerified",
+        "binaryExecutionVerified",
+        "pullSecretObserved",
+        "entitlementObserved",
+        "cloudMutationAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "archiveIntegrityVerified": {"const": true},
+        "checksumSignatureVerified": {"const": true},
+        "binaryExecutionVerified": {"const": false},
+        "pullSecretObserved": {"const": false},
+        "entitlementObserved": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {"type": "array", "maxItems": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false}
+      }
+    }
+  }
+}
