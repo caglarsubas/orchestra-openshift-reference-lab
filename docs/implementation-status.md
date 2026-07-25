@@ -78,6 +78,7 @@ any certification campaign slot.
 | 12-hour maximum project-bound operator lease | Yes | Yes | No | No | Not eligible |
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
 | Exact public `4.20.27` installer/client archive lock and local integrity intake | Yes | Yes | Local archive only | Yes | Not eligible |
+| Inert single-node workload and resource candidate | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
@@ -102,6 +103,15 @@ tar-member inventories. The payload-free report deliberately leaves Linux
 binary execution, entitlement, pull-secret observation, cloud mutation, and
 campaign eligibility false. These remaining prerequisites cannot be inferred
 from a successful archive inspection.
+
+The inert workload-candidate row records a source-only capacity calculation
+for nine single-replica workloads on the locked `n2-standard-8`. It preserves
+a 3-vCPU/12-GiB system reserve and leaves positive request headroom, but emits
+no deployable manifests and grants no installation authority. Trial-specific
+product chart profiles, direct dependency runtime contracts, a Valkey image,
+a CPU model-backend artifact, live allocatable capacity, and server-side dry
+run all remain explicit blockers. Source and CI validation therefore do not
+mark the minimal dependency plane as applied or live-tested.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

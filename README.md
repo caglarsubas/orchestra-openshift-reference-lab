@@ -135,6 +135,28 @@ version on a Linux AMD64 administration host, active entitlement, and pull
 secret remain separate downstream prerequisites. The report always denies
 cloud mutation and all campaign or certification use.
 
+The source-only workload candidate in
+[`config/sno-trial-workload-candidate.lock.json`](config/sno-trial-workload-candidate.lock.json)
+uses the released three-plane images and currently resolved dependency sources
+to test whether the intended trial shape can fit on the node. It reserves
+3 vCPU and 12 GiB for OpenShift and system services, caps workload requests at
+5 vCPU and 20 GiB, and records 3.4 vCPU/14.375 GiB steady requests plus a
+serial 250m/256 MiB transient allowance. The resulting peak leaves 1.35 vCPU
+and 5.375 GiB request headroom; aggregate limits are 7.25 vCPU/25 GiB and
+persistent volumes total 48 GiB. Validate the canonical candidate with:
+
+```bash
+make validate-sno-trial-workload-candidate
+```
+
+This is a capacity decision record, not deployment input. It emits no
+manifests, Argo CD applications, Secret values, lease, or cloud authority.
+Valkey and CPU model-backend artifacts are unresolved, and trial-specific
+single-replica chart profiles and dependency runtime contracts do not yet
+exist. Its canonical digest is
+`sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a`;
+all production, HA, campaign, certification, and SLA claims remain false.
+
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
 and at least 120 GB storage. The trial profile deliberately uses 8 vCPU and

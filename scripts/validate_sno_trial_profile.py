@@ -18,6 +18,7 @@ PRODUCTION_PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 ALLOWED_TRIAL_CONFIG_NAMES = {
     "sno-trial.lock.json",
     "sno-trial-openshift-toolchain.lock.json",
+    "sno-trial-workload-candidate.lock.json",
 }
 EXPECTED_PRODUCTION_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
