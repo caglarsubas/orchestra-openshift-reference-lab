@@ -51,6 +51,9 @@ jobs:
       - name: Validate inert SNO workload and capacity candidate
         run: python3 scripts/validate_sno_trial_workload_candidate.py
 
+      - name: Validate partial SNO product artifact set
+        run: python3 scripts/sno_trial_product_artifacts.py validate-lock
+
       - name: Prove pending SNO state cannot authorize cloud mutation
         run: |
           python3 scripts/sno_trial_readiness.py assess \

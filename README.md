@@ -192,6 +192,14 @@ The current canonical release-set digest is
 It records published artifacts only; it is not deployment, drill, soak, or
 verification evidence.
 
+The isolated SNO lane does not rewrite that production lineage. Its partial
+product artifact set is
+`sha256:ef79767052d9738b3b1e42a8bf231d013d6a08e386cd12d8993ed0ed434f05ac`.
+It binds the signed model-plane `v0.1.11` image and chart for read-only public
+replay while retaining blocked activation and all non-certifying claim flags.
+Platform and runtime SNO profiles, destination/live pull admission, operator
+inputs, server-side dry runs, and provider readiness remain absent.
+
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
 It locks eleven upstream chart packages and accounts for every declared
