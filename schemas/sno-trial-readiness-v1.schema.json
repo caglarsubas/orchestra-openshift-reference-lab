@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-readiness-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial readiness v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "offlineChecks",
+    "providerState",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-readiness.v1"},
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^sno-readiness-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"$ref": "#/$defs/timestamp"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"enum": ["simulated", "live-diagnostic"]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "offlineChecks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/offlineCheck"}
+    },
+    "providerState": {"$ref": "#/$defs/providerState"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "productionProfileDigest",
+        "releaseSetId",
+        "releaseSetDigest",
+        "requiredApisDigest"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "productionProfileDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetId": {"type": "string"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "requiredApisDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "offlineCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "subjectDigest"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+        "status": {"const": "passed"},
+        "subjectDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "providerState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedAt",
+        "projectId",
+        "projectIdentityDigest",
+        "projectNumberDigest",
+        "lifecycleState",
+        "billingEnabled",
+        "enabledRequiredApiCount",
+        "requiredApiCount",
+        "missingRequiredApis",
+        "quotaRequestStatus",
+        "quotaRequestStatusSource",
+        "requestedAdditionalProjects"
+      ],
+      "properties": {
+        "observedAt": {"$ref": "#/$defs/timestamp"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "projectNumberDigest": {"$ref": "#/$defs/digest"},
+        "lifecycleState": {"type": "string", "minLength": 1},
+        "billingEnabled": {"type": "boolean"},
+        "enabledRequiredApiCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 11
+        },
+        "requiredApiCount": {"const": 11},
+        "missingRequiredApis": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9.-]+\\.googleapis\\.com$"
+          }
+        },
+        "quotaRequestStatus": {
+          "enum": ["not-submitted", "pending", "approved", "rejected"]
+        },
+        "quotaRequestStatusSource": {"const": "operator-declared"},
+        "requestedAdditionalProjects": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction", "freshPlanRequired"],
+      "properties": {
+        "status": {
+          "enum": [
+            "BLOCKED",
+            "WAITING_PROVIDER",
+            "READY_FOR_FRESH_PLAN",
+            "FOUNDATION_RECHECK_REQUIRED",
+            "DOWNSTREAM_VERIFICATION_REQUIRED"
+          ]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]+$"}
+        },
+        "nextAction": {"type": "string", "pattern": "^[a-z][a-z0-9-]+$"},
+        "freshPlanRequired": {"const": true}
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandPolicy",
+        "rawProviderOutputStored",
+        "secretValuesStored",
+        "cloudMutationAuthorized",
+        "foundationPlanApplied",
+        "activeOperatorLeaseObserved",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "commandPolicy": {"const": "read-only"},
+        "rawProviderOutputStored": {"const": false},
+        "secretValuesStored": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "foundationPlanApplied": {"const": false},
+        "activeOperatorLeaseObserved": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

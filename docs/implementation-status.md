@@ -79,10 +79,20 @@ any certification campaign slot.
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
+| Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
+| Unbilled disposable project shell, without APIs or workloads | N/A | N/A | Shell only | Yes | Not eligible |
 | GCP project, budget, DNS, and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
 | Minimal co-located trial dependencies | No | N/A | No | No | Not eligible |
 | Verified teardown and residual-resource reconciliation | No | N/A | No | No | Not eligible |
+
+The project-shell row records a point-in-time read-only observation on
+2026-07-25 for `prometa-orch-sno-499235`: project lifecycle `ACTIVE`, billing
+disabled, zero enabled APIs, and the one-project billing-association quota
+request pending Google review. It does not mark the combined project, budget,
+DNS, and allowlist foundation as applied. The observation must be refreshed
+with `scripts/sno_trial_readiness.py`; its output is a non-certifying
+diagnostic, never campaign evidence or mutation authority.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

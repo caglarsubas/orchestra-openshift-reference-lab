@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.gcp.sno-trial-project-snapshot.v1",
+  "executionMode": "simulated",
+  "observedAt": "2026-07-25T05:00:00Z",
+  "projectId": "prometa-orch-sno-fixture",
+  "projectNumberDigest": "sha256:dd167315f4f1224b34e7ece05b8a166c12c2754c33d80a8cbce2223c6b18d1e1",
+  "lifecycleState": "ACTIVE",
+  "billingEnabled": false,
+  "enabledApis": [],
+  "quotaRequest": {
+    "status": "pending",
+    "source": "operator-declared",
+    "requestedAdditionalProjects": 1
+  }
+}

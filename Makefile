@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial test verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial test observe-sno-trial-readiness verify-sno-trial-readiness verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -28,6 +28,21 @@ validate:
 
 validate-sno-trial:
 	$(PYTHON) scripts/validate_sno_trial_profile.py
+
+observe-sno-trial-readiness:
+	test -n "$(PROJECT_ID)"
+	test -n "$(QUOTA_REQUEST_STATUS)"
+	test -n "$(ASSESSMENT_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_readiness.py collect \
+		--project-id "$(PROJECT_ID)" \
+		--quota-request-status "$(QUOTA_REQUEST_STATUS)" \
+		--assessment-id "$(ASSESSMENT_ID)" \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-readiness:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/sno_trial_readiness.py verify --report "$(REPORT)"
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
