@@ -1,13 +1,14 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate test observe-sno-trial-readiness verify-sno-trial-readiness inspect-sno-trial-toolchain verify-sno-trial-toolchain verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts test observe-sno-trial-readiness verify-sno-trial-readiness inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
 	$(PYTHON) scripts/validate_sno_trial_profile.py
 	$(PYTHON) scripts/openshift_toolchain_intake.py validate-lock
 	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
+	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock
 	$(PYTHON) scripts/validate_release_set.py
 	$(PYTHON) scripts/validate_reference_lab_contract_intake.py
 	$(PYTHON) scripts/validate_dependency_bom.py
@@ -37,6 +38,9 @@ validate-sno-trial-toolchain:
 validate-sno-trial-workload-candidate:
 	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
 
+validate-sno-trial-product-artifacts:
+	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock
+
 observe-sno-trial-readiness:
 	test -n "$(PROJECT_ID)"
 	test -n "$(QUOTA_REQUEST_STATUS)"
@@ -64,6 +68,24 @@ inspect-sno-trial-toolchain:
 verify-sno-trial-toolchain:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/openshift_toolchain_intake.py verify --report "$(REPORT)"
+
+replay-sno-trial-product-artifacts:
+	test -n "$(VERIFICATION_ID)"
+	test -n "$(GENERATED_AT)"
+	test -n "$(VERIFIER_REVISION)"
+	test -n "$(VERIFIER_RUN_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_product_artifacts.py replay \
+		--verification-id "$(VERIFICATION_ID)" \
+		--generated-at "$(GENERATED_AT)" \
+		--verifier-revision "$(VERIFIER_REVISION)" \
+		--verifier-run-id "$(VERIFIER_RUN_ID)" \
+		--verifier-run-attempt 1 \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-product-artifacts:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/sno_trial_product_artifacts.py verify --report "$(REPORT)"
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v

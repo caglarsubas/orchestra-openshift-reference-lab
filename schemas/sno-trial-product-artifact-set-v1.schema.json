@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-product-artifact-set-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial product artifact set v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "artifactSetId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "completeness",
+    "bindings",
+    "artifacts",
+    "activation",
+    "controls",
+    "claims",
+    "artifactSetDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-product-artifact-set.v1"
+    },
+    "artifactSetId": {
+      "const": "orchestra-sno-trial-products-2026-07-25.1"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "source-observation"},
+    "completeness": {"const": "partial"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {"$ref": "#/$defs/artifact"}
+    },
+    "activation": {"$ref": "#/$defs/activation"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "artifactSetDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workloadCandidateDigest"],
+      "properties": {
+        "workloadCandidateDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision"],
+      "properties": {
+        "repository": {"const": "caglarsubas/llm_inference_engine"},
+        "revision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "digest",
+        "reference",
+        "platform",
+        "platformManifestDigest",
+        "variant"
+      ],
+      "properties": {
+        "repository": {
+          "const": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi"
+        },
+        "digest": {"$ref": "#/$defs/digest"},
+        "reference": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:[a-f0-9]{64}$"
+        },
+        "platform": {"const": "linux/amd64"},
+        "platformManifestDigest": {"$ref": "#/$defs/digest"},
+        "variant": {"const": "ubi9"}
+      }
+    },
+    "chart": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "digest",
+        "reference",
+        "name",
+        "version",
+        "appVersion",
+        "packageDigest",
+        "trialValuesPath",
+        "trialValuesDigest"
+      ],
+      "properties": {
+        "repository": {
+          "const": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine"
+        },
+        "digest": {"$ref": "#/$defs/digest"},
+        "reference": {
+          "type": "string",
+          "pattern": "^ghcr\\.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine@sha256:[a-f0-9]{64}$"
+        },
+        "name": {"const": "orchestra-inference-engine"},
+        "version": {"const": "0.1.3"},
+        "appVersion": {"const": "0.1.11"},
+        "packageDigest": {"$ref": "#/$defs/digest"},
+        "trialValuesPath": {
+          "const": "orchestra-inference-engine/values.openshift-sno-trial.yaml"
+        },
+        "trialValuesDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow",
+        "workflowName",
+        "runId",
+        "runAttempt",
+        "runUrl",
+        "tag",
+        "signatureIdentity",
+        "oidcIssuer"
+      ],
+      "properties": {
+        "workflow": {"const": ".github/workflows/publish-images.yml"},
+        "workflowName": {"const": "publish-release-artifacts"},
+        "runId": {"const": 30151836099},
+        "runAttempt": {"const": 1},
+        "runUrl": {
+          "const": "https://github.com/caglarsubas/llm_inference_engine/actions/runs/30151836099"
+        },
+        "tag": {"const": "v0.1.11"},
+        "signatureIdentity": {
+          "const": "https://github.com/caglarsubas/llm_inference_engine/.github/workflows/publish-images.yml@refs/tags/v0.1.11"
+        },
+        "oidcIssuer": {
+          "const": "https://token.actions.githubusercontent.com"
+        }
+      }
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "sourceOnly",
+        "publicReplayRequired",
+        "destinationMirrorVerified",
+        "liveClusterPullVerified",
+        "secretReferencesResolved",
+        "serverSideDryRunVerified",
+        "activationAuthorized"
+      ],
+      "properties": {
+        "state": {"const": "published-not-trial-admitted"},
+        "sourceOnly": {"const": true},
+        "publicReplayRequired": {"const": true},
+        "destinationMirrorVerified": {"const": false},
+        "liveClusterPullVerified": {"const": false},
+        "secretReferencesResolved": {"const": false},
+        "serverSideDryRunVerified": {"const": false},
+        "activationAuthorized": {"const": false}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plane",
+        "release",
+        "source",
+        "image",
+        "chart",
+        "publication",
+        "admission"
+      ],
+      "properties": {
+        "plane": {"const": "modelPlane"},
+        "release": {"const": "v0.1.11"},
+        "source": {"$ref": "#/$defs/source"},
+        "image": {"$ref": "#/$defs/image"},
+        "chart": {"$ref": "#/$defs/chart"},
+        "publication": {"$ref": "#/$defs/publication"},
+        "admission": {"$ref": "#/$defs/admission"}
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reasonCodes"],
+      "properties": {
+        "state": {"const": "blocked"},
+        "reasonCodes": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "platform-sno-profile-missing"},
+            {"const": "runtime-sno-profile-missing"},
+            {"const": "product-artifact-replay-review-missing"},
+            {"const": "destination-mirror-verification-missing"},
+            {"const": "live-cluster-pull-verification-missing"},
+            {"const": "operator-secret-and-ca-inputs-missing"},
+            {"const": "openshift-server-side-dry-run-missing"},
+            {"const": "provider-readiness-not-approved"}
+          ],
+          "items": false,
+          "minItems": 8,
+          "maxItems": 8
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "productionReleaseSetMutated",
+        "manifestsEmitted",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "productionReleaseSetMutated": {"const": false},
+        "manifestsEmitted": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false}
+      }
+    }
+  }
+}

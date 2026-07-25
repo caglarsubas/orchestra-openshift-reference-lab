@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-product-artifact-set.v1",
+  "artifactSetId": "orchestra-sno-trial-products-2026-07-25.1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "executionMode": "source-observation",
+  "completeness": "partial",
+  "bindings": {
+    "workloadCandidateDigest": "sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a"
+  },
+  "artifacts": [
+    {
+      "plane": "modelPlane",
+      "release": "v0.1.11",
+      "source": {
+        "repository": "caglarsubas/llm_inference_engine",
+        "revision": "6c3f2a0cb34ca5110760b53d9cc8d65a3a5c2df2"
+      },
+      "image": {
+        "repository": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi",
+        "digest": "sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
+        "reference": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
+        "platform": "linux/amd64",
+        "platformManifestDigest": "sha256:52e9da1065dfa539c70aae79beccafc58a47db17f5422bc500e3ab9b3c394c7a",
+        "variant": "ubi9"
+      },
+      "chart": {
+        "repository": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine",
+        "digest": "sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
+        "reference": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine@sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
+        "name": "orchestra-inference-engine",
+        "version": "0.1.3",
+        "appVersion": "0.1.11",
+        "packageDigest": "sha256:bde3db9f6849e3a25a19d5671b0db4e8f14e14f96218b0552920f182fe8467b3",
+        "trialValuesPath": "orchestra-inference-engine/values.openshift-sno-trial.yaml",
+        "trialValuesDigest": "sha256:21affdee56d51be89396a209819d6a5b0a6d74fe6aa4210b1bd0096384023c1c"
+      },
+      "publication": {
+        "workflow": ".github/workflows/publish-images.yml",
+        "workflowName": "publish-release-artifacts",
+        "runId": 30151836099,
+        "runAttempt": 1,
+        "runUrl": "https://github.com/caglarsubas/llm_inference_engine/actions/runs/30151836099",
+        "tag": "v0.1.11",
+        "signatureIdentity": "https://github.com/caglarsubas/llm_inference_engine/.github/workflows/publish-images.yml@refs/tags/v0.1.11",
+        "oidcIssuer": "https://token.actions.githubusercontent.com"
+      },
+      "admission": {
+        "state": "published-not-trial-admitted",
+        "sourceOnly": true,
+        "publicReplayRequired": true,
+        "destinationMirrorVerified": false,
+        "liveClusterPullVerified": false,
+        "secretReferencesResolved": false,
+        "serverSideDryRunVerified": false,
+        "activationAuthorized": false
+      }
+    }
+  ],
+  "activation": {
+    "state": "blocked",
+    "reasonCodes": [
+      "platform-sno-profile-missing",
+      "runtime-sno-profile-missing",
+      "product-artifact-replay-review-missing",
+      "destination-mirror-verification-missing",
+      "live-cluster-pull-verification-missing",
+      "operator-secret-and-ca-inputs-missing",
+      "openshift-server-side-dry-run-missing",
+      "provider-readiness-not-approved"
+    ]
+  },
+  "controls": {
+    "productionReleaseSetMutated": false,
+    "manifestsEmitted": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEligible": false,
+    "allowedCertificationSlots": []
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false
+  },
+  "artifactSetDigest": "sha256:ef79767052d9738b3b1e42a8bf231d013d6a08e386cd12d8993ed0ed434f05ac"
+}

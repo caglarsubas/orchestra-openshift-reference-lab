@@ -1,0 +1,85 @@
+name: SNO trial product artifact replay
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for replay
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sno-trial-product-artifact-replay-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    name: read-only public model-plane artifact replay
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+
+    steps:
+      - name: Require exact reviewed first-attempt main execution
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+
+      - name: Check out exact verifier implementation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        with:
+          version: v3.16.4
+
+      - name: Set up Cosign for verification only
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Set up Docker Buildx for read-only index inspection
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Validate locked partial artifact set
+        run: python3 scripts/sno_trial_product_artifacts.py validate-lock
+
+      - name: Replay publication, signatures, attestations, and chart package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 scripts/sno_trial_product_artifacts.py replay \
+            --verification-id "sno-product-replay-${GITHUB_RUN_ID}.1" \
+            --generated-at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --verifier-revision "$GITHUB_SHA" \
+            --verifier-run-id "$GITHUB_RUN_ID" \
+            --verifier-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --output "$RUNNER_TEMP/sno-trial-product-artifact-replay.json"
+          python3 scripts/sno_trial_product_artifacts.py verify \
+            --report "$RUNNER_TEMP/sno-trial-product-artifact-replay.json"
+
+      - name: Upload payload-free replay report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sno-trial-product-artifact-replay-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sno-trial-product-artifact-replay.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Remove local replay material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sno-trial-product-artifact-replay.json"

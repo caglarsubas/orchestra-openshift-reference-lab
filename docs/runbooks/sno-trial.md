@@ -165,6 +165,35 @@ resource, image, mode, storage, or blocker change requires a new candidate ID
 and digest. The current candidate always remains blocked and cannot produce
 campaign evidence.
 
+## Replay the published model-plane trial artifact
+
+The model-plane owner has published release `v0.1.11` and chart `0.1.3` with
+the source-only SNO values contract. The partial artifact set is locked in
+`config/sno-trial-product-artifacts.lock.json` without changing the production
+cross-plane release set:
+
+```bash
+make validate-sno-trial-product-artifacts
+```
+
+After the lock is merged to `main`, dispatch
+`SNO trial product artifact replay` with the exact reviewed main SHA. The
+workflow reads the public release run and GHCR only. It requires the successful
+first-attempt tag workflow, verifies the UBI image and Helm chart keyless
+signatures and CycloneDX attestations, pulls the exact chart package, and
+checks the package digest plus the SNO values member digest. Its downloadable
+report contains no registry credentials, signature payloads, SBOM payloads,
+Secrets, or customer data.
+
+A successful replay proves only that this one public model-plane artifact
+matches its source and signed publication. An operator must review and accept
+the payload-free report in a later admission step; the workflow cannot mutate
+the lock or admit the artifact. The artifact set remains `partial` and
+activation remains blocked while platform/runtime SNO profiles,
+destination mirror and live cluster pulls, operator Secret/CA inputs,
+OpenShift server-side dry runs, and provider readiness are absent. It is not
+installation, campaign, reference-profile, customer, Red Hat, or SLA evidence.
+
 ## Record the Red Hat trial without identity payload
 
 The statement builder reads a mode-`0600` account identity file and the Red Hat
