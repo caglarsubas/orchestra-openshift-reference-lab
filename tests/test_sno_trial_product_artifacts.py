@@ -191,6 +191,30 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "publication_origin_invalid"):
             verify_publication_run(artifact, run)
 
+    def test_replay_workflow_separates_source_and_registry_credentials(
+        self,
+    ) -> None:
+        workflow = (
+            ROOT
+            / ".github"
+            / "workflows"
+            / "sno-trial-product-artifact-replay.yml"
+        ).read_text()
+        self.assertIn(
+            "SNO_ARTIFACT_READ_TOKEN: ${{ secrets.SNO_ARTIFACT_READ_TOKEN }}",
+            workflow,
+        )
+        self.assertIn(
+            "SNO_SOURCE_RUN_READ_TOKEN: "
+            "${{ secrets.SNO_SOURCE_RUN_READ_TOKEN }}",
+            workflow,
+        )
+        self.assertIn(
+            "GH_TOKEN: ${{ env.SNO_SOURCE_RUN_READ_TOKEN }}",
+            workflow,
+        )
+        self.assertNotIn("GH_TOKEN: ${{ github.token }}", workflow)
+
     def test_dispatched_publication_binds_main_and_exact_source_tag(
         self,
     ) -> None:
