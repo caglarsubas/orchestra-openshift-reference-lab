@@ -93,17 +93,21 @@ The complete source-to-destroy procedure is in
 As of 2026-07-26, the disposable `prometa-orch-sno-499235` foundation has been
 applied and independently read back: billing is enabled, all 11 locked APIs are
 active, the project-filtered 3,500 TRY budget has all six thresholds, and the
-unused legacy `ocp-lab.prometa.ai.` managed zone exists. The active trial
-contract now uses `ocp-lab.planeon.ai.`; its additive Cloud DNS zone has not
-yet been applied. The migration retains the old empty zone explicitly and does
-not delete or modify it. No compute, cluster, installer, workload, or Secret
-resource has been created.
+unused legacy `ocp-lab.prometa.ai.` managed zone exists. The active
+`ocp-lab.planeon.ai.` Cloud DNS zone was then created from exact main with a
+guarded plan of one add, zero changes, and zero destroys. The legacy zone moved
+in Terraform state without a provider mutation. Independent readback observed
+both exact zones, and a post-apply plan reported no drift. No compute, cluster,
+installer, workload, or Secret resource has been created.
 
 The Cloudflare-hosted `planeon.ai` parent does not yet delegate
 `ocp-lab.planeon.ai.`. Source CIDR review, a Linux AMD64 administration path,
-and an active operator lease also remain required. Earlier readiness reports
-are bound to the previous profile digest and are historical only. Re-run the
-payload-free assessment after the additive Planeon zone is applied:
+and an active operator lease also remain required. Fresh payload-free report
+`sno-readiness-operator-20260726174421.1` binds the current profile digest,
+records approved quota status as operator-declared, and remains
+`DOWNSTREAM_VERIFICATION_REQUIRED`. Its report digest is
+`sha256:13ba6f6fb93e524b0dcb28d653ff9ab52de1228fd0a2d94db8bdd66511cd56dc`.
+Re-run the assessment before relying on that point-in-time observation:
 
 ```bash
 READINESS_ID=sno-readiness-operator-$(date -u +%Y%m%d%H%M%S).1
@@ -145,14 +149,13 @@ make verify-sno-trial-network-hygiene \
 The initial live observation found the unused GCP-created `default` auto-mode
 VPC, 42 subnetworks, four default firewall rules, and three enabled
 internet-ingress rules. After a zero-dependent-resource inventory, the bounded
-operator cleanup removed only those default resources. The post-cleanup report
-`sno-network-operator-20260726143535.1` is `CLEAN`, has report digest
-`sha256:e69b9f1f5478b9bb07b9854dc708951546f3e048397cffbcfe415bc5ea95e1d8`,
+operator cleanup removed only those default resources. Fresh report
+`sno-network-operator-20260726174421.1` binds the current Planeon profile, is
+`CLEAN`, has report digest
+`sha256:fb074a14e51f012c750954f766bcd1d09bf05d8f10a40352fee4f8235f870380`,
 and observes zero networks, subnetworks, firewall rules, and internet-ingress
-rules. A subsequent Terraform refresh returned no changes. This closes the
-network-hygiene drift only; it does not authorize installation or produce
-campaign evidence. The report is bound to the prior trial-profile digest and
-must be recollected after the Planeon profile migration.
+rules. This closes the network-hygiene drift only; it does not authorize
+installation or produce campaign evidence.
 
 The exact versioned OpenShift `4.20.27` linux/amd64 installer and client
 archives are independently available from Red Hat's public mirror. Their URLs,
