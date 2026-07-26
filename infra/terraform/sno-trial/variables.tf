@@ -46,3 +46,9 @@ variable "allow_project_delete" {
   type        = bool
   default     = false
 }
+
+variable "retain_legacy_prometa_zone" {
+  description = "Temporarily retain the unused Prometa child zone during the additive Planeon DNS migration."
+  type        = bool
+  default     = false
+}

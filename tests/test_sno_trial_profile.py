@@ -150,6 +150,7 @@ class SnoTrialProfileTests(unittest.TestCase):
         self.assertIn("type: n2-standard-8", rendered)
         self.assertIn("diskType: pd-balanced", rendered)
         self.assertIn("publish: External", rendered)
+        self.assertIn("baseDomain: ocp-lab.planeon.ai", rendered)
         self.assertIn("${PULL_SECRET_JSON}", rendered)
         self.assertIn("${SSH_PUBLIC_KEY}", rendered)
         self.assertNotIn("${TARGET_PROJECT_ID}", rendered)

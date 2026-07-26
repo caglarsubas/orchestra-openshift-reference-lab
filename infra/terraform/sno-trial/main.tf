@@ -4,7 +4,7 @@ locals {
     file("${path.module}/../../../config/sno-trial-billing-execution.lock.json")
   )
 
-  profile_digest = "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b"
+  profile_digest = "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a"
   required_services = toset([
     "billingbudgets.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -122,14 +122,34 @@ resource "google_billing_budget" "trial" {
   depends_on = [google_project_service.required]
 }
 
-resource "google_dns_managed_zone" "public_base_domain" {
+moved {
+  from = google_dns_managed_zone.public_base_domain
+  to   = google_dns_managed_zone.legacy_public_base_domain[0]
+}
+
+resource "google_dns_managed_zone" "legacy_public_base_domain" {
+  count    = var.retain_legacy_prometa_zone ? 1 : 0
   provider = google.trial
 
   project = google_project.trial.project_id
 
   name          = "orchestra-ocp-sno-trial-public"
-  dns_name      = "${local.profile.location.dnsZone}."
+  dns_name      = "ocp-lab.prometa.ai."
   description   = "Public delegation zone for the non-certifying Orchestra OpenShift SNO trial"
+  visibility    = "public"
+  force_destroy = false
+
+  depends_on = [google_project_service.required]
+}
+
+resource "google_dns_managed_zone" "planeon_public_base_domain" {
+  provider = google.trial
+
+  project = google_project.trial.project_id
+
+  name          = "orchestra-ocp-sno-trial-planeon-public"
+  dns_name      = "${local.profile.location.dnsZone}."
+  description   = "Planeon public delegation zone for the non-certifying Orchestra OpenShift SNO trial"
   visibility    = "public"
   force_destroy = false
 

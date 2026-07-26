@@ -21,7 +21,7 @@
     "zones": [
       "europe-west1-b"
     ],
-    "dnsZone": "ocp-lab.prometa.ai"
+    "dnsZone": "ocp-lab.planeon.ai"
   },
   "projects": {
     "count": 1,

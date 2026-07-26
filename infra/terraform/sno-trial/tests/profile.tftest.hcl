@@ -81,6 +81,19 @@ run "locked_cost_boundary" {
     condition     = output.trial_contract.project_delete_authorized == false
     error_message = "Project deletion must remain disabled by default."
   }
+
+  assert {
+    condition     = output.trial_contract.legacy_prometa_zone_retained == false
+    error_message = "A fresh trial must not create the legacy Prometa zone."
+  }
+
+  assert {
+    condition = (
+      output.public_dns_delegation.managed_zone == "orchestra-ocp-sno-trial-planeon-public"
+      && output.public_dns_delegation.dns_name == "ocp-lab.planeon.ai."
+    )
+    error_message = "The active SNO trial delegation must remain isolated under planeon.ai."
+  }
 }
 
 run "reject_region_drift" {

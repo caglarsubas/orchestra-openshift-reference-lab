@@ -7,7 +7,7 @@
   "executionMode": "source-only",
   "architecture": "linux/amd64",
   "bindings": {
-    "trialProfileDigest": "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b",
+    "trialProfileDigest": "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a",
     "toolchainLockDigest": "sha256:c9ace01bc3d0c6e0dd9f404b2781ed70c8f82e01ced3bff431eca316649e0c9d",
     "artifactReleaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "dependencySourceDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
@@ -378,5 +378,5 @@
     "highAvailability": false,
     "rpoRtoVerified": false
   },
-  "candidateDigest": "sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a"
+  "candidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9"
 }

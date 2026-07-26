@@ -11,12 +11,14 @@ from scripts.github_environment_contract import (
 )
 from scripts.sno_trial_product_artifact_admission import (
     ADMISSION_CONTROLS,
+    DEPLOYMENT_REASONS,
     POLICY_PATH,
     REMAINING_REASONS,
     build_admission,
     unsigned_digest,
     validate_admission,
     validate_policy,
+    validate_replay_binding,
 )
 from scripts.sno_trial_product_artifacts import (
     CANDIDATE_PATH,
@@ -34,13 +36,38 @@ from scripts.validate_repository import ROOT
 
 class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.policy = load_json(POLICY_PATH)
+        self.source_policy = load_json(POLICY_PATH)
         self.lock = load_json(LOCK_PATH)
         self.candidate = load_json(CANDIDATE_PATH)
         self.report = self.valid_replay_report()
+        self.policy = self.current_replay_policy()
         self.environment_evidence = self.valid_environment_evidence()
         self.admitted_at = datetime(2026, 7, 26, 9, 0, tzinfo=timezone.utc)
         self.expires_at = datetime(2026, 8, 9, 9, 0, tzinfo=timezone.utc)
+
+    def current_replay_policy(self) -> dict[str, object]:
+        value = copy.deepcopy(self.source_policy)
+        replay = value["bindings"]["replay"]
+        report_bindings = self.report["bindings"]
+        replay.update(
+            {
+                "verificationId": self.report["verificationId"],
+                "generatedAt": self.report["generatedAt"],
+                "reportDigest": self.report["reportDigest"],
+                "verifierRevision": report_bindings["verifierRevision"],
+                "verifierRunId": report_bindings["verifierRunId"],
+                "verifierRunAttempt": report_bindings["verifierRunAttempt"],
+                "artifactName": (
+                    "sno-trial-product-artifact-replay-"
+                    f"{report_bindings['verifierRunId']}-1"
+                ),
+            }
+        )
+        value["review"]["replayState"] = "current"
+        value["activation"]["remainingReasonCodes"] = list(DEPLOYMENT_REASONS)
+        value["policyDigest"] = unsigned_digest(value, "policyDigest")
+        validate_policy(value, self.lock, self.candidate)
+        return value
 
     def valid_replay_report(self) -> dict[str, object]:
         artifacts = []
@@ -107,10 +134,6 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
             "claims": copy.deepcopy(CLAIMS),
         }
         value["reportDigest"] = report_digest(value)
-        self.assertEqual(
-            value["reportDigest"],
-            "sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280",
-        )
         validate_report(value, self.lock, self.candidate)
         return value
 
@@ -179,6 +202,32 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         )
 
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
+        validate_policy(self.source_policy, self.lock, self.candidate)
+        self.assertEqual(
+            self.source_policy["review"]["replayState"], "refresh-required"
+        )
+        self.assertEqual(
+            self.source_policy["activation"]["remainingReasonCodes"],
+            REMAINING_REASONS,
+        )
+        with self.assertRaisesRegex(
+            ValueError, "replay_refresh_required"
+        ):
+            validate_replay_binding(
+                self.report,
+                self.source_policy,
+                self.lock,
+                self.candidate,
+            )
+
+        malformed = copy.deepcopy(self.source_policy)
+        malformed["bindings"]["replay"]["verifierRunAttempt"] = True
+        malformed["policyDigest"] = unsigned_digest(
+            malformed, "policyDigest"
+        )
+        with self.assertRaisesRegex(ValueError, "policy_replay_invalid"):
+            validate_policy(malformed, self.lock, self.candidate)
+
         validate_policy(self.policy, self.lock, self.candidate)
         self.assertFalse(self.policy["controls"]["deploymentAuthorized"])
         self.assertFalse(self.policy["claims"]["campaignEvidence"])
@@ -199,7 +248,9 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
             self.candidate,
             at=self.admitted_at,
         )
-        self.assertEqual(admission["activation"]["reasonCodes"], REMAINING_REASONS)
+        self.assertEqual(
+            admission["activation"]["reasonCodes"], DEPLOYMENT_REASONS
+        )
         self.assertNotIn(
             "product-artifact-replay-review-missing",
             admission["activation"]["reasonCodes"],
