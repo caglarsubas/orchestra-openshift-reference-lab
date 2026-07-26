@@ -579,8 +579,8 @@ The renderer refuses to overwrite files, validates exact topology values, and
 does not accept a pull secret in its values file. Pull secret and SSH public
 key injection remain an operator step immediately before installer execution.
 
-The SNO trial uses a separate renderer and requires a valid, project-bound
-operator lease:
+The SNO trial uses a separate renderer and requires both a valid,
+project-bound operator lease and a short-lived aggregate render admission:
 
 ```bash
 python3 scripts/trial_lease.py create \
@@ -592,11 +592,18 @@ python3 scripts/trial_lease.py create \
 python3 scripts/render_sno_trial_install_config.py \
   --values restricted/sno-trial-install-values.json \
   --lease restricted/trial-leases/current.json \
+  --admission restricted/sno-render-<timestamp>.json \
   --output install-dir/trial/install-config.rendered.yaml
 ```
 
-This only renders a secret-free input. It neither creates a GCP project nor
-runs the installer.
+Create the admission with `make create-sno-trial-render-admission` after
+refreshing the provider-readiness, network-hygiene, DNS-delegation, and
+operator-path reports. It also binds the verified local toolchain intake and
+the active lease. The first four reports and the resulting admission each have
+a maximum 15-minute lifetime.
+
+This only authorizes and renders a secret-free input. It neither creates a GCP
+project nor permits firewall mutation or runs the installer.
 
 ## Delivery boundary
 

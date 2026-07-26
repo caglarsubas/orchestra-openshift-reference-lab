@@ -93,6 +93,9 @@ jobs:
           python3 scripts/sno_trial_operator_path.py verify \
             --report "${RUNNER_TEMP}/sno-trial-operator-path.json"
 
+      - name: Prove aggregate SNO render admission remains non-mutating
+        run: python3 -m unittest tests.test_sno_trial_install_admission -v
+
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 

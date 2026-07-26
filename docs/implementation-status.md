@@ -89,6 +89,7 @@ any certification campaign slot.
 | Payload-free fail-closed network-hygiene assessment | Yes | Yes | No | Yes | Not eligible |
 | Payload-free fail-closed DNS-delegation observation contract | Yes | Yes | No | No | Not eligible |
 | Payload-free Linux AMD64 operator-path observation contract | Yes | Yes | No | No | Not eligible |
+| Short-lived aggregate secret-free render admission | Yes | Yes | No | No | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
@@ -147,6 +148,15 @@ project, and source-CIDR digests. No live report exists because the Linux
 administration host and private source-CIDR input are not yet available. Even
 `OPERATOR_PATH_OBSERVED` grants no firewall mutation, cloud mutation, install,
 campaign, or certification authority.
+
+The aggregate render-admission contract and renderer integration are
+source-complete. `READY_TO_RENDER` requires fresh live provider, network, DNS,
+and operator-path reports, a verified live-local toolchain intake, exact
+project agreement, and an active lease bound to the observed operator identity.
+The admission is valid for no more than 15 minutes and authorizes only
+secret-free install-config rendering. It grants no firewall mutation, cloud
+mutation, cluster creation, campaign, or certification authority. No live
+admission exists because the Linux operator-path report remains unavailable.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's

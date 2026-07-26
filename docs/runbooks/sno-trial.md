@@ -573,8 +573,41 @@ python3 scripts/trial_lease.py verify \
 
 The lease binds the exact trial-profile digest, project, operator digest,
 budget, active-hour ceiling, and expiry. An expired, not-yet-active, modified,
-or cross-project lease fails closed. A lease is install admission, not an
-automatic shutdown mechanism.
+or cross-project lease fails closed. The lease is one aggregate-admission
+input, not install authority or an automatic shutdown mechanism.
+
+## Create a short-lived render admission
+
+Refresh the provider-readiness, network-hygiene, DNS-delegation, and
+operator-path reports immediately before rendering. The first four reports
+must be no older than 15 minutes. The signed local toolchain intake may be no
+older than 30 days. Then bind all five reports to the active lease:
+
+```bash
+ADMISSION_ID=sno-render-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make create-sno-trial-render-admission \
+  READINESS=restricted/<fresh-readiness-report>.json \
+  NETWORK=restricted/<fresh-network-report>.json \
+  DNS=restricted/<fresh-dns-report>.json \
+  OPERATOR_PATH=restricted/<fresh-operator-path-report>.json \
+  TOOLCHAIN=restricted/<verified-toolchain-report>.json \
+  LEASE=restricted/trial-leases/current.json \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  ADMISSION_ID="$ADMISSION_ID" \
+  OUTPUT="restricted/$ADMISSION_ID.json"
+
+make verify-sno-trial-render-admission \
+  ADMISSION="restricted/$ADMISSION_ID.json" \
+  LEASE=restricted/trial-leases/current.json \
+  PROJECT_ID=prometa-orch-sno-499235
+```
+
+`READY_TO_RENDER` requires live, fresh, accepted evidence; exact project
+agreement; and a lease operator digest matching the single identity observed
+on the administration host. The admission expires after at most 15 minutes.
+It authorizes only secret-free installer-input rendering. Cloud, firewall, and
+cluster-creation authority remain false.
 
 ## Render the secret-free installer input
 
@@ -592,14 +625,15 @@ Render only under `install-dir/trial/`:
 python3 scripts/render_sno_trial_install_config.py \
   --values restricted/sno-trial-install-values.json \
   --lease restricted/trial-leases/current.json \
+  --admission "restricted/$ADMISSION_ID.json" \
   --output install-dir/trial/install-config.rendered.yaml
 ```
 
-The renderer verifies the active lease and locks one 8-vCPU control-plane
-node, zero workers, 150 GB balanced disk, one zone, OVN-Kubernetes, and
-external publishing. It refuses pull secrets in the values file and leaves
-`${PULL_SECRET_JSON}` and `${SSH_PUBLIC_KEY}` for a final restricted operator
-step.
+The renderer verifies both the active lease and unexpired aggregate admission,
+then locks one 8-vCPU control-plane node, zero workers, 150 GB balanced disk,
+one zone, OVN-Kubernetes, and external publishing. It refuses pull secrets in
+the values file and leaves `${PULL_SECRET_JSON}` and `${SSH_PUBLIC_KEY}` for a
+final restricted operator step.
 
 Use the exact `4.20.27` linux/amd64 installer to validate the materialized
 configuration on the Linux administration host before creating resources.
