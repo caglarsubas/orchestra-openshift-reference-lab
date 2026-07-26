@@ -87,6 +87,7 @@ any certification campaign slot.
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
 | Payload-free fail-closed network-hygiene assessment | Yes | Yes | No | Yes | Not eligible |
+| Payload-free fail-closed DNS-delegation observation contract | Yes | Yes | No | No | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
@@ -127,6 +128,15 @@ and status `CLEAN`, with zero networks, subnetworks, firewall rules, and
 internet-ingress rules. It binds the current Planeon profile. This closes only
 the network-hygiene drift; the report grants no mutation or install authority
 and is never campaign evidence.
+
+The DNS-delegation collector and strict report contract are source-complete.
+They compare the active Planeon Cloud DNS managed zone with an external
+authoritative NS answer and persist only counts and canonical set digests.
+Missing delegation reports `WAITING_DELEGATION`, a partial or wrong set reports
+`BLOCKED`, and an exact set reports `DELEGATION_OBSERVED`. No reviewed live DNS
+report has been recorded because operator confirmation remains pending. Every
+status grants no DNS mutation, cloud mutation, install, campaign, or
+certification authority.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's

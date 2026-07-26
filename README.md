@@ -100,9 +100,10 @@ in Terraform state without a provider mutation. Independent readback observed
 both exact zones, and a post-apply plan reported no drift. No compute, cluster,
 installer, workload, or Secret resource has been created.
 
-The Cloudflare-hosted `planeon.ai` parent does not yet delegate
-`ocp-lab.planeon.ai.`. Source CIDR review, a Linux AMD64 administration path,
-and an active operator lease also remain required. Fresh payload-free report
+Operator confirmation of the Cloudflare-hosted `planeon.ai` parent delegation
+for `ocp-lab.planeon.ai.` remains pending. Source CIDR review, a Linux AMD64
+administration path, and an active operator lease also remain required. Fresh
+payload-free report
 `sno-readiness-operator-20260726174421.1` binds the current profile digest,
 records approved quota status as operator-declared, and remains
 `DOWNSTREAM_VERIFICATION_REQUIRED`. Its report digest is
@@ -127,6 +128,27 @@ neither raw provider output nor billing-account identity and always reports
 `cloudMutationAuthorized: false`, `campaignEvidence: false`, and no
 certification slots. The quota-review status is explicitly operator-declared;
 it is not represented as a `gcloud` or Google attestation.
+
+DNS delegation has its own read-only, payload-free observation contract. It
+compares the exact active Cloud DNS zone with the externally authoritative NS
+answer, then persists only counts and canonical set digests:
+
+```bash
+DNS_ID=sno-dns-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-dns-delegation \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  ASSESSMENT_ID="$DNS_ID" \
+  OUTPUT="restricted/$DNS_ID.json"
+
+make verify-sno-trial-dns-delegation \
+  REPORT="restricted/$DNS_ID.json"
+```
+
+An empty answer produces `WAITING_DELEGATION`; a partial or different set
+produces `BLOCKED`; only an exact set produces `DELEGATION_OBSERVED`. Even that
+last status grants no installation or DNS mutation authority. Source CIDR,
+administration path, and operator lease verification remain separate gates.
 
 Network hygiene is assessed separately because GCP can create a default
 auto-mode VPC when Compute becomes active even when the project contract

@@ -488,14 +488,33 @@ Read the generated nameservers from the restricted Terraform output and add
 four DNS-only `NS` records for host `ocp-lab` in the Cloudflare-hosted
 `planeon.ai` parent. Do not modify `www.planeon.ai`, the apex nameservers, or
 website records. Do not install until an external authoritative lookup returns
-the complete generated NS set:
+the complete generated NS set. After the operator reports that the parent
+records are complete, create and verify a fresh read-only observation:
 
 ```bash
-dig +short NS ocp-lab.planeon.ai. | sort
+DNS_ID=sno-dns-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-dns-delegation \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  ASSESSMENT_ID="$DNS_ID" \
+  OUTPUT="restricted/$DNS_ID.json"
+
+make verify-sno-trial-dns-delegation \
+  REPORT="restricted/$DNS_ID.json"
 ```
 
-The Terraform output proves only that the managed zone exists. The external
-lookup proves only delegation. Neither is certification evidence.
+The collector runs only `gcloud dns managed-zones describe` and `dig NS`.
+Reports store counts and canonical set digests, not raw provider responses or
+nameserver values. `WAITING_DELEGATION` means the authoritative answer is
+empty; `BLOCKED` means the managed-zone identity or nameserver sets do not
+match; `DELEGATION_OBSERVED` means the public answer exactly matches all four
+Cloud DNS nameservers.
+
+The Terraform output proves only that the managed zone exists, and
+`DELEGATION_OBSERVED` proves only the point-in-time public delegation. The
+report always keeps DNS mutation, cloud mutation, installation, campaign, and
+certification authority false. Source CIDR, administration path, and operator
+lease remain separate prerequisites.
 
 ## Create and verify an operator lease
 

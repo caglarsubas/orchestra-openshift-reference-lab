@@ -75,6 +75,15 @@ jobs:
           python3 scripts/sno_trial_network_hygiene.py verify \
             --report "${RUNNER_TEMP}/sno-trial-network-hygiene.json"
 
+      - name: Prove missing SNO DNS delegation grants no install authority
+        run: |
+          python3 scripts/sno_trial_dns_delegation.py assess \
+            --snapshot tests/fixtures/sno-trial-dns-delegation-missing.json \
+            --assessment-id sno-dns-ci-missing.1 \
+            --output "${RUNNER_TEMP}/sno-trial-dns-delegation.json"
+          python3 scripts/sno_trial_dns_delegation.py verify \
+            --report "${RUNNER_TEMP}/sno-trial-dns-delegation.json"
+
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 
