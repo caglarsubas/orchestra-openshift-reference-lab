@@ -84,6 +84,15 @@ jobs:
           python3 scripts/sno_trial_dns_delegation.py verify \
             --report "${RUNNER_TEMP}/sno-trial-dns-delegation.json"
 
+      - name: Prove observed SNO operator path grants no install authority
+        run: |
+          python3 scripts/sno_trial_operator_path.py assess \
+            --snapshot tests/fixtures/sno-trial-operator-path-ready.json \
+            --assessment-id sno-operator-ci-ready.1 \
+            --output "${RUNNER_TEMP}/sno-trial-operator-path.json"
+          python3 scripts/sno_trial_operator_path.py verify \
+            --report "${RUNNER_TEMP}/sno-trial-operator-path.json"
+
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 
