@@ -202,9 +202,13 @@ artifact binds its first successful publication attempt. Runtime `v0.18.7`
 also binds the supported Cosign v3 publisher used by the independent replay.
 The artifact-set digest is
 `sha256:2e6507fad12d56a5f0ddcd90259bb24eb5550f8047b285a812e9888ad82df9ef`.
-The replay uses
-a dedicated environment credential with package-read access only because the
-artifacts cross personal and organization GHCR namespaces. Destination mirror
+The replay uses two separate environment credentials: a classic token limited
+to package-read access across the locked GHCR namespaces and a fine-grained
+token limited to Actions-read plus required metadata on the private platform
+source repository. Exact-main run `30194136809` completed on 2026-07-26 with
+payload-free report digest
+`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
+This is live registry replay evidence only. Human admission, destination mirror
 and live-cluster pulls, operator inputs, server-side dry runs, and provider
 readiness remain absent; activation and every certifying claim remain false.
 

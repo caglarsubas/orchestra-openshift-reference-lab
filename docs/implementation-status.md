@@ -81,7 +81,7 @@ any certification campaign slot.
 | Inert single-node workload and resource candidate | Yes | Yes | No | No | Not eligible |
 | Source-only SNO profiles for all three product planes | Yes | Yes | No | No | Not eligible |
 | Digest-locked three-plane signed publication set | Yes | Yes | No | No | Not eligible |
-| Read-only three-plane registry replay | Yes | Yes | No | No | Not eligible |
+| Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
@@ -110,12 +110,16 @@ from a successful archive inspection.
 The inert workload-candidate row records a source-only capacity calculation
 for nine single-replica workloads on the locked `n2-standard-8`. It preserves
 a 3-vCPU/12-GiB system reserve and leaves positive request headroom, but emits
-no deployable manifests and grants no installation authority. Trial-specific
-product profiles are now published and digest-locked, but registry replay,
-human admission, direct dependency runtime contracts, a Valkey image, a CPU
-model-backend artifact, live allocatable capacity, and server-side dry run all
-remain explicit blockers. Source and CI validation therefore do not mark the
-minimal dependency plane as applied or live-tested.
+no deployable manifests and grants no installation authority. The exact-main
+registry replay run `30194136809` completed on 2026-07-26 and produced
+payload-free report digest
+`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
+It verified the three locked publications, signatures, CycloneDX attestations,
+linux/amd64 manifests, and chart packages. Human admission, direct dependency
+runtime contracts, a Valkey image, a CPU model-backend artifact, destination
+and live-cluster pull proof, operator Secret/CA inputs, live allocatable
+capacity, and server-side dry run remain explicit blockers. The replay is
+live-tested but neither applied nor campaign evidence.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

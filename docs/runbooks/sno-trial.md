@@ -179,10 +179,17 @@ make validate-sno-trial-product-artifacts
 ```
 
 Create the `sno-trial-product-artifact-replay` GitHub environment and populate
-only its `SNO_ARTIFACT_READ_TOKEN` secret. The token must be dedicated to this
-replay and limited to package-read access across the three locked repositories;
-it receives no package-write, signing, OIDC, deployment, or cloud authority.
-The environment and secret are operator state and never enter Git.
+these two independent secrets:
+
+- `SNO_ARTIFACT_READ_TOKEN`: a classic token dedicated to this replay and
+  limited to package-read access across the locked GHCR namespaces;
+- `SNO_SOURCE_RUN_READ_TOKEN`: a fine-grained token limited to Actions-read
+  plus required metadata on only the private `caglarsubas/agent-hook-v2`
+  repository.
+
+Neither credential receives package-write, source-write, signing, OIDC,
+deployment, or cloud authority. The environment and secret values are operator
+state and never enter Git.
 
 After the lock is merged to `main`, dispatch `SNO trial product artifact
 replay` with the exact reviewed main SHA. The workflow requires each exact
@@ -194,6 +201,12 @@ keyless signature and CycloneDX attestation, checks the exact linux/amd64 child
 manifest, pulls each chart package, and validates both package and SNO values
 member digests. Its downloadable report contains no registry credentials,
 signature payloads, SBOM payloads, Secrets, or customer data.
+
+Exact-main run `30194136809` completed on 2026-07-26 against verifier revision
+`9f1b153a1d11805a1dcca34f8b5e3e3f7d0b739e`. Its payload-free report digest is
+`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
+The report remains a time-bounded GitHub Actions artifact and does not by
+itself record human admission.
 
 A successful replay proves only that the three locked artifacts match their
 sources and signed publications. An operator must review and accept the
