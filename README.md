@@ -211,6 +211,11 @@ payload-free report digest
 This is live registry replay evidence only. Human admission, destination mirror
 and live-cluster pulls, operator inputs, server-side dry runs, and provider
 readiness remain absent; activation and every certifying claim remain false.
+The separate replay-admission policy, strict schema, and protected workflow are
+source-valid but not live-tested. They require a non-owner GitHub reviewer,
+prevent self-review and rerun approval reuse, emit only payload-free identity
+digests, and remove only the replay-review blocker. They grant no cloud,
+deployment, campaign, or certification authority.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.

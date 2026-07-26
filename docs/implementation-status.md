@@ -82,6 +82,7 @@ any certification campaign slot.
 | Source-only SNO profiles for all three product planes | Yes | Yes | No | No | Not eligible |
 | Digest-locked three-plane signed publication set | Yes | Yes | No | No | Not eligible |
 | Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
+| Independent replay admission contract | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
@@ -120,6 +121,13 @@ runtime contracts, a Valkey image, a CPU model-backend artifact, destination
 and live-cluster pull proof, operator Secret/CA inputs, live allocatable
 capacity, and server-side dry run remain explicit blockers. The replay is
 live-tested but neither applied nor campaign evidence.
+
+The independent replay-admission policy, strict output schema, and protected
+workflow are source- and CI-validated. They are not live-tested: the required
+non-owner GitHub environment reviewer has not been configured and no admission
+record has been issued. Even a valid admission removes only the replay-review
+reason and leaves all five deployment/provider blockers and every certifying
+claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

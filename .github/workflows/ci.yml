@@ -54,6 +54,9 @@ jobs:
       - name: Validate partial SNO product artifact set
         run: python3 scripts/sno_trial_product_artifacts.py validate-lock
 
+      - name: Validate independent SNO product replay admission policy
+        run: python3 scripts/sno_trial_product_artifact_admission.py validate-policy
+
       - name: Prove pending SNO state cannot authorize cloud mutation
         run: |
           python3 scripts/sno_trial_readiness.py assess \

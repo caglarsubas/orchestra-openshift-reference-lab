@@ -1,0 +1,152 @@
+name: SNO trial product artifact admission
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for admission
+        required: true
+        type: string
+      replay_artifact_id:
+        description: Exact successful replay artifact ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: sno-trial-product-artifact-admission-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  admit:
+    name: independently review SNO product artifact replay
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: sno-trial-product-artifact-admission
+    env:
+      EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+      REPLAY_ARTIFACT_ID: ${{ inputs.replay_artifact_id }}
+      REPLAY_RUN_ID: "30194136809"
+      REPLAY_ARTIFACT_NAME: sno-trial-product-artifact-replay-30194136809-1
+
+    steps:
+      - name: Require exact reviewed first-attempt main execution
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$REPLAY_ARTIFACT_ID" == "8629559616" ]]
+
+      - name: Check out exact admission implementation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Validate locked admission policy
+        run: python3 scripts/sno_trial_product_artifact_admission.py validate-policy
+
+      - name: Download exact replay artifact without retaining API payloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${REPLAY_ARTIFACT_ID}" \
+            > "$RUNNER_TEMP/replay-artifact-metadata.json"
+          jq -e \
+            --arg name "$REPLAY_ARTIFACT_NAME" \
+            --argjson run_id "$REPLAY_RUN_ID" \
+            '
+              .id == 8629559616
+              and .name == $name
+              and .expired == false
+              and .workflow_run.id == $run_id
+            ' \
+            "$RUNNER_TEMP/replay-artifact-metadata.json" >/dev/null
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2026-03-10" \
+            "/repos/${GITHUB_REPOSITORY}/actions/artifacts/${REPLAY_ARTIFACT_ID}/zip" \
+            > "$RUNNER_TEMP/replay.zip"
+          REPLAY_ZIP="$RUNNER_TEMP/replay.zip" REPLAY_DIR="$RUNNER_TEMP/replay" \
+            python3 - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path, PurePosixPath
+
+          archive = Path(os.environ["REPLAY_ZIP"])
+          destination = Path(os.environ["REPLAY_DIR"])
+          expected = "sno-trial-product-artifact-replay.json"
+          with zipfile.ZipFile(archive) as handle:
+              entries = handle.infolist()
+              if len(entries) != 1 or entries[0].is_dir():
+                  raise SystemExit("sno_product_admission_archive_inventory_invalid")
+              member = PurePosixPath(entries[0].filename)
+              if member.is_absolute() or ".." in member.parts or member.name != expected:
+                  raise SystemExit("sno_product_admission_archive_path_invalid")
+              if entries[0].file_size > 1024 * 1024:
+                  raise SystemExit("sno_product_admission_archive_size_invalid")
+              destination.mkdir(mode=0o700)
+              output = destination / expected
+              output.write_bytes(handle.read(entries[0]))
+              output.chmod(0o600)
+          PY
+          python3 scripts/sno_trial_product_artifacts.py verify \
+            --report "$RUNNER_TEMP/replay/sno-trial-product-artifact-replay.json"
+
+      - name: Build independently approved payload-free admission
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$GH_TOKEN" > "$RUNNER_TEMP/github-token"
+          chmod 0600 "$RUNNER_TEMP/github-token"
+          ADMITTED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          EXPIRES_AT="$(date -u -d "$ADMITTED_AT +14 days" +%Y-%m-%dT%H:%M:%SZ)"
+          python3 scripts/sno_trial_product_artifact_admission.py admit \
+            --report "$RUNNER_TEMP/replay/sno-trial-product-artifact-replay.json" \
+            --github-token-file "$RUNNER_TEMP/github-token" \
+            --admission-id "sno-product-admission-${GITHUB_RUN_ID}.1" \
+            --admitted-at "$ADMITTED_AT" \
+            --expires-at "$EXPIRES_AT" \
+            --workflow-revision "$GITHUB_SHA" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-actor-id "$GITHUB_ACTOR_ID" \
+            --output "$RUNNER_TEMP/sno-trial-product-artifact-admission.json"
+          python3 scripts/sno_trial_product_artifact_admission.py verify \
+            --report "$RUNNER_TEMP/replay/sno-trial-product-artifact-replay.json" \
+            --admission "$RUNNER_TEMP/sno-trial-product-artifact-admission.json" \
+            --at "$ADMITTED_AT"
+
+      - name: Upload payload-free admission record
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sno-trial-product-artifact-admission-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sno-trial-product-artifact-admission.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove local review material
+        if: always()
+        run: |
+          rm -rf \
+            "$RUNNER_TEMP/github-token" \
+            "$RUNNER_TEMP/replay" \
+            "$RUNNER_TEMP/replay.zip" \
+            "$RUNNER_TEMP/replay-artifact-metadata.json" \
+            "$RUNNER_TEMP/sno-trial-product-artifact-admission.json"

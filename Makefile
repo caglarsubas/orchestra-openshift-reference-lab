@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts test observe-sno-trial-readiness verify-sno-trial-readiness inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -9,6 +9,7 @@ validate:
 	$(PYTHON) scripts/openshift_toolchain_intake.py validate-lock
 	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
 	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock
+	$(PYTHON) scripts/sno_trial_product_artifact_admission.py validate-policy
 	$(PYTHON) scripts/validate_release_set.py
 	$(PYTHON) scripts/validate_reference_lab_contract_intake.py
 	$(PYTHON) scripts/validate_dependency_bom.py
@@ -40,6 +41,9 @@ validate-sno-trial-workload-candidate:
 
 validate-sno-trial-product-artifacts:
 	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock
+
+validate-sno-trial-product-admission:
+	$(PYTHON) scripts/sno_trial_product_artifact_admission.py validate-policy
 
 observe-sno-trial-readiness:
 	test -n "$(PROJECT_ID)"
@@ -86,6 +90,13 @@ replay-sno-trial-product-artifacts:
 verify-sno-trial-product-artifacts:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_product_artifacts.py verify --report "$(REPORT)"
+
+verify-sno-trial-product-admission:
+	test -n "$(REPORT)"
+	test -n "$(ADMISSION)"
+	$(PYTHON) scripts/sno_trial_product_artifact_admission.py verify \
+		--report "$(REPORT)" \
+		--admission "$(ADMISSION)"
 
 test:
 	$(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v
