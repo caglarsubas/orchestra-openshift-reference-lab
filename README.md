@@ -141,6 +141,17 @@ make verify-sno-trial-network-hygiene \
   REPORT="restricted/$NETWORK_ID.json"
 ```
 
+The initial live observation found the unused GCP-created `default` auto-mode
+VPC, 42 subnetworks, four default firewall rules, and three enabled
+internet-ingress rules. After a zero-dependent-resource inventory, the bounded
+operator cleanup removed only those default resources. The post-cleanup report
+`sno-network-operator-20260726143535.1` is `CLEAN`, has report digest
+`sha256:e69b9f1f5478b9bb07b9854dc708951546f3e048397cffbcfe415bc5ea95e1d8`,
+and observes zero networks, subnetworks, firewall rules, and internet-ingress
+rules. A subsequent Terraform refresh returned no changes. This closes the
+network-hygiene drift only; it does not authorize installation or produce
+campaign evidence.
+
 The exact versioned OpenShift `4.20.27` linux/amd64 installer and client
 archives are independently available from Red Hat's public mirror. Their URLs,
 byte sizes, OpenPGP-signed published checksums, signing-key fingerprint, and
