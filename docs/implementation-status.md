@@ -110,11 +110,16 @@ must not be treated as live provider state.
 
 The first live network-hygiene observation found one GCP default auto-mode VPC,
 42 default subnetworks, four default firewall rules, and three enabled
-internet-ingress rules. No instance or workload uses them. This is a blocking
-pre-install drift condition, not an applied Orchestra network topology. Cleanup
-must be separately executed and followed by a new `CLEAN` observation. The
-payload-free report `sno-network-operator-20260726141208.1` has digest
-`sha256:f1e011e6b2a9da8c778a64be185e39c0d92daefc9c09b2eff37b05c677c3242e`.
+internet-ingress rules. No instance or workload used them. After a
+zero-dependent-resource inventory, the bounded operator cleanup removed only
+the four default firewall rules, auto-created internet route, and unused
+`default` VPC. The post-cleanup payload-free report
+`sno-network-operator-20260726143535.1` has digest
+`sha256:e69b9f1f5478b9bb07b9854dc708951546f3e048397cffbcfe415bc5ea95e1d8`
+and status `CLEAN`, with zero networks, subnetworks, firewall rules, and
+internet-ingress rules. A subsequent Terraform refresh returned no changes.
+This closes only the network-hygiene drift; the report grants no mutation or
+install authority and is never campaign evidence.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's

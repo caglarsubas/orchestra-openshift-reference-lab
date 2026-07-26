@@ -426,12 +426,23 @@ GoDaddy-hosted `prometa.ai` parent has not delegated the zone. Do not create an
 operator lease or installer resources until that delegation, source CIDR,
 Linux AMD64 administration path, and remaining prerequisites are verified.
 
-The first network-hygiene observation also found a GCP-created default
-auto-mode VPC, 42 subnetworks, and four default firewall rules, including three
-enabled internet-ingress rules. Treat this as blocking drift. Capture a
-payload-free report before and after cleanup. The initial report is
+The first network-hygiene observation found a GCP-created default auto-mode
+VPC, 42 subnetworks, and four default firewall rules, including three enabled
+internet-ingress rules. The initial payload-free report is
 `sno-network-operator-20260726141208.1`, with digest
-`sha256:f1e011e6b2a9da8c778a64be185e39c0d92daefc9c09b2eff37b05c677c3242e`:
+`sha256:f1e011e6b2a9da8c778a64be185e39c0d92daefc9c09b2eff37b05c677c3242e`.
+An immediate dependency inventory found no instances, instance groups,
+addresses, forwarding rules, routers, VPN gateways, backend services, network
+endpoint groups, or peerings. The bounded operator cleanup removed exactly the
+four default firewall rules, the auto-created internet route, and the unused
+`default` VPC.
+
+The post-cleanup report `sno-network-operator-20260726143535.1` is `CLEAN`,
+has report digest
+`sha256:e69b9f1f5478b9bb07b9854dc708951546f3e048397cffbcfe415bc5ea95e1d8`,
+and observes zero networks, subnetworks, firewall rules, and internet-ingress
+rules. A subsequent Terraform refresh returned no changes. Re-run the
+payload-free assessment before relying on this point-in-time observation:
 
 ```bash
 NETWORK_ID=sno-network-operator-$(date -u +%Y%m%d%H%M%S).1
@@ -447,7 +458,7 @@ make verify-sno-trial-network-hygiene \
 
 The report stores counts and canonical inventory digests, not raw firewall
 sources or provider responses. It never authorizes cleanup or installation.
-Proceed only when a fresh post-cleanup report is `CLEAN`.
+Proceed only while a fresh report remains `CLEAN`.
 
 ## Delegate the trial DNS zone
 
