@@ -433,17 +433,20 @@ readback and a post-apply Terraform refresh verified:
 - One 3,500 TRY budget, six thresholds, and the exact project-number filter.
 - The unused `ocp-lab.prometa.ai.` Cloud DNS zone with four generated
   nameservers.
+- The active `ocp-lab.planeon.ai.` Cloud DNS zone with four generated
+  nameservers.
 - No Terraform drift and no compute, cluster, workload, or Secret resources.
 
-The active trial profile now uses `ocp-lab.planeon.ai.`. The additive Planeon
-managed zone is not yet applied, and the old zone remains retained for a
-separately reviewed cleanup. The readiness report
-`sno-readiness-operator-20260726134508.1` remains
-`DOWNSTREAM_VERIFICATION_REQUIRED`, but is bound to the previous profile
-digest and is now historical. Do not create an operator lease or installer
-resources until the Planeon zone exists, Cloudflare delegates it, and fresh
-readiness, source CIDR, Linux AMD64 administration path, and remaining
-prerequisites are verified.
+The active Planeon zone was applied from an exact-main plan with one add, zero
+changes, and zero destroys. The legacy zone moved in Terraform state without a
+provider mutation. Independent readback observed both zones, and a post-apply
+plan reported no drift. Fresh readiness report
+`sno-readiness-operator-20260726174421.1` has report digest
+`sha256:13ba6f6fb93e524b0dcb28d653ff9ab52de1228fd0a2d94db8bdd66511cd56dc`
+and remains `DOWNSTREAM_VERIFICATION_REQUIRED`. Do not create an operator lease
+or installer resources until Cloudflare delegates the Planeon child zone and
+source CIDR, Linux AMD64 administration path, and remaining prerequisites are
+verified.
 
 The first network-hygiene observation found a GCP-created default auto-mode
 VPC, 42 subnetworks, and four default firewall rules, including three enabled
@@ -456,12 +459,12 @@ endpoint groups, or peerings. The bounded operator cleanup removed exactly the
 four default firewall rules, the auto-created internet route, and the unused
 `default` VPC.
 
-The post-cleanup report `sno-network-operator-20260726143535.1` is `CLEAN`,
+Fresh report `sno-network-operator-20260726174421.1` is `CLEAN`,
 has report digest
-`sha256:e69b9f1f5478b9bb07b9854dc708951546f3e048397cffbcfe415bc5ea95e1d8`,
-and observes zero networks, subnetworks, firewall rules, and internet-ingress
-rules. A subsequent Terraform refresh returned no changes. Re-run the
-payload-free assessment before relying on this point-in-time observation:
+`sha256:fb074a14e51f012c750954f766bcd1d09bf05d8f10a40352fee4f8235f870380`,
+binds the current Planeon profile, and observes zero networks, subnetworks,
+firewall rules, and internet-ingress rules. Re-run the payload-free assessment
+before relying on this point-in-time observation:
 
 ```bash
 NETWORK_ID=sno-network-operator-$(date -u +%Y%m%d%H%M%S).1
@@ -477,9 +480,7 @@ make verify-sno-trial-network-hygiene \
 
 The report stores counts and canonical inventory digests, not raw firewall
 sources or provider responses. It never authorizes cleanup or installation.
-The recorded post-cleanup report is bound to the previous profile digest;
-recollect it after the Planeon migration. Proceed only while a fresh report
-remains `CLEAN`.
+Proceed only while a fresh report remains `CLEAN`.
 
 ## Delegate the trial DNS zone
 

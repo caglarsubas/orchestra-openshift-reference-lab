@@ -97,18 +97,21 @@ The foundation rows record the 2026-07-26 bounded operator apply for
 `prometa-orch-sno-499235`. The exact reviewed remainder created one
 project-filtered 3,500 TRY budget and changed or destroyed nothing. Independent
 readback observed active billing, all 11 locked APIs, six budget thresholds,
-and the now-legacy `ocp-lab.prometa.ai.` Cloud DNS managed zone. A subsequent
-Terraform refresh reported no drift. The active source contract now uses
-`ocp-lab.planeon.ai.`; its additive managed zone has not yet been applied and
-the old empty zone is retained pending separate cleanup. No compute, cluster,
-workload, Secret, or source-IP allowlist exists.
+and the now-legacy `ocp-lab.prometa.ai.` Cloud DNS managed zone. A later
+guarded exact-main plan created only the active `ocp-lab.planeon.ai.` zone,
+moved the legacy zone address in Terraform state without changing it, and
+destroyed nothing. Independent readback observed both zones, and a subsequent
+plan reported no drift. No compute, cluster, workload, Secret, or source-IP
+allowlist exists.
 
 The payload-free readiness report
-`sno-readiness-operator-20260726134508.1` has report digest
-`sha256:9899937beeaed8599dc7b1c1f8904e0d66445d27433a6df96bd9fc4874ca1871`
+`sno-readiness-operator-20260726174421.1` has report digest
+`sha256:13ba6f6fb93e524b0dcb28d653ff9ab52de1228fd0a2d94db8bdd66511cd56dc`
 and status `DOWNSTREAM_VERIFICATION_REQUIRED`. It grants no mutation or install
-authority and is never campaign evidence. It is bound to the previous
-trial-profile digest and is now historical. The checked-in inert workload
+authority and is never campaign evidence. It binds the current Planeon profile
+and observes active billing, all 11 required APIs, and operator-declared
+approved quota status. DNS delegation, source CIDR, administration path, and
+operator lease remain downstream gates. The checked-in inert workload
 candidate remains a source-time capacity artifact; its activation reason list
 must not be treated as live provider state.
 
@@ -118,12 +121,12 @@ internet-ingress rules. No instance or workload used them. After a
 zero-dependent-resource inventory, the bounded operator cleanup removed only
 the four default firewall rules, auto-created internet route, and unused
 `default` VPC. The post-cleanup payload-free report
-`sno-network-operator-20260726143535.1` has digest
-`sha256:e69b9f1f5478b9bb07b9854dc708951546f3e048397cffbcfe415bc5ea95e1d8`
+`sno-network-operator-20260726174421.1` has digest
+`sha256:fb074a14e51f012c750954f766bcd1d09bf05d8f10a40352fee4f8235f870380`
 and status `CLEAN`, with zero networks, subnetworks, firewall rules, and
-internet-ingress rules. A subsequent Terraform refresh returned no changes.
-This closes only the network-hygiene drift; the report grants no mutation or
-install authority and is never campaign evidence.
+internet-ingress rules. It binds the current Planeon profile. This closes only
+the network-hygiene drift; the report grants no mutation or install authority
+and is never campaign evidence.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's
