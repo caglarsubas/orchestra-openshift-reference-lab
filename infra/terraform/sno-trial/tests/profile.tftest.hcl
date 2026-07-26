@@ -54,6 +54,15 @@ run "locked_cost_boundary" {
   }
 
   assert {
+    condition = (
+      output.trial_contract.billing_budget_currency_code == "TRY"
+      && output.trial_contract.billing_budget_amount_units == 3500
+      && output.trial_contract.budget_exchange_rate_date == "2026-07-24"
+    )
+    error_message = "The provider budget must remain locked to the reviewed TRY conversion."
+  }
+
+  assert {
     condition     = output.trial_contract.maximum_active_hours_per_month == 48
     error_message = "The active node-hour ceiling must remain locked to 48."
   }

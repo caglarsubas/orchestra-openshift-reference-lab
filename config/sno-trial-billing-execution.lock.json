@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-billing-execution.v1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "profileDigest": "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b",
+  "monthlyUsdCeiling": 75,
+  "billingCurrencyCode": "TRY",
+  "billingAmountUnits": 3500,
+  "conversionRateTryPerUsd": "47.2497",
+  "conversionRateDate": "2026-07-24",
+  "conversionRateSource": "TCMB ForexSelling",
+  "equivalentUsdAtLockedRate": "74.08",
+  "budgetIsHardCap": false
+}

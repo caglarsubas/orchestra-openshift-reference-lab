@@ -39,6 +39,12 @@ resources. Actual GCP prices, taxes, network egress, DNS, load balancers,
 snapshots, and idle disks remain variable.
 
 The `$75` monthly budget is an alert threshold, not a provider-side hard cap.
+Because the authorized Google billing account is denominated in TRY, the
+provider-side amount is 3,500 TRY. That is about $74.08 at the TCMB
+`ForexSelling` rate of 47.2497 TRY/USD on 2026-07-24 and remains below the
+locked USD ceiling. The conversion is bound separately in
+`config/sno-trial-billing-execution.lock.json`; the canonical topology profile
+and its product-artifact bindings remain unchanged.
 The operational limits are:
 
 - GCP budget alerts at 10, 25, 50, 75, 90, and 100 percent.
@@ -61,7 +67,8 @@ Do not create a lease until all of these are true:
 4. One dedicated, disposable GCP project has billing enabled.
 5. Project quota supports a temporary bootstrap VM, one `n2-standard-8`,
    persistent disks, load balancers, forwarding rules, external IPs, and DNS.
-6. The project has a `$75` budget with the six locked alert thresholds.
+6. The project has a 3,500 TRY budget, bound to the `$75` ceiling, with the six
+   locked alert thresholds.
 7. `ocp-lab.prometa.ai` is available for the `orchestra-trial` cluster DNS
    namespace.
 8. A Linux AMD64 administration host has short-lived GCP credentials. The
@@ -315,7 +322,8 @@ terraform -chdir=infra/terraform/sno-trial show -no-color \
 ```
 
 Review the plan before applying it. It must create one project, the locked API
-set, one project-filtered `$75` budget with six thresholds, and one public
+set, one project-filtered 3,500 TRY budget (the locked `$75` ceiling) with six
+thresholds, and one public
 `ocp-lab.prometa.ai.` zone. It must not create compute instances, disks, load
 balancers, networks, credentials, or production-reference resources.
 

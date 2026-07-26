@@ -25,6 +25,9 @@ output "trial_contract" {
     target_class                   = local.profile.targetClass
     certification_eligible         = local.profile.certificationEligible
     monthly_budget_usd             = local.profile.guardrails.budget.monthlyUsd
+    billing_budget_currency_code   = local.billing_execution.billingCurrencyCode
+    billing_budget_amount_units    = local.billing_execution.billingAmountUnits
+    budget_exchange_rate_date      = local.billing_execution.conversionRateDate
     budget_is_hard_cap             = local.profile.guardrails.budget.budgetIsHardCap
     maximum_active_hours_per_month = local.profile.guardrails.budget.maxActiveHoursPerMonth
     maximum_lease_hours            = local.profile.guardrails.lease.maximumHours
