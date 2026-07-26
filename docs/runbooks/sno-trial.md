@@ -210,14 +210,14 @@ manifest, pulls each chart package, and validates both package and SNO values
 member digests. Its downloadable report contains no registry credentials,
 signature payloads, SBOM payloads, Secrets, or customer data.
 
-Exact-main run `30194136809` completed on 2026-07-26 against verifier revision
-`9f1b153a1d11805a1dcca34f8b5e3e3f7d0b739e`. Its payload-free report digest is
-`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
-That report binds the prior trial-profile and artifact-set digests. It is
-historical after the Planeon DNS migration and cannot be admitted against the
-current lock. Dispatch a fresh exact-main replay after the domain migration is
-merged. The report remains a time-bounded GitHub Actions artifact and does not
-by itself record human admission.
+Exact-main run `30211883723` completed on 2026-07-26 against verifier revision
+`985cb37de283193a24776dfe840ab240d34a929a`. Its payload-free report digest is
+`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
+Artifact `8634695656` is named
+`sno-trial-product-artifact-replay-30211883723-1` and expires on
+2026-08-09. The downloaded report verifies against the current Planeon-bound
+artifact and workload locks. It remains a time-bounded GitHub Actions artifact
+and does not by itself record human admission.
 
 A successful replay proves only that the three locked artifacts match their
 sources and signed publications. An operator must review and accept the
@@ -232,13 +232,12 @@ reference-profile, customer, Red Hat, or SLA evidence.
 The source contract for that later review is locked in
 `config/sno-trial-product-artifact-admission-policy.lock.json`; its output
 schema is
-`schemas/sno-trial-product-artifact-admission-v1.schema.json`. The policy is
-temporarily bound to the historical replay run `30194136809`, artifact ID
-`8629559616`, and report digest
-`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`,
-while also carrying `product-artifact-replay-refresh-required`. The old report
-fails current artifact-set binding. Update the policy through a separate
-reviewed PR after the fresh replay; do not dispatch admission before then.
+`schemas/sno-trial-product-artifact-admission-v1.schema.json`. Policy
+`orchestra-sno-trial-product-admission-2026-07-27.1` binds only replay run
+`30211883723`, artifact ID `8634695656`, and report digest
+`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
+Its replay state is `current`; the five deployment and provider blockers remain
+unchanged.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:

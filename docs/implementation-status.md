@@ -136,26 +136,26 @@ from a successful archive inspection.
 The inert workload-candidate row records a source-only capacity calculation
 for nine single-replica workloads on the locked `n2-standard-8`. It preserves
 a 3-vCPU/12-GiB system reserve and leaves positive request headroom, but emits
-no deployable manifests and grants no installation authority. The exact-main
-registry replay run `30194136809` completed on 2026-07-26 against the prior
-profile-bound artifact set and produced payload-free report digest
-`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
-It verified the three publications, signatures, CycloneDX attestations,
-linux/amd64 manifests, and chart packages then locked. The current
-Planeon-bound artifact set has a different digest, so that replay is historical
-and cannot be admitted. A fresh exact-main replay is an explicit blocker
-alongside direct dependency runtime contracts, a Valkey image, a CPU
-model-backend artifact, destination and live-cluster pull proof, operator
-Secret/CA inputs, live allocatable capacity, and server-side dry run.
+no deployable manifests and grants no installation authority. Exact-main
+registry replay run `30211883723` completed on 2026-07-26 against verifier
+revision `985cb37de283193a24776dfe840ab240d34a929a` and produced payload-free
+report digest
+`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
+The downloaded report independently verified the three Planeon-bound
+publications, signatures, CycloneDX attestations, linux/amd64 manifests, chart
+packages, and current lock digests. Direct dependency runtime contracts, a
+Valkey image, a CPU model-backend artifact, destination and live-cluster pull
+proof, operator Secret/CA inputs, live allocatable capacity, and server-side
+dry run remain blockers.
 
 The independent replay-admission policy, strict output schema, and protected
-workflow are source- and CI-validated. The policy is explicitly blocked by
-`product-artifact-replay-refresh-required`; the old report cannot bind to the
-current artifact set. The required non-owner GitHub environment reviewer also
-has not been configured and no admission record has been issued. Even a valid
-future admission removes only the replay-review reason and leaves all five
-deployment/provider blockers and every certifying
-claim false.
+workflow are source- and CI-validated. Policy
+`orchestra-sno-trial-product-admission-2026-07-27.1` binds the exact fresh
+report and immutable Actions artifact ID. The required non-owner GitHub
+environment reviewer has not been configured and no admission record has been
+issued. Even a valid future admission removes only the replay-review reason
+and leaves all five deployment/provider blockers and every certifying claim
+false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

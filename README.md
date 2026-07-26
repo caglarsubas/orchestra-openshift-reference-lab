@@ -249,17 +249,18 @@ The artifact-set digest is
 The replay uses two separate environment credentials: a classic token limited
 to package-read access across the locked GHCR namespaces and a fine-grained
 token limited to Actions-read plus required metadata on the private platform
-source repository. Exact-main run `30194136809` completed on 2026-07-26
-against the prior profile-bound artifact set, with payload-free report digest
-`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
-That report is historical and cannot satisfy the Planeon-bound artifact-set
-digest. The admission policy now includes
-`product-artifact-replay-refresh-required`; its old report fails binding
-against the current lock. A fresh exact-main replay and a separately reviewed
-policy update are required before human admission can resume. Destination
-mirror and live-cluster pulls, operator inputs, server-side dry runs, and
-provider readiness also remain absent; activation and every certifying claim
-remain false.
+source repository. Exact-main run `30211883723` completed on 2026-07-26
+against verifier revision
+`985cb37de283193a24776dfe840ab240d34a929a`, with payload-free report digest
+`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
+The downloaded report was independently replayed against the Planeon-bound
+artifact and workload locks. Admission policy
+`orchestra-sno-trial-product-admission-2026-07-27.1` binds only that run,
+report, and immutable artifact ID. The protected admission environment and
+independent reviewer are not configured, so no admission record exists.
+Destination mirror and live-cluster pulls, operator inputs, server-side dry
+runs, and provider readiness also remain absent; activation and every
+certifying claim remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
