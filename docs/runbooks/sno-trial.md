@@ -405,6 +405,27 @@ teardown remain the operational controls. `allow_project_delete` defaults to
 false so an ordinary Terraform destroy cannot delete the project before the
 OpenShift installer and residual-resource checks have completed.
 
+## Current live checkpoint
+
+The 2026-07-26 bounded foundation apply for `prometa-orch-sno-499235` is
+complete. The reviewed remainder created only the project-scoped 3,500 TRY
+budget; the earlier partial apply had already attached billing, enabled the
+locked APIs, and created the public managed zone. Independent API readback and
+a post-apply Terraform refresh verified:
+
+- Billing enabled and all 11 required APIs active.
+- One 3,500 TRY budget, six thresholds, and the exact project-number filter.
+- The `ocp-lab.prometa.ai.` Cloud DNS zone with four generated nameservers.
+- No Terraform drift and no compute, cluster, workload, or Secret resources.
+
+The readiness report
+`sno-readiness-operator-20260726134508.1` remains
+`DOWNSTREAM_VERIFICATION_REQUIRED`; it is payload-free, non-authorizing, and
+non-certifying. Public lookup still returns no child NS records because the
+GoDaddy-hosted `prometa.ai` parent has not delegated the zone. Do not create an
+operator lease or installer resources until that delegation, source CIDR,
+Linux AMD64 administration path, and remaining prerequisites are verified.
+
 ## Delegate the trial DNS zone
 
 Read the generated nameservers from the restricted Terraform output and
