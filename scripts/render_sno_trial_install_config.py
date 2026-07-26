@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import NoReturn
 
 try:
+    from scripts.sno_trial_install_admission import validate_admission
     from scripts.trial_lease import (
         ROOT,
         load_profile,
@@ -21,6 +22,9 @@ try:
         validate_lease,
     )
 except ModuleNotFoundError:
+    from sno_trial_install_admission import (  # type: ignore[no-redef]
+        validate_admission,
+    )
     from trial_lease import (  # type: ignore[no-redef]
         ROOT,
         load_profile,
@@ -51,6 +55,16 @@ def load_values(path: Path) -> dict[str, str]:
     project_id = value["TARGET_PROJECT_ID"]
     if not isinstance(project_id, str) or not GCP_PROJECT.fullmatch(project_id):
         fail("trial_install_project_invalid")
+    return value
+
+
+def load_admission(path: Path) -> dict[str, object]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        fail(f"trial_install_admission_invalid:{error}")
+    if not isinstance(value, dict):
+        fail("trial_install_admission_object_required")
     return value
 
 
@@ -98,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--values", required=True, type=Path)
     parser.add_argument("--lease", required=True, type=Path)
+    parser.add_argument("--admission", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--at")
     args = parser.parse_args(argv)
@@ -123,6 +138,18 @@ def main(argv: list[str] | None = None) -> int:
         assessed_at,
         expected_project_id=values["TARGET_PROJECT_ID"],
     )
+    admission = load_admission(args.admission.resolve())
+    validate_admission(
+        admission,
+        assessed_at,
+        expected_project_id=values["TARGET_PROJECT_ID"],
+        lease=lease,
+    )
+    if (
+        admission["decision"]["status"] != "READY_TO_RENDER"
+        or admission["controls"]["installConfigRenderAuthorized"] is not True
+    ):
+        fail("trial_install_render_not_authorized")
     rendered = render(TEMPLATE.read_text(encoding="utf-8"), values)
     output.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     descriptor = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)

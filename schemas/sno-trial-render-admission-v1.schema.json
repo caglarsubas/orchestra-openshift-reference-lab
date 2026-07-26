@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-render-admission-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial render admission v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "admissionId",
+    "generatedAt",
+    "validUntil",
+    "targetClass",
+    "bindings",
+    "evidence",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-render-admission.v1"},
+    "admissionId": {
+      "type": "string",
+      "pattern": "^sno-render-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "validUntil": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "evidence": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/evidence"}
+    },
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "projectId",
+        "projectIdentityDigest",
+        "leaseId",
+        "leaseDigest",
+        "operatorIdentityDigest",
+        "sourceCidrDigest",
+        "evidenceSetDigest"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "leaseId": {
+          "type": "string",
+          "pattern": "^sno-trial-[a-z0-9][a-z0-9-]{5,63}$"
+        },
+        "leaseDigest": {"$ref": "#/$defs/digest"},
+        "operatorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "sourceCidrDigest": {"$ref": "#/$defs/digest"},
+        "evidenceSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "kind",
+        "id",
+        "reportDigest",
+        "generatedAt",
+        "executionMode",
+        "maxAgeMinutes",
+        "fresh",
+        "accepted"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "provider-readiness",
+            "network-hygiene",
+            "dns-delegation",
+            "operator-path",
+            "toolchain-intake"
+          ]
+        },
+        "kind": {"type": "string", "minLength": 1, "maxLength": 160},
+        "id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "reportDigest": {"$ref": "#/$defs/digest"},
+        "generatedAt": {"type": "string", "format": "date-time"},
+        "executionMode": {
+          "enum": ["simulated", "live-diagnostic", "live-local"]
+        },
+        "maxAgeMinutes": {
+          "type": "integer",
+          "enum": [15, 43200]
+        },
+        "fresh": {"type": "boolean"},
+        "accepted": {"type": "boolean"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction"],
+      "properties": {
+        "status": {"enum": ["READY_TO_RENDER", "BLOCKED"]},
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "LIVE_EVIDENCE_REQUIRED",
+              "EVIDENCE_STALE_OR_FUTURE",
+              "PROJECT_BINDING_MISMATCH",
+              "READINESS_NOT_ACCEPTED",
+              "NETWORK_NOT_CLEAN",
+              "DNS_NOT_OBSERVED",
+              "OPERATOR_PATH_NOT_OBSERVED",
+              "TOOLCHAIN_NOT_ACCEPTED",
+              "LEASE_OPERATOR_IDENTITY_MISMATCH"
+            ]
+          }
+        },
+        "nextAction": {
+          "enum": [
+            "render-secret-free-install-config",
+            "refresh-and-reconcile-prerequisites"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "installConfigRenderAuthorized",
+        "cloudMutationAuthorized",
+        "firewallMutationAuthorized",
+        "clusterCreationAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "installConfigRenderAuthorized": {"type": "boolean"},
+        "cloudMutationAuthorized": {"const": false},
+        "firewallMutationAuthorized": {"const": false},
+        "clusterCreationAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

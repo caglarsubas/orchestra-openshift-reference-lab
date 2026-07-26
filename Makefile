@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path create-sno-trial-render-admission verify-sno-trial-render-admission inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -104,6 +104,36 @@ observe-sno-trial-operator-path:
 verify-sno-trial-operator-path:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_operator_path.py verify --report "$(REPORT)"
+
+create-sno-trial-render-admission:
+	test -n "$(READINESS)"
+	test -n "$(NETWORK)"
+	test -n "$(DNS)"
+	test -n "$(OPERATOR_PATH)"
+	test -n "$(TOOLCHAIN)"
+	test -n "$(LEASE)"
+	test -n "$(PROJECT_ID)"
+	test -n "$(ADMISSION_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_install_admission.py create \
+		--readiness "$(READINESS)" \
+		--network "$(NETWORK)" \
+		--dns "$(DNS)" \
+		--operator-path "$(OPERATOR_PATH)" \
+		--toolchain "$(TOOLCHAIN)" \
+		--lease "$(LEASE)" \
+		--project-id "$(PROJECT_ID)" \
+		--admission-id "$(ADMISSION_ID)" \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-render-admission:
+	test -n "$(ADMISSION)"
+	test -n "$(LEASE)"
+	test -n "$(PROJECT_ID)"
+	$(PYTHON) scripts/sno_trial_install_admission.py verify \
+		--admission "$(ADMISSION)" \
+		--lease "$(LEASE)" \
+		--project-id "$(PROJECT_ID)"
 
 inspect-sno-trial-toolchain:
 	test -n "$(ARCHIVE_DIR)"
