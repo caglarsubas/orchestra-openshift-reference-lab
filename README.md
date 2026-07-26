@@ -123,6 +123,24 @@ neither raw provider output nor billing-account identity and always reports
 certification slots. The quota-review status is explicitly operator-declared;
 it is not represented as a `gcloud` or Google attestation.
 
+Network hygiene is assessed separately because GCP can create a default
+auto-mode VPC when Compute becomes active even when the project contract
+disables automatic network creation. The assessment records only counts and
+canonical inventory digests, blocks on any pre-install network or firewall
+rule, and grants neither cleanup nor install authority:
+
+```bash
+NETWORK_ID=sno-network-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-network-hygiene \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  ASSESSMENT_ID="$NETWORK_ID" \
+  OUTPUT="restricted/$NETWORK_ID.json"
+
+make verify-sno-trial-network-hygiene \
+  REPORT="restricted/$NETWORK_ID.json"
+```
+
 The exact versioned OpenShift `4.20.27` linux/amd64 installer and client
 archives are independently available from Red Hat's public mirror. Their URLs,
 byte sizes, OpenPGP-signed published checksums, signing-key fingerprint, and
@@ -425,7 +443,7 @@ evidence. The canonical inventory digest is
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for SNO readiness diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for SNO readiness and network-hygiene diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |

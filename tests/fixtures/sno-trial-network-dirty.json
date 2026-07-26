@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.gcp.sno-trial-network-snapshot.v1",
+  "executionMode": "simulated",
+  "observedAt": "2026-07-26T13:55:00Z",
+  "projectId": "prometa-orch-sno-fixture",
+  "networks": [
+    {
+      "name": "default",
+      "autoMode": true,
+      "subnetworkCount": 43
+    }
+  ],
+  "firewalls": [
+    {
+      "name": "default-allow-icmp",
+      "networkName": "default",
+      "direction": "INGRESS",
+      "disabled": false,
+      "internetIngress": true
+    },
+    {
+      "name": "default-allow-internal",
+      "networkName": "default",
+      "direction": "INGRESS",
+      "disabled": false,
+      "internetIngress": false
+    },
+    {
+      "name": "default-allow-rdp",
+      "networkName": "default",
+      "direction": "INGRESS",
+      "disabled": false,
+      "internetIngress": true
+    },
+    {
+      "name": "default-allow-ssh",
+      "networkName": "default",
+      "direction": "INGRESS",
+      "disabled": false,
+      "internetIngress": true
+    }
+  ]
+}

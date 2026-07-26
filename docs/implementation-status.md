@@ -86,6 +86,7 @@ any certification campaign slot.
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
+| Payload-free fail-closed network-hygiene assessment | Yes | Yes | No | Yes | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
@@ -106,6 +107,14 @@ and status `DOWNSTREAM_VERIFICATION_REQUIRED`. It grants no mutation or install
 authority and is never campaign evidence. The checked-in inert workload
 candidate remains a source-time capacity artifact; its activation reason list
 must not be treated as live provider state.
+
+The first live network-hygiene observation found one GCP default auto-mode VPC,
+42 default subnetworks, four default firewall rules, and three enabled
+internet-ingress rules. No instance or workload uses them. This is a blocking
+pre-install drift condition, not an applied Orchestra network topology. Cleanup
+must be separately executed and followed by a new `CLEAN` observation. The
+payload-free report `sno-network-operator-20260726141208.1` has digest
+`sha256:f1e011e6b2a9da8c778a64be185e39c0d92daefc9c09b2eff37b05c677c3242e`.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's

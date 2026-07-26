@@ -66,6 +66,15 @@ jobs:
           python3 scripts/sno_trial_readiness.py verify \
             --report "${RUNNER_TEMP}/sno-trial-readiness.json"
 
+      - name: Prove default SNO network drift blocks install authority
+        run: |
+          python3 scripts/sno_trial_network_hygiene.py assess \
+            --snapshot tests/fixtures/sno-trial-network-dirty.json \
+            --assessment-id sno-network-ci-dirty.1 \
+            --output "${RUNNER_TEMP}/sno-trial-network-hygiene.json"
+          python3 scripts/sno_trial_network_hygiene.py verify \
+            --report "${RUNNER_TEMP}/sno-trial-network-hygiene.json"
+
       - name: Validate immutable cross-plane release set
         run: python3 scripts/validate_release_set.py
 
