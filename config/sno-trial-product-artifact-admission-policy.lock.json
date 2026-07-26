@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
+  "policyId": "orchestra-sno-trial-product-admission-2026-07-26.1",
+  "targetClass": "engineering-trial",
+  "bindings": {
+    "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+    "artifactSetId": "orchestra-sno-trial-products-2026-07-25.3",
+    "artifactSetDigest": "sha256:2e6507fad12d56a5f0ddcd90259bb24eb5550f8047b285a812e9888ad82df9ef",
+    "workloadCandidateDigest": "sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a",
+    "replay": {
+      "verificationId": "sno-product-replay-30194136809.1",
+      "generatedAt": "2026-07-26T08:10:51Z",
+      "reportDigest": "sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280",
+      "verifierRevision": "9f1b153a1d11805a1dcca34f8b5e3e3f7d0b739e",
+      "verifierRunId": 30194136809,
+      "verifierRunAttempt": 1,
+      "artifactId": 8629559616,
+      "artifactName": "sno-trial-product-artifact-replay-30194136809-1"
+    }
+  },
+  "github": {
+    "repository": "caglarsubas/orchestra-openshift-reference-lab",
+    "repositoryId": "1307302690",
+    "repositoryOwnerId": "37515097",
+    "repositoryVisibility": "private",
+    "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/sno-trial-product-artifact-admission.yml@refs/heads/main",
+    "environment": "sno-trial-product-artifact-admission",
+    "minimumIndependentReviewers": 1,
+    "reviewerType": "User",
+    "preventSelfReview": true,
+    "deploymentBranch": "main"
+  },
+  "review": {
+    "maximumReplayAgeSeconds": 1209600,
+    "maximumAdmissionAgeSeconds": 2592000,
+    "requiredChecks": [
+      "replay-report-schema-and-digest",
+      "three-plane-publication-lineage",
+      "image-signatures-and-cyclonedx-attestations",
+      "chart-packages-and-sno-values",
+      "non-authorizing-claims-and-controls"
+    ]
+  },
+  "activation": {
+    "state": "blocked",
+    "remainingReasonCodes": [
+      "destination-mirror-verification-missing",
+      "live-cluster-pull-verification-missing",
+      "operator-secret-and-ca-inputs-missing",
+      "openshift-server-side-dry-run-missing",
+      "provider-readiness-not-approved"
+    ]
+  },
+  "controls": {
+    "productionReleaseSetMutated": false,
+    "manifestsEmitted": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEligible": false,
+    "allowedCertificationSlots": []
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false
+  },
+  "policyDigest": "sha256:a4d7a59d8a94008d27659df15e0d060588a15b7e1ad7c0ffbd51f96dfb450a1b"
+}

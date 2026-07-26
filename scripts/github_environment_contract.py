@@ -317,6 +317,12 @@ def validate_workflow_approvals(
                 "runAttempt": workflow_run_attempt,
             }
         ),
+        "requesterIdentityDigest": payload_digest(
+            {"type": expected["reviewerType"], "id": workflow_actor_id}
+        ),
+        "reviewerIdentityDigest": payload_digest(
+            {"type": expected["reviewerType"], "id": reviewer_id}
+        ),
         "approvalIdentityDigest": payload_digest(
             {
                 "environmentId": environment_id,

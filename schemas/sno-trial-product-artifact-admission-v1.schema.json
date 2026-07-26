@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-product-artifact-admission-v1.schema.json",
+  "title": "Orchestra SNO trial product artifact replay admission v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "admissionId",
+    "admittedAt",
+    "expiresAt",
+    "targetClass",
+    "decision",
+    "bindings",
+    "review",
+    "admission",
+    "activation",
+    "controls",
+    "claims",
+    "admissionDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-product-artifact-admission.v1"
+    },
+    "admissionId": {
+      "type": "string",
+      "pattern": "^sno-product-admission-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "admittedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "decision": {"const": "approved"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "review": {"$ref": "#/$defs/review"},
+    "admission": {"$ref": "#/$defs/admission"},
+    "activation": {"$ref": "#/$defs/activation"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "admissionDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "policyDigest",
+        "profileId",
+        "artifactSetId",
+        "artifactSetDigest",
+        "workloadCandidateDigest",
+        "verificationId",
+        "replayGeneratedAt",
+        "replayReportDigest",
+        "verifierRevision",
+        "verifierRunId",
+        "verifierRunAttempt",
+        "replayArtifactId",
+        "replayArtifactName",
+        "admissionWorkflowRevision",
+        "admissionWorkflowRunId",
+        "admissionWorkflowRunAttempt"
+      ],
+      "properties": {
+        "policyId": {
+          "const": "orchestra-sno-trial-product-admission-2026-07-26.1"
+        },
+        "policyDigest": {"$ref": "#/$defs/digest"},
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "artifactSetId": {
+          "const": "orchestra-sno-trial-products-2026-07-25.3"
+        },
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "workloadCandidateDigest": {"$ref": "#/$defs/digest"},
+        "verificationId": {
+          "const": "sno-product-replay-30194136809.1"
+        },
+        "replayGeneratedAt": {"type": "string", "format": "date-time"},
+        "replayReportDigest": {"$ref": "#/$defs/digest"},
+        "verifierRevision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "verifierRunId": {"const": 30194136809},
+        "verifierRunAttempt": {"const": 1},
+        "replayArtifactId": {"const": 8629559616},
+        "replayArtifactName": {
+          "const": "sno-trial-product-artifact-replay-30194136809-1"
+        },
+        "admissionWorkflowRevision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "admissionWorkflowRunId": {"type": "integer", "minimum": 1},
+        "admissionWorkflowRunAttempt": {"const": 1}
+      }
+    },
+    "workflowApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflowRunIdentityDigest",
+        "requesterIdentityDigest",
+        "reviewerIdentityDigest",
+        "approvalIdentityDigest",
+        "independentApproval"
+      ],
+      "properties": {
+        "workflowRunIdentityDigest": {"$ref": "#/$defs/digest"},
+        "requesterIdentityDigest": {"$ref": "#/$defs/digest"},
+        "reviewerIdentityDigest": {"$ref": "#/$defs/digest"},
+        "approvalIdentityDigest": {"$ref": "#/$defs/digest"},
+        "independentApproval": {"const": true}
+      }
+    },
+    "environmentEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repositoryIdentityDigest",
+        "environmentIdentityDigest",
+        "reviewerIdentityDigests",
+        "reviewerCount",
+        "preventSelfReview",
+        "deploymentBranchPolicyDigest",
+        "workflowApproval"
+      ],
+      "properties": {
+        "repositoryIdentityDigest": {"$ref": "#/$defs/digest"},
+        "environmentIdentityDigest": {"$ref": "#/$defs/digest"},
+        "reviewerIdentityDigests": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/digest"},
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "reviewerCount": {"type": "integer", "minimum": 1, "maximum": 6},
+        "preventSelfReview": {"const": true},
+        "deploymentBranchPolicyDigest": {"$ref": "#/$defs/digest"},
+        "workflowApproval": {"$ref": "#/$defs/workflowApproval"}
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewType",
+        "requiredChecks",
+        "checksPassed",
+        "environmentEvidence"
+      ],
+      "properties": {
+        "reviewType": {"const": "independent-github-environment-review"},
+        "requiredChecks": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "replay-report-schema-and-digest"},
+            {"const": "three-plane-publication-lineage"},
+            {"const": "image-signatures-and-cyclonedx-attestations"},
+            {"const": "chart-packages-and-sno-values"},
+            {"const": "non-authorizing-claims-and-controls"}
+          ],
+          "items": false,
+          "minItems": 5,
+          "maxItems": 5
+        },
+        "checksPassed": {"const": true},
+        "environmentEvidence": {"$ref": "#/$defs/environmentEvidence"}
+      }
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "scope",
+        "replayAccepted",
+        "destinationMirrorVerified",
+        "liveClusterPullVerified",
+        "secretReferencesResolved",
+        "serverSideDryRunVerified",
+        "providerReadinessApproved",
+        "activationAuthorized"
+      ],
+      "properties": {
+        "state": {"const": "source-replay-admitted"},
+        "scope": {"const": "sno-trial-product-artifacts-only"},
+        "replayAccepted": {"const": true},
+        "destinationMirrorVerified": {"const": false},
+        "liveClusterPullVerified": {"const": false},
+        "secretReferencesResolved": {"const": false},
+        "serverSideDryRunVerified": {"const": false},
+        "providerReadinessApproved": {"const": false},
+        "activationAuthorized": {"const": false}
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reasonCodes"],
+      "properties": {
+        "state": {"const": "blocked"},
+        "reasonCodes": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "destination-mirror-verification-missing"},
+            {"const": "live-cluster-pull-verification-missing"},
+            {"const": "operator-secret-and-ca-inputs-missing"},
+            {"const": "openshift-server-side-dry-run-missing"},
+            {"const": "provider-readiness-not-approved"}
+          ],
+          "items": false,
+          "minItems": 5,
+          "maxItems": 5
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "independentHumanReview",
+        "payloadsCollected",
+        "secretsCollected",
+        "manifestsEmitted",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "independentHumanReview": {"const": true},
+        "payloadsCollected": {"const": false},
+        "secretsCollected": {"const": false},
+        "manifestsEmitted": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {"type": "array", "maxItems": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false}
+      }
+    }
+  }
+}

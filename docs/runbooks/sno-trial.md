@@ -216,6 +216,38 @@ and live-cluster pulls, operator Secret/CA inputs, OpenShift server-side dry
 runs, and provider readiness are absent. It is not installation, campaign,
 reference-profile, customer, Red Hat, or SLA evidence.
 
+### Independently admit the replay
+
+The source contract for that later review is locked in
+`config/sno-trial-product-artifact-admission-policy.lock.json`; its output
+schema is
+`schemas/sno-trial-product-artifact-admission-v1.schema.json`. The policy is
+bound to replay run `30194136809`, artifact ID `8629559616`, and report digest
+`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
+
+Before dispatching `SNO trial product artifact admission`, configure the
+`sno-trial-product-artifact-admission` GitHub environment with:
+
+- one non-owner `User` reviewer;
+- required-reviewer protection and prevention of self-review;
+- a custom deployment-branch policy allowing only `main`;
+- no environment Secrets, OIDC, cloud credentials, registry credentials, or
+  deployment authority.
+
+The repository owner and workflow initiator cannot approve the run. A rerun
+cannot reuse an approval. The workflow downloads only the exact immutable
+replay artifact, validates it again, obtains the environment and approval event
+through the read-only GitHub API, and emits identity digests rather than user
+names, comments, tokens, or API payloads.
+
+The replay must be reviewed within 14 days. The workflow-issued admission
+expires after 14 days and can never exceed the policy lifetime maximum of 30
+days. It accepts only the source replay and removes only
+`product-artifact-replay-review-missing`. Destination mirror and live-cluster
+pull verification, Secret/CA inputs, server-side dry run, and provider
+readiness remain blocking. The output grants no cloud mutation, deployment,
+campaign, certification, production-support, Red Hat, or SLA authority.
+
 ## Record the Red Hat trial without identity payload
 
 The statement builder reads a mode-`0600` account identity file and the Red Hat

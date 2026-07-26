@@ -168,6 +168,14 @@ class GithubEnvironmentContractTests(unittest.TestCase):
         )
         encoded = json.dumps(evidence)
         self.assertTrue(evidence["independentApproval"])
+        self.assertEqual(
+            evidence["reviewerIdentityDigest"],
+            payload_digest({"type": "User", "id": 24681012}),
+        )
+        self.assertEqual(
+            evidence["requesterIdentityDigest"],
+            payload_digest({"type": "User", "id": 13579}),
+        )
         self.assertNotIn("fixture comment", encoded)
         self.assertNotIn("independent-reviewer-fixture", encoded)
         self.assertNotIn("24681012", encoded)
