@@ -90,19 +90,26 @@ digest
 The complete source-to-destroy procedure is in
 [`docs/runbooks/sno-trial.md`](docs/runbooks/sno-trial.md).
 
-As of the 2026-07-25 read-only observation, the disposable trial project shell
-`prometa-orch-sno-499235` is active, billing is detached, zero APIs are enabled,
-and the request for one additional billing-project association is pending
-Google review. The shell has no trial workloads, budget, or delegated DNS and
-does not constitute an applied SNO foundation. Re-run the payload-free
-readiness diagnostic before relying on this point-in-time statement:
+As of 2026-07-26, the disposable `prometa-orch-sno-499235` foundation has been
+applied and independently read back: billing is enabled, all 11 locked APIs are
+active, the project-filtered 3,500 TRY budget has all six thresholds, and the
+public `ocp-lab.prometa.ai.` managed zone exists. A post-apply Terraform refresh
+reported no drift. No compute, cluster, installer, workload, or Secret resource
+has been created.
+
+The public parent still does not delegate `ocp-lab.prometa.ai.` to the generated
+Cloud DNS nameservers. Source CIDR review, a Linux AMD64 administration path,
+and an active operator lease also remain required. The fresh payload-free
+readiness report therefore remains `DOWNSTREAM_VERIFICATION_REQUIRED`, with
+all certification and production claims false. Re-run it before relying on
+this point-in-time statement:
 
 ```bash
 READINESS_ID=sno-readiness-operator-$(date -u +%Y%m%d%H%M%S).1
 
 make observe-sno-trial-readiness \
   PROJECT_ID=prometa-orch-sno-499235 \
-  QUOTA_REQUEST_STATUS=pending \
+  QUOTA_REQUEST_STATUS=approved \
   ASSESSMENT_ID="$READINESS_ID" \
   OUTPUT="restricted/$READINESS_ID.json"
 

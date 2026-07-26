@@ -74,7 +74,7 @@ any certification campaign slot.
 |---|---:|---:|---:|---:|---:|
 | Distinct non-certifying SNO profile and digest | Yes | Yes | No | No | Not eligible |
 | One 8-vCPU control-plane node, zero workers, 150 GB balanced disk | Yes | Yes | No | No | Not eligible |
-| `$75` alert ceiling and 48 active-hour limit | Yes | Yes | No | No | Not eligible |
+| `$75` alert ceiling and 48 active-hour limit | Yes | Yes | Budget only | Yes | Not eligible |
 | 12-hour maximum project-bound operator lease | Yes | Yes | No | No | Not eligible |
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
 | Exact public `4.20.27` installer/client archive lock and local integrity intake | Yes | Yes | Local archive only | Yes | Not eligible |
@@ -84,21 +84,28 @@ any certification campaign slot.
 | Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
-| Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | No | No | Not eligible |
+| Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
-| Unbilled disposable project shell, without APIs or workloads | N/A | N/A | Shell only | Yes | Not eligible |
-| GCP project, budget, DNS, and source-IP allowlist | No | N/A | No | No | Not eligible |
+| Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
+| Parent DNS delegation and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
 | Minimal co-located trial dependencies | No | N/A | No | No | Not eligible |
 | Verified teardown and residual-resource reconciliation | No | N/A | No | No | Not eligible |
 
-The project-shell row records a point-in-time read-only observation on
-2026-07-25 for `prometa-orch-sno-499235`: project lifecycle `ACTIVE`, billing
-disabled, zero enabled APIs, and the one-project billing-association quota
-request pending Google review. It does not mark the combined project, budget,
-DNS, and allowlist foundation as applied. The observation must be refreshed
-with `scripts/sno_trial_readiness.py`; its output is a non-certifying
-diagnostic, never campaign evidence or mutation authority.
+The foundation rows record the 2026-07-26 bounded operator apply for
+`prometa-orch-sno-499235`. The exact reviewed remainder created one
+project-filtered 3,500 TRY budget and changed or destroyed nothing. Independent
+readback observed active billing, all 11 locked APIs, six budget thresholds,
+and the public Cloud DNS managed zone. A subsequent Terraform refresh reported
+no drift. No compute, cluster, workload, Secret, or source-IP allowlist exists.
+
+The payload-free readiness report
+`sno-readiness-operator-20260726134508.1` has report digest
+`sha256:9899937beeaed8599dc7b1c1f8904e0d66445d27433a6df96bd9fc4874ca1871`
+and status `DOWNSTREAM_VERIFICATION_REQUIRED`. It grants no mutation or install
+authority and is never campaign evidence. The checked-in inert workload
+candidate remains a source-time capacity artifact; its activation reason list
+must not be treated as live provider state.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's
