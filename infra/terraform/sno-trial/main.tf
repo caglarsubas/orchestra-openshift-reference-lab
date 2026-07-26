@@ -1,5 +1,8 @@
 locals {
   profile = jsondecode(file("${path.module}/../../../config/sno-trial.lock.json"))
+  billing_execution = jsondecode(
+    file("${path.module}/../../../config/sno-trial-billing-execution.lock.json")
+  )
 
   profile_digest = "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b"
   required_services = toset([
@@ -35,6 +38,26 @@ check "locked_trial_profile" {
       && local.profile.guardrails.teardown.automaticProviderTeardown == false
     )
     error_message = "The Terraform trial foundation no longer matches the locked SNO profile."
+  }
+}
+
+check "locked_billing_execution" {
+  assert {
+    condition = (
+      local.billing_execution.schemaVersion == 1
+      && local.billing_execution.kind == "orchestra.openshift.sno-trial-billing-execution.v1"
+      && local.billing_execution.profileId == local.profile.profileId
+      && local.billing_execution.profileDigest == local.profile_digest
+      && local.billing_execution.monthlyUsdCeiling == local.profile.guardrails.budget.monthlyUsd
+      && local.billing_execution.billingCurrencyCode == "TRY"
+      && local.billing_execution.billingAmountUnits == 3500
+      && local.billing_execution.conversionRateTryPerUsd == "47.2497"
+      && local.billing_execution.conversionRateDate == "2026-07-24"
+      && local.billing_execution.conversionRateSource == "TCMB ForexSelling"
+      && local.billing_execution.equivalentUsdAtLockedRate == "74.08"
+      && local.billing_execution.budgetIsHardCap == local.profile.guardrails.budget.budgetIsHardCap
+    )
+    error_message = "The Terraform trial budget no longer matches the reviewed billing execution lock."
   }
 }
 
@@ -83,8 +106,8 @@ resource "google_billing_budget" "trial" {
 
   amount {
     specified_amount {
-      currency_code = "USD"
-      units         = tostring(local.profile.guardrails.budget.monthlyUsd)
+      currency_code = local.billing_execution.billingCurrencyCode
+      units         = tostring(local.billing_execution.billingAmountUnits)
     }
   }
 

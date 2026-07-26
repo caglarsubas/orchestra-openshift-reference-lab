@@ -12,11 +12,15 @@ from typing import Any, NoReturn
 
 ROOT = Path(__file__).resolve().parents[1]
 TRIAL_PROFILE = ROOT / "config" / "sno-trial.lock.json"
+BILLING_EXECUTION_LOCK = (
+    ROOT / "config" / "sno-trial-billing-execution.lock.json"
+)
 PRODUCTION_PROFILE = ROOT / "config" / "lab.lock.json"
 TRIAL_PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 PRODUCTION_PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 ALLOWED_TRIAL_CONFIG_NAMES = {
     "sno-trial.lock.json",
+    "sno-trial-billing-execution.lock.json",
     "sno-trial-openshift-toolchain.lock.json",
     "sno-trial-product-artifact-admission-policy.lock.json",
     "sno-trial-product-artifacts.lock.json",
@@ -27,6 +31,9 @@ EXPECTED_PRODUCTION_DIGEST = (
 )
 EXPECTED_TRIAL_DIGEST = (
     "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b"
+)
+EXPECTED_BILLING_EXECUTION_DIGEST = (
+    "sha256:832f6811ce867ec864950858f105a01983ed2ca79deeb344b7762a8b9f4bfa25"
 )
 PROTECTED_PRODUCTION_PATHS = (
     ROOT / ".github" / "workflows",
@@ -223,6 +230,38 @@ def validate_profile(
         fail("trial_profile_digest_changed")
 
 
+def validate_billing_execution(
+    value: dict[str, Any], profile: dict[str, Any]
+) -> None:
+    expected = {
+        "schemaVersion": 1,
+        "kind": "orchestra.openshift.sno-trial-billing-execution.v1",
+        "profileId": TRIAL_PROFILE_ID,
+        "profileDigest": EXPECTED_TRIAL_DIGEST,
+        "monthlyUsdCeiling": 75,
+        "billingCurrencyCode": "TRY",
+        "billingAmountUnits": 3500,
+        "conversionRateTryPerUsd": "47.2497",
+        "conversionRateDate": "2026-07-24",
+        "conversionRateSource": "TCMB ForexSelling",
+        "equivalentUsdAtLockedRate": "74.08",
+        "budgetIsHardCap": False,
+    }
+    if value != expected:
+        fail("trial_billing_execution_invalid")
+    if (
+        value["profileId"] != profile["profileId"]
+        or value["profileDigest"] != canonical_digest(profile)
+        or value["monthlyUsdCeiling"]
+        != profile["guardrails"]["budget"]["monthlyUsd"]
+        or value["budgetIsHardCap"]
+        != profile["guardrails"]["budget"]["budgetIsHardCap"]
+    ):
+        fail("trial_billing_execution_profile_binding_invalid")
+    if canonical_digest(value) != EXPECTED_BILLING_EXECUTION_DIGEST:
+        fail("trial_billing_execution_digest_changed")
+
+
 def validate_production_isolation(root: Path = ROOT) -> None:
     for protected in PROTECTED_PRODUCTION_PATHS:
         if not protected.exists():
@@ -241,10 +280,16 @@ def validate_production_isolation(root: Path = ROOT) -> None:
 
 def main() -> int:
     trial = load_json(TRIAL_PROFILE)
+    billing_execution = load_json(BILLING_EXECUTION_LOCK)
     production = load_json(PRODUCTION_PROFILE)
     validate_profile(trial, production)
+    validate_billing_execution(billing_execution, trial)
     validate_production_isolation()
-    print(f"sno_trial_profile_valid profileDigest={canonical_digest(trial)}")
+    print(
+        "sno_trial_profile_valid "
+        f"profileDigest={canonical_digest(trial)} "
+        f"billingExecutionDigest={canonical_digest(billing_execution)}"
+    )
     return 0
 
 

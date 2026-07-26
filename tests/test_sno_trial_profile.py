@@ -18,6 +18,8 @@ from scripts.render_sno_trial_install_config import (
 )
 from scripts.trial_lease import build_lease, validate_lease
 from scripts.validate_sno_trial_profile import (
+    BILLING_EXECUTION_LOCK,
+    EXPECTED_BILLING_EXECUTION_DIGEST,
     EXPECTED_PRODUCTION_DIGEST,
     EXPECTED_TRIAL_DIGEST,
     PRODUCTION_PROFILE,
@@ -27,6 +29,7 @@ from scripts.validate_sno_trial_profile import (
     TRIAL_PROFILE_ID,
     canonical_digest,
     load_json,
+    validate_billing_execution,
     validate_profile,
     validate_production_isolation,
 )
@@ -35,6 +38,7 @@ from scripts.validate_sno_trial_profile import (
 class SnoTrialProfileTests(unittest.TestCase):
     def setUp(self) -> None:
         self.profile = load_json(TRIAL_PROFILE)
+        self.billing_execution = load_json(BILLING_EXECUTION_LOCK)
         self.production = load_json(PRODUCTION_PROFILE)
         self.starts_at = datetime(2026, 7, 24, 8, 0, tzinfo=timezone.utc)
 
@@ -55,6 +59,26 @@ class SnoTrialProfileTests(unittest.TestCase):
         self.assertEqual(self.production["profileId"], PRODUCTION_PROFILE_ID)
         self.assertEqual(canonical_digest(self.profile), EXPECTED_TRIAL_DIGEST)
         self.assertEqual(canonical_digest(self.production), EXPECTED_PRODUCTION_DIGEST)
+
+    def test_billing_execution_is_profile_bound_and_below_usd_ceiling(self) -> None:
+        validate_billing_execution(self.billing_execution, self.profile)
+        self.assertEqual(
+            canonical_digest(self.billing_execution),
+            EXPECTED_BILLING_EXECUTION_DIGEST,
+        )
+        self.assertEqual(self.billing_execution["billingCurrencyCode"], "TRY")
+        self.assertLess(
+            float(self.billing_execution["equivalentUsdAtLockedRate"]),
+            self.profile["guardrails"]["budget"]["monthlyUsd"],
+        )
+
+    def test_billing_execution_drift_is_rejected(self) -> None:
+        changed = copy.deepcopy(self.billing_execution)
+        changed["billingAmountUnits"] = 3501
+        with self.assertRaisesRegex(
+            ValueError, "trial_billing_execution_invalid"
+        ):
+            validate_billing_execution(changed, self.profile)
 
     def test_only_named_trial_locks_may_reference_trial_profile_in_config(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

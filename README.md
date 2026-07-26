@@ -62,7 +62,13 @@ provisioning.
 
 The separate `orchestra-ocp-sno-trial-amd64-v1` profile provides a live,
 non-certifying path for the current Red Hat trial and a `$75` monthly budget
-alert ceiling. It does not alter or weaken `orchestra-ocp-4.20-amd64-v1`.
+alert ceiling. The Google billing account is denominated in TRY, so the
+provider budget is locked to 3,500 TRY (about $74.08 at the 2026-07-24 TCMB
+selling rate). It does not alter or weaken `orchestra-ocp-4.20-amd64-v1`.
+The account-specific conversion is isolated in
+[`config/sno-trial-billing-execution.lock.json`](config/sno-trial-billing-execution.lock.json)
+so rotating it does not rewrite the stable trial profile or product-artifact
+lineage.
 
 - One OpenShift `4.20.27` `n2-standard-8` control-plane node in
   `europe-west1-b`, 150 GB `pd-balanced`, and zero workers.
