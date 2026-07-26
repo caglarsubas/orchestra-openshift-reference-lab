@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.gcp.sno-trial-dns-delegation-snapshot.v1",
+  "executionMode": "simulated",
+  "observedAt": "2026-07-27T00:00:00Z",
+  "projectId": "prometa-orch-sno-fixture",
+  "managedZone": {
+    "name": "orchestra-ocp-sno-trial-planeon-public",
+    "dnsName": "ocp-lab.planeon.ai.",
+    "visibility": "public",
+    "nameServers": [
+      "ns-cloud-a1.googledomains.com.",
+      "ns-cloud-a2.googledomains.com.",
+      "ns-cloud-a3.googledomains.com.",
+      "ns-cloud-a4.googledomains.com."
+    ]
+  },
+  "delegatedNameServers": []
+}

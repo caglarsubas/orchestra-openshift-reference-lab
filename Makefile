@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -72,6 +72,19 @@ observe-sno-trial-network-hygiene:
 verify-sno-trial-network-hygiene:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_network_hygiene.py verify --report "$(REPORT)"
+
+observe-sno-trial-dns-delegation:
+	test -n "$(PROJECT_ID)"
+	test -n "$(ASSESSMENT_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_dns_delegation.py collect \
+		--project-id "$(PROJECT_ID)" \
+		--assessment-id "$(ASSESSMENT_ID)" \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-dns-delegation:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/sno_trial_dns_delegation.py verify --report "$(REPORT)"
 
 inspect-sno-trial-toolchain:
 	test -n "$(ARCHIVE_DIR)"
