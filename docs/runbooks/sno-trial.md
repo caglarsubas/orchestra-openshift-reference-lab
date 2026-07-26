@@ -43,8 +43,9 @@ Because the authorized Google billing account is denominated in TRY, the
 provider-side amount is 3,500 TRY. That is about $74.08 at the TCMB
 `ForexSelling` rate of 47.2497 TRY/USD on 2026-07-24 and remains below the
 locked USD ceiling. The conversion is bound separately in
-`config/sno-trial-billing-execution.lock.json`; the canonical topology profile
-and its product-artifact bindings remain unchanged.
+`config/sno-trial-billing-execution.lock.json`. A DNS-domain change updates the
+canonical profile digest and therefore refreshes its workload and
+product-artifact bindings; prior live replay reports remain historical.
 The operational limits are:
 
 - GCP budget alerts at 10, 25, 50, 75, 90, and 100 percent.
@@ -69,7 +70,7 @@ Do not create a lease until all of these are true:
    persistent disks, load balancers, forwarding rules, external IPs, and DNS.
 6. The project has a 3,500 TRY budget, bound to the `$75` ceiling, with the six
    locked alert thresholds.
-7. `ocp-lab.prometa.ai` is available for the `orchestra-trial` cluster DNS
+7. `ocp-lab.planeon.ai` is available for the `orchestra-trial` cluster DNS
    namespace.
 8. A Linux AMD64 administration host has short-lived GCP credentials. The
    downloaded linux binaries do not execute natively on macOS.
@@ -212,8 +213,11 @@ signature payloads, SBOM payloads, Secrets, or customer data.
 Exact-main run `30194136809` completed on 2026-07-26 against verifier revision
 `9f1b153a1d11805a1dcca34f8b5e3e3f7d0b739e`. Its payload-free report digest is
 `sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
-The report remains a time-bounded GitHub Actions artifact and does not by
-itself record human admission.
+That report binds the prior trial-profile and artifact-set digests. It is
+historical after the Planeon DNS migration and cannot be admitted against the
+current lock. Dispatch a fresh exact-main replay after the domain migration is
+merged. The report remains a time-bounded GitHub Actions artifact and does not
+by itself record human admission.
 
 A successful replay proves only that the three locked artifacts match their
 sources and signed publications. An operator must review and accept the
@@ -229,8 +233,12 @@ The source contract for that later review is locked in
 `config/sno-trial-product-artifact-admission-policy.lock.json`; its output
 schema is
 `schemas/sno-trial-product-artifact-admission-v1.schema.json`. The policy is
-bound to replay run `30194136809`, artifact ID `8629559616`, and report digest
-`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
+temporarily bound to the historical replay run `30194136809`, artifact ID
+`8629559616`, and report digest
+`sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`,
+while also carrying `product-artifact-replay-refresh-required`. The old report
+fails current artifact-set binding. Update the policy through a separate
+reviewed PR after the fresh replay; do not dispatch admission before then.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:
@@ -312,6 +320,8 @@ export TF_VAR_billing_account="$(
     --format='value(name)'
 )"
 export TF_VAR_project_id='<globally-unique-disposable-project-id>'
+# Existing prometa-orch-sno-499235 migration only; omit for fresh projects.
+export TF_VAR_retain_legacy_prometa_zone=true
 
 terraform -chdir=infra/terraform/sno-trial init -input=false
 terraform -chdir=infra/terraform/sno-trial plan \
@@ -324,8 +334,14 @@ terraform -chdir=infra/terraform/sno-trial show -no-color \
 Review the plan before applying it. It must create one project, the locked API
 set, one project-filtered 3,500 TRY budget (the locked `$75` ceiling) with six
 thresholds, and one public
-`ocp-lab.prometa.ai.` zone. It must not create compute instances, disks, load
+`ocp-lab.planeon.ai.` zone. It must not create compute instances, disks, load
 balancers, networks, credentials, or production-reference resources.
+
+For the existing `prometa-orch-sno-499235` migration only, set
+`TF_VAR_retain_legacy_prometa_zone=true`. The reviewed plan must move the
+existing zone's Terraform address without changing it, create the Planeon zone,
+and show zero updates and zero destroys. Fresh projects leave this variable
+false and never create the legacy Prometa zone.
 
 Apply exactly the reviewed plan, capture only restricted output, and remove the
 short-lived environment values:
@@ -336,7 +352,8 @@ terraform -chdir=infra/terraform/sno-trial apply \
 terraform -chdir=infra/terraform/sno-trial output -json \
   > restricted/terraform/sno-trial/foundation-output.json
 
-unset GOOGLE_OAUTH_ACCESS_TOKEN TF_VAR_billing_account TF_VAR_project_id
+unset GOOGLE_OAUTH_ACCESS_TOKEN TF_VAR_billing_account TF_VAR_project_id \
+  TF_VAR_retain_legacy_prometa_zone
 ```
 
 If project creation succeeds but billing association fails, Terraform can
@@ -410,21 +427,24 @@ OpenShift installer and residual-resource checks have completed.
 The 2026-07-26 bounded foundation apply for `prometa-orch-sno-499235` is
 complete. The reviewed remainder created only the project-scoped 3,500 TRY
 budget; the earlier partial apply had already attached billing, enabled the
-locked APIs, and created the public managed zone. Independent API readback and
-a post-apply Terraform refresh verified:
+locked APIs, and created the now-legacy public managed zone. Independent API
+readback and a post-apply Terraform refresh verified:
 
 - Billing enabled and all 11 required APIs active.
 - One 3,500 TRY budget, six thresholds, and the exact project-number filter.
-- The `ocp-lab.prometa.ai.` Cloud DNS zone with four generated nameservers.
+- The unused `ocp-lab.prometa.ai.` Cloud DNS zone with four generated
+  nameservers.
 - No Terraform drift and no compute, cluster, workload, or Secret resources.
 
-The readiness report
+The active trial profile now uses `ocp-lab.planeon.ai.`. The additive Planeon
+managed zone is not yet applied, and the old zone remains retained for a
+separately reviewed cleanup. The readiness report
 `sno-readiness-operator-20260726134508.1` remains
-`DOWNSTREAM_VERIFICATION_REQUIRED`; it is payload-free, non-authorizing, and
-non-certifying. Public lookup still returns no child NS records because the
-GoDaddy-hosted `prometa.ai` parent has not delegated the zone. Do not create an
-operator lease or installer resources until that delegation, source CIDR,
-Linux AMD64 administration path, and remaining prerequisites are verified.
+`DOWNSTREAM_VERIFICATION_REQUIRED`, but is bound to the previous profile
+digest and is now historical. Do not create an operator lease or installer
+resources until the Planeon zone exists, Cloudflare delegates it, and fresh
+readiness, source CIDR, Linux AMD64 administration path, and remaining
+prerequisites are verified.
 
 The first network-hygiene observation found a GCP-created default auto-mode
 VPC, 42 subnetworks, and four default firewall rules, including three enabled
@@ -458,16 +478,20 @@ make verify-sno-trial-network-hygiene \
 
 The report stores counts and canonical inventory digests, not raw firewall
 sources or provider responses. It never authorizes cleanup or installation.
-Proceed only while a fresh report remains `CLEAN`.
+The recorded post-cleanup report is bound to the previous profile digest;
+recollect it after the Planeon migration. Proceed only while a fresh report
+remains `CLEAN`.
 
 ## Delegate the trial DNS zone
 
-Read the generated nameservers from the restricted Terraform output and
-delegate `ocp-lab.prometa.ai.` at the `prometa.ai` parent. Do not install until
-an external authoritative lookup returns the complete generated NS set:
+Read the generated nameservers from the restricted Terraform output and add
+four DNS-only `NS` records for host `ocp-lab` in the Cloudflare-hosted
+`planeon.ai` parent. Do not modify `www.planeon.ai`, the apex nameservers, or
+website records. Do not install until an external authoritative lookup returns
+the complete generated NS set:
 
 ```bash
-dig +short NS ocp-lab.prometa.ai. | sort
+dig +short NS ocp-lab.planeon.ai. | sort
 ```
 
 The Terraform output proves only that the managed zone exists. The external

@@ -30,10 +30,10 @@ EXPECTED_PRODUCTION_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
 )
 EXPECTED_TRIAL_DIGEST = (
-    "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b"
+    "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a"
 )
 EXPECTED_BILLING_EXECUTION_DIGEST = (
-    "sha256:832f6811ce867ec864950858f105a01983ed2ca79deeb344b7762a8b9f4bfa25"
+    "sha256:c36e8d30ac3f397d5ab0aabe562a2bb8ecece2e54dd4046ba4f22c24fea0a279"
 )
 PROTECTED_PRODUCTION_PATHS = (
     ROOT / ".github" / "workflows",
@@ -119,7 +119,7 @@ def validate_profile(
         "cloud": "gcp",
         "region": "europe-west1",
         "zones": ["europe-west1-b"],
-        "dnsZone": "ocp-lab.prometa.ai",
+        "dnsZone": "ocp-lab.planeon.ai",
     }:
         fail("trial_location_invalid")
     if value["projects"] != {

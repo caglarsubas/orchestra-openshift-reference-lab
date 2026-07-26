@@ -67,7 +67,7 @@ def render(template: str, values: dict[str, str]) -> str:
     if set(PLACEHOLDER.findall(rendered)) != SECRET_PLACEHOLDERS:
         fail("trial_install_rendered_placeholders_invalid")
     required_fragments = (
-        "baseDomain: ocp-lab.prometa.ai",
+        "baseDomain: ocp-lab.planeon.ai",
         "name: orchestra-trial",
         "name: worker\n    replicas: 0",
         "name: master\n  replicas: 1",

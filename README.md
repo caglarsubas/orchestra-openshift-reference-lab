@@ -86,23 +86,24 @@ lineage.
 The locked trial contract is
 [`config/sno-trial.lock.json`](config/sno-trial.lock.json), with canonical
 digest
-`sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b`.
+`sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a`.
 The complete source-to-destroy procedure is in
 [`docs/runbooks/sno-trial.md`](docs/runbooks/sno-trial.md).
 
 As of 2026-07-26, the disposable `prometa-orch-sno-499235` foundation has been
 applied and independently read back: billing is enabled, all 11 locked APIs are
 active, the project-filtered 3,500 TRY budget has all six thresholds, and the
-public `ocp-lab.prometa.ai.` managed zone exists. A post-apply Terraform refresh
-reported no drift. No compute, cluster, installer, workload, or Secret resource
-has been created.
+unused legacy `ocp-lab.prometa.ai.` managed zone exists. The active trial
+contract now uses `ocp-lab.planeon.ai.`; its additive Cloud DNS zone has not
+yet been applied. The migration retains the old empty zone explicitly and does
+not delete or modify it. No compute, cluster, installer, workload, or Secret
+resource has been created.
 
-The public parent still does not delegate `ocp-lab.prometa.ai.` to the generated
-Cloud DNS nameservers. Source CIDR review, a Linux AMD64 administration path,
-and an active operator lease also remain required. The fresh payload-free
-readiness report therefore remains `DOWNSTREAM_VERIFICATION_REQUIRED`, with
-all certification and production claims false. Re-run it before relying on
-this point-in-time statement:
+The Cloudflare-hosted `planeon.ai` parent does not yet delegate
+`ocp-lab.planeon.ai.`. Source CIDR review, a Linux AMD64 administration path,
+and an active operator lease also remain required. Earlier readiness reports
+are bound to the previous profile digest and are historical only. Re-run the
+payload-free assessment after the additive Planeon zone is applied:
 
 ```bash
 READINESS_ID=sno-readiness-operator-$(date -u +%Y%m%d%H%M%S).1
@@ -150,7 +151,8 @@ operator cleanup removed only those default resources. The post-cleanup report
 and observes zero networks, subnetworks, firewall rules, and internet-ingress
 rules. A subsequent Terraform refresh returned no changes. This closes the
 network-hygiene drift only; it does not authorize installation or produce
-campaign evidence.
+campaign evidence. The report is bound to the prior trial-profile digest and
+must be recollected after the Planeon profile migration.
 
 The exact versioned OpenShift `4.20.27` linux/amd64 installer and client
 archives are independently available from Red Hat's public mirror. Their URLs,
@@ -196,7 +198,7 @@ manifests, Argo CD applications, Secret values, lease, or cloud authority.
 Valkey and CPU model-backend artifacts are unresolved, and trial-specific
 single-replica chart profiles and dependency runtime contracts do not yet
 exist. Its canonical digest is
-`sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a`;
+`sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9`;
 all production, HA, campaign, certification, and SLA claims remain false.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
@@ -243,21 +245,21 @@ attempts, and source-only SNO values for read-only registry replay. Every
 artifact binds its first successful publication attempt. Runtime `v0.18.7`
 also binds the supported Cosign v3 publisher used by the independent replay.
 The artifact-set digest is
-`sha256:2e6507fad12d56a5f0ddcd90259bb24eb5550f8047b285a812e9888ad82df9ef`.
+`sha256:ade81d5555838a091f24580b1300697221a3ed05414ce99880964e7ee54cb12a`.
 The replay uses two separate environment credentials: a classic token limited
 to package-read access across the locked GHCR namespaces and a fine-grained
 token limited to Actions-read plus required metadata on the private platform
-source repository. Exact-main run `30194136809` completed on 2026-07-26 with
-payload-free report digest
+source repository. Exact-main run `30194136809` completed on 2026-07-26
+against the prior profile-bound artifact set, with payload-free report digest
 `sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
-This is live registry replay evidence only. Human admission, destination mirror
-and live-cluster pulls, operator inputs, server-side dry runs, and provider
-readiness remain absent; activation and every certifying claim remain false.
-The separate replay-admission policy, strict schema, and protected workflow are
-source-valid but not live-tested. They require a non-owner GitHub reviewer,
-prevent self-review and rerun approval reuse, emit only payload-free identity
-digests, and remove only the replay-review blocker. They grant no cloud,
-deployment, campaign, or certification authority.
+That report is historical and cannot satisfy the Planeon-bound artifact-set
+digest. The admission policy now includes
+`product-artifact-replay-refresh-required`; its old report fails binding
+against the current lock. A fresh exact-main replay and a separately reviewed
+policy update are required before human admission can resume. Destination
+mirror and live-cluster pulls, operator inputs, server-side dry runs, and
+provider readiness also remain absent; activation and every certifying claim
+remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.

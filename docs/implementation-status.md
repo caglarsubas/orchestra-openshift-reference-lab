@@ -97,14 +97,18 @@ The foundation rows record the 2026-07-26 bounded operator apply for
 `prometa-orch-sno-499235`. The exact reviewed remainder created one
 project-filtered 3,500 TRY budget and changed or destroyed nothing. Independent
 readback observed active billing, all 11 locked APIs, six budget thresholds,
-and the public Cloud DNS managed zone. A subsequent Terraform refresh reported
-no drift. No compute, cluster, workload, Secret, or source-IP allowlist exists.
+and the now-legacy `ocp-lab.prometa.ai.` Cloud DNS managed zone. A subsequent
+Terraform refresh reported no drift. The active source contract now uses
+`ocp-lab.planeon.ai.`; its additive managed zone has not yet been applied and
+the old empty zone is retained pending separate cleanup. No compute, cluster,
+workload, Secret, or source-IP allowlist exists.
 
 The payload-free readiness report
 `sno-readiness-operator-20260726134508.1` has report digest
 `sha256:9899937beeaed8599dc7b1c1f8904e0d66445d27433a6df96bd9fc4874ca1871`
 and status `DOWNSTREAM_VERIFICATION_REQUIRED`. It grants no mutation or install
-authority and is never campaign evidence. The checked-in inert workload
+authority and is never campaign evidence. It is bound to the previous
+trial-profile digest and is now historical. The checked-in inert workload
 candidate remains a source-time capacity artifact; its activation reason list
 must not be treated as live provider state.
 
@@ -133,21 +137,24 @@ The inert workload-candidate row records a source-only capacity calculation
 for nine single-replica workloads on the locked `n2-standard-8`. It preserves
 a 3-vCPU/12-GiB system reserve and leaves positive request headroom, but emits
 no deployable manifests and grants no installation authority. The exact-main
-registry replay run `30194136809` completed on 2026-07-26 and produced
-payload-free report digest
+registry replay run `30194136809` completed on 2026-07-26 against the prior
+profile-bound artifact set and produced payload-free report digest
 `sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280`.
-It verified the three locked publications, signatures, CycloneDX attestations,
-linux/amd64 manifests, and chart packages. Human admission, direct dependency
-runtime contracts, a Valkey image, a CPU model-backend artifact, destination
-and live-cluster pull proof, operator Secret/CA inputs, live allocatable
-capacity, and server-side dry run remain explicit blockers. The replay is
-live-tested but neither applied nor campaign evidence.
+It verified the three publications, signatures, CycloneDX attestations,
+linux/amd64 manifests, and chart packages then locked. The current
+Planeon-bound artifact set has a different digest, so that replay is historical
+and cannot be admitted. A fresh exact-main replay is an explicit blocker
+alongside direct dependency runtime contracts, a Valkey image, a CPU
+model-backend artifact, destination and live-cluster pull proof, operator
+Secret/CA inputs, live allocatable capacity, and server-side dry run.
 
 The independent replay-admission policy, strict output schema, and protected
-workflow are source- and CI-validated. They are not live-tested: the required
-non-owner GitHub environment reviewer has not been configured and no admission
-record has been issued. Even a valid admission removes only the replay-review
-reason and leaves all five deployment/provider blockers and every certifying
+workflow are source- and CI-validated. The policy is explicitly blocked by
+`product-artifact-replay-refresh-required`; the old report cannot bind to the
+current artifact set. The required non-owner GitHub environment reviewer also
+has not been configured and no admission record has been issued. Even a valid
+future admission removes only the replay-review reason and leaves all five
+deployment/provider blockers and every certifying
 claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence

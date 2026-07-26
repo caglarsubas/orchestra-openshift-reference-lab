@@ -7,7 +7,7 @@
   "executionMode": "source-observation",
   "completeness": "published-three-plane-not-trial-admitted",
   "bindings": {
-    "workloadCandidateDigest": "sha256:509a699d4748dc6dc1e1298f7ba1fd524d7ccab8a2a23c6cef09702db91bb10a"
+    "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9"
   },
   "artifacts": [
     {
@@ -179,5 +179,5 @@
     "contractualSla": false,
     "productionSupported": false
   },
-  "artifactSetDigest": "sha256:2e6507fad12d56a5f0ddcd90259bb24eb5550f8047b285a812e9888ad82df9ef"
+  "artifactSetDigest": "sha256:ade81d5555838a091f24580b1300697221a3ed05414ce99880964e7ee54cb12a"
 }

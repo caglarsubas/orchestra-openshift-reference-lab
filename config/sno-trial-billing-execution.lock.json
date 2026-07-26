@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "orchestra.openshift.sno-trial-billing-execution.v1",
   "profileId": "orchestra-ocp-sno-trial-amd64-v1",
-  "profileDigest": "sha256:0e660bc8552fd9714d97e7063511751d633fb7aee0f39729733034728e8d2a4b",
+  "profileDigest": "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a",
   "monthlyUsdCeiling": 75,
   "billingCurrencyCode": "TRY",
   "billingAmountUnits": 3500,

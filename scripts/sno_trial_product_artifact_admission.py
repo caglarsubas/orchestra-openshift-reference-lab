@@ -61,13 +61,15 @@ REQUIRED_CHECKS = [
     "chart-packages-and-sno-values",
     "non-authorizing-claims-and-controls",
 ]
-REMAINING_REASONS = [
+REPLAY_REFRESH_REASON = "product-artifact-replay-refresh-required"
+DEPLOYMENT_REASONS = [
     "destination-mirror-verification-missing",
     "live-cluster-pull-verification-missing",
     "operator-secret-and-ca-inputs-missing",
     "openshift-server-side-dry-run-missing",
     "provider-readiness-not-approved",
 ]
+REMAINING_REASONS = [REPLAY_REFRESH_REASON, *DEPLOYMENT_REASONS]
 POLICY_CONTROLS = {
     "productionReleaseSetMutated": False,
     "manifestsEmitted": False,
@@ -193,25 +195,32 @@ def validate_policy(
         },
         "sno_product_admission_policy_replay_invalid",
     )
+    run_id = replay["verifierRunId"]
+    run_attempt = replay["verifierRunAttempt"]
+    artifact_id = replay["artifactId"]
     if (
-        replay["verificationId"] != "sno-product-replay-30194136809.1"
-        or replay["generatedAt"] != "2026-07-26T08:10:51Z"
-        or replay["reportDigest"]
-        != "sha256:e664bf181d4e0a4b8023f0633957774b292e80747c6ae39833c006ad553bc280"
-        or replay["verifierRevision"]
-        != "9f1b153a1d11805a1dcca34f8b5e3e3f7d0b739e"
-        or replay["verifierRunId"] != 30194136809
-        or replay["verifierRunAttempt"] != 1
-        or replay["artifactId"] != 8629559616
+        not isinstance(run_id, int)
+        or isinstance(run_id, bool)
+        or run_id <= 0
+        or not isinstance(run_attempt, int)
+        or isinstance(run_attempt, bool)
+        or run_attempt != 1
+        or not isinstance(artifact_id, int)
+        or isinstance(artifact_id, bool)
+        or artifact_id <= 0
+        or replay["verificationId"] != f"sno-product-replay-{run_id}.1"
         or replay["artifactName"]
-        != "sno-trial-product-artifact-replay-30194136809-1"
+        != f"sno-trial-product-artifact-replay-{run_id}-1"
     ):
         fail("sno_product_admission_policy_replay_invalid")
     parse_utc(replay["generatedAt"], "sno_product_admission_policy_replay_invalid")
     validate_digest(
         replay["reportDigest"], "sno_product_admission_policy_replay_invalid"
     )
-    if not REVISION.fullmatch(replay["verifierRevision"]):
+    if (
+        not isinstance(replay["verifierRevision"], str)
+        or not REVISION.fullmatch(replay["verifierRevision"])
+    ):
         fail("sno_product_admission_policy_replay_invalid")
 
     github = exact_keys(
@@ -254,6 +263,7 @@ def validate_policy(
             "maximumReplayAgeSeconds",
             "maximumAdmissionAgeSeconds",
             "requiredChecks",
+            "replayState",
         },
         "sno_product_admission_policy_review_invalid",
     )
@@ -261,11 +271,17 @@ def validate_policy(
         review["maximumReplayAgeSeconds"] != 14 * 24 * 60 * 60
         or review["maximumAdmissionAgeSeconds"] != 30 * 24 * 60 * 60
         or review["requiredChecks"] != REQUIRED_CHECKS
+        or review["replayState"] not in {"refresh-required", "current"}
     ):
         fail("sno_product_admission_policy_review_invalid")
+    expected_reasons = (
+        REMAINING_REASONS
+        if review["replayState"] == "refresh-required"
+        else DEPLOYMENT_REASONS
+    )
     if policy["activation"] != {
         "state": "blocked",
-        "remainingReasonCodes": REMAINING_REASONS,
+        "remainingReasonCodes": expected_reasons,
     }:
         fail("sno_product_admission_policy_activation_invalid")
     if policy["controls"] != POLICY_CONTROLS:
@@ -285,6 +301,8 @@ def validate_replay_binding(
     lock: dict[str, Any],
     candidate: dict[str, Any],
 ) -> None:
+    if policy["review"]["replayState"] != "current":
+        fail("sno_product_admission_replay_refresh_required")
     validate_report(report, lock, candidate)
     replay = policy["bindings"]["replay"]
     bindings = report["bindings"]
@@ -492,7 +510,9 @@ def build_admission(
         },
         "activation": {
             "state": "blocked",
-            "reasonCodes": list(REMAINING_REASONS),
+            "reasonCodes": list(
+                policy["activation"]["remainingReasonCodes"]
+            ),
         },
         "controls": dict(ADMISSION_CONTROLS),
         "claims": dict(CLAIMS),
@@ -692,7 +712,7 @@ def validate_admission(
         fail("sno_product_admission_scope_invalid")
     if value["activation"] != {
         "state": "blocked",
-        "reasonCodes": REMAINING_REASONS,
+        "reasonCodes": policy["activation"]["remainingReasonCodes"],
     }:
         fail("sno_product_admission_activation_invalid")
     if value["controls"] != ADMISSION_CONTROLS:

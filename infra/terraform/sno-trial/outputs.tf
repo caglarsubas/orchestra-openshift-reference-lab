@@ -12,9 +12,9 @@ output "budget_name" {
 
 output "public_dns_delegation" {
   value = {
-    managed_zone = google_dns_managed_zone.public_base_domain.name
-    dns_name     = google_dns_managed_zone.public_base_domain.dns_name
-    name_servers = sort(google_dns_managed_zone.public_base_domain.name_servers)
+    managed_zone = google_dns_managed_zone.planeon_public_base_domain.name
+    dns_name     = google_dns_managed_zone.planeon_public_base_domain.dns_name
+    name_servers = sort(google_dns_managed_zone.planeon_public_base_domain.name_servers)
   }
 }
 
@@ -33,5 +33,6 @@ output "trial_contract" {
     maximum_lease_hours            = local.profile.guardrails.lease.maximumHours
     automatic_provider_teardown    = local.profile.guardrails.teardown.automaticProviderTeardown
     project_delete_authorized      = var.allow_project_delete
+    legacy_prometa_zone_retained   = var.retain_legacy_prometa_zone
   }
 }
