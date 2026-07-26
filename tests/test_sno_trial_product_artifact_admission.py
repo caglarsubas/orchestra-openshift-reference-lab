@@ -36,38 +36,17 @@ from scripts.validate_repository import ROOT
 
 class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.source_policy = load_json(POLICY_PATH)
+        self.policy = load_json(POLICY_PATH)
         self.lock = load_json(LOCK_PATH)
         self.candidate = load_json(CANDIDATE_PATH)
         self.report = self.valid_replay_report()
-        self.policy = self.current_replay_policy()
         self.environment_evidence = self.valid_environment_evidence()
-        self.admitted_at = datetime(2026, 7, 26, 9, 0, tzinfo=timezone.utc)
-        self.expires_at = datetime(2026, 8, 9, 9, 0, tzinfo=timezone.utc)
-
-    def current_replay_policy(self) -> dict[str, object]:
-        value = copy.deepcopy(self.source_policy)
-        replay = value["bindings"]["replay"]
-        report_bindings = self.report["bindings"]
-        replay.update(
-            {
-                "verificationId": self.report["verificationId"],
-                "generatedAt": self.report["generatedAt"],
-                "reportDigest": self.report["reportDigest"],
-                "verifierRevision": report_bindings["verifierRevision"],
-                "verifierRunId": report_bindings["verifierRunId"],
-                "verifierRunAttempt": report_bindings["verifierRunAttempt"],
-                "artifactName": (
-                    "sno-trial-product-artifact-replay-"
-                    f"{report_bindings['verifierRunId']}-1"
-                ),
-            }
+        self.admitted_at = datetime(
+            2026, 7, 26, 18, 0, tzinfo=timezone.utc
         )
-        value["review"]["replayState"] = "current"
-        value["activation"]["remainingReasonCodes"] = list(DEPLOYMENT_REASONS)
-        value["policyDigest"] = unsigned_digest(value, "policyDigest")
-        validate_policy(value, self.lock, self.candidate)
-        return value
+        self.expires_at = datetime(
+            2026, 8, 9, 17, 0, tzinfo=timezone.utc
+        )
 
     def valid_replay_report(self) -> dict[str, object]:
         artifacts = []
@@ -115,8 +94,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         value: dict[str, object] = {
             "schemaVersion": 2,
             "kind": REPORT_KIND,
-            "verificationId": "sno-product-replay-30194136809.1",
-            "generatedAt": "2026-07-26T08:10:51Z",
+            "verificationId": "sno-product-replay-30211883723.1",
+            "generatedAt": "2026-07-26T17:06:53Z",
             "targetClass": "engineering-trial",
             "executionMode": REPORT_EXECUTION_MODE,
             "bindings": {
@@ -124,8 +103,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
                 "artifactSetId": self.lock["artifactSetId"],
                 "artifactSetDigest": self.lock["artifactSetDigest"],
                 "workloadCandidateDigest": self.candidate["candidateDigest"],
-                "verifierRevision": "9f1b153a1d11805a1dcca34f8b5e3e3f7d0b739e",
-                "verifierRunId": 30194136809,
+                "verifierRevision": "985cb37de283193a24776dfe840ab240d34a929a",
+                "verifierRunId": 30211883723,
                 "verifierRunAttempt": 1,
             },
             "artifacts": artifacts,
@@ -134,6 +113,10 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
             "claims": copy.deepcopy(CLAIMS),
         }
         value["reportDigest"] = report_digest(value)
+        self.assertEqual(
+            value["reportDigest"],
+            "sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359",
+        )
         validate_report(value, self.lock, self.candidate)
         return value
 
@@ -202,25 +185,31 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         )
 
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
-        validate_policy(self.source_policy, self.lock, self.candidate)
+        validate_policy(self.policy, self.lock, self.candidate)
         self.assertEqual(
-            self.source_policy["review"]["replayState"], "refresh-required"
+            self.policy["review"]["replayState"], "current"
         )
         self.assertEqual(
-            self.source_policy["activation"]["remainingReasonCodes"],
-            REMAINING_REASONS,
+            self.policy["activation"]["remainingReasonCodes"],
+            DEPLOYMENT_REASONS,
         )
+
+        stale = copy.deepcopy(self.policy)
+        stale["review"]["replayState"] = "refresh-required"
+        stale["activation"]["remainingReasonCodes"] = list(REMAINING_REASONS)
+        stale["policyDigest"] = unsigned_digest(stale, "policyDigest")
+        validate_policy(stale, self.lock, self.candidate)
         with self.assertRaisesRegex(
             ValueError, "replay_refresh_required"
         ):
             validate_replay_binding(
                 self.report,
-                self.source_policy,
+                stale,
                 self.lock,
                 self.candidate,
             )
 
-        malformed = copy.deepcopy(self.source_policy)
+        malformed = copy.deepcopy(self.policy)
         malformed["bindings"]["replay"]["verifierRunAttempt"] = True
         malformed["policyDigest"] = unsigned_digest(
             malformed, "policyDigest"
@@ -228,7 +217,6 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "policy_replay_invalid"):
             validate_policy(malformed, self.lock, self.candidate)
 
-        validate_policy(self.policy, self.lock, self.candidate)
         self.assertFalse(self.policy["controls"]["deploymentAuthorized"])
         self.assertFalse(self.policy["claims"]["campaignEvidence"])
 
@@ -398,7 +386,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
             "environment: sno-trial-product-artifact-admission", source
         )
         self.assertIn('[[ "$GITHUB_RUN_ATTEMPT" == "1" ]]', source)
-        self.assertIn('[[ "$REPLAY_ARTIFACT_ID" == "8629559616" ]]', source)
+        self.assertIn('[[ "$REPLAY_ARTIFACT_ID" == "8634695656" ]]', source)
         self.assertIn("actions: read", source)
         self.assertNotIn("packages: write", source)
         self.assertNotIn("id-token: write", source)
