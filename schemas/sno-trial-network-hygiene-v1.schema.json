@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-network-hygiene-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial network hygiene v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "providerState",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-network-hygiene.v1"},
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^sno-network-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {
+      "enum": ["simulated", "live-diagnostic"]
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "providerState": {"$ref": "#/$defs/providerState"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "projectId",
+        "projectIdentityDigest"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "providerState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedAt",
+        "projectId",
+        "projectIdentityDigest",
+        "networkCount",
+        "autoModeNetworkCount",
+        "defaultNetworkPresent",
+        "defaultSubnetworkCount",
+        "firewallRuleCount",
+        "defaultFirewallRuleCount",
+        "internetIngressRuleCount",
+        "networkInventoryDigest",
+        "firewallInventoryDigest"
+      ],
+      "properties": {
+        "observedAt": {"type": "string", "format": "date-time"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "networkCount": {"type": "integer", "minimum": 0},
+        "autoModeNetworkCount": {"type": "integer", "minimum": 0},
+        "defaultNetworkPresent": {"type": "boolean"},
+        "defaultSubnetworkCount": {"type": "integer", "minimum": 0},
+        "firewallRuleCount": {"type": "integer", "minimum": 0},
+        "defaultFirewallRuleCount": {"type": "integer", "minimum": 0},
+        "internetIngressRuleCount": {"type": "integer", "minimum": 0},
+        "networkInventoryDigest": {"$ref": "#/$defs/digest"},
+        "firewallInventoryDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction"],
+      "properties": {
+        "status": {"enum": ["CLEAN", "BLOCKED"]},
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "PREEXISTING_NETWORKS_PRESENT",
+              "AUTO_MODE_NETWORK_PRESENT",
+              "DEFAULT_NETWORK_PRESENT",
+              "DEFAULT_SUBNETWORKS_PRESENT",
+              "PREEXISTING_FIREWALL_RULES_PRESENT",
+              "DEFAULT_FIREWALL_RULES_PRESENT",
+              "PUBLIC_INGRESS_RULES_PRESENT"
+            ]
+          }
+        },
+        "nextAction": {
+          "enum": [
+            "continue-downstream-prerequisites",
+            "remove-unused-default-network-resources"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandPolicy",
+        "rawProviderOutputStored",
+        "secretValuesStored",
+        "cloudMutationAuthorized",
+        "cleanupAuthorized",
+        "installAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "commandPolicy": {"const": "read-only"},
+        "rawProviderOutputStored": {"const": false},
+        "secretValuesStored": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "cleanupAuthorized": {"const": false},
+        "installAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

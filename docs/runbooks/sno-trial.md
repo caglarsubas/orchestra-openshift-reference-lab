@@ -426,6 +426,29 @@ GoDaddy-hosted `prometa.ai` parent has not delegated the zone. Do not create an
 operator lease or installer resources until that delegation, source CIDR,
 Linux AMD64 administration path, and remaining prerequisites are verified.
 
+The first network-hygiene observation also found a GCP-created default
+auto-mode VPC, 42 subnetworks, and four default firewall rules, including three
+enabled internet-ingress rules. Treat this as blocking drift. Capture a
+payload-free report before and after cleanup. The initial report is
+`sno-network-operator-20260726141208.1`, with digest
+`sha256:f1e011e6b2a9da8c778a64be185e39c0d92daefc9c09b2eff37b05c677c3242e`:
+
+```bash
+NETWORK_ID=sno-network-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-network-hygiene \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  ASSESSMENT_ID="$NETWORK_ID" \
+  OUTPUT="restricted/$NETWORK_ID.json"
+
+make verify-sno-trial-network-hygiene \
+  REPORT="restricted/$NETWORK_ID.json"
+```
+
+The report stores counts and canonical inventory digests, not raw firewall
+sources or provider responses. It never authorizes cleanup or installation.
+Proceed only when a fresh post-cleanup report is `CLEAN`.
+
 ## Delegate the trial DNS zone
 
 Read the generated nameservers from the restricted Terraform output and
