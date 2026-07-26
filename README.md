@@ -150,6 +150,32 @@ produces `BLOCKED`; only an exact set produces `DELEGATION_OBSERVED`. Even that
 last status grants no installation or DNS mutation authority. Source CIDR,
 administration path, and operator lease verification remain separate gates.
 
+The operator path is also assessed separately on the Linux AMD64 host that
+would run the installer. Put one public host CIDR in a mode-`0600` ignored
+file, extract the verified installer and client under `restricted/`, and run:
+
+```bash
+OPERATOR_ID=sno-operator-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-operator-path \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  SOURCE_CIDR_FILE=restricted/operator/source-cidr.txt \
+  INSTALLER=restricted/redhat/4.20.27/openshift-install \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  ASSESSMENT_ID="$OPERATOR_ID" \
+  OUTPUT="restricted/$OPERATOR_ID.json"
+
+make verify-sno-trial-operator-path \
+  REPORT="restricted/$OPERATOR_ID.json"
+```
+
+The live collector verifies Linux AMD64, exactly one active `gcloud` identity,
+the exact configured project, host-scoped public IPv4 `/32` or IPv6 `/128`,
+and exact installer/client version `4.20.27`. It stores identity and source
+CIDR digests, never the values. `OPERATOR_PATH_OBSERVED` still grants no
+firewall, cloud mutation, or install authority; a short-lived lease and a
+separate aggregate install admission remain downstream.
+
 Network hygiene is assessed separately because GCP can create a default
 auto-mode VPC when Compute becomes active even when the project contract
 disables automatic network creation. The assessment records only counts and

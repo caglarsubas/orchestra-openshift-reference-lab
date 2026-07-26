@@ -516,6 +516,45 @@ report always keeps DNS mutation, cloud mutation, installation, campaign, and
 certification authority false. Source CIDR, administration path, and operator
 lease remain separate prerequisites.
 
+## Observe the administration path and source CIDR
+
+Perform this step on the Linux AMD64 host that would run the installer, not on
+macOS. Extract the already verified `openshift-install` and `oc` binaries under
+ignored `restricted/redhat/4.20.27/` storage. Record exactly one current public
+host network in a private input file:
+
+```bash
+install -d -m 0700 restricted/operator
+printf '%s\n' '<public-ip>/32' > restricted/operator/source-cidr.txt
+chmod 0600 restricted/operator/source-cidr.txt
+```
+
+Use `/128` for a single public IPv6 address. Wider ranges, private addresses,
+and mode-permissive or symlinked files fail closed. Then collect and verify:
+
+```bash
+OPERATOR_ID=sno-operator-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-operator-path \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  SOURCE_CIDR_FILE=restricted/operator/source-cidr.txt \
+  INSTALLER=restricted/redhat/4.20.27/openshift-install \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  ASSESSMENT_ID="$OPERATOR_ID" \
+  OUTPUT="restricted/$OPERATOR_ID.json"
+
+make verify-sno-trial-operator-path \
+  REPORT="restricted/$OPERATOR_ID.json"
+```
+
+The collector runs only local version commands and read-only `gcloud auth
+list` / `gcloud config get-value project`. It requires Linux AMD64, exactly one
+active identity, the exact project, exact `4.20.27` tools, and a public
+host-scoped CIDR. The report stores only identity-set, project, and CIDR
+digests. `OPERATOR_PATH_OBSERVED` does not change any firewall and does not
+authorize installation. Re-run it if the host, identity, project, tools, or
+public address changes.
+
 ## Create and verify an operator lease
 
 Create a lease immediately before rendering:

@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-operator-path-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial operator path v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "operatorPathState",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-operator-path.v1"},
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^sno-operator-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"enum": ["simulated", "live-diagnostic"]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "operatorPathState": {"$ref": "#/$defs/operatorPathState"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "projectId",
+        "projectIdentityDigest",
+        "expectedOpenShiftVersion"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "expectedOpenShiftVersion": {"const": "4.20.27"}
+      }
+    },
+    "operatorPathState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedAt",
+        "projectId",
+        "projectIdentityDigest",
+        "operatingSystem",
+        "architecture",
+        "activeIdentityCount",
+        "activeIdentityDigests",
+        "activeIdentitySetDigest",
+        "configuredProjectMatches",
+        "configuredProjectIdentityDigest",
+        "sourceAddressFamily",
+        "sourcePrefixLength",
+        "sourceHostNetwork",
+        "sourceCidrDigest",
+        "installerVersion",
+        "clientVersion"
+      ],
+      "properties": {
+        "observedAt": {"type": "string", "format": "date-time"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "operatingSystem": {
+          "enum": ["linux", "darwin", "windows", "other"]
+        },
+        "architecture": {"enum": ["amd64", "arm64", "other"]},
+        "activeIdentityCount": {"type": "integer", "minimum": 0},
+        "activeIdentityDigests": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/digest"}
+        },
+        "activeIdentitySetDigest": {"$ref": "#/$defs/digest"},
+        "configuredProjectMatches": {"type": "boolean"},
+        "configuredProjectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "sourceAddressFamily": {"enum": ["ipv4", "ipv6"]},
+        "sourcePrefixLength": {
+          "type": "integer",
+          "enum": [32, 128]
+        },
+        "sourceHostNetwork": {"const": true},
+        "sourceCidrDigest": {"$ref": "#/$defs/digest"},
+        "installerVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "clientVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction"],
+      "properties": {
+        "status": {"enum": ["OPERATOR_PATH_OBSERVED", "BLOCKED"]},
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "ADMIN_HOST_OS_UNSUPPORTED",
+              "ADMIN_HOST_ARCHITECTURE_UNSUPPORTED",
+              "ACTIVE_GCP_IDENTITY_INVALID",
+              "GCP_PROJECT_MISMATCH",
+              "SOURCE_CIDR_NOT_HOST_SCOPED",
+              "INSTALLER_VERSION_MISMATCH",
+              "CLIENT_VERSION_MISMATCH"
+            ]
+          }
+        },
+        "nextAction": {
+          "enum": [
+            "create-short-lived-lease-and-build-install-admission",
+            "reconcile-operator-path"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandPolicy",
+        "rawCommandOutputStored",
+        "credentialValuesStored",
+        "sourceCidrStored",
+        "cloudMutationAuthorized",
+        "firewallMutationAuthorized",
+        "installAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "commandPolicy": {"const": "read-only"},
+        "rawCommandOutputStored": {"const": false},
+        "credentialValuesStored": {"const": false},
+        "sourceCidrStored": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "firewallMutationAuthorized": {"const": false},
+        "installAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

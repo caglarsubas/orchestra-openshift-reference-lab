@@ -88,6 +88,7 @@ any certification campaign slot.
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
 | Payload-free fail-closed network-hygiene assessment | Yes | Yes | No | Yes | Not eligible |
 | Payload-free fail-closed DNS-delegation observation contract | Yes | Yes | No | No | Not eligible |
+| Payload-free Linux AMD64 operator-path observation contract | Yes | Yes | No | No | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | No | N/A | No | No | Not eligible |
 | OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
@@ -137,6 +138,15 @@ Missing delegation reports `WAITING_DELEGATION`, a partial or wrong set reports
 report has been recorded because operator confirmation remains pending. Every
 status grants no DNS mutation, cloud mutation, install, campaign, or
 certification authority.
+
+The operator-path collector and strict report contract are source-complete.
+They verify a Linux AMD64 host, one active GCP identity, the exact configured
+project, a private-file-supplied public host CIDR, and exact `4.20.27`
+installer/client versions. Persisted reports contain only identity-set,
+project, and source-CIDR digests. No live report exists because the Linux
+administration host and private source-CIDR input are not yet available. Even
+`OPERATOR_PATH_OBSERVED` grants no firewall mutation, cloud mutation, install,
+campaign, or certification authority.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's

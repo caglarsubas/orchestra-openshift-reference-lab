@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.host.sno-trial-operator-path-snapshot.v1",
+  "executionMode": "simulated",
+  "observedAt": "2026-07-27T01:00:00Z",
+  "projectId": "prometa-orch-sno-fixture",
+  "operatingSystem": "linux",
+  "architecture": "amd64",
+  "activeIdentityDigests": [
+    "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  ],
+  "configuredProjectId": "prometa-orch-sno-fixture",
+  "sourceNetwork": {
+    "family": "ipv4",
+    "prefixLength": 32,
+    "hostNetwork": true,
+    "cidrDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "toolchain": {
+    "installerVersion": "4.20.27",
+    "clientVersion": "4.20.27"
+  }
+}
