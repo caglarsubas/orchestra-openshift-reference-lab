@@ -80,8 +80,8 @@ any certification campaign slot.
 | Exact public `4.20.27` installer/client archive lock and local integrity intake | Yes | Yes | Local archive only | Yes | Not eligible |
 | Inert single-node workload and resource candidate | Yes | Yes | No | No | Not eligible |
 | Source-only SNO profiles for all three product planes | Yes | Yes | No | No | Not eligible |
-| Digest-locked three-plane signed publication set | Yes | Yes | No | No | Not eligible |
-| Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
+| Digest-locked four-workload-image, three-plane signed publication set | Yes | Yes | No | No | Not eligible |
+| Read-only three-plane registry replay | Yes | Yes | No | Refresh required | Not eligible |
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | Yes | Yes | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
@@ -221,10 +221,13 @@ accepted all 18 rendered objects and post-checks found none persisted. Live
 allocatable capacity was `7500m` CPU and `32469135360` bytes memory; current
 OpenShift requests plus the locked candidate peak leave `628m` CPU and
 `2214 MiB` memory, so the margin is positive but tight. The report identified
-four unique rendered images: three are bound by the artifact set and the
-platform migration image is not. Thirteen Secret references were reduced to
+four unique rendered images: three were bound by that artifact set and the
+platform migration image was not. Thirteen Secret references were reduced to
 counts and digests only. External references, live pulls, and destination
 mirroring remain unverified, and no deployment or admission state advanced.
+The current source contract now binds all four images; the immutable report
+still describes the prior set and requires a fresh live replay and future
+server-side observation.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's
@@ -242,23 +245,23 @@ registry replay run `30211883723` completed on 2026-07-26 against verifier
 revision `985cb37de283193a24776dfe840ab240d34a929a` and produced payload-free
 report digest
 `sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
-The downloaded report independently verified the three Planeon-bound
+The downloaded report independently verified the previous three-image
 publications, signatures, CycloneDX attestations, linux/amd64 manifests, chart
-packages, and current lock digests. Direct dependency runtime contracts, a
+packages, and then-current lock digests. The source contract now adds the
+signed `prometa-tools-ubi` migration image as a platform auxiliary image, so
+the old replay is intentionally stale. Direct dependency runtime contracts, a
 Valkey image, a CPU model-backend artifact, destination and live-cluster pull
-proof, operator Secret/CA inputs, and the unbound platform migration image
-remain blockers. Live capacity and server-side API acceptance are now observed
-separately, but the tight margin and non-persistence proof do not authorize
-deployment.
+proof, and operator Secret/CA inputs remain blockers. Live capacity and
+server-side API acceptance were observed separately, but the tight margin and
+non-persistence proof do not authorize deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
-`orchestra-sno-trial-product-admission-2026-07-27.1` binds the exact fresh
-report and immutable Actions artifact ID. The required non-owner GitHub
-environment reviewer has not been configured and no admission record has been
-issued. Even a valid future admission removes only the replay-review reason
-and leaves all five deployment/provider blockers and every certifying claim
-false.
+`orchestra-sno-trial-product-admission-2026-07-28.2` is
+`refresh-required` after the artifact-set change, so no previous replay or
+admission can cross that digest boundary. Even a valid future admission
+removes only the replay-refresh reason and leaves all deployment/provider
+blockers and every certifying claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

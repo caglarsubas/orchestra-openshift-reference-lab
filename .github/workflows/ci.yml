@@ -51,7 +51,7 @@ jobs:
       - name: Validate inert SNO workload and capacity candidate
         run: python3 scripts/validate_sno_trial_workload_candidate.py
 
-      - name: Validate partial SNO product artifact set
+      - name: Validate complete SNO workload image artifact set
         run: python3 scripts/sno_trial_product_artifacts.py validate-lock
 
       - name: Validate independent SNO product replay admission policy
