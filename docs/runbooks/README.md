@@ -28,7 +28,7 @@ authorization digest, independent timing, and cleanup verification.
 | Credential/certificate rotation | Pending Vault/ESO deployment |
 | Fault campaign | Pending fault-controller deployment and authorization flow |
 | Evidence review/finalization | Platform contract intake is pinned; live custody, reviews, and closure pending |
-| Cost control and teardown | Procedure implemented; live rehearsal pending |
+| Cost control and teardown | Dated dominant-charge rate card plus payload-free active-exposure/post-teardown residual contract implemented; exact-main live capture, destroy, and clean residual proof pending |
 
 The table is intentionally not a readiness claim. A runbook becomes
 `rehearsed` only when its payload-free report is signed under the active

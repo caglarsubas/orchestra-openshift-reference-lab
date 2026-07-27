@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.gcp.sno-trial-resource-snapshot.v1",
+  "executionMode": "simulated",
+  "phase": "active",
+  "observedAt": "2026-07-27T16:05:00Z",
+  "targetProjectId": "prometa-orch-sno-fixture",
+  "operatorProjectId": "prometa-staging-fixture",
+  "operatorInstanceName": "orchestra-sno-operator-fixture",
+  "target": {
+    "instances": [
+      {
+        "name": "orchestra-trial-fixture-master-0",
+        "machineType": "n2-standard-8",
+        "status": "RUNNING",
+        "creationTimestamp": "2026-07-27T15:12:00Z"
+      }
+    ],
+    "disks": [
+      {
+        "name": "orchestra-trial-fixture-master-0",
+        "diskType": "pd-balanced",
+        "sizeGiB": 150,
+        "creationTimestamp": "2026-07-27T15:12:00Z"
+      }
+    ],
+    "resourceNames": {
+      "addresses": [
+        "orchestra-trial-fixture-api"
+      ],
+      "buckets": [
+        "orchestra-trial-fixture-image-registry",
+        "orchestra-trial-oidc"
+      ],
+      "customRoles": [
+        "prometaorchsnofixture_openshiftgcpccm"
+      ],
+      "firewalls": [
+        "orchestra-trial-fixture-api"
+      ],
+      "forwardingRules": [
+        "orchestra-trial-fixture-api",
+        "orchestra-trial-fixture-ingress"
+      ],
+      "networks": [
+        "orchestra-trial-fixture-network"
+      ],
+      "routers": [
+        "orchestra-trial-fixture-router"
+      ],
+      "serviceAccounts": [
+        "orchestra-tr-openshift-fixture"
+      ],
+      "subnetworks": [
+        "orchestra-trial-fixture-worker-subnet"
+      ],
+      "workloadIdentityPools": [
+        "orchestra-trial"
+      ]
+    }
+  },
+  "operator": {
+    "instances": [
+      {
+        "name": "orchestra-sno-operator-fixture",
+        "machineType": "e2-standard-2",
+        "status": "RUNNING",
+        "creationTimestamp": "2026-07-27T13:12:00Z"
+      }
+    ],
+    "disks": [
+      {
+        "name": "orchestra-sno-operator-fixture",
+        "diskType": "pd-balanced",
+        "sizeGiB": 30,
+        "creationTimestamp": "2026-07-27T13:12:00Z"
+      }
+    ]
+  }
+}

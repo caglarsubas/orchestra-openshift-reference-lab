@@ -91,6 +91,7 @@ any certification campaign slot.
 | Payload-free Linux AMD64 operator-path observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Short-lived aggregate secret-free render admission | Yes | Yes | N/A | Yes | Not eligible |
 | Payload-free exact-main live cluster observation contract | Yes | Yes | N/A | Yes | Not eligible |
+| Payload-free cost-exposure and teardown-residual observation contract | Yes | Yes | N/A | No | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | Yes | N/A | Yes | Yes | Not eligible |
 | OpenShift `4.20.27` SNO installation | Yes | N/A | Yes | Yes | Not eligible |
@@ -181,6 +182,16 @@ credential, provider credential, or raw command output. Its command policy is
 read-only and every campaign, certification, production, HA, RPO/RTO, Red Hat,
 and SLA claim remains false. Cost observation, product admission/dry-runs, and
 verified teardown remain outstanding.
+
+The cost-exposure contract is source- and fixture-complete. It binds a dated
+GCP Cloud Billing Catalog rate-card digest, the locked billing execution,
+target and operator identities, resource runtime, installer/CCO/WIF residual
+counts, and inventory digests. The estimate includes N2/E2 compute and zonal
+balanced-disk list rates while explicitly excluding load balancing, external
+IP, DNS, egress, tax, credits, and discounts. It is never billed spend. A
+post-teardown report can reach `TEARDOWN_RESIDUALS_CLEAN` only when both the
+managed target inventory and operator VM/disk inventory are empty. No
+exact-main live report has been recorded yet.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's
