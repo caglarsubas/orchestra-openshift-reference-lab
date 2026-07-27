@@ -91,8 +91,8 @@ any certification campaign slot.
 | Payload-free Linux AMD64 operator-path observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Short-lived aggregate secret-free render admission | Yes | Yes | N/A | Yes | Not eligible |
 | Payload-free exact-main live cluster observation contract | Yes | Yes | N/A | Yes | Not eligible |
-| Payload-free cost-exposure and teardown-residual observation contract | Yes | Yes | N/A | No | Not eligible |
-| Payload-free product server-dry-run and live-capacity observation contract | Yes | Yes | N/A | No | Not eligible |
+| Payload-free cost-exposure and teardown-residual observation contract | Yes | Yes | N/A | Yes | Not eligible |
+| Payload-free product server-dry-run and live-capacity observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | Yes | N/A | Yes | Yes | Not eligible |
 | OpenShift `4.20.27` SNO installation | Yes | N/A | Yes | Yes | Not eligible |
@@ -181,8 +181,8 @@ commit `dffb6931bc5d656fc38d6e84e07f65fbb600998a`, has report digest
 and status `TRIAL_CLUSTER_OBSERVED`. It stores no kubeconfig, console
 credential, provider credential, or raw command output. Its command policy is
 read-only and every campaign, certification, production, HA, RPO/RTO, Red Hat,
-and SLA claim remains false. Cost observation, product admission/dry-runs, and
-verified teardown remain outstanding.
+and SLA claim remains false. Product admission, live pull/mirror proof,
+external inputs, deployment, and verified teardown remain outstanding.
 
 The cost-exposure contract is source- and fixture-complete. It binds a dated
 GCP Cloud Billing Catalog rate-card digest, the locked billing execution,
@@ -191,8 +191,27 @@ counts, and inventory digests. The estimate includes N2/E2 compute and zonal
 balanced-disk list rates while explicitly excluding load balancing, external
 IP, DNS, egress, tax, credits, and discounts. It is never billed spend. A
 post-teardown report can reach `TEARDOWN_RESIDUALS_CLEAN` only when both the
-managed target inventory and operator VM/disk inventory are empty. No
-exact-main live report has been recorded yet.
+managed target inventory and operator VM/disk inventory are empty. Exact-main
+active report `sno-exposure-main-20260727163536.1`, generated from commit
+`582043aa6eedbd522518fac536bce1e7643738d1`, has report digest
+`sha256:b11972ee78ee58f6aa326b58ff64895bca60265b63d221734b4a1d2e41b86f88`
+and status `ACTIVE_EXPOSURE_OBSERVED`. Its incomplete dominant-charge estimate
+at `2026-07-27T16:35:36Z` was `$0.888127` / `41.963752 TRY`; it is not a
+billing export, hard cap, or clean-teardown claim.
+
+The exact-main product observation
+`sno-product-dry-run-main-20260727170500.1`, generated from commit
+`26232696a0b80ab38f09a2bfbd4a9980da0c8ed3`, has report digest
+`sha256:9394ce8fed98e92c46ff01479d86c0f40ee330409d12b8a8e350866d303b2ae1`
+and status `SERVER_DRY_RUN_OBSERVED_WITH_GAPS`. Strict server-side validation
+accepted all 18 rendered objects and post-checks found none persisted. Live
+allocatable capacity was `7500m` CPU and `32469135360` bytes memory; current
+OpenShift requests plus the locked candidate peak leave `628m` CPU and
+`2214 MiB` memory, so the margin is positive but tight. The report identified
+four unique rendered images: three are bound by the artifact set and the
+platform migration image is not. Thirteen Secret references were reduced to
+counts and digests only. External references, live pulls, and destination
+mirroring remain unverified, and no deployment or admission state advanced.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's
@@ -214,8 +233,10 @@ The downloaded report independently verified the three Planeon-bound
 publications, signatures, CycloneDX attestations, linux/amd64 manifests, chart
 packages, and current lock digests. Direct dependency runtime contracts, a
 Valkey image, a CPU model-backend artifact, destination and live-cluster pull
-proof, operator Secret/CA inputs, live allocatable capacity, and server-side
-dry run remain blockers.
+proof, operator Secret/CA inputs, and the unbound platform migration image
+remain blockers. Live capacity and server-side API acceptance are now observed
+separately, but the tight margin and non-persistence proof do not authorize
+deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
