@@ -1,0 +1,450 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-dependency-runtime-contract-set-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial dependency runtime contract set v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "contractSetId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "architecture",
+    "bindings",
+    "runtimeDefaults",
+    "contracts",
+    "activation",
+    "controls",
+    "claims",
+    "contractSetDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-dependency-runtime-contract-set.v1"
+    },
+    "contractSetId": {
+      "const": "orchestra-sno-trial-dependency-runtime-2026-07-28.1"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "source-only"},
+    "architecture": {"const": "linux/amd64"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "runtimeDefaults": {"$ref": "#/$defs/runtimeDefaults"},
+    "contracts": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        {"$ref": "#/$defs/postgresqlContract"},
+        {"$ref": "#/$defs/clickhouseContract"},
+        {"$ref": "#/$defs/jetstreamContract"},
+        {"$ref": "#/$defs/valkeyContract"},
+        {"$ref": "#/$defs/modelBackendContract"}
+      ],
+      "items": false
+    },
+    "activation": {"$ref": "#/$defs/activation"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "contractSetDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workloadCandidateId",
+        "workloadCandidateDigest",
+        "dependencyAdmissionDigest",
+        "operatorInputContractDigest"
+      ],
+      "properties": {
+        "workloadCandidateId": {
+          "const": "orchestra-sno-trial-workload-candidate-2026-07-25.1"
+        },
+        "workloadCandidateDigest": {"$ref": "#/$defs/digest"},
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
+        "operatorInputContractDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scc",
+        "runAsNonRoot",
+        "arbitraryUidRequired",
+        "fixedUid",
+        "readOnlyRootFilesystem",
+        "allowPrivilegeEscalation",
+        "capabilitiesDropAll",
+        "seccompProfile"
+      ],
+      "properties": {
+        "scc": {"const": "restricted-v2"},
+        "runAsNonRoot": {"const": true},
+        "arbitraryUidRequired": {"const": true},
+        "fixedUid": {"type": "null"},
+        "readOnlyRootFilesystem": {"const": true},
+        "allowPrivilegeEscalation": {"const": false},
+        "capabilitiesDropAll": {"const": true},
+        "seccompProfile": {"const": "RuntimeDefault"}
+      }
+    },
+    "runtimeDefaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "replicas",
+        "highAvailability",
+        "autoscalingEnabled",
+        "podDisruptionBudgetEnabled",
+        "topologySpreadEnabled",
+        "serviceAccountTokenAutomount",
+        "security"
+      ],
+      "properties": {
+        "replicas": {"const": 1},
+        "highAvailability": {"const": false},
+        "autoscalingEnabled": {"const": false},
+        "podDisruptionBudgetEnabled": {"const": false},
+        "topologySpreadEnabled": {"const": false},
+        "serviceAccountTokenAutomount": {"const": false},
+        "security": {"$ref": "#/$defs/security"}
+      }
+    },
+    "quantities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cpuMillicores", "memoryMiB"],
+      "properties": {
+        "cpuMillicores": {"type": "integer", "minimum": 1},
+        "memoryMiB": {"type": "integer", "minimum": 1}
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests", "limits"],
+      "properties": {
+        "requests": {"$ref": "#/$defs/quantities"},
+        "limits": {"$ref": "#/$defs/quantities"}
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceClass",
+        "sourceId",
+        "reference",
+        "platformDigest",
+        "admissionState",
+        "usableForCapacityOnly"
+      ],
+      "properties": {
+        "sourceClass": {
+          "enum": ["dependency-source", "unresolved"]
+        },
+        "sourceId": {"type": "string", "minLength": 1},
+        "reference": {
+          "type": ["string", "null"],
+          "minLength": 1
+        },
+        "platformDigest": {
+          "anyOf": [
+            {"$ref": "#/$defs/digest"},
+            {"type": "null"}
+          ]
+        },
+        "admissionState": {
+          "enum": ["source-resolved-not-mirrored", "unresolved"]
+        },
+        "usableForCapacityOnly": {"const": true}
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "purpose",
+        "sizeGiB",
+        "accessMode",
+        "storageClassRef",
+        "storageClassResolved",
+        "backupEnabled"
+      ],
+      "properties": {
+        "enabled": {"const": true},
+        "purpose": {"type": "string", "minLength": 1},
+        "sizeGiB": {"type": "integer", "minimum": 1},
+        "accessMode": {"const": "ReadWriteOnce"},
+        "storageClassRef": {"type": "null"},
+        "storageClassResolved": {"const": false},
+        "backupEnabled": {"const": false}
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "serviceType",
+        "defaultDeny",
+        "allowedClients",
+        "egressRequired"
+      ],
+      "properties": {
+        "serviceType": {"const": "ClusterIP"},
+        "defaultDeny": {"const": true},
+        "allowedClients": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["platform", "runtime-host", "model-plane"]
+          }
+        },
+        "egressRequired": {"const": false}
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "port",
+        "tlsRequired",
+        "authenticationRequired",
+        "credentialSecretRef",
+        "certificateSecretRef",
+        "trustedCaConfigMapRef",
+        "referencesResolved"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "postgresql",
+            "clickhouse-https",
+            "nats-tls",
+            "valkey-tls",
+            "openai-compatible-https"
+          ]
+        },
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "tlsRequired": {"const": true},
+        "authenticationRequired": {"const": true},
+        "credentialSecretRef": {"type": "null"},
+        "certificateSecretRef": {"type": "null"},
+        "trustedCaConfigMapRef": {"type": "null"},
+        "referencesResolved": {"const": false}
+      }
+    },
+    "behavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "durability",
+        "readiness",
+        "degradation",
+        "runtimeDownloadAllowed"
+      ],
+      "properties": {
+        "durability": {"type": "string", "minLength": 1},
+        "readiness": {"type": "string", "minLength": 1},
+        "degradation": {"type": "string", "minLength": 1},
+        "runtimeDownloadAllowed": {"const": false}
+      }
+    },
+    "contractBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sourceId",
+        "workloadKind",
+        "artifact",
+        "resources",
+        "persistence",
+        "network",
+        "protocol",
+        "behavior"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "postgresql",
+            "clickhouse",
+            "jetstream",
+            "valkey",
+            "model-backend"
+          ]
+        },
+        "sourceId": {"type": "string", "minLength": 1},
+        "workloadKind": {"const": "StatefulSet"},
+        "artifact": {"$ref": "#/$defs/artifact"},
+        "resources": {"$ref": "#/$defs/resources"},
+        "persistence": {"$ref": "#/$defs/persistence"},
+        "network": {"$ref": "#/$defs/network"},
+        "protocol": {"$ref": "#/$defs/protocol"},
+        "behavior": {"$ref": "#/$defs/behavior"}
+      }
+    },
+    "postgresqlContract": {
+      "allOf": [
+        {"$ref": "#/$defs/contractBase"},
+        {
+          "type": "object",
+          "properties": {
+            "id": {"const": "postgresql"},
+            "sourceId": {"const": "cloudnative-pg-postgresql-16"}
+          }
+        }
+      ]
+    },
+    "clickhouseContract": {
+      "allOf": [
+        {"$ref": "#/$defs/contractBase"},
+        {
+          "type": "object",
+          "properties": {
+            "id": {"const": "clickhouse"},
+            "sourceId": {"const": "clickhouse-server-lts"}
+          }
+        }
+      ]
+    },
+    "jetstreamContract": {
+      "allOf": [
+        {"$ref": "#/$defs/contractBase"},
+        {
+          "type": "object",
+          "properties": {
+            "id": {"const": "jetstream"},
+            "sourceId": {"const": "nats-server"}
+          }
+        }
+      ]
+    },
+    "valkeyContract": {
+      "allOf": [
+        {"$ref": "#/$defs/contractBase"},
+        {
+          "type": "object",
+          "properties": {
+            "id": {"const": "valkey"},
+            "sourceId": {"const": "valkey"}
+          }
+        }
+      ]
+    },
+    "modelBackendContract": {
+      "allOf": [
+        {"$ref": "#/$defs/contractBase"},
+        {
+          "type": "object",
+          "properties": {
+            "id": {"const": "model-backend"},
+            "sourceId": {"const": "model-backend"}
+          }
+        }
+      ]
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reasonCodes"],
+      "properties": {
+        "state": {"const": "blocked"},
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "uniqueItems": true,
+          "prefixItems": [
+            {"const": "DEPENDENCY_SOURCE_ADMISSION_INCOMPLETE"},
+            {"const": "VALKEY_ARTIFACT_CONTRACT_MISSING"},
+            {"const": "MODEL_ARTIFACT_CONTRACT_MISSING"},
+            {"const": "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED"},
+            {"const": "DEPENDENCY_TLS_REFERENCES_UNRESOLVED"},
+            {"const": "STORAGE_CLASS_REFERENCE_UNRESOLVED"},
+            {"const": "DESTINATION_MIRROR_PROOF_MISSING"},
+            {"const": "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING"},
+            {"const": "LIVE_DEPENDENCY_CONNECTIVITY_MISSING"}
+          ],
+          "items": false
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "sourceOnly",
+        "productionDependencyProfileMutated",
+        "manifestsEmitted",
+        "argocdApplicationsEmitted",
+        "kustomizationReferenced",
+        "secretValuesStored",
+        "runtimeModelDownloadAllowed",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "scope": {
+          "const": "sno-engineering-trial-dependencies-only"
+        },
+        "sourceOnly": {"const": true},
+        "productionDependencyProfileMutated": {"const": false},
+        "manifestsEmitted": {"const": false},
+        "argocdApplicationsEmitted": {"const": false},
+        "kustomizationReferenced": {"const": false},
+        "secretValuesStored": {"const": false},
+        "runtimeModelDownloadAllowed": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

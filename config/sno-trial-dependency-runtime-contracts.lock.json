@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-dependency-runtime-contract-set.v1",
+  "contractSetId": "orchestra-sno-trial-dependency-runtime-2026-07-28.1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "executionMode": "source-only",
+  "architecture": "linux/amd64",
+  "bindings": {
+    "workloadCandidateId": "orchestra-sno-trial-workload-candidate-2026-07-25.1",
+    "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "operatorInputContractDigest": "sha256:3a50c77bc2be59354b29d3f60f8913871f109adbb197d3b53296894b92dae502"
+  },
+  "runtimeDefaults": {
+    "replicas": 1,
+    "highAvailability": false,
+    "autoscalingEnabled": false,
+    "podDisruptionBudgetEnabled": false,
+    "topologySpreadEnabled": false,
+    "serviceAccountTokenAutomount": false,
+    "security": {
+      "scc": "restricted-v2",
+      "runAsNonRoot": true,
+      "arbitraryUidRequired": true,
+      "fixedUid": null,
+      "readOnlyRootFilesystem": true,
+      "allowPrivilegeEscalation": false,
+      "capabilitiesDropAll": true,
+      "seccompProfile": "RuntimeDefault"
+    }
+  },
+  "contracts": [
+    {
+      "id": "postgresql",
+      "sourceId": "cloudnative-pg-postgresql-16",
+      "workloadKind": "StatefulSet",
+      "artifact": {
+        "sourceClass": "dependency-source",
+        "sourceId": "cloudnative-pg-postgresql-16",
+        "reference": "ghcr.io/cloudnative-pg/postgresql:16.10-system-trixie",
+        "platformDigest": "sha256:dea92d39d38abf4d87c0b0bd43cbf956dc2de03db3a78b5829ac629ef296b8e1",
+        "admissionState": "source-resolved-not-mirrored",
+        "usableForCapacityOnly": true
+      },
+      "resources": {
+        "requests": {
+          "cpuMillicores": 250,
+          "memoryMiB": 1024
+        },
+        "limits": {
+          "cpuMillicores": 500,
+          "memoryMiB": 2048
+        }
+      },
+      "persistence": {
+        "enabled": true,
+        "purpose": "relational-state",
+        "sizeGiB": 10,
+        "accessMode": "ReadWriteOnce",
+        "storageClassRef": null,
+        "storageClassResolved": false,
+        "backupEnabled": false
+      },
+      "network": {
+        "serviceType": "ClusterIP",
+        "defaultDeny": true,
+        "allowedClients": [
+          "platform",
+          "runtime-host"
+        ],
+        "egressRequired": false
+      },
+      "protocol": {
+        "name": "postgresql",
+        "port": 5432,
+        "tlsRequired": true,
+        "authenticationRequired": true,
+        "credentialSecretRef": null,
+        "certificateSecretRef": null,
+        "trustedCaConfigMapRef": null,
+        "referencesResolved": false
+      },
+      "behavior": {
+        "durability": "fsync-required",
+        "readiness": "pg-isready-authenticated",
+        "degradation": "fail-closed-no-local-database",
+        "runtimeDownloadAllowed": false
+      }
+    },
+    {
+      "id": "clickhouse",
+      "sourceId": "clickhouse-server-lts",
+      "workloadKind": "StatefulSet",
+      "artifact": {
+        "sourceClass": "dependency-source",
+        "sourceId": "clickhouse-server-lts",
+        "reference": "docker.io/clickhouse/clickhouse-server:25.8.28.1",
+        "platformDigest": "sha256:cb75da0e596b8115d10bea34cef1414eafebfbcb5f5136c03e022c7b525899b3",
+        "admissionState": "source-resolved-not-mirrored",
+        "usableForCapacityOnly": true
+      },
+      "resources": {
+        "requests": {
+          "cpuMillicores": 500,
+          "memoryMiB": 2048
+        },
+        "limits": {
+          "cpuMillicores": 1000,
+          "memoryMiB": 4096
+        }
+      },
+      "persistence": {
+        "enabled": true,
+        "purpose": "telemetry-state",
+        "sizeGiB": 20,
+        "accessMode": "ReadWriteOnce",
+        "storageClassRef": null,
+        "storageClassResolved": false,
+        "backupEnabled": false
+      },
+      "network": {
+        "serviceType": "ClusterIP",
+        "defaultDeny": true,
+        "allowedClients": [
+          "platform"
+        ],
+        "egressRequired": false
+      },
+      "protocol": {
+        "name": "clickhouse-https",
+        "port": 8443,
+        "tlsRequired": true,
+        "authenticationRequired": true,
+        "credentialSecretRef": null,
+        "certificateSecretRef": null,
+        "trustedCaConfigMapRef": null,
+        "referencesResolved": false
+      },
+      "behavior": {
+        "durability": "single-replica-persistent",
+        "readiness": "https-ping-authenticated",
+        "degradation": "typed-telemetry-storage-unavailable",
+        "runtimeDownloadAllowed": false
+      }
+    },
+    {
+      "id": "jetstream",
+      "sourceId": "nats-server",
+      "workloadKind": "StatefulSet",
+      "artifact": {
+        "sourceClass": "dependency-source",
+        "sourceId": "nats-server",
+        "reference": "docker.io/library/nats:2.14.2-alpine",
+        "platformDigest": "sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
+        "admissionState": "source-resolved-not-mirrored",
+        "usableForCapacityOnly": true
+      },
+      "resources": {
+        "requests": {
+          "cpuMillicores": 100,
+          "memoryMiB": 256
+        },
+        "limits": {
+          "cpuMillicores": 250,
+          "memoryMiB": 512
+        }
+      },
+      "persistence": {
+        "enabled": true,
+        "purpose": "durable-event-stream",
+        "sizeGiB": 5,
+        "accessMode": "ReadWriteOnce",
+        "storageClassRef": null,
+        "storageClassResolved": false,
+        "backupEnabled": false
+      },
+      "network": {
+        "serviceType": "ClusterIP",
+        "defaultDeny": true,
+        "allowedClients": [
+          "platform"
+        ],
+        "egressRequired": false
+      },
+      "protocol": {
+        "name": "nats-tls",
+        "port": 4222,
+        "tlsRequired": true,
+        "authenticationRequired": true,
+        "credentialSecretRef": null,
+        "certificateSecretRef": null,
+        "trustedCaConfigMapRef": null,
+        "referencesResolved": false
+      },
+      "behavior": {
+        "durability": "jetstream-file-store-replicas-one",
+        "readiness": "nats-server-ready",
+        "degradation": "buffer-or-reject-without-in-process-downgrade",
+        "runtimeDownloadAllowed": false
+      }
+    },
+    {
+      "id": "valkey",
+      "sourceId": "valkey",
+      "workloadKind": "StatefulSet",
+      "artifact": {
+        "sourceClass": "unresolved",
+        "sourceId": "valkey",
+        "reference": null,
+        "platformDigest": null,
+        "admissionState": "unresolved",
+        "usableForCapacityOnly": true
+      },
+      "resources": {
+        "requests": {
+          "cpuMillicores": 100,
+          "memoryMiB": 256
+        },
+        "limits": {
+          "cpuMillicores": 250,
+          "memoryMiB": 512
+        }
+      },
+      "persistence": {
+        "enabled": true,
+        "purpose": "shared-rate-limit-and-budget-state",
+        "sizeGiB": 2,
+        "accessMode": "ReadWriteOnce",
+        "storageClassRef": null,
+        "storageClassResolved": false,
+        "backupEnabled": false
+      },
+      "network": {
+        "serviceType": "ClusterIP",
+        "defaultDeny": true,
+        "allowedClients": [
+          "platform",
+          "model-plane"
+        ],
+        "egressRequired": false
+      },
+      "protocol": {
+        "name": "valkey-tls",
+        "port": 6379,
+        "tlsRequired": true,
+        "authenticationRequired": true,
+        "credentialSecretRef": null,
+        "certificateSecretRef": null,
+        "trustedCaConfigMapRef": null,
+        "referencesResolved": false
+      },
+      "behavior": {
+        "durability": "aof-appendfsync-everysec",
+        "readiness": "valkey-ping-authenticated",
+        "degradation": "conservative-deny-no-local-rate-limit",
+        "runtimeDownloadAllowed": false
+      }
+    },
+    {
+      "id": "model-backend",
+      "sourceId": "model-backend",
+      "workloadKind": "StatefulSet",
+      "artifact": {
+        "sourceClass": "unresolved",
+        "sourceId": "model-backend",
+        "reference": null,
+        "platformDigest": null,
+        "admissionState": "unresolved",
+        "usableForCapacityOnly": true
+      },
+      "resources": {
+        "requests": {
+          "cpuMillicores": 1500,
+          "memoryMiB": 6144
+        },
+        "limits": {
+          "cpuMillicores": 2000,
+          "memoryMiB": 8192
+        }
+      },
+      "persistence": {
+        "enabled": true,
+        "purpose": "immutable-model-artifact-cache",
+        "sizeGiB": 10,
+        "accessMode": "ReadWriteOnce",
+        "storageClassRef": null,
+        "storageClassResolved": false,
+        "backupEnabled": false
+      },
+      "network": {
+        "serviceType": "ClusterIP",
+        "defaultDeny": true,
+        "allowedClients": [
+          "model-plane"
+        ],
+        "egressRequired": false
+      },
+      "protocol": {
+        "name": "openai-compatible-https",
+        "port": 8000,
+        "tlsRequired": true,
+        "authenticationRequired": true,
+        "credentialSecretRef": null,
+        "certificateSecretRef": null,
+        "trustedCaConfigMapRef": null,
+        "referencesResolved": false
+      },
+      "behavior": {
+        "durability": "model-artifact-prestaged-read-only",
+        "readiness": "health-and-v1-models",
+        "degradation": "typed-model-backend-unavailable",
+        "runtimeDownloadAllowed": false
+      }
+    }
+  ],
+  "activation": {
+    "state": "blocked",
+    "reasonCodes": [
+      "DEPENDENCY_SOURCE_ADMISSION_INCOMPLETE",
+      "VALKEY_ARTIFACT_CONTRACT_MISSING",
+      "MODEL_ARTIFACT_CONTRACT_MISSING",
+      "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED",
+      "DEPENDENCY_TLS_REFERENCES_UNRESOLVED",
+      "STORAGE_CLASS_REFERENCE_UNRESOLVED",
+      "DESTINATION_MIRROR_PROOF_MISSING",
+      "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING",
+      "LIVE_DEPENDENCY_CONNECTIVITY_MISSING"
+    ]
+  },
+  "controls": {
+    "scope": "sno-engineering-trial-dependencies-only",
+    "sourceOnly": true,
+    "productionDependencyProfileMutated": false,
+    "manifestsEmitted": false,
+    "argocdApplicationsEmitted": false,
+    "kustomizationReferenced": false,
+    "secretValuesStored": false,
+    "runtimeModelDownloadAllowed": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEligible": false,
+    "allowedCertificationSlots": []
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false,
+    "highAvailability": false,
+    "rpoRtoVerified": false
+  },
+  "contractSetDigest": "sha256:76b0b5ce5a540a4e35cd90a0f40656354ef9812383d5f23974a424fbbbf9c3e3"
+}

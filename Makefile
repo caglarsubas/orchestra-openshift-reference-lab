@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-dependency-runtime-contracts validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -9,6 +9,7 @@ validate:
 	$(PYTHON) scripts/sno_trial_resource_exposure.py validate-rate-card
 	$(PYTHON) scripts/openshift_toolchain_intake.py validate-lock
 	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
+	$(PYTHON) scripts/validate_sno_trial_dependency_runtime_contracts.py
 	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock
 	$(PYTHON) scripts/sno_trial_product_artifact_admission.py validate-policy
 	$(PYTHON) scripts/sno_trial_operator_inputs.py validate-lock
@@ -40,6 +41,9 @@ validate-sno-trial-toolchain:
 
 validate-sno-trial-workload-candidate:
 	$(PYTHON) scripts/validate_sno_trial_workload_candidate.py
+
+validate-sno-trial-dependency-runtime-contracts:
+	$(PYTHON) scripts/validate_sno_trial_dependency_runtime_contracts.py
 
 validate-sno-trial-product-artifacts:
 	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock

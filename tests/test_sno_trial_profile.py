@@ -91,6 +91,10 @@ class SnoTrialProfileTests(unittest.TestCase):
             (config / "sno-trial-openshift-toolchain.lock.json").write_text(
                 TRIAL_PROFILE_ID, encoding="utf-8"
             )
+            (
+                config
+                / "sno-trial-dependency-runtime-contracts.lock.json"
+            ).write_text(TRIAL_PROFILE_ID, encoding="utf-8")
             (config / "sno-trial-operator-inputs.lock.json").write_text(
                 TRIAL_PROFILE_ID, encoding="utf-8"
             )
