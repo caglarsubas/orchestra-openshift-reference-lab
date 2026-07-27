@@ -301,8 +301,18 @@ make validate-sno-trial-workload-candidate
 This is a capacity decision record, not deployment input. It emits no
 manifests, Argo CD applications, Secret values, lease, or cloud authority.
 Valkey and CPU model-backend artifacts are unresolved, and trial-specific
-single-replica chart profiles and dependency runtime contracts do not yet
-exist. Its canonical digest is
+single-replica executable profiles do not yet exist. The source-only
+dependency runtime requirements are locked separately in
+[`config/sno-trial-dependency-runtime-contracts.lock.json`](config/sno-trial-dependency-runtime-contracts.lock.json).
+Its five contracts bind the current candidate, dependency admission, and
+operator-input contract while requiring restricted-v2, arbitrary UID,
+read-only roots, TLS/authentication, default-deny networking, persistent
+single replicas, no runtime model download, and fail-closed degradation.
+They emit no Kubernetes objects and remain blocked on artifact, Secret/TLS,
+storage-class, mirror, dry-run, and live-connectivity evidence. The candidate
+will retain its runtime-contract blocker until a new candidate revision binds
+this contract set and forces a fresh product-artifact replay. Its canonical
+digest is
 `sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9`;
 all production, HA, campaign, certification, and SLA claims remain false.
 

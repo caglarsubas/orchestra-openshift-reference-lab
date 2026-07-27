@@ -160,9 +160,21 @@ persistent volumes.
 Do not render or apply this file. It contains artifact observations and
 capacity assumptions, not Kubernetes resources. The production chart profiles
 cannot be reused because their replica and availability contracts differ.
-Before a future activation review, dependency owners must define direct
-single-instance runtime contracts, and operators must resolve immutable Valkey
-and CPU model-backend artifacts by digest. The three product planes now expose
+The source-only direct single-instance dependency requirements are now locked
+in `config/sno-trial-dependency-runtime-contracts.lock.json`. Validate their
+candidate, source-admission, operator-input, resource, persistence, transport,
+security, failure, and self-digest bindings with:
+
+```bash
+make validate-sno-trial-dependency-runtime-contracts
+```
+
+This lock emits no Kubernetes objects. Operators must still resolve immutable
+Valkey and CPU model-backend artifacts by digest, name the dependency-side
+Secret/TLS and storage-class references, author executable trial profiles, and
+pass mirror, server-side dry-run, and live-connectivity checks. A future
+candidate revision must bind the contract-set digest; that change deliberately
+requires a fresh product-artifact replay. The three product planes now expose
 source-only SNO values, but their registry replay, human admission, Secret/TLS
 references, destination pull proofs, live allocatable capacity, calibration,
 and OpenShift server-side dry runs must still pass.

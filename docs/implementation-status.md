@@ -254,13 +254,20 @@ Exact-main run `30293130839` replayed the resulting four-image set from
 revision `2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; immutable artifact
 `8663575783` contains report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
-Direct dependency runtime contracts, a Valkey image, a CPU model-backend
-artifact, destination and live-cluster pull proof, and populated operator
-Secret/CA inputs remain blockers. The source contract now inventories all 17
-external objects and validates their references against the July 27 renders,
-but no live read-only input report exists. Live capacity and server-side API
-acceptance were observed separately, but the tight margin and non-persistence
-proof do not authorize deployment.
+Source-only direct dependency runtime requirements now exist for PostgreSQL,
+ClickHouse, JetStream, Valkey, and the CPU model backend. The strict lock binds
+the current candidate, source admission, and operator-input contract and
+requires restricted-v2, arbitrary UID, read-only roots, TLS/authentication,
+default-deny networking, persistent single replicas, no runtime model download,
+and fail-closed degradation. It emits no manifests and is not yet bound back
+into a new workload candidate. A Valkey image, CPU model-backend image and
+model artifact, executable dependency profiles, destination and live-cluster
+pull proof, and populated operator Secret/CA inputs remain blockers. The
+operator-input source contract inventories all 17 external objects and
+validates their references against the July 27 renders, but no live read-only
+input report exists. Live capacity and server-side API acceptance were
+observed separately, but the tight margin and non-persistence proof do not
+authorize deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
