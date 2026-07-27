@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-cluster-snapshot.v1",
+  "executionMode": "simulated",
+  "observedAt": "2026-07-27T16:00:00Z",
+  "projectId": "prometa-orch-sno-fixture",
+  "clusterVersion": {
+    "version": "4.20.27",
+    "available": "True",
+    "progressing": "False",
+    "failing": "False"
+  },
+  "infrastructure": {
+    "platform": "GCP",
+    "topology": "SingleReplica",
+    "region": "europe-west1",
+    "infrastructureName": "orchestra-trial-fixture"
+  },
+  "credentials": {
+    "mode": "Manual",
+    "serviceAccountIssuer": "https://storage.googleapis.com/orchestra-trial-oidc"
+  },
+  "nodes": [
+    {
+      "name": "orchestra-trial-fixture-master-0",
+      "architecture": "amd64",
+      "ready": "True",
+      "schedulable": true,
+      "roles": [
+        "control-plane",
+        "master",
+        "worker"
+      ]
+    }
+  ],
+  "machines": [
+    {
+      "name": "orchestra-trial-fixture-master-0",
+      "role": "master",
+      "machineType": "n2-standard-8",
+      "phase": "Running"
+    }
+  ],
+  "operators": [
+    {"name": "authentication", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "baremetal", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "cloud-controller-manager", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "cloud-credential", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "cluster-autoscaler", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "config-operator", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "console", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "control-plane-machine-set", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "csi-snapshot-controller", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "dns", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "etcd", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "image-registry", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "ingress", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "insights", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "kube-apiserver", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "kube-controller-manager", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "kube-scheduler", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "kube-storage-version-migrator", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "machine-api", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "machine-approver", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "machine-config", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "marketplace", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "monitoring", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "network", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "node-tuning", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "olm", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "openshift-apiserver", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "openshift-controller-manager", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "openshift-samples", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "operator-lifecycle-manager", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "operator-lifecycle-manager-catalog", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "operator-lifecycle-manager-packageserver", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "service-ca", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"},
+    {"name": "storage", "version": "4.20.27", "available": "True", "progressing": "False", "degraded": "False"}
+  ],
+  "console": {
+    "host": "console-openshift-console.apps.orchestra-trial.ocp-lab.planeon.ai",
+    "statusCode": "200"
+  },
+  "storageClasses": [
+    {
+      "name": "ssd-csi",
+      "provisioner": "pd.csi.storage.gke.io",
+      "default": false,
+      "volumeBindingMode": "WaitForFirstConsumer",
+      "allowExpansion": true
+    },
+    {
+      "name": "standard-csi",
+      "provisioner": "pd.csi.storage.gke.io",
+      "default": true,
+      "volumeBindingMode": "WaitForFirstConsumer",
+      "allowExpansion": true
+    }
+  ],
+  "compute": [
+    {
+      "name": "orchestra-trial-fixture-master-0",
+      "status": "RUNNING",
+      "machineType": "n2-standard-8"
+    }
+  ],
+  "apiFirewalls": [
+    {
+      "name": "orchestra-trial-fixture-api",
+      "sourceRanges": [
+        "8.8.8.8/32"
+      ]
+    }
+  ],
+  "expectedSourceCidrDigest": "sha256:5ec594bc89dc4cf96d5762ab303626733bf32c2eb9771b525658682f89acefb6"
+}

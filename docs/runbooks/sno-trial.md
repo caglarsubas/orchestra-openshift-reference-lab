@@ -667,11 +667,36 @@ the release-matched `ccoctl` utility and GCP Workload Identity resources before
 cluster creation so cluster components use short-lived credentials rather than
 an administrator credential stored in the cluster.
 
+The attached installer service account must be able to sign blobs as itself.
+Grant `roles/iam.serviceAccountTokenCreator` on that service account resource,
+not project-wide. The target project must expose the IAM, resource-manager, and
+STS APIs needed by `ccoctl`. Its installer identity needs the Red Hat-documented
+GCP installer roles plus project IAM-policy read/write for the component
+service-account bindings. Prefer a minimal custom project role containing only
+`resourcemanager.projects.get`, `resourcemanager.projects.getIamPolicy`, and
+`resourcemanager.projects.setIamPolicy` for that last requirement.
+
+Extract the seven release-matched `CredentialsRequest` objects and run
+`ccoctl gcp create-service-accounts` before `openshift-install create cluster`.
+Copy only the generated cluster-authentication and component credential
+manifests plus the service-account signing material into a fresh installer
+directory. Restrict signer private material to mode `0600`. Record the OIDC
+bucket, workload-identity pool/provider, component service-account, and custom
+role inventory under ignored storage without recording credential values.
+
 Use the exact `4.20.27` linux/amd64 installer to validate the materialized
 configuration on the Linux administration host before creating resources.
 Keep the secret-bearing `install-config.yaml`, installer metadata, kubeconfig,
 and auth directory under ignored restricted storage. Never place secret values
 in command history, workflow inputs, logs, or Git.
+
+Treat an installer directory as single-use once `create cluster` starts. If an
+attempt fails after metadata or ignition generation, preserve its logs and run
+the exact installer `destroy cluster` against that directory. Independently
+verify that its instances, disks, addresses, load balancers, DNS records,
+firewalls, and buckets are gone, then rebuild a new installer directory from
+the original materialized config and `ccoctl` output. Never replay a directory
+whose bootstrap ignition or metadata came from a failed attempt.
 
 ## Provisioning sequence
 
@@ -697,6 +722,47 @@ in command history, workflow inputs, logs, or Git.
 The Terraform module provisions the bounded project foundation only. DNS
 delegation, installer execution, source-IP allowlisting, cluster workloads,
 and teardown remain explicit live operator steps.
+
+The installer creates cluster firewall rules during execution. Watch for the
+`<infra-id>-api` and temporary `<infra-id>-bootstrap-in-ssh` rules and replace
+their broad source ranges with the exact private source-CIDR file as soon as
+they appear. Keep the documented Google health-check source ranges on health
+probe rules and leave internal source-tag rules intact. Before accepting the
+install, independently verify that no cluster administrative rule has
+`0.0.0.0/0` or `::/0`.
+
+## Observe the live trial cluster
+
+After the installer reports completion, collect a payload-free observation
+from the same Linux AMD64 operator host:
+
+```bash
+CLUSTER_ID=sno-cluster-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-cluster \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  SOURCE_CIDR_FILE=restricted/operator/source-cidr.txt \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  ASSESSMENT_ID="$CLUSTER_ID" \
+  OUTPUT="restricted/$CLUSTER_ID.json"
+
+make verify-sno-trial-cluster \
+  REPORT="restricted/$CLUSTER_ID.json"
+```
+
+The collector performs only read operations against OpenShift, GCP, and the
+console route. It requires exact `4.20.27`, one ready schedulable
+`n2-standard-8` control-plane node, zero worker machines, all observed cluster
+operators healthy, `SingleReplica` GCP topology, `Manual` credentials, the
+locked WIF issuer, the default expandable `standard-csi` storage class, a
+console `200`, no bootstrap VM, and an API firewall restricted to the private
+source-CIDR input. Node, infrastructure, instance, console-host, and source-CIDR
+identities are stored only as digests.
+
+`TRIAL_CLUSTER_OBSERVED` is engineering evidence only. It grants no workload,
+cloud, teardown, campaign, certification, production, HA, RPO/RTO, Red Hat, or
+SLA authority. A simulated fixture can exercise the contract in CI but cannot
+impersonate a live collection.
 
 ## Teardown and reconciliation
 

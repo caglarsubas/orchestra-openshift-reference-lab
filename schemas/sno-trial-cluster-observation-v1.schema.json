@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/sno-trial-cluster-observation-v1.schema.json",
+  "title": "Orchestra OpenShift SNO trial cluster observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "clusterState",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-cluster-observation.v1"
+    },
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^sno-cluster-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"enum": ["simulated", "live-diagnostic"]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "clusterState": {"$ref": "#/$defs/clusterState"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "projectId",
+        "projectIdentityDigest"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "clusterState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedAt",
+        "projectId",
+        "projectIdentityDigest",
+        "version",
+        "versionMatches",
+        "topology",
+        "region",
+        "infrastructureIdentityDigest",
+        "topologyMatches",
+        "credentialMode",
+        "serviceAccountIssuerDigest",
+        "credentialConfigurationMatches",
+        "nodeCount",
+        "readySchedulableNodeCount",
+        "workerMachineCount",
+        "nodeSetDigest",
+        "nodeShapeMatches",
+        "operatorCount",
+        "healthyOperatorCount",
+        "operatorSetDigest",
+        "operatorHealthMatches",
+        "computeInstanceCount",
+        "bootstrapInstanceCount",
+        "masterInstanceCount",
+        "computeSetDigest",
+        "computeInventoryMatches",
+        "apiFirewallCount",
+        "apiSourceSetDigest",
+        "adminSourceMatches",
+        "consoleHostDigest",
+        "consoleStatusCode",
+        "consoleReachable",
+        "storageClassCount",
+        "storageClassSetDigest",
+        "defaultStorageClass",
+        "storageConfigurationMatches",
+        "trialShapeMatches"
+      ],
+      "properties": {
+        "observedAt": {"type": "string", "format": "date-time"},
+        "projectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{4,28}[a-z0-9]$"
+        },
+        "projectIdentityDigest": {"$ref": "#/$defs/digest"},
+        "version": {"type": "string", "minLength": 1},
+        "versionMatches": {"type": "boolean"},
+        "topology": {"type": "string", "minLength": 1},
+        "region": {"type": "string", "minLength": 1},
+        "infrastructureIdentityDigest": {"$ref": "#/$defs/digest"},
+        "topologyMatches": {"type": "boolean"},
+        "credentialMode": {"type": "string", "minLength": 1},
+        "serviceAccountIssuerDigest": {"$ref": "#/$defs/digest"},
+        "credentialConfigurationMatches": {"type": "boolean"},
+        "nodeCount": {"type": "integer", "minimum": 0},
+        "readySchedulableNodeCount": {"type": "integer", "minimum": 0},
+        "workerMachineCount": {"type": "integer", "minimum": 0},
+        "nodeSetDigest": {"$ref": "#/$defs/digest"},
+        "nodeShapeMatches": {"type": "boolean"},
+        "operatorCount": {"type": "integer", "minimum": 0},
+        "healthyOperatorCount": {"type": "integer", "minimum": 0},
+        "operatorSetDigest": {"$ref": "#/$defs/digest"},
+        "operatorHealthMatches": {"type": "boolean"},
+        "computeInstanceCount": {"type": "integer", "minimum": 0},
+        "bootstrapInstanceCount": {"type": "integer", "minimum": 0},
+        "masterInstanceCount": {"type": "integer", "minimum": 0},
+        "computeSetDigest": {"$ref": "#/$defs/digest"},
+        "computeInventoryMatches": {"type": "boolean"},
+        "apiFirewallCount": {"type": "integer", "minimum": 0},
+        "apiSourceSetDigest": {"$ref": "#/$defs/digest"},
+        "adminSourceMatches": {"type": "boolean"},
+        "consoleHostDigest": {"$ref": "#/$defs/digest"},
+        "consoleStatusCode": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        },
+        "consoleReachable": {"type": "boolean"},
+        "storageClassCount": {"type": "integer", "minimum": 0},
+        "storageClassSetDigest": {"$ref": "#/$defs/digest"},
+        "defaultStorageClass": {"type": "string"},
+        "storageConfigurationMatches": {"type": "boolean"},
+        "trialShapeMatches": {"type": "boolean"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction"],
+      "properties": {
+        "status": {"enum": ["TRIAL_CLUSTER_OBSERVED", "BLOCKED"]},
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "VERSION_MISMATCH",
+              "TOPOLOGY_MISMATCH",
+              "CREDENTIAL_CONFIGURATION_MISMATCH",
+              "NODE_SHAPE_MISMATCH",
+              "OPERATOR_HEALTH_MISMATCH",
+              "COMPUTE_INVENTORY_MISMATCH",
+              "ADMIN_SOURCE_MISMATCH",
+              "CONSOLE_UNAVAILABLE",
+              "STORAGE_CONFIGURATION_MISMATCH"
+            ]
+          }
+        },
+        "nextAction": {
+          "enum": [
+            "reconcile-live-trial-cluster",
+            "capture-cost-and-plan-teardown"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandPolicy",
+        "rawCommandOutputStored",
+        "credentialValuesStored",
+        "kubeconfigStored",
+        "consoleCredentialStored",
+        "cloudMutationAuthorized",
+        "workloadMutationAuthorized",
+        "teardownAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "commandPolicy": {"const": "read-only"},
+        "rawCommandOutputStored": {"const": false},
+        "credentialValuesStored": {"const": false},
+        "kubeconfigStored": {"const": false},
+        "consoleCredentialStored": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "workloadMutationAuthorized": {"const": false},
+        "teardownAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}
