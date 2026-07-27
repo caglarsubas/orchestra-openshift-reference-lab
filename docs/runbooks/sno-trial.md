@@ -492,7 +492,7 @@ Proceed only while a fresh report remains `CLEAN`.
 The clean installer state completed OpenShift `4.20.27` on 2026-07-27. Do not
 reuse an installer metadata directory after `create cluster` has started; run
 the exact installer destroy operation, verify cleanup, and render a fresh
-directory for a retry. The completed cluster has one ready schedulable
+directory for a retry. The completed cluster had one ready schedulable
 `n2-standard-8` control-plane/worker node, zero worker Machines,
 `SingleReplica` topology, `Manual` credentials with the locked workload
 identity issuer, two CSI storage classes, a host-scoped API firewall, a
@@ -503,7 +503,8 @@ Exact-main live observation `sno-cluster-main-20260727160232.1`, generated
 from commit `dffb6931bc5d656fc38d6e84e07f65fbb600998a`, has report digest
 `sha256:440b40b3e9b173ebe3c8ddba6020406b4a9651b3931a11c1ffd3ffcc88ae21c6`
 and status `TRIAL_CLUSTER_OBSERVED`. It is payload-free and read-only. Product
-workloads, cost capture, and teardown remain incomplete.
+workloads were never deployed. Exact-main cost/dry-run checkpoints and the
+later clean teardown are recorded below.
 
 ## Delegate the trial DNS zone
 
@@ -894,6 +895,17 @@ if policy allows. Project deletion requires a final Terraform plan with
 and residual inventory are clean. Close the lease with an operator note kept
 under `restricted/`; do not commit raw provider output. Budget alerts do not
 prove that teardown succeeded.
+
+The 2026-07-27 bounded trial ran the installer destroy from the original
+metadata directory, removed the separately created CCO/WIF resources, and
+deleted the operator VM. Independent post-teardown report
+`sno-exposure-post-teardown-20260727172000.1` has report digest
+`sha256:98b62fa0b69ef12a362e4915b9ababff3c5b5193652bf9143d9d3508c32fdf70`
+and status `TEARDOWN_RESIDUALS_CLEAN`. It observed zero target
+instances/disks, zero resources in every managed trial class, and zero
+operator VM/disks. The retained project foundation, budget, APIs, and
+delegated DNS zone are outside that managed set and were intentionally not
+deleted.
 
 ## Allowed result wording
 

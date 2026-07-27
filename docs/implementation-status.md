@@ -97,7 +97,7 @@ any certification campaign slot.
 | Parent DNS delegation and source-IP allowlist | Yes | N/A | Yes | Yes | Not eligible |
 | OpenShift `4.20.27` SNO installation | Yes | N/A | Yes | Yes | Not eligible |
 | Minimal co-located trial dependencies | No | N/A | No | No | Not eligible |
-| Verified teardown and residual-resource reconciliation | No | N/A | No | No | Not eligible |
+| Verified teardown and residual-resource reconciliation | Yes | N/A | Yes | Yes | Not eligible |
 
 The foundation rows record the 2026-07-26 bounded operator apply for
 `prometa-orch-sno-499235`. The exact reviewed remainder created one
@@ -108,9 +108,9 @@ guarded exact-main plan created only the active `ocp-lab.planeon.ai.` zone,
 moved the legacy zone address in Terraform state without changing it, and
 destroyed nothing. Independent readback observed both zones, and a subsequent
 plan reported no drift. That statement is the historical pre-install
-foundation checkpoint; the bounded SNO cluster and source-IP allowlist now
-exist as described below. No product workload or application Secret has been
-deployed.
+foundation checkpoint; the bounded SNO cluster and source-IP allowlist were
+later exercised and removed as described below. No product workload or
+application Secret was deployed.
 
 The payload-free readiness report
 `sno-readiness-operator-20260726174421.1` has report digest
@@ -168,9 +168,9 @@ granted no firewall mutation, cloud mutation, cluster creation, campaign, or
 certification authority.
 
 The clean third installer state completed OpenShift `4.20.27` on 2026-07-27
-after two failed states were destroyed rather than reused. The live cluster is
-`SingleReplica` in `europe-west1`, uses `Manual` cloud credentials with a
-workload-identity issuer, and has one ready schedulable `n2-standard-8`
+after two failed states were destroyed rather than reused. The live cluster was
+`SingleReplica` in `europe-west1`, used `Manual` cloud credentials with a
+workload-identity issuer, and had one ready schedulable `n2-standard-8`
 control-plane/worker node, zero worker Machines, two CSI storage classes, a
 host-scoped API allowlist, a reachable console, and 34 of 34 healthy cluster
 operators. Bootstrap compute and its etcd member are absent.
@@ -182,7 +182,8 @@ and status `TRIAL_CLUSTER_OBSERVED`. It stores no kubeconfig, console
 credential, provider credential, or raw command output. Its command policy is
 read-only and every campaign, certification, production, HA, RPO/RTO, Red Hat,
 and SLA claim remains false. Product admission, live pull/mirror proof,
-external inputs, deployment, and verified teardown remain outstanding.
+external inputs, deployment, and a production/reference-profile exercise
+remain outstanding.
 
 The cost-exposure contract is source- and fixture-complete. It binds a dated
 GCP Cloud Billing Catalog rate-card digest, the locked billing execution,
@@ -198,6 +199,18 @@ active report `sno-exposure-main-20260727163536.1`, generated from commit
 and status `ACTIVE_EXPOSURE_OBSERVED`. Its incomplete dominant-charge estimate
 at `2026-07-27T16:35:36Z` was `$0.888127` / `41.963752 TRY`; it is not a
 billing export, hard cap, or clean-teardown claim.
+
+The installer then destroyed the cluster from its original metadata directory.
+The release-matched CCO tool removed the separate OIDC bucket, seven custom
+roles, seven component service accounts, and workload-identity pool, after
+which the operator VM was deleted. Independent report
+`sno-exposure-post-teardown-20260727172000.1` has report digest
+`sha256:98b62fa0b69ef12a362e4915b9ababff3c5b5193652bf9143d9d3508c32fdf70`
+and status `TEARDOWN_RESIDUALS_CLEAN`. It observed zero target
+instances/disks, zero resources across all ten managed trial classes, and zero
+operator VM/disks. The retained foundation, budget, APIs, and delegated DNS
+zone are outside the managed residual classification, so this is not an empty
+project or project-deletion claim.
 
 The exact-main product observation
 `sno-product-dry-run-main-20260727170500.1`, generated from commit

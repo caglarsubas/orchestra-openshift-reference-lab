@@ -101,12 +101,13 @@ both exact zones, and a post-apply plan reported no drift.
 
 On 2026-07-27, the parent delegation, Linux AMD64 operator path, exact
 `4.20.27` tools, project-bound lease, and short-lived render admission were
-observed before a clean install. The resulting `SingleReplica` cluster has one
+observed before a clean install. The resulting `SingleReplica` cluster had one
 ready schedulable `n2-standard-8` control-plane/worker node, zero worker
 Machines, `Manual` cloud credentials with workload identity, two CSI storage
 classes, a host-scoped API firewall, a reachable console, and 34 of 34 healthy
-cluster operators. No product workload or application Secret has been
-deployed.
+cluster operators. No product workload or application Secret was deployed.
+The cluster and separately created CCO/WIF resources were later destroyed, and
+the operator VM was deleted.
 
 Exact-main payload-free observation
 `sno-cluster-main-20260727160232.1` has report digest
@@ -114,7 +115,7 @@ Exact-main payload-free observation
 It records `TRIAL_CLUSTER_OBSERVED`, grants no mutation authority, and keeps
 all campaign, certification, production, HA, RPO/RTO, Red Hat, and SLA claims
 false. Product admission, live pull/mirror proof, external inputs, deployment,
-and verified teardown remain.
+and a production/reference-profile exercise remain.
 
 Cost and teardown state use a separate read-only contract. A dated GCP catalog
 rate card estimates only the dominant N2/E2 compute and zonal balanced-disk
@@ -128,6 +129,14 @@ Exact-main active report `sno-exposure-main-20260727163536.1` has digest
 and status `ACTIVE_EXPOSURE_OBSERVED`. Its incomplete dominant-charge estimate
 at `2026-07-27T16:35:36Z` was `$0.888127` / `41.963752 TRY`; this is not a
 billing export, hard cap, or teardown result.
+
+Post-teardown report `sno-exposure-post-teardown-20260727172000.1` has digest
+`sha256:98b62fa0b69ef12a362e4915b9ababff3c5b5193652bf9143d9d3508c32fdf70`
+and status `TEARDOWN_RESIDUALS_CLEAN`. It observed zero target
+instances/disks, zero resources in all ten managed trial classes, and zero
+operator VM/disks. This closes the bounded SNO trial cleanup only; the retained
+GCP project foundation, budget, APIs, and delegated DNS zone are outside the
+managed residual set and the report does not claim that the project is empty.
 
 Product API acceptance and live-capacity projection use another payload-free
 contract. It binds the healthy cluster report, artifact set, workload
