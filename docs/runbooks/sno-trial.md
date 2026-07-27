@@ -176,9 +176,10 @@ campaign evidence.
 ## Replay the published three-plane trial artifacts
 
 The platform, runtime, and model-plane owners publish independent UBI images
-and charts with source-only SNO values contracts. Their exact releases,
-sources, linux/amd64 image manifests, chart packages, and publication runs are
-locked in
+and charts with source-only SNO values contracts. The platform release
+contains both the service image and the migration-tools image. Their exact
+releases, sources, linux/amd64 image manifests, chart packages, and publication
+runs are locked in
 `config/sno-trial-product-artifacts.lock.json` without changing the production
 cross-plane release set:
 
@@ -219,13 +220,13 @@ Artifact `8634695656` is named
 artifact and workload locks. It remains a time-bounded GitHub Actions artifact
 and does not by itself record human admission.
 
-A successful replay proves only that the three locked artifacts match their
-sources and signed publications. An operator must review and accept the
-payload-free report in a later admission step; the workflow cannot mutate the
-lock or admit an artifact. Activation remains blocked while destination mirror
-and live-cluster pulls, operator Secret/CA inputs, OpenShift server-side dry
-runs, and provider readiness are absent. It is not installation, campaign,
-reference-profile, customer, Red Hat, or SLA evidence.
+A successful replay proves only that the four locked workload images and three
+charts match their sources and signed publications. An operator must review
+and accept the payload-free report in a later admission step; the workflow
+cannot mutate the lock or admit an artifact. Activation remains blocked while
+destination mirror and live-cluster pulls, operator Secret/CA inputs,
+OpenShift server-side dry runs, and provider readiness are absent. It is not
+installation, campaign, reference-profile, customer, Red Hat, or SLA evidence.
 
 ### Independently admit the replay
 
@@ -233,11 +234,13 @@ The source contract for that later review is locked in
 `config/sno-trial-product-artifact-admission-policy.lock.json`; its output
 schema is
 `schemas/sno-trial-product-artifact-admission-v1.schema.json`. Policy
-`orchestra-sno-trial-product-admission-2026-07-27.1` binds only replay run
+`orchestra-sno-trial-product-admission-2026-07-28.2` retains the previous
+replay run
 `30211883723`, artifact ID `8634695656`, and report digest
-`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
-Its replay state is `current`; the five deployment and provider blockers remain
-unchanged.
+`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`
+as historical metadata only. Its replay state is `refresh-required`; admission
+must not run until a later policy update binds a successful exact-main replay
+of the current artifact-set digest.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:
@@ -872,9 +875,12 @@ The 2026-07-27 exact-main observation
 It accepted 18 of 18 rendered objects, observed no persisted object, and
 projected `628m` CPU plus `2214 MiB` memory headroom. It remains
 `SERVER_DRY_RUN_OBSERVED_WITH_GAPS` because the capacity margin is tight, the
-platform migration image is not bound by the artifact lock, and external
-references, live pulls, and destination mirroring were not verified. Do not
-remove the lock's activation blockers based on this report.
+platform migration image was not bound by that report's artifact lock, and
+external references, live pulls, and destination mirroring were not verified.
+The current source lock binds the migration image, but this immutable report
+cannot be upgraded in place. Replay the updated artifact set and collect a new
+server-side observation on a future cluster. Do not remove activation blockers
+based on this report.
 
 ## Teardown and reconciliation
 

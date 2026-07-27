@@ -150,9 +150,11 @@ Exact-main report `sno-product-dry-run-main-20260727170500.1` has digest
 and status `SERVER_DRY_RUN_OBSERVED_WITH_GAPS`. All 18 rendered objects passed
 strict server-side validation and all were absent afterward. Projecting the
 locked candidate over current OpenShift requests left `628m` CPU and
-`2214 MiB` memory, so the capacity margin remains explicitly tight. The
-platform migration image is not artifact-bound, and external references,
-live pulls, and destination mirroring remain unverified.
+`2214 MiB` memory, so the capacity margin remains explicitly tight. At
+collection time, the platform migration image was not artifact-bound, and
+external references, live pulls, and destination mirroring were unverified.
+The current source contract now binds that released migration image, but this
+historical report is immutable and cannot prove the updated artifact set.
 
 The pre-install payload-free report
 `sno-readiness-operator-20260726174421.1` binds the current profile digest,
@@ -342,13 +344,16 @@ verification evidence.
 The isolated SNO lane does not rewrite that production lineage. Its v2 product
 artifact set is independently digested in
 [`config/sno-trial-product-artifacts.lock.json`](config/sno-trial-product-artifacts.lock.json).
-It binds the platform `platform-v0.1.0-rc.11`, runtime `v0.18.7`, and model-plane
-`v0.1.11` UBI images, charts, exact source revisions, exact publication
-attempts, and source-only SNO values for read-only registry replay. Every
-artifact binds its first successful publication attempt. Runtime `v0.18.7`
-also binds the supported Cosign v3 publisher used by the independent replay.
-The artifact-set digest is
-`sha256:ade81d5555838a091f24580b1300697221a3ed05414ce99880964e7ee54cb12a`.
+It binds four workload images across the platform
+`platform-v0.1.0-rc.11`, runtime `v0.18.7`, and model-plane `v0.1.11`
+releases. The platform entry binds both `prometa-ubi` and the
+`prometa-tools-ubi` migration image from the same signed release manifest.
+Charts, exact source revisions, exact publication attempts, and source-only
+SNO values are also bound for read-only registry replay. Every artifact binds
+its first successful publication attempt. Runtime `v0.18.7` also binds the
+supported Cosign v3 publisher used by the independent replay. The artifact-set
+digest is
+`sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948`.
 The replay uses two separate environment credentials: a classic token limited
 to package-read access across the locked GHCR namespaces and a fine-grained
 token limited to Actions-read plus required metadata on the private platform
@@ -356,14 +361,13 @@ source repository. Exact-main run `30211883723` completed on 2026-07-26
 against verifier revision
 `985cb37de283193a24776dfe840ab240d34a929a`, with payload-free report digest
 `sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
-The downloaded report was independently replayed against the Planeon-bound
-artifact and workload locks. Admission policy
-`orchestra-sno-trial-product-admission-2026-07-27.1` binds only that run,
-report, and immutable artifact ID. The protected admission environment and
-independent reviewer are not configured, so no admission record exists.
-Destination mirror and live-cluster pulls, operator inputs, server-side dry
-runs, and provider readiness also remain absent; activation and every
-certifying claim remain false.
+That report remains valid evidence for the previous artifact-set digest only.
+The current admission policy
+`orchestra-sno-trial-product-admission-2026-07-28.2` is therefore
+`refresh-required`; it cannot admit the previous report against the new
+four-image set. Destination mirror and live-cluster pulls, operator inputs, a
+fresh server-side dry run, and provider readiness also remain absent;
+activation and every certifying claim remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.

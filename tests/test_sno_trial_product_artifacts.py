@@ -51,7 +51,7 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         validate_lock(self.lock, self.candidate)
         self.assertEqual(
             self.lock["completeness"],
-            "published-three-plane-not-trial-admitted",
+            "published-three-plane-workload-images-bound-not-trial-admitted",
         )
         self.assertEqual(
             tuple(artifact["plane"] for artifact in self.artifacts),
@@ -70,6 +70,22 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
         self.assertFalse(self.lock["controls"]["productionReleaseSetMutated"])
         self.assertFalse(self.lock["controls"]["cloudMutationAuthorized"])
         self.assertFalse(self.lock["controls"]["deploymentAuthorized"])
+        self.assertEqual(
+            [
+                image["reference"]
+                for artifact in self.artifacts
+                for image in [
+                    artifact["image"],
+                    *artifact["auxiliaryImages"],
+                ]
+            ],
+            [
+                "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
+                "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4",
+                "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
+                "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
+            ],
+        )
 
     def test_lock_requires_exact_unique_plane_order(self) -> None:
         for artifacts in (
@@ -124,6 +140,16 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
                     )
                     with self.assertRaisesRegex(ValueError, code):
                         validate_lock(changed, self.candidate)
+
+        changed = copy.deepcopy(self.lock)
+        changed["artifacts"][0]["auxiliaryImages"][0]["digest"] = (
+            f"sha256:{9:064x}"
+        )
+        changed["artifactSetDigest"] = unsigned_digest(
+            changed, "artifactSetDigest"
+        )
+        with self.assertRaisesRegex(ValueError, "image_invalid"):
+            validate_lock(changed, self.candidate)
 
     def test_admission_activation_controls_and_claims_cannot_escalate(self) -> None:
         changes = [
@@ -441,6 +467,15 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
                         "signatureVerified": True,
                         "cycloneDxAttestationVerified": True,
                     },
+                    "auxiliaryImages": [
+                        {
+                            **auxiliary,
+                            "platformManifestVerified": True,
+                            "signatureVerified": True,
+                            "cycloneDxAttestationVerified": True,
+                        }
+                        for auxiliary in artifact["auxiliaryImages"]
+                    ],
                     "chart": {
                         "reference": chart["reference"],
                         "digest": chart["digest"],
@@ -502,6 +537,12 @@ class SnoTrialProductArtifactTests(unittest.TestCase):
     def test_report_rejects_digest_order_and_attempt_drift(self) -> None:
         report = self.valid_report()
         report["artifacts"][0]["image"]["digest"] = f"sha256:{6:064x}"
+        report["reportDigest"] = report_digest(report)
+        with self.assertRaisesRegex(ValueError, "report_image_invalid"):
+            validate_report(report, self.lock, self.candidate)
+
+        report = self.valid_report()
+        report["artifacts"][0]["auxiliaryImages"] = []
         report["reportDigest"] = report_digest(report)
         with self.assertRaisesRegex(ValueError, "report_image_invalid"):
             validate_report(report, self.lock, self.candidate)

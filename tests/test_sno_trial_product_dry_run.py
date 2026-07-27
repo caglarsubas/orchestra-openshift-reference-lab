@@ -155,7 +155,7 @@ spec:
         - name: app
           image: ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d
         - name: migration
-          image: ghcr.io/example/migration@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          image: ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4
       volumes:
         - name: tls
           secret:
@@ -268,6 +268,11 @@ spec:
         self.assertNotIn("pod-sensitive-name", encoded)
         self.assertNotIn("sensitive", encoded)
         self.assertTrue(report["aggregate"]["allNonPersistent"])
+        self.assertTrue(report["aggregate"]["allImagesArtifactBound"])
+        self.assertNotIn(
+            "MIGRATION_IMAGE_NOT_ARTIFACT_BOUND",
+            report["decision"]["reasonCodes"],
+        )
 
 
 if __name__ == "__main__":

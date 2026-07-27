@@ -67,7 +67,7 @@
       "properties": {
         "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
         "artifactSetId": {
-          "const": "orchestra-sno-trial-products-2026-07-25.3"
+          "const": "orchestra-sno-trial-products-2026-07-28.4"
         },
         "artifactSetDigest": {"$ref": "#/$defs/digest"},
         "workloadCandidateDigest": {"$ref": "#/$defs/digest"},
@@ -218,11 +218,23 @@
     "artifactBase": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["plane", "publication", "image", "chart", "admission"],
+      "required": [
+        "plane",
+        "publication",
+        "image",
+        "auxiliaryImages",
+        "chart",
+        "admission"
+      ],
       "properties": {
         "plane": {"type": "string"},
         "publication": {"$ref": "#/$defs/publication"},
         "image": {"$ref": "#/$defs/image"},
+        "auxiliaryImages": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/image"},
+          "maxItems": 1
+        },
         "chart": {"$ref": "#/$defs/chart"},
         "admission": {"$ref": "#/$defs/admission"}
       }

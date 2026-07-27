@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   replay:
-    name: read-only three-plane product artifact replay
+    name: read-only three-plane workload artifact replay
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
@@ -70,7 +70,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ env.SNO_ARTIFACT_READ_TOKEN }}
 
-      - name: Validate locked three-plane artifact set
+      - name: Validate locked three-plane workload artifact set
         run: python3 scripts/sno_trial_product_artifacts.py validate-lock
 
       - name: Replay publication, signatures, attestations, and chart package

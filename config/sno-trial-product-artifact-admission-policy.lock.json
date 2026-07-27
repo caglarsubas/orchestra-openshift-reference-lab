@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
-  "policyId": "orchestra-sno-trial-product-admission-2026-07-27.1",
+  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.2",
   "targetClass": "engineering-trial",
   "bindings": {
     "profileId": "orchestra-ocp-sno-trial-amd64-v1",
-    "artifactSetId": "orchestra-sno-trial-products-2026-07-25.3",
-    "artifactSetDigest": "sha256:ade81d5555838a091f24580b1300697221a3ed05414ce99880964e7ee54cb12a",
+    "artifactSetId": "orchestra-sno-trial-products-2026-07-28.4",
+    "artifactSetDigest": "sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948",
     "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9",
     "replay": {
       "verificationId": "sno-product-replay-30211883723.1",
@@ -34,7 +34,7 @@
   "review": {
     "maximumReplayAgeSeconds": 1209600,
     "maximumAdmissionAgeSeconds": 2592000,
-    "replayState": "current",
+    "replayState": "refresh-required",
     "requiredChecks": [
       "replay-report-schema-and-digest",
       "three-plane-publication-lineage",
@@ -46,6 +46,7 @@
   "activation": {
     "state": "blocked",
     "remainingReasonCodes": [
+      "product-artifact-replay-refresh-required",
       "destination-mirror-verification-missing",
       "live-cluster-pull-verification-missing",
       "operator-secret-and-ca-inputs-missing",
@@ -69,5 +70,5 @@
     "contractualSla": false,
     "productionSupported": false
   },
-  "policyDigest": "sha256:fae9d30455359c3c87f9618f7d03b23c1527227c72ff73ae9b7688b815c13fee"
+  "policyDigest": "sha256:c52eef46d357fbc47da4741f438c6dda299128d2795689f39ca8e7ef2c27e7c9"
 }

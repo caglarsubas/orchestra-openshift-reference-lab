@@ -569,7 +569,9 @@ def collect_snapshot(
         "sno_product_dry_run_pod_observation_failed",
     )
     locked_images = {
-        artifact["image"]["reference"] for artifact in lock["artifacts"]
+        image["reference"]
+        for artifact in lock["artifacts"]
+        for image in [artifact["image"], *artifact["auxiliaryImages"]]
     }
     results: list[dict[str, Any]] = []
     for plane in PLANES:

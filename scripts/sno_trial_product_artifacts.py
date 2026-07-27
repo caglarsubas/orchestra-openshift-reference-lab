@@ -29,7 +29,7 @@ CANDIDATE_PATH = ROOT / "config" / "sno-trial-workload-candidate.lock.json"
 LOCK_KIND = "orchestra.openshift.sno-trial-product-artifact-set.v2"
 REPORT_KIND = "orchestra.openshift.sno-trial-product-artifact-replay.v2"
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
-ARTIFACT_SET_ID = "orchestra-sno-trial-products-2026-07-25.3"
+ARTIFACT_SET_ID = "orchestra-sno-trial-products-2026-07-28.4"
 TARGET_CLASS = "engineering-trial"
 LOCK_EXECUTION_MODE = "source-observation"
 REPORT_EXECUTION_MODE = "live-registry-artifact-replay"
@@ -50,6 +50,16 @@ EXPECTED_ARTIFACTS: dict[str, dict[str, Any]] = {
             "platformManifestDigest": "sha256:998db0c5a1110bbaf551e44d362af63e4d844db8d115380ec7215680ad564a14",
             "variant": "ubi9",
         },
+        "auxiliaryImages": [
+            {
+                "repository": (
+                    "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi"
+                ),
+                "digest": "sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4",
+                "platformManifestDigest": "sha256:2e6cf720844096da1483f00eafaf316e2b2203a048ad1a8d820bd4030babcf71",
+                "variant": "ubi9",
+            }
+        ],
         "chart": {
             "repository": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa",
             "digest": "sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
@@ -87,6 +97,7 @@ EXPECTED_ARTIFACTS: dict[str, dict[str, Any]] = {
             "platformManifestDigest": "sha256:5f397db663f26d7e33a01faf656a8fa3eebee73ccdb348e4dfae84d7f2ec713f",
             "variant": "ubi9",
         },
+        "auxiliaryImages": [],
         "chart": {
             "repository": (
                 "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime"
@@ -127,6 +138,7 @@ EXPECTED_ARTIFACTS: dict[str, dict[str, Any]] = {
             "platformManifestDigest": "sha256:52e9da1065dfa539c70aae79beccafc58a47db17f5422bc500e3ab9b3c394c7a",
             "variant": "ubi9",
         },
+        "auxiliaryImages": [],
         "chart": {
             "repository": (
                 "ghcr.io/caglarsubas/llm_inference_engine/"
@@ -175,6 +187,7 @@ ARTIFACT_KEYS = {
     "release",
     "source",
     "image",
+    "auxiliaryImages",
     "chart",
     "publication",
     "admission",
@@ -352,7 +365,8 @@ def validate_lock(
         or value["profileId"] != PROFILE_ID
         or value["targetClass"] != TARGET_CLASS
         or value["executionMode"] != LOCK_EXECUTION_MODE
-        or value["completeness"] != "published-three-plane-not-trial-admitted"
+        or value["completeness"]
+        != "published-three-plane-workload-images-bound-not-trial-admitted"
     ):
         fail("sno_product_artifact_lock_identity_invalid")
     if value["bindings"] != {
@@ -407,24 +421,47 @@ def validate_lock(
             "sno_product_artifact_lock_source_invalid",
         )
 
-        image = artifact["image"]
-        if not isinstance(image, dict):
-            fail("sno_product_artifact_lock_image_invalid")
-        exact_keys(image, IMAGE_KEYS, "sno_product_artifact_lock_image_keys_invalid")
-        for field in ("digest", "platformManifestDigest"):
-            validate_digest(image[field], "sno_product_artifact_lock_image_invalid")
+        images = [artifact["image"], *artifact["auxiliaryImages"]]
+        expected_images = [
+            expected_artifact["image"],
+            *expected_artifact["auxiliaryImages"],
+        ]
         if (
-            not isinstance(image["repository"], str)
-            or image["reference"] != f"{image['repository']}@{image['digest']}"
-            or image["platform"] != "linux/amd64"
-            or image["variant"] != "ubi9"
+            not isinstance(artifact["image"], dict)
+            or not isinstance(artifact["auxiliaryImages"], list)
+            or len(images) != len(expected_images)
         ):
             fail("sno_product_artifact_lock_image_invalid")
-        require_expected_subset(
-            image,
-            expected_artifact["image"],
-            "sno_product_artifact_lock_image_invalid",
-        )
+        references: list[str] = []
+        for image, expected_image in zip(images, expected_images, strict=True):
+            if not isinstance(image, dict):
+                fail("sno_product_artifact_lock_image_invalid")
+            exact_keys(
+                image,
+                IMAGE_KEYS,
+                "sno_product_artifact_lock_image_keys_invalid",
+            )
+            for field in ("digest", "platformManifestDigest"):
+                validate_digest(
+                    image[field],
+                    "sno_product_artifact_lock_image_invalid",
+                )
+            if (
+                not isinstance(image["repository"], str)
+                or image["reference"]
+                != f"{image['repository']}@{image['digest']}"
+                or image["platform"] != "linux/amd64"
+                or image["variant"] != "ubi9"
+            ):
+                fail("sno_product_artifact_lock_image_invalid")
+            require_expected_subset(
+                image,
+                expected_image,
+                "sno_product_artifact_lock_image_invalid",
+            )
+            references.append(image["reference"])
+        if len(references) != len(set(references)):
+            fail("sno_product_artifact_lock_image_invalid")
 
         chart = artifact["chart"]
         if not isinstance(chart, dict):
@@ -899,12 +936,11 @@ def verify_image_index(
 
 
 def verify_image(
-    artifact: dict[str, Any],
+    image: dict[str, Any],
+    source: dict[str, Any],
+    publication: dict[str, Any],
     run: CommandRunner,
 ) -> dict[str, Any]:
-    source = artifact["source"]
-    image = artifact["image"]
-    publication = artifact["publication"]
     verify_image_index(image, run)
     verify_signature(
         image["reference"],
@@ -952,11 +988,22 @@ def build_report(
         fail("sno_product_artifact_verifier_run_invalid")
     artifacts = []
     for artifact in lock["artifacts"]:
+        source = artifact["source"]
+        publication = artifact["publication"]
         artifacts.append(
             {
                 "plane": artifact["plane"],
                 "publication": verify_publication_run(artifact, run),
-                "image": verify_image(artifact, run),
+                "image": verify_image(
+                    artifact["image"],
+                    source,
+                    publication,
+                    run,
+                ),
+                "auxiliaryImages": [
+                    verify_image(image, source, publication, run)
+                    for image in artifact["auxiliaryImages"]
+                ],
                 "chart": verify_chart(artifact, run),
                 "admission": dict(artifact["admission"]),
             }
@@ -1061,7 +1108,14 @@ def validate_report(
             fail("sno_product_artifact_report_artifacts_invalid")
         exact_keys(
             report_artifact,
-            {"plane", "publication", "image", "chart", "admission"},
+            {
+                "plane",
+                "publication",
+                "image",
+                "auxiliaryImages",
+                "chart",
+                "admission",
+            },
             "sno_product_artifact_report_artifact_keys_invalid",
         )
         if report_artifact["plane"] != artifact["plane"]:
@@ -1086,6 +1140,17 @@ def validate_report(
             "signatureVerified": True,
             "cycloneDxAttestationVerified": True,
         }:
+            fail("sno_product_artifact_report_image_invalid")
+        expected_auxiliary_images = [
+            {
+                **image,
+                "platformManifestVerified": True,
+                "signatureVerified": True,
+                "cycloneDxAttestationVerified": True,
+            }
+            for image in artifact["auxiliaryImages"]
+        ]
+        if report_artifact["auxiliaryImages"] != expected_auxiliary_images:
             fail("sno_product_artifact_report_image_invalid")
         chart = artifact["chart"]
         if report_artifact["chart"] != {

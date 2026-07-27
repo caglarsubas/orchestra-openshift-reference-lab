@@ -36,10 +36,21 @@ from scripts.validate_repository import ROOT
 
 class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.policy = load_json(POLICY_PATH)
+        self.locked_policy = load_json(POLICY_PATH)
+        self.policy = copy.deepcopy(self.locked_policy)
         self.lock = load_json(LOCK_PATH)
         self.candidate = load_json(CANDIDATE_PATH)
         self.report = self.valid_replay_report()
+        self.policy["bindings"]["replay"]["reportDigest"] = self.report[
+            "reportDigest"
+        ]
+        self.policy["review"]["replayState"] = "current"
+        self.policy["activation"]["remainingReasonCodes"] = list(
+            DEPLOYMENT_REASONS
+        )
+        self.policy["policyDigest"] = unsigned_digest(
+            self.policy, "policyDigest"
+        )
         self.environment_evidence = self.valid_environment_evidence()
         self.admitted_at = datetime(
             2026, 7, 26, 18, 0, tzinfo=timezone.utc
@@ -74,6 +85,15 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
                         "signatureVerified": True,
                         "cycloneDxAttestationVerified": True,
                     },
+                    "auxiliaryImages": [
+                        {
+                            **auxiliary,
+                            "platformManifestVerified": True,
+                            "signatureVerified": True,
+                            "cycloneDxAttestationVerified": True,
+                        }
+                        for auxiliary in artifact["auxiliaryImages"]
+                    ],
                     "chart": {
                         "reference": chart["reference"],
                         "digest": chart["digest"],
@@ -115,7 +135,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         value["reportDigest"] = report_digest(value)
         self.assertEqual(
             value["reportDigest"],
-            "sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359",
+            "sha256:7f52e40628789449e651a3775fa03dd96146baf4be5e36ee96371c739049e030",
         )
         validate_report(value, self.lock, self.candidate)
         return value
@@ -185,6 +205,15 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         )
 
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
+        validate_policy(self.locked_policy, self.lock, self.candidate)
+        self.assertEqual(
+            self.locked_policy["review"]["replayState"],
+            "refresh-required",
+        )
+        self.assertEqual(
+            self.locked_policy["activation"]["remainingReasonCodes"],
+            REMAINING_REASONS,
+        )
         validate_policy(self.policy, self.lock, self.candidate)
         self.assertEqual(
             self.policy["review"]["replayState"], "current"

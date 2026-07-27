@@ -25,13 +25,13 @@
       "const": "orchestra.openshift.sno-trial-product-artifact-set.v2"
     },
     "artifactSetId": {
-      "const": "orchestra-sno-trial-products-2026-07-25.3"
+      "const": "orchestra-sno-trial-products-2026-07-28.4"
     },
     "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
     "targetClass": {"const": "engineering-trial"},
     "executionMode": {"const": "source-observation"},
     "completeness": {
-      "const": "published-three-plane-not-trial-admitted"
+      "const": "published-three-plane-workload-images-bound-not-trial-admitted"
     },
     "bindings": {"$ref": "#/$defs/bindings"},
     "artifacts": {
@@ -216,6 +216,7 @@
         "release",
         "source",
         "image",
+        "auxiliaryImages",
         "chart",
         "publication",
         "admission"
@@ -225,6 +226,11 @@
         "release": {"type": "string", "minLength": 1},
         "source": {"$ref": "#/$defs/source"},
         "image": {"$ref": "#/$defs/image"},
+        "auxiliaryImages": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/image"},
+          "maxItems": 1
+        },
         "chart": {"$ref": "#/$defs/chart"},
         "publication": {"$ref": "#/$defs/publication"},
         "admission": {"$ref": "#/$defs/admission"}
