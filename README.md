@@ -302,7 +302,8 @@ This is a capacity decision record, not deployment input. It emits no
 manifests, Argo CD applications, Secret values, lease, or cloud authority.
 Its Valkey and CPU model-backend entries intentionally remain unresolved
 because the candidate predates the artifact selection below, and
-trial-specific single-replica executable profiles do not yet exist. The
+the new trial-specific single-replica manifest candidate is not yet bound back
+into this capacity record. The
 source-only dependency runtime requirements are locked separately in
 [`config/sno-trial-dependency-runtime-contracts.lock.json`](config/sno-trial-dependency-runtime-contracts.lock.json).
 Its five contracts bind the current candidate, dependency admission, and
@@ -329,11 +330,27 @@ dependency BOM and runtime contracts with:
 make validate-sno-trial-dependency-artifacts
 ```
 
-This closes artifact selection only. Upstream review, destination mirroring,
-lab signing, PVC materialization, Secret/TLS and storage-class references,
-executable manifests, server-side dry-run, and live connectivity remain
-blocked. The artifact set does not mutate the current workload candidate or
-its replay lineage and emits no Kubernetes objects.
+Artifact selection now feeds the inactive Kubernetes candidate in
+[`gitops/dependencies/candidates/sno-trial`](gitops/dependencies/candidates/sno-trial).
+It renders one restricted single-replica StatefulSet each for Valkey and the
+CPU model backend, their headless Services, dedicated tokenless service
+accounts, restricted namespaces, and exact default-deny/allowlist policies.
+The model is mounted from an operator-prestaged read-only PVC and the
+containers use the exact artifact-set images and startup arguments. Validate
+the source and render contract with:
+
+```bash
+make validate-sno-trial-dependency-manifests
+```
+
+This closes manifest authoring only. The candidate uses a conspicuous
+unresolved storage-class identifier and references operator-owned
+authentication/TLS Secrets and model PVC without creating them. It is absent
+from the active dependency Kustomization and emits no Argo CD Application.
+Upstream review, destination admission and signing, input materialization,
+live allocatable capacity, workload-candidate rebinding, server-side dry-run,
+and connectivity remain blocked. Neither the artifact set nor this manifest
+candidate changes the current product replay lineage or authorizes apply.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
@@ -598,7 +615,7 @@ evidence. The canonical inventory digest is
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for SNO readiness, network-hygiene and operator-input diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for SNO readiness, network-hygiene, operator-input and dependency-manifest diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |

@@ -1,0 +1,28 @@
+{
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "orchestra-sno-valkey",
+    "namespace": "orchestra-sno-valkey",
+    "labels": {
+      "app.kubernetes.io/name": "orchestra-sno-valkey",
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "type": "ClusterIP",
+    "clusterIP": "None",
+    "selector": {
+      "app.kubernetes.io/name": "orchestra-sno-valkey"
+    },
+    "ports": [
+      {
+        "name": "valkey-tls",
+        "port": 6379,
+        "protocol": "TCP",
+        "targetPort": "valkey-tls"
+      }
+    ]
+  }
+}

@@ -57,6 +57,9 @@ jobs:
       - name: Validate immutable SNO dependency artifact set
         run: python3 scripts/validate_sno_trial_dependency_artifacts.py
 
+      - name: Validate inactive SNO dependency manifest candidate
+        run: python3 scripts/validate_sno_trial_dependency_manifests.py
+
       - name: Validate complete SNO workload image artifact set
         run: python3 scripts/sno_trial_product_artifacts.py validate-lock
 
@@ -270,6 +273,9 @@ jobs:
 
       - name: Validate blocked dependency-plane GitOps floor
         run: kubectl kustomize gitops/dependencies/reference-lab | python3 scripts/validate_dependency_gitops.py
+
+      - name: Render inactive SNO dependency manifest candidate
+        run: kubectl kustomize gitops/dependencies/candidates/sno-trial >/dev/null
 
       - name: Validate digest-bound product GitOps
         run: kubectl kustomize gitops/products/reference-lab | python3 scripts/validate_product_gitops.py
