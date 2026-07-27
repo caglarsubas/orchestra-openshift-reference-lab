@@ -113,7 +113,8 @@ Exact-main payload-free observation
 `sha256:440b40b3e9b173ebe3c8ddba6020406b4a9651b3931a11c1ffd3ffcc88ae21c6`.
 It records `TRIAL_CLUSTER_OBSERVED`, grants no mutation authority, and keeps
 all campaign, certification, production, HA, RPO/RTO, Red Hat, and SLA claims
-false. Cost capture, product admission/dry-runs, and verified teardown remain.
+false. Product admission, live pull/mirror proof, external inputs, deployment,
+and verified teardown remain.
 
 Cost and teardown state use a separate read-only contract. A dated GCP catalog
 rate card estimates only the dominant N2/E2 compute and zonal balanced-disk
@@ -122,12 +123,27 @@ remain explicit exclusions, so the result is never represented as billed
 spend. The same payload-free inventory contract requires zero managed target
 and operator resources before it can report clean teardown.
 
+Exact-main active report `sno-exposure-main-20260727163536.1` has digest
+`sha256:b11972ee78ee58f6aa326b58ff64895bca60265b63d221734b4a1d2e41b86f88`
+and status `ACTIVE_EXPOSURE_OBSERVED`. Its incomplete dominant-charge estimate
+at `2026-07-27T16:35:36Z` was `$0.888127` / `41.963752 TRY`; this is not a
+billing export, hard cap, or teardown result.
+
 Product API acceptance and live-capacity projection use another payload-free
 contract. It binds the healthy cluster report, artifact set, workload
 candidate, and three rendered-manifest digests; runs strict server-side
 dry-runs; and proves no rendered object persisted. A successful observation
 does not resolve image pulls, destination mirroring, Secrets, CAs,
 dependencies, scheduling, readiness, deployment, admission, or certification.
+
+Exact-main report `sno-product-dry-run-main-20260727170500.1` has digest
+`sha256:9394ce8fed98e92c46ff01479d86c0f40ee330409d12b8a8e350866d303b2ae1`
+and status `SERVER_DRY_RUN_OBSERVED_WITH_GAPS`. All 18 rendered objects passed
+strict server-side validation and all were absent afterward. Projecting the
+locked candidate over current OpenShift requests left `628m` CPU and
+`2214 MiB` memory, so the capacity margin remains explicitly tight. The
+platform migration image is not artifact-bound, and external references,
+live pulls, and destination mirroring remain unverified.
 
 The pre-install payload-free report
 `sno-readiness-operator-20260726174421.1` binds the current profile digest,

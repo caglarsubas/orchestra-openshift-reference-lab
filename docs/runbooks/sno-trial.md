@@ -865,6 +865,16 @@ service behavior, deployment, admission, or certification. An image present
 in a rendered chart but absent from the locked artifact set remains an
 explicit blocker rather than being silently admitted by the observation.
 
+The 2026-07-27 exact-main observation
+`sno-product-dry-run-main-20260727170500.1` has report digest
+`sha256:9394ce8fed98e92c46ff01479d86c0f40ee330409d12b8a8e350866d303b2ae1`.
+It accepted 18 of 18 rendered objects, observed no persisted object, and
+projected `628m` CPU plus `2214 MiB` memory headroom. It remains
+`SERVER_DRY_RUN_OBSERVED_WITH_GAPS` because the capacity margin is tight, the
+platform migration image is not bound by the artifact lock, and external
+references, live pulls, and destination mirroring were not verified. Do not
+remove the lock's activation blockers based on this report.
+
 ## Teardown and reconciliation
 
 Run the exact installer destroy operation from the original metadata directory.
