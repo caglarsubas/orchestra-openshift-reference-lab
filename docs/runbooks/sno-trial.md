@@ -635,6 +635,31 @@ one zone, OVN-Kubernetes, and external publishing. It refuses pull secrets in
 the values file and leaves `${PULL_SECRET_JSON}` and `${SSH_PUBLIC_KEY}` for a
 final restricted operator step.
 
+Generate a dedicated trial SSH key under ignored storage and materialize the
+two file-backed values while the same admission is still active:
+
+```bash
+install -d -m 0700 restricted/operator install-dir/trial/operator
+ssh-keygen -q -t ed25519 -N '' \
+  -f restricted/operator/orchestra-trial
+chmod 0600 restricted/operator/orchestra-trial.pub
+
+make materialize-sno-trial-install-config \
+  RENDERED=install-dir/trial/install-config.rendered.yaml \
+  PULL_SECRET=restricted/pull-secret.json \
+  SSH_PUBLIC_KEY=restricted/operator/orchestra-trial.pub \
+  LEASE=restricted/trial-leases/current.json \
+  ADMISSION="restricted/$ADMISSION_ID.json" \
+  PROJECT_ID=prometa-orch-sno-499235 \
+  OUTPUT=install-dir/trial/operator/install-config.yaml
+```
+
+The materializer accepts private regular files only, parses the pull secret
+with duplicate-key rejection, validates the SSH public-key shape, revalidates
+the lease and admission, and creates the final file at mode `0600`. Secret
+values never enter command arguments or output. It is create-only and still
+does not authorize cluster creation.
+
 Use the exact `4.20.27` linux/amd64 installer to validate the materialized
 configuration on the Linux administration host before creating resources.
 Keep the secret-bearing `install-config.yaml`, installer metadata, kubeconfig,

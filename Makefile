@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path create-sno-trial-render-admission verify-sno-trial-render-admission inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -134,6 +134,23 @@ verify-sno-trial-render-admission:
 		--admission "$(ADMISSION)" \
 		--lease "$(LEASE)" \
 		--project-id "$(PROJECT_ID)"
+
+materialize-sno-trial-install-config:
+	test -n "$(RENDERED)"
+	test -n "$(PULL_SECRET)"
+	test -n "$(SSH_PUBLIC_KEY)"
+	test -n "$(LEASE)"
+	test -n "$(ADMISSION)"
+	test -n "$(PROJECT_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/materialize_sno_trial_install_config.py \
+		--rendered "$(RENDERED)" \
+		--pull-secret "$(PULL_SECRET)" \
+		--ssh-public-key "$(SSH_PUBLIC_KEY)" \
+		--lease "$(LEASE)" \
+		--admission "$(ADMISSION)" \
+		--project-id "$(PROJECT_ID)" \
+		--output "$(OUTPUT)"
 
 inspect-sno-trial-toolchain:
 	test -n "$(ARCHIVE_DIR)"
