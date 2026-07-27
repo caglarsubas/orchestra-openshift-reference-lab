@@ -115,6 +115,13 @@ It records `TRIAL_CLUSTER_OBSERVED`, grants no mutation authority, and keeps
 all campaign, certification, production, HA, RPO/RTO, Red Hat, and SLA claims
 false. Cost capture, product admission/dry-runs, and verified teardown remain.
 
+Cost and teardown state use a separate read-only contract. A dated GCP catalog
+rate card estimates only the dominant N2/E2 compute and zonal balanced-disk
+charges; load balancing, external IP, DNS, egress, tax, credits, and discounts
+remain explicit exclusions, so the result is never represented as billed
+spend. The same payload-free inventory contract requires zero managed target
+and operator resources before it can report clean teardown.
+
 The pre-install payload-free report
 `sno-readiness-operator-20260726174421.1` binds the current profile digest,
 records approved quota status as operator-declared, and remains

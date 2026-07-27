@@ -787,6 +787,43 @@ cloud, teardown, campaign, certification, production, HA, RPO/RTO, Red Hat, or
 SLA authority. A simulated fixture can exercise the contract in CI but cannot
 impersonate a live collection.
 
+## Observe cost exposure and teardown residuals
+
+The resource-exposure report uses the dated catalog rates in
+`config/sno-trial-cost-rate-card.lock.json` for N2/E2 compute and zonal
+balanced-disk capacity. It records elapsed resource hours, installer/CCO/WIF
+resource counts, inventory digests, and an estimate. It does not query or
+verify billed spend. Load balancing, external IP, DNS, egress, tax, credits,
+and discounts remain explicit exclusions.
+
+Collect the active state before any product dry-run:
+
+```bash
+EXPOSURE_ID=sno-exposure-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-resource-exposure \
+  TARGET_PROJECT_ID=prometa-orch-sno-499235 \
+  OPERATOR_PROJECT_ID=prometa-staging-ah \
+  OPERATOR_INSTANCE_NAME=orchestra-sno-operator-20260727 \
+  PHASE=active \
+  ASSESSMENT_ID="$EXPOSURE_ID" \
+  OUTPUT="restricted/$EXPOSURE_ID.json"
+
+make verify-sno-trial-resource-exposure \
+  REPORT="restricted/$EXPOSURE_ID.json"
+```
+
+`ACTIVE_EXPOSURE_OBSERVED` requires exactly one managed target VM/disk, one
+operator VM/disk, only priced machine and disk types, and an estimated dominant
+subtotal below the monthly alert ceiling. The estimate is intentionally
+incomplete and the budget remains an alert, not a hard cap.
+
+After installer destroy, CCO/WIF cleanup, and operator-host deletion, repeat
+the same command with `PHASE=post-teardown`. `TEARDOWN_RESIDUALS_CLEAN`
+requires zero managed target resources and zero operator VM/disk resources.
+The collector stores no names, IPs, credentials, raw provider output, or
+billing-account identity and never authorizes cleanup or teardown.
+
 ## Teardown and reconciliation
 
 Run the exact installer destroy operation from the original metadata directory.

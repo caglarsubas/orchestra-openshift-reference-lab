@@ -102,6 +102,16 @@ jobs:
           python3 scripts/sno_trial_cluster_observation.py verify \
             --report "${RUNNER_TEMP}/sno-trial-cluster.json"
 
+      - name: Prove SNO cost exposure remains estimate-only
+        run: |
+          python3 scripts/sno_trial_resource_exposure.py validate-rate-card
+          python3 scripts/sno_trial_resource_exposure.py assess \
+            --snapshot tests/fixtures/sno-trial-resource-exposure-active.json \
+            --assessment-id sno-exposure-ci-active.1 \
+            --output "${RUNNER_TEMP}/sno-trial-resource-exposure.json"
+          python3 scripts/sno_trial_resource_exposure.py verify \
+            --report "${RUNNER_TEMP}/sno-trial-resource-exposure.json"
+
       - name: Prove aggregate SNO render admission remains non-mutating
         run: python3 -m unittest tests.test_sno_trial_install_admission -v
 

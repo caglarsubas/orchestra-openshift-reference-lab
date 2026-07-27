@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.gcp.sno-trial-cost-rate-card.v1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "catalogServiceId": "6F81-5844-456A",
+  "catalogObservedAt": "2026-07-27T16:04:00Z",
+  "currencyCode": "USD",
+  "monthHours": 730,
+  "rates": [
+    {
+      "key": "balanced-pd",
+      "skuId": "6AE1-525F-8B80",
+      "description": "Balanced PD Capacity",
+      "usageUnit": "GiBy.mo",
+      "unitRateUsd": "0.100000000"
+    },
+    {
+      "key": "e2-core-emea",
+      "skuId": "9FE0-8F60-A9F0",
+      "description": "E2 Instance Core running in EMEA",
+      "usageUnit": "h",
+      "unitRateUsd": "0.023993370"
+    },
+    {
+      "key": "e2-ram-emea",
+      "skuId": "F268-6CE7-AC16",
+      "description": "E2 Instance Ram running in EMEA",
+      "usageUnit": "GiBy.h",
+      "unitRateUsd": "0.003216090"
+    },
+    {
+      "key": "n2-core-emea",
+      "skuId": "9F61-45D7-D4FB",
+      "description": "N2 Instance Core running in EMEA",
+      "usageUnit": "h",
+      "unitRateUsd": "0.034773000"
+    },
+    {
+      "key": "n2-ram-emea",
+      "skuId": "A109-54C1-7CB0",
+      "description": "N2 Instance Ram running in EMEA",
+      "usageUnit": "GiBy.h",
+      "unitRateUsd": "0.004661000"
+    }
+  ],
+  "machineProfiles": [
+    {
+      "machineType": "e2-standard-2",
+      "vcpu": 2,
+      "memoryGiB": 8,
+      "coreRateKey": "e2-core-emea",
+      "ramRateKey": "e2-ram-emea"
+    },
+    {
+      "machineType": "n2-standard-8",
+      "vcpu": 8,
+      "memoryGiB": 32,
+      "coreRateKey": "n2-core-emea",
+      "ramRateKey": "n2-ram-emea"
+    }
+  ],
+  "excludedChargeClasses": [
+    "cloud-dns",
+    "credits-and-discounts",
+    "external-ip",
+    "load-balancing",
+    "network-egress",
+    "tax"
+  ],
+  "estimateIsBilledSpend": false
+}
