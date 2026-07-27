@@ -367,9 +367,12 @@ Exact-main run `30293130839` replayed the current four-image set from revision
 contains payload-free report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
 Admission policy `orchestra-sno-trial-product-admission-2026-07-28.3`
-binds only that replay and is current. Destination mirror and live-cluster
-pulls, operator inputs, a fresh server-side dry run, and provider readiness
-remain absent; activation and every certifying claim remain false.
+binds only that replay and is current. The value-free operator-input contract
+now locks 14 Secret references, three CA ConfigMaps, their required key names,
+and the three rendered-manifest bindings; no live input observation exists.
+Destination mirror and live-cluster pulls, populated operator inputs, a fresh
+server-side dry run, and provider readiness remain absent; activation and
+every certifying claim remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
@@ -566,7 +569,7 @@ evidence. The canonical inventory digest is
 | `infra/openshift/` | Secret-free OpenShift installer template |
 | `gitops/` | Active cluster declarations plus a non-activatable dependency values candidate; no generated Secret values |
 | `policies/` | Repository and deployment policy inputs |
-| `schemas/` | Strict additive JSON contracts for SNO readiness and network-hygiene diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
+| `schemas/` | Strict additive JSON contracts for SNO readiness, network-hygiene and operator-input diagnostics, prerequisite observations, operator control-plane readiness, lab service publication, foundation plan/apply/observation custody, signed collection statements, scan manifests, risk evidence, and signature exceptions |
 | `scripts/` | Local/CI validation and rendering tools |
 | `services/` | Lab-owned synthetic and GitOps integration services; none are platform runtime authority |
 | `docs/runbooks/` | Human-controlled operational procedures |

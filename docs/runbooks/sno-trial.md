@@ -826,6 +826,65 @@ requires zero managed target resources and zero operator VM/disk resources.
 The collector stores no names, IPs, credentials, raw provider output, or
 billing-account identity and never authorizes cleanup or teardown.
 
+## Prepare and observe operator Secret and CA inputs
+
+The value-free contract in
+`config/sno-trial-operator-inputs.lock.json` binds the external references
+consumed by the three SNO chart renders. It currently requires 14 Secrets and
+three CA ConfigMaps in `default`. The contract records object names, expected
+Secret types, and required or optional key names only. It contains no values.
+
+Generate every credential, signed runtime document, routing artifact,
+certificate, and CA bundle out of band. Keep source material under ignored
+`restricted/` custody or in the operator's Secret manager. Do not put Secret
+values on a command line, in Helm values, in a shell transcript, or in Git.
+The complete key inventory is the `inputs` array in the lock; the principal
+groups are:
+
+- Platform: application/Datastore credentials, JetStream, Valkey, and server
+  TLS, plus the trusted CA ConfigMap.
+- Runtime: signed runtime config, runtime credentials, migration identity,
+  and server TLS, plus the trusted CA ConfigMap.
+- Model plane: auth keys, signed routing artifacts, observation and OTLP
+  credentials, Valkey, and server TLS, plus the trusted CA ConfigMap.
+
+After an operator creates those objects and before any workload is applied,
+run the read-only observer against the same three immutable renders:
+
+```bash
+INPUT_ID=sno-operator-inputs-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-operator-inputs \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  KUBECONFIG=restricted/operator/install-clean-<date>/auth/kubeconfig \
+  PLATFORM_MANIFEST=restricted/live-artifacts/<date>/prometa.rendered.yaml \
+  RUNTIME_MANIFEST=restricted/live-artifacts/<date>/runtime.rendered.yaml \
+  MODEL_MANIFEST=restricted/live-artifacts/<date>/model.rendered.yaml \
+  ASSESSMENT_ID="$INPUT_ID" \
+  OUTPUT="restricted/$INPUT_ID.json"
+
+make verify-sno-trial-operator-inputs \
+  REPORT="restricted/$INPUT_ID.json"
+```
+
+The collector issues only `oc get secret|configmap --ignore-not-found` calls
+whose Go templates emit object type and key names. Kubernetes returns the
+Secret object to `oc`, so run this only on the controlled operator host; the
+template emits no values and the collector stores neither values nor raw
+command output. The report reduces object identities and missing-key sets to
+digests. It reaches `OPERATOR_INPUTS_OBSERVED` only for a
+`live-read-only` collection where all 17 references match the rendered
+manifests, every object exists, every required key is present, and every
+Secret type matches. A complete simulated fixture remains unresolved.
+
+This report proves metadata resolution only. It does not validate credential
+semantics, certificate chains or expiry, dependency DNS/TLS connectivity,
+image pulls, scheduling, startup, service behavior, or deployment. The
+existing July 27 dry-run predates this contract and remains immutable; collect
+a fresh operator-input report and fresh product dry-run on the same future
+cluster rather than upgrading either report in place. The current SNO cluster
+was destroyed, so no live operator-input observation exists.
+
 ## Observe product server dry-runs and live capacity
 
 Render the three locked product charts into ignored `restricted/` custody.
