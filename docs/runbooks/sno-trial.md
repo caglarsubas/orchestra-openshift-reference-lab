@@ -234,13 +234,11 @@ The source contract for that later review is locked in
 `config/sno-trial-product-artifact-admission-policy.lock.json`; its output
 schema is
 `schemas/sno-trial-product-artifact-admission-v1.schema.json`. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.2` retains the previous
-replay run
-`30211883723`, artifact ID `8634695656`, and report digest
-`sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`
-as historical metadata only. Its replay state is `refresh-required`; admission
-must not run until a later policy update binds a successful exact-main replay
-of the current artifact-set digest.
+`orchestra-sno-trial-product-admission-2026-07-28.3` binds exact-main replay
+run `30293130839`, artifact ID `8663575783`, and report digest
+`sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
+Its replay state is `current`; admission remains a separate protected action
+and does not grant deployment authority.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:

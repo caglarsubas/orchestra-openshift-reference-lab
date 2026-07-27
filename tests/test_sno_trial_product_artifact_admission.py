@@ -36,27 +36,16 @@ from scripts.validate_repository import ROOT
 
 class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.locked_policy = load_json(POLICY_PATH)
-        self.policy = copy.deepcopy(self.locked_policy)
+        self.policy = load_json(POLICY_PATH)
         self.lock = load_json(LOCK_PATH)
         self.candidate = load_json(CANDIDATE_PATH)
         self.report = self.valid_replay_report()
-        self.policy["bindings"]["replay"]["reportDigest"] = self.report[
-            "reportDigest"
-        ]
-        self.policy["review"]["replayState"] = "current"
-        self.policy["activation"]["remainingReasonCodes"] = list(
-            DEPLOYMENT_REASONS
-        )
-        self.policy["policyDigest"] = unsigned_digest(
-            self.policy, "policyDigest"
-        )
         self.environment_evidence = self.valid_environment_evidence()
         self.admitted_at = datetime(
-            2026, 7, 26, 18, 0, tzinfo=timezone.utc
+            2026, 7, 27, 19, 0, tzinfo=timezone.utc
         )
         self.expires_at = datetime(
-            2026, 8, 9, 17, 0, tzinfo=timezone.utc
+            2026, 8, 10, 19, 0, tzinfo=timezone.utc
         )
 
     def valid_replay_report(self) -> dict[str, object]:
@@ -114,8 +103,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         value: dict[str, object] = {
             "schemaVersion": 2,
             "kind": REPORT_KIND,
-            "verificationId": "sno-product-replay-30211883723.1",
-            "generatedAt": "2026-07-26T17:06:53Z",
+            "verificationId": "sno-product-replay-30293130839.1",
+            "generatedAt": "2026-07-27T18:18:18Z",
             "targetClass": "engineering-trial",
             "executionMode": REPORT_EXECUTION_MODE,
             "bindings": {
@@ -123,8 +112,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
                 "artifactSetId": self.lock["artifactSetId"],
                 "artifactSetDigest": self.lock["artifactSetDigest"],
                 "workloadCandidateDigest": self.candidate["candidateDigest"],
-                "verifierRevision": "985cb37de283193a24776dfe840ab240d34a929a",
-                "verifierRunId": 30211883723,
+                "verifierRevision": "2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee",
+                "verifierRunId": 30293130839,
                 "verifierRunAttempt": 1,
             },
             "artifacts": artifacts,
@@ -135,7 +124,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         value["reportDigest"] = report_digest(value)
         self.assertEqual(
             value["reportDigest"],
-            "sha256:7f52e40628789449e651a3775fa03dd96146baf4be5e36ee96371c739049e030",
+            "sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615",
         )
         validate_report(value, self.lock, self.candidate)
         return value
@@ -205,15 +194,6 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         )
 
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
-        validate_policy(self.locked_policy, self.lock, self.candidate)
-        self.assertEqual(
-            self.locked_policy["review"]["replayState"],
-            "refresh-required",
-        )
-        self.assertEqual(
-            self.locked_policy["activation"]["remainingReasonCodes"],
-            REMAINING_REASONS,
-        )
         validate_policy(self.policy, self.lock, self.candidate)
         self.assertEqual(
             self.policy["review"]["replayState"], "current"
@@ -372,7 +352,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
                 self.report,
                 self.lock,
                 self.candidate,
-                at=datetime(2026, 8, 10, tzinfo=timezone.utc),
+                at=datetime(2026, 8, 11, tzinfo=timezone.utc),
             )
 
         with self.assertRaisesRegex(ValueError, "admission_time_invalid"):
@@ -383,8 +363,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
                 self.candidate,
                 self.environment_evidence,
                 admission_id="sno-product-admission-test-001",
-                admitted_at=datetime(2026, 8, 10, tzinfo=timezone.utc),
-                expires_at=datetime(2026, 8, 11, tzinfo=timezone.utc),
+                admitted_at=datetime(2026, 8, 12, tzinfo=timezone.utc),
+                expires_at=datetime(2026, 8, 13, tzinfo=timezone.utc),
                 admission_workflow_revision="a" * 40,
                 admission_workflow_run_id=999,
                 admission_workflow_run_attempt=1,

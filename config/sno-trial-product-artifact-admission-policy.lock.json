@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
-  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.2",
+  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.3",
   "targetClass": "engineering-trial",
   "bindings": {
     "profileId": "orchestra-ocp-sno-trial-amd64-v1",
@@ -9,14 +9,14 @@
     "artifactSetDigest": "sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948",
     "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9",
     "replay": {
-      "verificationId": "sno-product-replay-30211883723.1",
-      "generatedAt": "2026-07-26T17:06:53Z",
-      "reportDigest": "sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359",
-      "verifierRevision": "985cb37de283193a24776dfe840ab240d34a929a",
-      "verifierRunId": 30211883723,
+      "verificationId": "sno-product-replay-30293130839.1",
+      "generatedAt": "2026-07-27T18:18:18Z",
+      "reportDigest": "sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615",
+      "verifierRevision": "2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee",
+      "verifierRunId": 30293130839,
       "verifierRunAttempt": 1,
-      "artifactId": 8634695656,
-      "artifactName": "sno-trial-product-artifact-replay-30211883723-1"
+      "artifactId": 8663575783,
+      "artifactName": "sno-trial-product-artifact-replay-30293130839-1"
     }
   },
   "github": {
@@ -34,7 +34,7 @@
   "review": {
     "maximumReplayAgeSeconds": 1209600,
     "maximumAdmissionAgeSeconds": 2592000,
-    "replayState": "refresh-required",
+    "replayState": "current",
     "requiredChecks": [
       "replay-report-schema-and-digest",
       "three-plane-publication-lineage",
@@ -46,7 +46,6 @@
   "activation": {
     "state": "blocked",
     "remainingReasonCodes": [
-      "product-artifact-replay-refresh-required",
       "destination-mirror-verification-missing",
       "live-cluster-pull-verification-missing",
       "operator-secret-and-ca-inputs-missing",
@@ -70,5 +69,5 @@
     "contractualSla": false,
     "productionSupported": false
   },
-  "policyDigest": "sha256:c52eef46d357fbc47da4741f438c6dda299128d2795689f39ca8e7ef2c27e7c9"
+  "policyDigest": "sha256:f55c3bb222ee52f561780e86e6b2304620fe3bd961fa2bad2bb349f4961db03f"
 }
