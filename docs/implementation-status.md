@@ -73,9 +73,9 @@ any certification campaign slot.
 | Trial capability | Declared | CI-validated | Applied | Live-tested | Campaign evidence |
 |---|---:|---:|---:|---:|---:|
 | Distinct non-certifying SNO profile and digest | Yes | Yes | No | No | Not eligible |
-| One 8-vCPU control-plane node, zero workers, 150 GB balanced disk | Yes | Yes | No | No | Not eligible |
+| One 8-vCPU control-plane node, zero workers, 150 GB balanced disk | Yes | Yes | Yes | Yes | Not eligible |
 | `$75` alert ceiling and 48 active-hour limit | Yes | Yes | Budget only | Yes | Not eligible |
-| 12-hour maximum project-bound operator lease | Yes | Yes | No | No | Not eligible |
+| 12-hour maximum project-bound operator lease | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free Red Hat trial statement builder | Yes | Yes | No | No | Not eligible |
 | Exact public `4.20.27` installer/client archive lock and local integrity intake | Yes | Yes | Local archive only | Yes | Not eligible |
 | Inert single-node workload and resource candidate | Yes | Yes | No | No | Not eligible |
@@ -83,16 +83,17 @@ any certification campaign slot.
 | Digest-locked three-plane signed publication set | Yes | Yes | No | No | Not eligible |
 | Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
-| Secret-free lease-gated installer renderer | Yes | Yes | No | No | Not eligible |
+| Secret-free lease-gated installer renderer | Yes | Yes | Yes | Yes | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
 | Payload-free fail-closed network-hygiene assessment | Yes | Yes | No | Yes | Not eligible |
-| Payload-free fail-closed DNS-delegation observation contract | Yes | Yes | No | No | Not eligible |
-| Payload-free Linux AMD64 operator-path observation contract | Yes | Yes | No | No | Not eligible |
-| Short-lived aggregate secret-free render admission | Yes | Yes | No | No | Not eligible |
+| Payload-free fail-closed DNS-delegation observation contract | Yes | Yes | N/A | Yes | Not eligible |
+| Payload-free Linux AMD64 operator-path observation contract | Yes | Yes | N/A | Yes | Not eligible |
+| Short-lived aggregate secret-free render admission | Yes | Yes | N/A | Yes | Not eligible |
+| Payload-free exact-main live cluster observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
-| Parent DNS delegation and source-IP allowlist | No | N/A | No | No | Not eligible |
-| OpenShift `4.20.27` SNO installation | No | N/A | No | No | Not eligible |
+| Parent DNS delegation and source-IP allowlist | Yes | N/A | Yes | Yes | Not eligible |
+| OpenShift `4.20.27` SNO installation | Yes | N/A | Yes | Yes | Not eligible |
 | Minimal co-located trial dependencies | No | N/A | No | No | Not eligible |
 | Verified teardown and residual-resource reconciliation | No | N/A | No | No | Not eligible |
 
@@ -104,8 +105,10 @@ and the now-legacy `ocp-lab.prometa.ai.` Cloud DNS managed zone. A later
 guarded exact-main plan created only the active `ocp-lab.planeon.ai.` zone,
 moved the legacy zone address in Terraform state without changing it, and
 destroyed nothing. Independent readback observed both zones, and a subsequent
-plan reported no drift. No compute, cluster, workload, Secret, or source-IP
-allowlist exists.
+plan reported no drift. That statement is the historical pre-install
+foundation checkpoint; the bounded SNO cluster and source-IP allowlist now
+exist as described below. No product workload or application Secret has been
+deployed.
 
 The payload-free readiness report
 `sno-readiness-operator-20260726174421.1` has report digest
@@ -114,9 +117,9 @@ and status `DOWNSTREAM_VERIFICATION_REQUIRED`. It grants no mutation or install
 authority and is never campaign evidence. It binds the current Planeon profile
 and observes active billing, all 11 required APIs, and operator-declared
 approved quota status. DNS delegation, source CIDR, administration path, and
-operator lease remain downstream gates. The checked-in inert workload
-candidate remains a source-time capacity artifact; its activation reason list
-must not be treated as live provider state.
+operator lease were later observed independently before rendering. The
+checked-in inert workload candidate remains a source-time capacity artifact;
+its activation reason list must not be treated as live provider state.
 
 The first live network-hygiene observation found one GCP default auto-mode VPC,
 42 default subnetworks, four default firewall rules, and three enabled
@@ -131,32 +134,53 @@ internet-ingress rules. It binds the current Planeon profile. This closes only
 the network-hygiene drift; the report grants no mutation or install authority
 and is never campaign evidence.
 
-The DNS-delegation collector and strict report contract are source-complete.
-They compare the active Planeon Cloud DNS managed zone with an external
-authoritative NS answer and persist only counts and canonical set digests.
-Missing delegation reports `WAITING_DELEGATION`, a partial or wrong set reports
-`BLOCKED`, and an exact set reports `DELEGATION_OBSERVED`. No reviewed live DNS
-report has been recorded because operator confirmation remains pending. Every
-status grants no DNS mutation, cloud mutation, install, campaign, or
+The DNS-delegation collector and strict report contract compare the active
+Planeon Cloud DNS managed zone with an external authoritative NS answer and
+persist only counts and canonical set digests. Missing delegation reports
+`WAITING_DELEGATION`, a partial or wrong set reports `BLOCKED`, and an exact
+set reports `DELEGATION_OBSERVED`. Live report
+`sno-dns-operator-20260727141303.1` has report digest
+`sha256:6993294dcba4d07742d14e5c900c088475107fdcc1f7f8d1dfa87a58f36fa91c`
+and observed the exact delegated nameserver set before rendering. The status
+grants no DNS mutation, cloud mutation, install, campaign, or certification
+authority.
+
+The operator-path collector verifies a Linux AMD64 host, one active GCP
+identity, the exact configured project, a private-file-supplied public host
+CIDR, and exact `4.20.27` installer/client versions. Persisted reports contain
+only identity-set, project, and source-CIDR digests. Live report
+`sno-operator-operator-20260727141147.1` has report digest
+`sha256:1c0bfead0ee69c47d55abb45281840c2c0409c1f08032c33c25750e699fc7482`
+and status `OPERATOR_PATH_OBSERVED`. That status grants no firewall mutation,
+cloud mutation, install, campaign, or certification authority.
+
+The aggregate render-admission contract and renderer integration require fresh
+live provider, network, DNS, and operator-path reports, a verified live-local
+toolchain intake, exact project agreement, and an active lease bound to the
+observed operator identity. Admission
+`sno-render-operator-20260727141325.1` had report digest
+`sha256:e831430a195fe20e8f182a069169cf74a96307a1e9f941a4afdeec989bf95849`
+and issued the short-lived `READY_TO_RENDER` decision used for the successful
+clean install. It authorized only secret-free install-config rendering and
+granted no firewall mutation, cloud mutation, cluster creation, campaign, or
 certification authority.
 
-The operator-path collector and strict report contract are source-complete.
-They verify a Linux AMD64 host, one active GCP identity, the exact configured
-project, a private-file-supplied public host CIDR, and exact `4.20.27`
-installer/client versions. Persisted reports contain only identity-set,
-project, and source-CIDR digests. No live report exists because the Linux
-administration host and private source-CIDR input are not yet available. Even
-`OPERATOR_PATH_OBSERVED` grants no firewall mutation, cloud mutation, install,
-campaign, or certification authority.
+The clean third installer state completed OpenShift `4.20.27` on 2026-07-27
+after two failed states were destroyed rather than reused. The live cluster is
+`SingleReplica` in `europe-west1`, uses `Manual` cloud credentials with a
+workload-identity issuer, and has one ready schedulable `n2-standard-8`
+control-plane/worker node, zero worker Machines, two CSI storage classes, a
+host-scoped API allowlist, a reachable console, and 34 of 34 healthy cluster
+operators. Bootstrap compute and its etcd member are absent.
 
-The aggregate render-admission contract and renderer integration are
-source-complete. `READY_TO_RENDER` requires fresh live provider, network, DNS,
-and operator-path reports, a verified live-local toolchain intake, exact
-project agreement, and an active lease bound to the observed operator identity.
-The admission is valid for no more than 15 minutes and authorizes only
-secret-free install-config rendering. It grants no firewall mutation, cloud
-mutation, cluster creation, campaign, or certification authority. No live
-admission exists because the Linux operator-path report remains unavailable.
+Exact-main observation `sno-cluster-main-20260727160232.1`, generated from
+commit `dffb6931bc5d656fc38d6e84e07f65fbb600998a`, has report digest
+`sha256:440b40b3e9b173ebe3c8ddba6020406b4a9651b3931a11c1ffd3ffcc88ae21c6`
+and status `TRIAL_CLUSTER_OBSERVED`. It stores no kubeconfig, console
+credential, provider credential, or raw command output. Its command policy is
+read-only and every campaign, certification, production, HA, RPO/RTO, Red Hat,
+and SLA claim remains false. Cost observation, product admission/dry-runs, and
+verified teardown remain outstanding.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's

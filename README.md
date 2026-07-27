@@ -90,20 +90,32 @@ digest
 The complete source-to-destroy procedure is in
 [`docs/runbooks/sno-trial.md`](docs/runbooks/sno-trial.md).
 
-As of 2026-07-26, the disposable `prometa-orch-sno-499235` foundation has been
-applied and independently read back: billing is enabled, all 11 locked APIs are
+The disposable `prometa-orch-sno-499235` foundation was applied on 2026-07-26
+and independently read back: billing is enabled, all 11 locked APIs are
 active, the project-filtered 3,500 TRY budget has all six thresholds, and the
-unused legacy `ocp-lab.prometa.ai.` managed zone exists. The active
+legacy `ocp-lab.prometa.ai.` managed zone exists. The active
 `ocp-lab.planeon.ai.` Cloud DNS zone was then created from exact main with a
 guarded plan of one add, zero changes, and zero destroys. The legacy zone moved
 in Terraform state without a provider mutation. Independent readback observed
-both exact zones, and a post-apply plan reported no drift. No compute, cluster,
-installer, workload, or Secret resource has been created.
+both exact zones, and a post-apply plan reported no drift.
 
-Operator confirmation of the Cloudflare-hosted `planeon.ai` parent delegation
-for `ocp-lab.planeon.ai.` remains pending. Source CIDR review, a Linux AMD64
-administration path, and an active operator lease also remain required. Fresh
-payload-free report
+On 2026-07-27, the parent delegation, Linux AMD64 operator path, exact
+`4.20.27` tools, project-bound lease, and short-lived render admission were
+observed before a clean install. The resulting `SingleReplica` cluster has one
+ready schedulable `n2-standard-8` control-plane/worker node, zero worker
+Machines, `Manual` cloud credentials with workload identity, two CSI storage
+classes, a host-scoped API firewall, a reachable console, and 34 of 34 healthy
+cluster operators. No product workload or application Secret has been
+deployed.
+
+Exact-main payload-free observation
+`sno-cluster-main-20260727160232.1` has report digest
+`sha256:440b40b3e9b173ebe3c8ddba6020406b4a9651b3931a11c1ffd3ffcc88ae21c6`.
+It records `TRIAL_CLUSTER_OBSERVED`, grants no mutation authority, and keeps
+all campaign, certification, production, HA, RPO/RTO, Red Hat, and SLA claims
+false. Cost capture, product admission/dry-runs, and verified teardown remain.
+
+The pre-install payload-free report
 `sno-readiness-operator-20260726174421.1` binds the current profile digest,
 records approved quota status as operator-declared, and remains
 `DOWNSTREAM_VERIFICATION_REQUIRED`. Its report digest is
@@ -225,10 +237,11 @@ make verify-sno-trial-toolchain \
   REPORT="restricted/$TOOLCHAIN_ID.json"
 ```
 
-This is signed archive-integrity evidence only. Extracted ELF architecture and
-version on a Linux AMD64 administration host, active entitlement, and pull
-secret remain separate downstream prerequisites. The report always denies
-cloud mutation and all campaign or certification use.
+This intake alone is signed archive-integrity evidence only. The successful
+trial separately exercised extracted ELF architecture and version on the
+Linux AMD64 operator host, active trial access, and an operator-held pull
+secret. No credential value enters a report or the repository. Every report
+denies cloud mutation and all campaign or certification use.
 
 The source-only workload candidate in
 [`config/sno-trial-workload-candidate.lock.json`](config/sno-trial-workload-candidate.lock.json)

@@ -12,9 +12,9 @@ authorization digest, independent timing, and cleanup verification.
 | Immutable foundation plan | Read-only planner, create-only signer/publisher, private generation-pinned review helper, strict package contract, and payload-free summary implemented; bootstrap/environment/live run pending |
 | Review-bound foundation apply | Separate exact-subject executor, saved-plan-only workflow, state-lock/lineage checks, and signed self-attested receipt implemented; secure review, live apply, and independent observation pending |
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
-| Split-horizon DNS and delegation | Procedure and Terraform contract implemented; live delegation pending |
-| Private OpenShift installation | Template delivered; live procedure pending gates |
-| Cost-bounded SNO engineering trial | Locked non-certifying profile, 12-hour maximum lease, payload-free Red Hat trial statement and provider-readiness diagnostic, secret-free renderer, and isolated project/budget/DNS Terraform implemented; quota approval, fresh live plan/apply, delegation, allowlist, install, and teardown remain operator work |
+| Split-horizon DNS and delegation | Procedure and Terraform contract implemented; trial parent delegation observed live, production split-horizon rehearsal pending |
+| Private OpenShift installation | Production template delivered; separate public-ingress SNO trial installed and observed live, private production profile pending |
+| Cost-bounded SNO engineering trial | Locked non-certifying profile, 12-hour lease, exact toolchain, DNS/operator/render admissions, clean OpenShift 4.20.27 SNO install, and exact-main payload-free cluster observation exercised live; cost capture, product dry-runs, and verified teardown remain |
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract and offline values candidate implemented; live mirror intake and admitted overlay pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
