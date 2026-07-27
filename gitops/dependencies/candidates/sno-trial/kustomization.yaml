@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace-valkey.json
+  - namespace-model-backend.json
+  - valkey-service-account.json
+  - valkey-service.json
+  - valkey-stateful-set.json
+  - valkey-default-deny.json
+  - valkey-allow-clients.json
+  - model-backend-service-account.json
+  - model-backend-service.json
+  - model-backend-stateful-set.json
+  - model-backend-default-deny.json
+  - model-backend-allow-model-plane.json

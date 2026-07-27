@@ -1,0 +1,49 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "allow-valkey-clients",
+    "namespace": "orchestra-sno-valkey",
+    "labels": {
+      "app.kubernetes.io/name": "orchestra-sno-valkey",
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "podSelector": {
+      "matchLabels": {
+        "app.kubernetes.io/name": "orchestra-sno-valkey"
+      }
+    },
+    "policyTypes": [
+      "Ingress"
+    ],
+    "ingress": [
+      {
+        "from": [
+          {
+            "namespaceSelector": {
+              "matchLabels": {
+                "kubernetes.io/metadata.name": "orchestra-platform"
+              }
+            }
+          },
+          {
+            "namespaceSelector": {
+              "matchLabels": {
+                "kubernetes.io/metadata.name": "orchestra-model"
+              }
+            }
+          }
+        ],
+        "ports": [
+          {
+            "port": 6379,
+            "protocol": "TCP"
+          }
+        ]
+      }
+    ]
+  }
+}

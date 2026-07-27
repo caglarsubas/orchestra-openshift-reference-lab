@@ -169,11 +169,8 @@ security, failure, and self-digest bindings with:
 make validate-sno-trial-dependency-runtime-contracts
 ```
 
-This lock emits no Kubernetes objects. Operators must still resolve immutable
-Valkey and CPU model-backend artifacts into a candidate revision, name the
-dependency-side Secret/TLS and storage-class references, author executable
-trial profiles, and pass mirror, server-side dry-run, and live-connectivity
-checks. The source selection itself is now locked in
+This lock emits no Kubernetes objects. The source selection itself is now
+locked in
 `config/sno-trial-dependency-artifacts.lock.json`:
 
 ```bash
@@ -187,6 +184,30 @@ pre-staging onto a read-only PVC and prohibits runtime network download.
 This is source-only selection: it emits no manifest, stores no model bytes,
 does not satisfy upstream review or mirror/signature gates, and does not
 authorize deployment.
+
+The selected Valkey and CPU backend artifacts now have an inactive, renderable
+manifest candidate:
+
+```bash
+make validate-sno-trial-dependency-manifests
+```
+
+The candidate creates no Secret, PVC, StorageClass, Route, or Argo CD
+Application. It references exact operator-owned Secret names and keys, an
+operator-prestaged read-only model PVC, and the unresolved
+`ORCHESTRA_SNO_STORAGE_CLASS_REQUIRED` identifier. It enforces arbitrary
+non-root UIDs, read-only roots, dropped capabilities, runtime-default seccomp,
+tokenless service accounts, default-deny networking, and exact namespace
+allowlists. Runtime model download remains absent.
+
+Do not apply this source directory. After the cluster is observable, select a
+live StorageClass only after verifying RWO provisioning,
+`WaitForFirstConsumer`, expansion support, and the intended GCP PD behavior.
+Materialize the six required external inputs in restricted operator state,
+replace the storage-class identifier, and produce a new immutable artifact
+whose content digest differs from this source candidate. That future artifact
+must pass OpenShift server-side dry-run and live connectivity before any
+activation review.
 
 A future candidate revision must bind the contract-set digest; that change
 deliberately requires a fresh product-artifact replay. The three product planes

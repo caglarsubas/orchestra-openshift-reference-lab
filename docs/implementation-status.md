@@ -264,9 +264,17 @@ into a new workload candidate. Source artifact selection now pins Valkey 9.1.0,
 the linux/amd64 llama.cpp `b10143` server manifest, and the exact Qwen2.5 0.5B
 Instruct Q4_K_M revision, size, license, and SHA-256 digest. The separate
 artifact lock requires operator pre-staging on a read-only PVC and prohibits
-runtime model downloads. Upstream review, executable dependency profiles,
-destination and live-cluster pull proof, model-PVC materialization, and
-populated operator Secret/CA inputs remain blockers. The
+runtime model downloads. An inactive 12-object Kubernetes candidate now
+projects the exact Valkey and llama.cpp artifacts into restricted,
+single-replica StatefulSets with tokenless service accounts, read-only roots,
+dropped capabilities, probes, headless Services, and namespace-scoped
+default-deny/allowlist policies. Its strict lock binds the source manifests,
+runtime contracts, artifact set, six external input references, and two
+workloads. CI renders it, but the active dependency Kustomization does not
+reference it. Upstream review, destination and live-cluster pull proof,
+storage-class materialization, model-PVC digest proof, populated dependency
+Secret/TLS inputs, workload-candidate rebinding, server-side dry-run, and live
+connectivity remain blockers. The
 operator-input source contract inventories all 17 external objects and
 validates their references against the July 27 renders, but no live read-only
 input report exists. Live capacity and server-side API acceptance were

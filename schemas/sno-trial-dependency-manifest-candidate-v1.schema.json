@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/orchestra/sno-trial-dependency-manifest-candidate-v1.schema.json",
+  "title": "Orchestra SNO trial dependency manifest candidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "candidateId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "architecture",
+    "bindings",
+    "manifestRoot",
+    "kustomization",
+    "resourceFiles",
+    "resourceInventory",
+    "requiredInputs",
+    "workloads",
+    "manifestSetDigest",
+    "activation",
+    "controls",
+    "claims",
+    "candidateDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-dependency-manifest-candidate.v1"
+    },
+    "candidateId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profileId": {
+      "const": "orchestra-ocp-sno-trial-amd64-v1"
+    },
+    "targetClass": {
+      "const": "engineering-trial"
+    },
+    "executionMode": {
+      "const": "source-only"
+    },
+    "architecture": {
+      "const": "linux/amd64"
+    },
+    "bindings": {
+      "$ref": "#/$defs/bindings"
+    },
+    "manifestRoot": {
+      "const": "gitops/dependencies/candidates/sno-trial"
+    },
+    "kustomization": {
+      "const": "gitops/dependencies/candidates/sno-trial/kustomization.yaml"
+    },
+    "resourceFiles": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+\\.json$"
+      }
+    },
+    "resourceInventory": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "$ref": "#/$defs/resourceIdentity"
+      }
+    },
+    "requiredInputs": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "$ref": "#/$defs/requiredInput"
+      }
+    },
+    "workloads": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/workload"
+      }
+    },
+    "manifestSetDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "activation": {
+      "$ref": "#/$defs/activation"
+    },
+    "controls": {
+      "$ref": "#/$defs/controls"
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "candidateDigest": {
+      "$ref": "#/$defs/digest"
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workloadCandidateDigest",
+        "runtimeContractSetDigest",
+        "dependencyArtifactSetDigest"
+      ],
+      "properties": {
+        "workloadCandidateDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "runtimeContractSetDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "dependencyArtifactSetDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      }
+    },
+    "resourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiVersion",
+        "kind",
+        "namespace",
+        "name"
+      ],
+      "properties": {
+        "apiVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "Namespace",
+            "ServiceAccount",
+            "Service",
+            "StatefulSet",
+            "NetworkPolicy"
+          ]
+        },
+        "namespace": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "requiredInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "namespace",
+        "name",
+        "requiredKeys",
+        "usage",
+        "materialization"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "StorageClass",
+            "Secret",
+            "PersistentVolumeClaim"
+          ]
+        },
+        "namespace": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requiredKeys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "usage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "materialization": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "workload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "namespace",
+        "statefulSet",
+        "service",
+        "serviceAccount",
+        "container",
+        "image",
+        "replicas",
+        "port",
+        "protocol",
+        "allowedClientNamespaces",
+        "persistentVolumeGiB",
+        "modelArtifactReadOnly"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "valkey",
+            "model-backend"
+          ]
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statefulSet": {
+          "type": "string",
+          "minLength": 1
+        },
+        "service": {
+          "type": "string",
+          "minLength": 1
+        },
+        "serviceAccount": {
+          "type": "string",
+          "minLength": 1
+        },
+        "container": {
+          "type": "string",
+          "minLength": 1
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^[^@\\s]+@sha256:[a-f0-9]{64}$"
+        },
+        "replicas": {
+          "const": 1
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "protocol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowedClientNamespaces": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "persistentVolumeGiB": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "modelArtifactReadOnly": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "reasonCodes"
+      ],
+      "properties": {
+        "state": {
+          "const": "blocked"
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "sourceOnly",
+        "renderable",
+        "operatorMaterializationRequired",
+        "productionDependencyProfileMutated",
+        "workloadCandidateMutated",
+        "manifestsEmitted",
+        "argocdApplicationsEmitted",
+        "activeKustomizationReferenced",
+        "secretObjectsEmitted",
+        "secretValuesStored",
+        "modelBytesStored",
+        "runtimeModelDownloadAllowed",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceOnly": {
+          "const": true
+        },
+        "renderable": {
+          "const": true
+        },
+        "operatorMaterializationRequired": {
+          "const": true
+        },
+        "productionDependencyProfileMutated": {
+          "const": false
+        },
+        "workloadCandidateMutated": {
+          "const": false
+        },
+        "manifestsEmitted": {
+          "const": true
+        },
+        "argocdApplicationsEmitted": {
+          "const": false
+        },
+        "activeKustomizationReferenced": {
+          "const": false
+        },
+        "secretObjectsEmitted": {
+          "const": false
+        },
+        "secretValuesStored": {
+          "const": false
+        },
+        "modelBytesStored": {
+          "const": false
+        },
+        "runtimeModelDownloadAllowed": {
+          "const": false
+        },
+        "cloudMutationAuthorized": {
+          "const": false
+        },
+        "deploymentAuthorized": {
+          "const": false
+        },
+        "campaignEligible": {
+          "const": false
+        },
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {
+          "const": false
+        },
+        "referenceProfileVerified": {
+          "const": false
+        },
+        "customerCertified": {
+          "const": false
+        },
+        "redHatCertified": {
+          "const": false
+        },
+        "contractualSla": {
+          "const": false
+        },
+        "productionSupported": {
+          "const": false
+        },
+        "highAvailability": {
+          "const": false
+        },
+        "rpoRtoVerified": {
+          "const": false
+        }
+      }
+    }
+  }
+}

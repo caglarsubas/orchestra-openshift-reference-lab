@@ -1,0 +1,194 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "StatefulSet",
+  "metadata": {
+    "name": "orchestra-sno-model-backend",
+    "namespace": "orchestra-sno-model-backend",
+    "labels": {
+      "app.kubernetes.io/name": "orchestra-sno-model-backend",
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "replicas": 1,
+    "serviceName": "orchestra-sno-model-backend",
+    "podManagementPolicy": "OrderedReady",
+    "updateStrategy": {
+      "type": "RollingUpdate"
+    },
+    "selector": {
+      "matchLabels": {
+        "app.kubernetes.io/name": "orchestra-sno-model-backend"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app.kubernetes.io/name": "orchestra-sno-model-backend",
+          "app.kubernetes.io/part-of": "orchestra-sno-trial",
+          "orchestra.prometa.ai/activation": "blocked"
+        }
+      },
+      "spec": {
+        "serviceAccountName": "orchestra-sno-model-backend",
+        "automountServiceAccountToken": false,
+        "terminationGracePeriodSeconds": 60,
+        "securityContext": {
+          "runAsNonRoot": true,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "containers": [
+          {
+            "name": "model-backend",
+            "image": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+            "imagePullPolicy": "IfNotPresent",
+            "args": [
+              "--model",
+              "/models/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+              "--alias",
+              "orchestra-reference-cpu",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8000",
+              "--ctx-size",
+              "2048",
+              "--parallel",
+              "1",
+              "--api-key-file",
+              "/var/run/secrets/orchestra-model/api-keys",
+              "--ssl-key-file",
+              "/var/run/secrets/orchestra-model/tls.key",
+              "--ssl-cert-file",
+              "/var/run/secrets/orchestra-model/tls.crt"
+            ],
+            "ports": [
+              {
+                "name": "https",
+                "containerPort": 8000,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {
+              "requests": {
+                "cpu": "1500m",
+                "memory": "6144Mi"
+              },
+              "limits": {
+                "cpu": "2000m",
+                "memory": "8192Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              },
+              "readOnlyRootFilesystem": true,
+              "runAsNonRoot": true
+            },
+            "startupProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": "https",
+                "scheme": "HTTPS"
+              },
+              "failureThreshold": 120,
+              "periodSeconds": 5,
+              "timeoutSeconds": 3
+            },
+            "readinessProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": "https",
+                "scheme": "HTTPS"
+              },
+              "failureThreshold": 3,
+              "periodSeconds": 10,
+              "timeoutSeconds": 3
+            },
+            "livenessProbe": {
+              "httpGet": {
+                "path": "/health",
+                "port": "https",
+                "scheme": "HTTPS"
+              },
+              "failureThreshold": 3,
+              "periodSeconds": 30,
+              "timeoutSeconds": 3
+            },
+            "volumeMounts": [
+              {
+                "name": "model-artifact",
+                "mountPath": "/models",
+                "readOnly": true
+              },
+              {
+                "name": "auth",
+                "mountPath": "/var/run/secrets/orchestra-model/api-keys",
+                "subPath": "api-keys",
+                "readOnly": true
+              },
+              {
+                "name": "tls",
+                "mountPath": "/var/run/secrets/orchestra-model/tls.crt",
+                "subPath": "tls.crt",
+                "readOnly": true
+              },
+              {
+                "name": "tls",
+                "mountPath": "/var/run/secrets/orchestra-model/tls.key",
+                "subPath": "tls.key",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "name": "model-artifact",
+            "persistentVolumeClaim": {
+              "claimName": "orchestra-sno-model-artifact",
+              "readOnly": true
+            }
+          },
+          {
+            "name": "auth",
+            "secret": {
+              "secretName": "orchestra-sno-model-auth",
+              "defaultMode": 288,
+              "items": [
+                {
+                  "key": "api-keys",
+                  "path": "api-keys"
+                }
+              ]
+            }
+          },
+          {
+            "name": "tls",
+            "secret": {
+              "secretName": "orchestra-sno-model-server-tls",
+              "defaultMode": 288,
+              "items": [
+                {
+                  "key": "tls.crt",
+                  "path": "tls.crt"
+                },
+                {
+                  "key": "tls.key",
+                  "path": "tls.key"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "allow-model-plane",
+    "namespace": "orchestra-sno-model-backend",
+    "labels": {
+      "app.kubernetes.io/name": "orchestra-sno-model-backend",
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "podSelector": {
+      "matchLabels": {
+        "app.kubernetes.io/name": "orchestra-sno-model-backend"
+      }
+    },
+    "policyTypes": [
+      "Ingress"
+    ],
+    "ingress": [
+      {
+        "from": [
+          {
+            "namespaceSelector": {
+              "matchLabels": {
+                "kubernetes.io/metadata.name": "orchestra-model"
+              }
+            }
+          }
+        ],
+        "ports": [
+          {
+            "port": 8000,
+            "protocol": "TCP"
+          }
+        ]
+      }
+    ]
+  }
+}

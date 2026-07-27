@@ -1,0 +1,28 @@
+{
+  "apiVersion": "v1",
+  "kind": "Service",
+  "metadata": {
+    "name": "orchestra-sno-model-backend",
+    "namespace": "orchestra-sno-model-backend",
+    "labels": {
+      "app.kubernetes.io/name": "orchestra-sno-model-backend",
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "type": "ClusterIP",
+    "clusterIP": "None",
+    "selector": {
+      "app.kubernetes.io/name": "orchestra-sno-model-backend"
+    },
+    "ports": [
+      {
+        "name": "https",
+        "port": 8000,
+        "protocol": "TCP",
+        "targetPort": "https"
+      }
+    ]
+  }
+}

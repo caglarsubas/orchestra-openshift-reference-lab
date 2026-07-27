@@ -1,0 +1,197 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "StatefulSet",
+  "metadata": {
+    "name": "orchestra-sno-valkey",
+    "namespace": "orchestra-sno-valkey",
+    "labels": {
+      "app.kubernetes.io/name": "orchestra-sno-valkey",
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "replicas": 1,
+    "serviceName": "orchestra-sno-valkey",
+    "podManagementPolicy": "OrderedReady",
+    "updateStrategy": {
+      "type": "RollingUpdate"
+    },
+    "selector": {
+      "matchLabels": {
+        "app.kubernetes.io/name": "orchestra-sno-valkey"
+      }
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app.kubernetes.io/name": "orchestra-sno-valkey",
+          "app.kubernetes.io/part-of": "orchestra-sno-trial",
+          "orchestra.prometa.ai/activation": "blocked"
+        }
+      },
+      "spec": {
+        "serviceAccountName": "orchestra-sno-valkey",
+        "automountServiceAccountToken": false,
+        "terminationGracePeriodSeconds": 30,
+        "securityContext": {
+          "runAsNonRoot": true,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "containers": [
+          {
+            "name": "valkey",
+            "image": "docker.io/valkey/valkey@sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+            "imagePullPolicy": "IfNotPresent",
+            "command": [
+              "/bin/sh",
+              "-ec"
+            ],
+            "args": [
+              "exec valkey-server --bind 0.0.0.0 --protected-mode yes --port 0 --tls-port 6379 --tls-cert-file /var/run/secrets/orchestra-valkey/tls.crt --tls-key-file /var/run/secrets/orchestra-valkey/tls.key --tls-ca-cert-file /var/run/secrets/orchestra-valkey/ca.crt --tls-auth-clients no --requirepass \"$VALKEYCLI_AUTH\" --dir /data --appendonly yes --appendfsync everysec --save \"\""
+            ],
+            "env": [
+              {
+                "name": "VALKEYCLI_AUTH",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "name": "orchestra-sno-valkey-auth",
+                    "key": "password"
+                  }
+                }
+              }
+            ],
+            "ports": [
+              {
+                "name": "valkey-tls",
+                "containerPort": 6379,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {
+              "requests": {
+                "cpu": "100m",
+                "memory": "256Mi"
+              },
+              "limits": {
+                "cpu": "250m",
+                "memory": "512Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              },
+              "readOnlyRootFilesystem": true,
+              "runAsNonRoot": true
+            },
+            "startupProbe": {
+              "exec": {
+                "command": [
+                  "valkey-cli",
+                  "--tls",
+                  "--cacert",
+                  "/var/run/secrets/orchestra-valkey/ca.crt",
+                  "ping"
+                ]
+              },
+              "failureThreshold": 30,
+              "periodSeconds": 2,
+              "timeoutSeconds": 2
+            },
+            "readinessProbe": {
+              "exec": {
+                "command": [
+                  "valkey-cli",
+                  "--tls",
+                  "--cacert",
+                  "/var/run/secrets/orchestra-valkey/ca.crt",
+                  "ping"
+                ]
+              },
+              "failureThreshold": 3,
+              "periodSeconds": 5,
+              "timeoutSeconds": 2
+            },
+            "livenessProbe": {
+              "exec": {
+                "command": [
+                  "valkey-cli",
+                  "--tls",
+                  "--cacert",
+                  "/var/run/secrets/orchestra-valkey/ca.crt",
+                  "ping"
+                ]
+              },
+              "failureThreshold": 3,
+              "periodSeconds": 10,
+              "timeoutSeconds": 2
+            },
+            "volumeMounts": [
+              {
+                "name": "data",
+                "mountPath": "/data"
+              },
+              {
+                "name": "tls",
+                "mountPath": "/var/run/secrets/orchestra-valkey",
+                "readOnly": true
+              }
+            ]
+          }
+        ],
+        "volumes": [
+          {
+            "name": "tls",
+            "secret": {
+              "secretName": "orchestra-sno-valkey-server-tls",
+              "defaultMode": 288,
+              "items": [
+                {
+                  "key": "tls.crt",
+                  "path": "tls.crt"
+                },
+                {
+                  "key": "tls.key",
+                  "path": "tls.key"
+                },
+                {
+                  "key": "ca.crt",
+                  "path": "ca.crt"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "volumeClaimTemplates": [
+      {
+        "metadata": {
+          "name": "data",
+          "labels": {
+            "app.kubernetes.io/name": "orchestra-sno-valkey",
+            "app.kubernetes.io/part-of": "orchestra-sno-trial",
+            "orchestra.prometa.ai/activation": "blocked"
+          }
+        },
+        "spec": {
+          "accessModes": [
+            "ReadWriteOnce"
+          ],
+          "storageClassName": "ORCHESTRA_SNO_STORAGE_CLASS_REQUIRED",
+          "resources": {
+            "requests": {
+              "storage": "2Gi"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

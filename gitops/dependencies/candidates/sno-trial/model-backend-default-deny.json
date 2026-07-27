@@ -1,0 +1,19 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "NetworkPolicy",
+  "metadata": {
+    "name": "default-deny",
+    "namespace": "orchestra-sno-model-backend",
+    "labels": {
+      "app.kubernetes.io/part-of": "orchestra-sno-trial",
+      "orchestra.prometa.ai/activation": "blocked"
+    }
+  },
+  "spec": {
+    "podSelector": {},
+    "policyTypes": [
+      "Ingress",
+      "Egress"
+    ]
+  }
+}
