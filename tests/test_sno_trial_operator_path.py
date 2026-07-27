@@ -112,7 +112,7 @@ class SnoTrialOperatorPathTests(unittest.TestCase):
                     stdout = "prometa-orch-sno-fixture\n"
                 elif command == [str(installer.resolve()), "version"]:
                     stdout = (
-                        "openshift-install 4.20.27\n"
+                        f"{installer.resolve()} 4.20.27\n"
                         "built from commit must-not-survive\n"
                     )
                 else:

@@ -49,7 +49,8 @@ ASSESSMENT_ID = re.compile(r"^sno-operator-[a-z0-9][a-z0-9.-]{5,79}$")
 PROJECT_ID = re.compile(r"^[a-z][a-z0-9-]{4,28}[a-z0-9]$")
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 INSTALLER_VERSION = re.compile(
-    r"(?m)^openshift-install\s+v?(\d+\.\d+\.\d+)\s*$"
+    r"(?m)^(?:[^\r\n]*[/\\])?openshift-install\s+"
+    r"v?(\d+\.\d+\.\d+)\s*$"
 )
 CLIENT_VERSION = re.compile(
     r"(?m)^Client Version:\s+v?(\d+\.\d+\.\d+)\s*$"
