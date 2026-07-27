@@ -112,6 +112,20 @@ jobs:
           python3 scripts/sno_trial_resource_exposure.py verify \
             --report "${RUNNER_TEMP}/sno-trial-resource-exposure.json"
 
+      - name: Prove SNO server dry-run grants no deployment authority
+        run: |
+          python3 scripts/sno_trial_cluster_observation.py assess \
+            --snapshot tests/fixtures/sno-trial-cluster-healthy.json \
+            --assessment-id sno-cluster-ci-product-dry-run.1 \
+            --output "${RUNNER_TEMP}/sno-trial-cluster-for-product.json"
+          python3 scripts/sno_trial_product_dry_run.py assess \
+            --snapshot tests/fixtures/sno-trial-product-dry-run-observed.json \
+            --cluster-report "${RUNNER_TEMP}/sno-trial-cluster-for-product.json" \
+            --assessment-id sno-product-dry-run-ci-observed.1 \
+            --output "${RUNNER_TEMP}/sno-trial-product-dry-run.json"
+          python3 scripts/sno_trial_product_dry_run.py verify \
+            --report "${RUNNER_TEMP}/sno-trial-product-dry-run.json"
+
       - name: Prove aggregate SNO render admission remains non-mutating
         run: python3 -m unittest tests.test_sno_trial_install_admission -v
 

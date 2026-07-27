@@ -824,6 +824,47 @@ requires zero managed target resources and zero operator VM/disk resources.
 The collector stores no names, IPs, credentials, raw provider output, or
 billing-account identity and never authorizes cleanup or teardown.
 
+## Observe product server dry-runs and live capacity
+
+Render the three locked product charts into ignored `restricted/` custody.
+Keep every image digest-pinned and use the existing application Secret and CA
+references; do not create those external inputs for this observation. Run the
+collector from the Linux AMD64 operator host against a previously verified
+`TRIAL_CLUSTER_OBSERVED` report:
+
+```bash
+DRY_RUN_ID=sno-product-dry-run-operator-$(date -u +%Y%m%d%H%M%S).1
+
+make observe-sno-trial-product-dry-run \
+  CLUSTER_REPORT=restricted/sno-cluster-<exact-main>.json \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  KUBECONFIG=restricted/operator/install-clean-<date>/auth/kubeconfig \
+  PLATFORM_MANIFEST=restricted/live-artifacts/<date>/prometa.rendered.yaml \
+  RUNTIME_MANIFEST=restricted/live-artifacts/<date>/runtime.rendered.yaml \
+  MODEL_MANIFEST=restricted/live-artifacts/<date>/model.rendered.yaml \
+  ASSESSMENT_ID="$DRY_RUN_ID" \
+  OUTPUT="restricted/$DRY_RUN_ID.json"
+
+make verify-sno-trial-product-dry-run \
+  REPORT="restricted/$DRY_RUN_ID.json"
+```
+
+The collector reads node allocatable capacity and effective non-terminal pod
+requests, then projects the locked candidate peak. It invokes only
+`oc apply --dry-run=server --validate=strict` in the existing `default`
+namespace and checks each rendered identity immediately afterward with
+`--ignore-not-found`. Any persisted object, rejected manifest, unhealthy
+cluster baseline, or negative projected headroom blocks the report.
+
+The payload-free report stores object, image, Secret-reference, node, pod, and
+namespace counts or canonical digests, never their names or raw manifests.
+`SERVER_DRY_RUN_OBSERVED_WITH_GAPS` proves API/schema acceptance and
+non-persistence only. It does not prove image pulls, destination mirroring,
+external Secret/CA/dependency resolution, scheduling, startup, readiness,
+service behavior, deployment, admission, or certification. An image present
+in a rendered chart but absent from the locked artifact set remains an
+explicit blocker rather than being silently admitted by the observation.
+
 ## Teardown and reconciliation
 
 Run the exact installer destroy operation from the original metadata directory.
