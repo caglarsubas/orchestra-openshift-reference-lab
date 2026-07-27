@@ -362,12 +362,14 @@ against verifier revision
 `985cb37de283193a24776dfe840ab240d34a929a`, with payload-free report digest
 `sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
 That report remains valid evidence for the previous artifact-set digest only.
-The current admission policy
-`orchestra-sno-trial-product-admission-2026-07-28.2` is therefore
-`refresh-required`; it cannot admit the previous report against the new
-four-image set. Destination mirror and live-cluster pulls, operator inputs, a
-fresh server-side dry run, and provider readiness also remain absent;
-activation and every certifying claim remain false.
+Exact-main run `30293130839` replayed the current four-image set from revision
+`2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; artifact `8663575783`
+contains payload-free report digest
+`sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
+Admission policy `orchestra-sno-trial-product-admission-2026-07-28.3`
+binds only that replay and is current. Destination mirror and live-cluster
+pulls, operator inputs, a fresh server-side dry run, and provider readiness
+remain absent; activation and every certifying claim remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.

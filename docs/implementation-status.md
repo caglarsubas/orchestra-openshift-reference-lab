@@ -81,7 +81,7 @@ any certification campaign slot.
 | Inert single-node workload and resource candidate | Yes | Yes | No | No | Not eligible |
 | Source-only SNO profiles for all three product planes | Yes | Yes | No | No | Not eligible |
 | Digest-locked four-workload-image, three-plane signed publication set | Yes | Yes | No | No | Not eligible |
-| Read-only three-plane registry replay | Yes | Yes | No | Refresh required | Not eligible |
+| Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | Yes | Yes | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
@@ -248,19 +248,22 @@ report digest
 The downloaded report independently verified the previous three-image
 publications, signatures, CycloneDX attestations, linux/amd64 manifests, chart
 packages, and then-current lock digests. The source contract now adds the
-signed `prometa-tools-ubi` migration image as a platform auxiliary image, so
-the old replay is intentionally stale. Direct dependency runtime contracts, a
-Valkey image, a CPU model-backend artifact, destination and live-cluster pull
-proof, and operator Secret/CA inputs remain blockers. Live capacity and
-server-side API acceptance were observed separately, but the tight margin and
-non-persistence proof do not authorize deployment.
+signed `prometa-tools-ubi` migration image as a platform auxiliary image.
+Exact-main run `30293130839` replayed the resulting four-image set from
+revision `2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; immutable artifact
+`8663575783` contains report digest
+`sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
+Direct dependency runtime contracts, a Valkey image, a CPU model-backend
+artifact, destination and live-cluster pull proof, and operator Secret/CA
+inputs remain blockers. Live capacity and server-side API acceptance were
+observed separately, but the tight margin and non-persistence proof do not
+authorize deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.2` is
-`refresh-required` after the artifact-set change, so no previous replay or
-admission can cross that digest boundary. Even a valid future admission
-removes only the replay-refresh reason and leaves all deployment/provider
+`orchestra-sno-trial-product-admission-2026-07-28.3` binds the current
+exact-main replay. No admission record exists. Even a valid future admission
+removes only the replay-review reason and leaves all deployment/provider
 blockers and every certifying claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
