@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/sno-trial-operator-inputs-v1.schema.json",
+  "title": "Orchestra SNO trial operator Secret and CA input observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "manifests",
+    "observations",
+    "aggregate",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-operator-inputs.v1"
+    },
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^sno-operator-inputs-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"enum": ["simulated", "live-read-only"]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "manifests": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/manifest"}
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 17,
+      "maxItems": 17,
+      "items": {"$ref": "#/$defs/observation"}
+    },
+    "aggregate": {"$ref": "#/$defs/aggregate"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "nonnegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "workloadCandidateId",
+        "workloadCandidateDigest",
+        "artifactSetId",
+        "artifactSetDigest",
+        "operatorInputContractId",
+        "operatorInputContractDigest"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "workloadCandidateId": {
+          "const": "orchestra-sno-trial-workload-candidate-2026-07-25.1"
+        },
+        "workloadCandidateDigest": {"$ref": "#/$defs/digest"},
+        "artifactSetId": {
+          "const": "orchestra-sno-trial-products-2026-07-28.4"
+        },
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "operatorInputContractId": {
+          "const": "orchestra-sno-trial-operator-inputs-2026-07-28.1"
+        },
+        "operatorInputContractDigest": {
+          "const": "sha256:3a50c77bc2be59354b29d3f60f8913871f109adbb197d3b53296894b92dae502"
+        }
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plane",
+        "manifestDigest",
+        "externalReferenceCount",
+        "externalReferenceSetDigest"
+      ],
+      "properties": {
+        "plane": {"enum": ["platform", "runtimeHost", "modelPlane"]},
+        "manifestDigest": {"$ref": "#/$defs/digest"},
+        "externalReferenceCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "externalReferenceSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referenceDigest",
+        "plane",
+        "kind",
+        "observed",
+        "typeMatches",
+        "requiredKeyCount",
+        "observedRequiredKeyCount",
+        "missingRequiredKeyCount",
+        "missingRequiredKeySetDigest"
+      ],
+      "properties": {
+        "referenceDigest": {"$ref": "#/$defs/digest"},
+        "plane": {"enum": ["platform", "runtimeHost", "modelPlane"]},
+        "kind": {"enum": ["Secret", "ConfigMap"]},
+        "observed": {"type": "boolean"},
+        "typeMatches": {"type": "boolean"},
+        "requiredKeyCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "observedRequiredKeyCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "missingRequiredKeyCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "missingRequiredKeySetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifestCount",
+        "externalReferenceCount",
+        "observedObjectCount",
+        "requiredKeyCount",
+        "observedRequiredKeyCount",
+        "missingRequiredKeyCount",
+        "manifestReferencesContractBound",
+        "allObjectsObserved",
+        "allRequiredKeysPresent",
+        "allTypesMatch",
+        "externalReferencesResolved"
+      ],
+      "properties": {
+        "manifestCount": {"const": 3},
+        "externalReferenceCount": {"const": 17},
+        "observedObjectCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "requiredKeyCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "observedRequiredKeyCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "missingRequiredKeyCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "manifestReferencesContractBound": {"type": "boolean"},
+        "allObjectsObserved": {"type": "boolean"},
+        "allRequiredKeysPresent": {"type": "boolean"},
+        "allTypesMatch": {"type": "boolean"},
+        "externalReferencesResolved": {"type": "boolean"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction"],
+      "properties": {
+        "status": {
+          "enum": [
+            "OPERATOR_INPUTS_UNRESOLVED",
+            "OPERATOR_INPUTS_OBSERVED"
+          ]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "LIVE_OBSERVATION_REQUIRED",
+              "MANIFEST_REFERENCE_CONTRACT_MISMATCH",
+              "INPUT_OBJECT_MISSING",
+              "INPUT_KEY_MISSING",
+              "INPUT_TYPE_MISMATCH"
+            ]
+          }
+        },
+        "nextAction": {
+          "enum": [
+            "reconcile-operator-inputs",
+            "bind-observation-to-product-dry-run"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandPolicy",
+        "secretValuesEmittedByClient",
+        "secretValuesStored",
+        "rawCommandOutputStored",
+        "objectNamesStored",
+        "kubeconfigStored",
+        "dependencyConnectivityTested",
+        "certificateValidityTested",
+        "cloudMutationAuthorized",
+        "workloadActivationAuthorized",
+        "deploymentAuthorized",
+        "teardownAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "commandPolicy": {
+          "const": "read-only-secret-and-configmap-key-metadata"
+        },
+        "secretValuesEmittedByClient": {"const": false},
+        "secretValuesStored": {"const": false},
+        "rawCommandOutputStored": {"const": false},
+        "objectNamesStored": {"const": false},
+        "kubeconfigStored": {"const": false},
+        "dependencyConnectivityTested": {"const": false},
+        "certificateValidityTested": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "workloadActivationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "teardownAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

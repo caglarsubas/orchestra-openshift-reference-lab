@@ -92,6 +92,7 @@ any certification campaign slot.
 | Short-lived aggregate secret-free render admission | Yes | Yes | N/A | Yes | Not eligible |
 | Payload-free exact-main live cluster observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Payload-free cost-exposure and teardown-residual observation contract | Yes | Yes | N/A | Yes | Not eligible |
+| Value-free 14-Secret/3-CA operator-input contract and read-only observer | Yes | Yes | No | No | Not eligible |
 | Payload-free product server-dry-run and live-capacity observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | Yes | N/A | Yes | Yes | Not eligible |
@@ -254,10 +255,12 @@ revision `2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; immutable artifact
 `8663575783` contains report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
 Direct dependency runtime contracts, a Valkey image, a CPU model-backend
-artifact, destination and live-cluster pull proof, and operator Secret/CA
-inputs remain blockers. Live capacity and server-side API acceptance were
-observed separately, but the tight margin and non-persistence proof do not
-authorize deployment.
+artifact, destination and live-cluster pull proof, and populated operator
+Secret/CA inputs remain blockers. The source contract now inventories all 17
+external objects and validates their references against the July 27 renders,
+but no live read-only input report exists. Live capacity and server-side API
+acceptance were observed separately, but the tight margin and non-persistence
+proof do not authorize deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy

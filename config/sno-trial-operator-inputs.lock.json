@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-operator-input-contract.v1",
+  "contractId": "orchestra-sno-trial-operator-inputs-2026-07-28.1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "bindings": {
+    "profileDigest": "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a",
+    "workloadCandidateId": "orchestra-sno-trial-workload-candidate-2026-07-25.1",
+    "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9",
+    "artifactSetId": "orchestra-sno-trial-products-2026-07-28.4",
+    "artifactSetDigest": "sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948"
+  },
+  "inputs": [
+    {
+      "plane": "platform",
+      "namespace": "default",
+      "kind": "ConfigMap",
+      "name": "orchestra-platform-trial-ca",
+      "expectedType": null,
+      "requiredKeys": [
+        "ca-bundle.crt"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "platform",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-platform-trial-jetstream",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "nats-url",
+        "password",
+        "username"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "platform",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-platform-trial-secrets",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "AUTH_SECRET",
+        "CLICKHOUSE_PASSWORD",
+        "DATABASE_URL",
+        "PROMETA_INFERENCE_ENGINE_API_KEY",
+        "PROMETA_KEK_BASE64"
+      ],
+      "optionalKeys": [
+        "CLICKHOUSE_USER",
+        "DATABASE_URL_RO",
+        "PROMETA_AUDIT_CHAIN_SECRET"
+      ],
+      "wholeObjectImport": true
+    },
+    {
+      "plane": "platform",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-platform-trial-tls",
+      "expectedType": "kubernetes.io/tls",
+      "requiredKeys": [
+        "tls.crt",
+        "tls.key"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "platform",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-platform-trial-valkey",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "redis-url"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "runtimeHost",
+      "namespace": "default",
+      "kind": "ConfigMap",
+      "name": "orchestra-runtime-trial-ca",
+      "expectedType": null,
+      "requiredKeys": [
+        "ca-bundle.crt"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "runtimeHost",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-runtime-trial-config",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "config.json"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "runtimeHost",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-runtime-trial-credentials",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "api-token",
+        "database-url",
+        "model-gateway-api-key",
+        "receipt-api-key"
+      ],
+      "optionalKeys": [
+        "control-plane-api-key"
+      ],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "runtimeHost",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-runtime-trial-migration",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "migration-database-url"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "runtimeHost",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-runtime-trial-server-tls",
+      "expectedType": "kubernetes.io/tls",
+      "requiredKeys": [
+        "tls.crt",
+        "tls.key"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "ConfigMap",
+      "name": "orchestra-model-plane-trial-ca",
+      "expectedType": null,
+      "requiredKeys": [
+        "ca-bundle.crt"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-model-plane-trial-auth",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "auth_keys.json"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-model-plane-trial-observation",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "api-key"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-model-plane-trial-otlp",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "headers"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-model-plane-trial-routing",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "model_routing_policy.json",
+        "model_routing_pricing.json",
+        "model_routing_trust.json"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-model-plane-trial-tls",
+      "expectedType": "kubernetes.io/tls",
+      "requiredKeys": [
+        "tls.crt",
+        "tls.key"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    },
+    {
+      "plane": "modelPlane",
+      "namespace": "default",
+      "kind": "Secret",
+      "name": "orchestra-model-plane-trial-valkey",
+      "expectedType": "Opaque",
+      "requiredKeys": [
+        "redis-url"
+      ],
+      "optionalKeys": [],
+      "wholeObjectImport": false
+    }
+  ],
+  "controls": {
+    "secretValuesStored": false,
+    "operatorCreatesValuesOutOfBand": true,
+    "additionalSecretKeysAllowed": true,
+    "liveObservationRequiredForResolution": true,
+    "dependencyConnectivitySeparate": true,
+    "certificateValiditySeparate": true,
+    "deploymentAuthorized": false,
+    "campaignEligible": false,
+    "allowedCertificationSlots": []
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false,
+    "highAvailability": false,
+    "rpoRtoVerified": false
+  },
+  "contractDigest": "sha256:3a50c77bc2be59354b29d3f60f8913871f109adbb197d3b53296894b92dae502"
+}

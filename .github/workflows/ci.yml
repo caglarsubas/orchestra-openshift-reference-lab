@@ -57,6 +57,9 @@ jobs:
       - name: Validate independent SNO product replay admission policy
         run: python3 scripts/sno_trial_product_artifact_admission.py validate-policy
 
+      - name: Validate value-free SNO operator input contract
+        run: python3 scripts/sno_trial_operator_inputs.py validate-lock
+
       - name: Prove pending SNO state cannot authorize cloud mutation
         run: |
           python3 scripts/sno_trial_readiness.py assess \
@@ -125,6 +128,9 @@ jobs:
             --output "${RUNNER_TEMP}/sno-trial-product-dry-run.json"
           python3 scripts/sno_trial_product_dry_run.py verify \
             --report "${RUNNER_TEMP}/sno-trial-product-dry-run.json"
+
+      - name: Prove simulated operator inputs cannot claim live resolution
+        run: python3 -m unittest tests.test_sno_trial_operator_inputs -v
 
       - name: Prove aggregate SNO render admission remains non-mutating
         run: python3 -m unittest tests.test_sno_trial_install_admission -v

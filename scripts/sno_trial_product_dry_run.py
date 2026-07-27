@@ -371,6 +371,8 @@ def secret_references(content: str) -> list[str]:
     lines = content.splitlines()
     for index, line in enumerate(lines):
         stripped = line.strip()
+        if stripped.startswith("- "):
+            stripped = stripped[2:].lstrip()
         if stripped not in {"secretKeyRef:", "secretRef:"}:
             continue
         parent_indent = len(line) - len(line.lstrip())

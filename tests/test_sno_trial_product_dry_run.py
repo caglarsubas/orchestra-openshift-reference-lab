@@ -18,6 +18,7 @@ from scripts.sno_trial_product_dry_run import (
     collect_snapshot,
     cpu_millicores,
     memory_bytes,
+    secret_references,
     validate_assessment,
     validate_snapshot,
 )
@@ -122,6 +123,20 @@ class SnoTrialProductDryRunTests(unittest.TestCase):
         self.assertEqual(cpu_millicores("1u"), 1)
         self.assertEqual(memory_bytes("31708140Ki"), 32469135360)
         self.assertEqual(memory_bytes("1.5Gi"), 1610612736)
+
+    def test_env_from_secret_reference_is_counted(self) -> None:
+        content = """envFrom:
+  - secretRef:
+      name: whole-secret
+env:
+  - valueFrom:
+      secretKeyRef:
+        name: keyed-secret
+        key: token
+"""
+        self.assertEqual(
+            secret_references(content), ["keyed-secret", "whole-secret"]
+        )
 
     def test_public_schema_is_strict_for_every_object(self) -> None:
         schema = fixture(
