@@ -14,7 +14,7 @@ authorization digest, independent timing, and cleanup verification.
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
 | Split-horizon DNS and delegation | Procedure and Terraform contract implemented; trial parent delegation observed live, production split-horizon rehearsal pending |
 | Private OpenShift installation | Production template delivered; separate public-ingress SNO trial installed and observed live, private production profile pending |
-| Cost-bounded SNO engineering trial | Locked non-certifying profile, 12-hour lease, exact toolchain, DNS/operator/render admissions, clean OpenShift 4.20.27 SNO install, and exact-main payload-free cluster observation exercised live; cost capture, product dry-runs, and verified teardown remain |
+| Cost-bounded SNO engineering trial | Locked non-certifying profile, exact toolchain, DNS/operator/render admissions, clean OpenShift 4.20.27 SNO install, exact-main cluster/cost/product-dry-run observations, and zero-managed-residual teardown exercised live; product activation and certification remain blocked |
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract and offline values candidate implemented; live mirror intake and admitted overlay pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
@@ -28,7 +28,7 @@ authorization digest, independent timing, and cleanup verification.
 | Credential/certificate rotation | Pending Vault/ESO deployment |
 | Fault campaign | Pending fault-controller deployment and authorization flow |
 | Evidence review/finalization | Platform contract intake is pinned; live custody, reviews, and closure pending |
-| Cost control and teardown | Dated dominant-charge rate card plus payload-free active-exposure/post-teardown residual contract implemented; exact-main live capture, destroy, and clean residual proof pending |
+| Cost control and teardown | Dated dominant-charge rate card plus payload-free active-exposure/post-teardown residual contract implemented and exercised; clean report observed zero managed target/operator residuals while retaining the project foundation |
 
 The table is intentionally not a readiness claim. A runbook becomes
 `rehearsed` only when its payload-free report is signed under the active
