@@ -435,18 +435,25 @@ readback and a post-apply Terraform refresh verified:
   nameservers.
 - The active `ocp-lab.planeon.ai.` Cloud DNS zone with four generated
   nameservers.
-- No Terraform drift and no compute, cluster, workload, or Secret resources.
+- No Terraform drift and, at that historical checkpoint, no compute, cluster,
+  workload, or Secret resources.
 
 The active Planeon zone was applied from an exact-main plan with one add, zero
 changes, and zero destroys. The legacy zone moved in Terraform state without a
 provider mutation. Independent readback observed both zones, and a post-apply
-plan reported no drift. Fresh readiness report
+plan reported no drift. Pre-install readiness report
 `sno-readiness-operator-20260726174421.1` has report digest
 `sha256:13ba6f6fb93e524b0dcb28d653ff9ab52de1228fd0a2d94db8bdd66511cd56dc`
-and remains `DOWNSTREAM_VERIFICATION_REQUIRED`. Do not create an operator lease
-or installer resources until Cloudflare delegates the Planeon child zone and
-source CIDR, Linux AMD64 administration path, and remaining prerequisites are
-verified.
+and remains `DOWNSTREAM_VERIFICATION_REQUIRED`.
+
+Those downstream gates were later satisfied. DNS report
+`sno-dns-operator-20260727141303.1` observed the exact parent delegation, and
+operator-path report `sno-operator-operator-20260727141147.1` observed the
+Linux AMD64 host, single attached operator identity, host-scoped source CIDR,
+target project, and exact `4.20.27` tools. Render admission
+`sno-render-operator-20260727141325.1` then issued a short-lived
+`READY_TO_RENDER` decision bound to an active project/operator lease. These
+reports are point-in-time gates and must be refreshed for a new install.
 
 The first network-hygiene observation found a GCP-created default auto-mode
 VPC, 42 subnetworks, and four default firewall rules, including three enabled
@@ -481,6 +488,22 @@ make verify-sno-trial-network-hygiene \
 The report stores counts and canonical inventory digests, not raw firewall
 sources or provider responses. It never authorizes cleanup or installation.
 Proceed only while a fresh report remains `CLEAN`.
+
+The clean installer state completed OpenShift `4.20.27` on 2026-07-27. Do not
+reuse an installer metadata directory after `create cluster` has started; run
+the exact installer destroy operation, verify cleanup, and render a fresh
+directory for a retry. The completed cluster has one ready schedulable
+`n2-standard-8` control-plane/worker node, zero worker Machines,
+`SingleReplica` topology, `Manual` credentials with the locked workload
+identity issuer, two CSI storage classes, a host-scoped API firewall, a
+reachable console, no bootstrap instance, and 34 of 34 healthy cluster
+operators.
+
+Exact-main live observation `sno-cluster-main-20260727160232.1`, generated
+from commit `dffb6931bc5d656fc38d6e84e07f65fbb600998a`, has report digest
+`sha256:440b40b3e9b173ebe3c8ddba6020406b4a9651b3931a11c1ffd3ffcc88ae21c6`
+and status `TRIAL_CLUSTER_OBSERVED`. It is payload-free and read-only. Product
+workloads, cost capture, and teardown remain incomplete.
 
 ## Delegate the trial DNS zone
 
