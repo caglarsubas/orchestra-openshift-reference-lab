@@ -260,9 +260,13 @@ the current candidate, source admission, and operator-input contract and
 requires restricted-v2, arbitrary UID, read-only roots, TLS/authentication,
 default-deny networking, persistent single replicas, no runtime model download,
 and fail-closed degradation. It emits no manifests and is not yet bound back
-into a new workload candidate. A Valkey image, CPU model-backend image and
-model artifact, executable dependency profiles, destination and live-cluster
-pull proof, and populated operator Secret/CA inputs remain blockers. The
+into a new workload candidate. Source artifact selection now pins Valkey 9.1.0,
+the linux/amd64 llama.cpp `b10143` server manifest, and the exact Qwen2.5 0.5B
+Instruct Q4_K_M revision, size, license, and SHA-256 digest. The separate
+artifact lock requires operator pre-staging on a read-only PVC and prohibits
+runtime model downloads. Upstream review, executable dependency profiles,
+destination and live-cluster pull proof, model-PVC materialization, and
+populated operator Secret/CA inputs remain blockers. The
 operator-input source contract inventories all 17 external objects and
 validates their references against the July 27 renders, but no live read-only
 input report exists. Live capacity and server-side API acceptance were

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-dependency-artifact-set.v1",
+  "artifactSetId": "orchestra-sno-trial-dependency-artifacts-2026-07-28.1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "executionMode": "source-only",
+  "architecture": "linux/amd64",
+  "bindings": {
+    "dependencyBomDigest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
+    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "runtimeContractSetDigest": "sha256:76b0b5ce5a540a4e35cd90a0f40656354ef9812383d5f23974a424fbbbf9c3e3"
+  },
+  "containers": [
+    {
+      "id": "valkey-image",
+      "serviceId": "valkey",
+      "sourceReference": "docker.io/valkey/valkey:9.1.0",
+      "resolvedReference": "docker.io/valkey/valkey@sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+      "indexDigest": "sha256:8e8d64b405ce18f41b8e5ee20aa4687a8ed0022d1298f2ce31cdcf3a76e09411",
+      "platformDigest": "sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+      "platform": "linux/amd64",
+      "version": "9.1.0",
+      "sourceRevision": null,
+      "sourceUrl": "https://github.com/valkey-io/valkey",
+      "license": "BSD-3-Clause",
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "runtimeCompatibility": {
+        "arbitraryUidRequired": true,
+        "fixedUidAllowed": false,
+        "readOnlyRootFilesystemRequired": true,
+        "serviceAccountTokenAutomount": false,
+        "requiredWritablePaths": [
+          "/data"
+        ]
+      }
+    },
+    {
+      "id": "model-backend-image",
+      "serviceId": "model-backend",
+      "sourceReference": "ghcr.io/ggml-org/llama.cpp:server",
+      "resolvedReference": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+      "indexDigest": "sha256:a576442ad3649c0b5ea74e20ad29a17c121117f32607cfe59ff27cc38066f874",
+      "platformDigest": "sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+      "platform": "linux/amd64",
+      "version": "b10143",
+      "sourceRevision": "88b47a755c72fed4b22fba0fd262e2d7b7d01583",
+      "sourceUrl": "https://github.com/ggml-org/llama.cpp",
+      "license": "MIT",
+      "upstreamVerification": {
+        "status": "pending",
+        "method": "reviewed-exception",
+        "identityPolicy": null
+      },
+      "runtimeCompatibility": {
+        "arbitraryUidRequired": true,
+        "fixedUidAllowed": false,
+        "readOnlyRootFilesystemRequired": true,
+        "serviceAccountTokenAutomount": false,
+        "requiredWritablePaths": []
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "orchestra-reference-cpu-model",
+      "serviceId": "model-backend",
+      "provider": "Qwen",
+      "repository": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+      "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+      "filename": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "immutableUrl": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/9217f5db79a29953eb74d5343926648285ec7e67/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "digest": "sha256:74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+      "sizeBytes": 491400032,
+      "format": "gguf",
+      "quantization": "Q4_K_M",
+      "license": "Apache-2.0",
+      "servedModelId": "orchestra-reference-cpu",
+      "mountPath": "/models/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "materialization": "operator-prestaged-read-only-pvc",
+      "runtimeDownloadAllowed": false,
+      "maximumAllowedBytes": 4294967296,
+      "chatRequired": true,
+      "embeddingQualityCertifying": false
+    }
+  ],
+  "runtimeBinding": {
+    "containerId": "model-backend-image",
+    "modelId": "orchestra-reference-cpu-model",
+    "protocol": "openai-compatible-https",
+    "port": 8000,
+    "authentication": "api-key-file",
+    "tls": "operator-secret-files",
+    "healthPath": "/health",
+    "modelInventoryPath": "/v1/models",
+    "startupArguments": [
+      "--model",
+      "/models/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "--alias",
+      "orchestra-reference-cpu",
+      "--host",
+      "0.0.0.0",
+      "--port",
+      "8000",
+      "--ctx-size",
+      "2048",
+      "--parallel",
+      "1",
+      "--api-key-file",
+      "/var/run/secrets/orchestra-model/api-keys",
+      "--ssl-key-file",
+      "/var/run/secrets/orchestra-model/tls.key",
+      "--ssl-cert-file",
+      "/var/run/secrets/orchestra-model/tls.crt"
+    ]
+  },
+  "activation": {
+    "state": "blocked",
+    "reasonCodes": [
+      "UPSTREAM_VERIFICATION_PENDING",
+      "DESTINATION_MIRROR_PROOF_MISSING",
+      "LAB_SIGNATURE_MISSING",
+      "MODEL_PVC_MATERIALIZATION_PROOF_MISSING",
+      "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED",
+      "DEPENDENCY_TLS_REFERENCES_UNRESOLVED",
+      "STORAGE_CLASS_REFERENCE_UNRESOLVED",
+      "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING",
+      "LIVE_DEPENDENCY_CONNECTIVITY_MISSING"
+    ]
+  },
+  "controls": {
+    "scope": "sno-engineering-trial-dependency-artifacts-only",
+    "sourceOnly": true,
+    "artifactBytesStored": false,
+    "productionDependencyProfileMutated": false,
+    "workloadCandidateMutated": false,
+    "manifestsEmitted": false,
+    "argocdApplicationsEmitted": false,
+    "kustomizationReferenced": false,
+    "secretValuesStored": false,
+    "runtimeModelDownloadAllowed": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEligible": false,
+    "allowedCertificationSlots": []
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false,
+    "highAvailability": false,
+    "rpoRtoVerified": false
+  },
+  "artifactSetDigest": "sha256:5b60283c1e02f20f4a224b55a218d62b308315adf6d58c8120f021e1f8333073"
+}

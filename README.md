@@ -300,9 +300,10 @@ make validate-sno-trial-workload-candidate
 
 This is a capacity decision record, not deployment input. It emits no
 manifests, Argo CD applications, Secret values, lease, or cloud authority.
-Valkey and CPU model-backend artifacts are unresolved, and trial-specific
-single-replica executable profiles do not yet exist. The source-only
-dependency runtime requirements are locked separately in
+Its Valkey and CPU model-backend entries intentionally remain unresolved
+because the candidate predates the artifact selection below, and
+trial-specific single-replica executable profiles do not yet exist. The
+source-only dependency runtime requirements are locked separately in
 [`config/sno-trial-dependency-runtime-contracts.lock.json`](config/sno-trial-dependency-runtime-contracts.lock.json).
 Its five contracts bind the current candidate, dependency admission, and
 operator-input contract while requiring restricted-v2, arbitrary UID,
@@ -315,6 +316,24 @@ this contract set and forces a fresh product-artifact replay. Its canonical
 digest is
 `sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9`;
 all production, HA, campaign, certification, and SLA claims remain false.
+
+The remaining source artifacts are now selected in
+[`config/sno-trial-dependency-artifacts.lock.json`](config/sno-trial-dependency-artifacts.lock.json):
+Valkey 9.1.0, the linux/amd64 llama.cpp `b10143` server manifest, and Qwen2.5
+0.5B Instruct Q4_K_M at its immutable Hugging Face revision, byte count, and
+SHA-256 digest. The model must be operator-prestaged on a read-only PVC;
+runtime download is prohibited. Validate the strict derivation from the
+dependency BOM and runtime contracts with:
+
+```bash
+make validate-sno-trial-dependency-artifacts
+```
+
+This closes artifact selection only. Upstream review, destination mirroring,
+lab signing, PVC materialization, Secret/TLS and storage-class references,
+executable manifests, server-side dry-run, and live connectivity remain
+blocked. The artifact set does not mutate the current workload candidate or
+its replay lineage and emits no Kubernetes objects.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
