@@ -81,6 +81,7 @@ def render(template: str, values: dict[str, str]) -> str:
     if set(PLACEHOLDER.findall(rendered)) != SECRET_PLACEHOLDERS:
         fail("trial_install_rendered_placeholders_invalid")
     required_fragments = (
+        "credentialsMode: Manual",
         "baseDomain: ocp-lab.planeon.ai",
         "name: orchestra-trial",
         "name: worker\n    replicas: 0",
@@ -97,6 +98,8 @@ def render(template: str, values: dict[str, str]) -> str:
     if any(fragment not in rendered for fragment in required_fragments):
         fail("trial_install_rendered_topology_invalid")
     forbidden_fragments = (
+        "credentialsMode: Mint",
+        "credentialsMode: Passthrough",
         "n2-standard-4",
         "pd-ssd",
         "europe-west1-c",

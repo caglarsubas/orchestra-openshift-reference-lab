@@ -660,6 +660,13 @@ the lease and admission, and creates the final file at mode `0600`. Secret
 values never enter command arguments or output. It is create-only and still
 does not authorize cluster creation.
 
+The locked template sets `credentialsMode: Manual`. Run the installer from a
+Linux AMD64 GCE administration host with an attached, short-lived service
+account; do not create or download a user-managed service-account key. Prepare
+the release-matched `ccoctl` utility and GCP Workload Identity resources before
+cluster creation so cluster components use short-lived credentials rather than
+an administrator credential stored in the cluster.
+
 Use the exact `4.20.27` linux/amd64 installer to validate the materialized
 configuration on the Linux administration host before creating resources.
 Keep the secret-bearing `install-config.yaml`, installer metadata, kubeconfig,
