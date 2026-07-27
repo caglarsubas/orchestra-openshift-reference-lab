@@ -170,14 +170,29 @@ make validate-sno-trial-dependency-runtime-contracts
 ```
 
 This lock emits no Kubernetes objects. Operators must still resolve immutable
-Valkey and CPU model-backend artifacts by digest, name the dependency-side
-Secret/TLS and storage-class references, author executable trial profiles, and
-pass mirror, server-side dry-run, and live-connectivity checks. A future
-candidate revision must bind the contract-set digest; that change deliberately
-requires a fresh product-artifact replay. The three product planes now expose
-source-only SNO values, but their registry replay, human admission, Secret/TLS
-references, destination pull proofs, live allocatable capacity, calibration,
-and OpenShift server-side dry runs must still pass.
+Valkey and CPU model-backend artifacts into a candidate revision, name the
+dependency-side Secret/TLS and storage-class references, author executable
+trial profiles, and pass mirror, server-side dry-run, and live-connectivity
+checks. The source selection itself is now locked in
+`config/sno-trial-dependency-artifacts.lock.json`:
+
+```bash
+make validate-sno-trial-dependency-artifacts
+```
+
+It pins Valkey 9.1.0 and its linux/amd64 manifest, llama.cpp server `b10143`
+and its linux/amd64 manifest, and the exact 491,400,032-byte Qwen2.5 0.5B
+Instruct Q4_K_M model digest. The model contract requires operator
+pre-staging onto a read-only PVC and prohibits runtime network download.
+This is source-only selection: it emits no manifest, stores no model bytes,
+does not satisfy upstream review or mirror/signature gates, and does not
+authorize deployment.
+
+A future candidate revision must bind the contract-set digest; that change
+deliberately requires a fresh product-artifact replay. The three product planes
+now expose source-only SNO values, but their registry replay, human admission,
+Secret/TLS references, destination pull proofs, live allocatable capacity,
+calibration, and OpenShift server-side dry runs must still pass.
 
 After a live cluster exists, compare the candidate reserve against
 `oc describe node` allocatable capacity and measured idle system usage. Any
