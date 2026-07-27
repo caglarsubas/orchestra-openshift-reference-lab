@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -145,6 +145,30 @@ observe-sno-trial-resource-exposure:
 verify-sno-trial-resource-exposure:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_resource_exposure.py verify \
+		--report "$(REPORT)"
+
+observe-sno-trial-product-dry-run:
+	test -n "$(CLUSTER_REPORT)"
+	test -n "$(CLIENT)"
+	test -n "$(KUBECONFIG)"
+	test -n "$(PLATFORM_MANIFEST)"
+	test -n "$(RUNTIME_MANIFEST)"
+	test -n "$(MODEL_MANIFEST)"
+	test -n "$(ASSESSMENT_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_product_dry_run.py collect \
+		--cluster-report "$(CLUSTER_REPORT)" \
+		--client "$(CLIENT)" \
+		--kubeconfig "$(KUBECONFIG)" \
+		--platform-manifest "$(PLATFORM_MANIFEST)" \
+		--runtime-manifest "$(RUNTIME_MANIFEST)" \
+		--model-manifest "$(MODEL_MANIFEST)" \
+		--assessment-id "$(ASSESSMENT_ID)" \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-product-dry-run:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/sno_trial_product_dry_run.py verify \
 		--report "$(REPORT)"
 
 create-sno-trial-render-admission:

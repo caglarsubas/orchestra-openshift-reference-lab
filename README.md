@@ -122,6 +122,13 @@ remain explicit exclusions, so the result is never represented as billed
 spend. The same payload-free inventory contract requires zero managed target
 and operator resources before it can report clean teardown.
 
+Product API acceptance and live-capacity projection use another payload-free
+contract. It binds the healthy cluster report, artifact set, workload
+candidate, and three rendered-manifest digests; runs strict server-side
+dry-runs; and proves no rendered object persisted. A successful observation
+does not resolve image pulls, destination mirroring, Secrets, CAs,
+dependencies, scheduling, readiness, deployment, admission, or certification.
+
 The pre-install payload-free report
 `sno-readiness-operator-20260726174421.1` binds the current profile digest,
 records approved quota status as operator-declared, and remains

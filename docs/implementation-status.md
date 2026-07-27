@@ -92,6 +92,7 @@ any certification campaign slot.
 | Short-lived aggregate secret-free render admission | Yes | Yes | N/A | Yes | Not eligible |
 | Payload-free exact-main live cluster observation contract | Yes | Yes | N/A | Yes | Not eligible |
 | Payload-free cost-exposure and teardown-residual observation contract | Yes | Yes | N/A | No | Not eligible |
+| Payload-free product server-dry-run and live-capacity observation contract | Yes | Yes | N/A | No | Not eligible |
 | Disposable project foundation, without compute or workloads | Yes | Yes | Yes | Yes | Not eligible |
 | Parent DNS delegation and source-IP allowlist | Yes | N/A | Yes | Yes | Not eligible |
 | OpenShift `4.20.27` SNO installation | Yes | N/A | Yes | Yes | Not eligible |

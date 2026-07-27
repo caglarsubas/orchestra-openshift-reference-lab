@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/sno-trial-product-dry-run-v1.schema.json",
+  "title": "Orchestra SNO trial product server dry-run observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "generatedAt",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "capacity",
+    "manifests",
+    "aggregate",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-product-dry-run.v1"
+    },
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^sno-product-dry-run-[a-z0-9][a-z0-9.-]{5,79}$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"enum": ["simulated", "live-diagnostic"]},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "capacity": {"$ref": "#/$defs/capacity"},
+    "manifests": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/manifest"}
+    },
+    "aggregate": {"$ref": "#/$defs/aggregate"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "nonnegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "profileDigest",
+        "clusterAssessmentId",
+        "clusterReportDigest",
+        "clusterDecisionStatus",
+        "artifactSetId",
+        "artifactSetDigest",
+        "workloadCandidateId",
+        "workloadCandidateDigest"
+      ],
+      "properties": {
+        "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+        "profileDigest": {"$ref": "#/$defs/digest"},
+        "clusterAssessmentId": {"type": "string", "minLength": 1},
+        "clusterReportDigest": {"$ref": "#/$defs/digest"},
+        "clusterDecisionStatus": {"const": "TRIAL_CLUSTER_OBSERVED"},
+        "artifactSetId": {"type": "string", "minLength": 1},
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "workloadCandidateId": {"type": "string", "minLength": 1},
+        "workloadCandidateDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "capacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eligibleNodeCount",
+        "nodeSetDigest",
+        "observedPodCount",
+        "podSetDigest",
+        "allocatableCpuMillicores",
+        "allocatableMemoryBytes",
+        "existingRequestedCpuMillicores",
+        "existingRequestedMemoryBytes",
+        "candidatePeakCpuMillicores",
+        "candidatePeakMemoryBytes",
+        "projectedHeadroomCpuMillicores",
+        "projectedHeadroomMemoryBytes",
+        "projectedHeadroomMemoryMiB",
+        "positiveProjectedHeadroom",
+        "capacityMarginTight"
+      ],
+      "properties": {
+        "eligibleNodeCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "nodeSetDigest": {"$ref": "#/$defs/digest"},
+        "observedPodCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "podSetDigest": {"$ref": "#/$defs/digest"},
+        "allocatableCpuMillicores": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "allocatableMemoryBytes": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "existingRequestedCpuMillicores": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "existingRequestedMemoryBytes": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "candidatePeakCpuMillicores": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "candidatePeakMemoryBytes": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "projectedHeadroomCpuMillicores": {"type": "integer"},
+        "projectedHeadroomMemoryBytes": {"type": "integer"},
+        "projectedHeadroomMemoryMiB": {"type": "integer"},
+        "positiveProjectedHeadroom": {"type": "boolean"},
+        "capacityMarginTight": {"type": "boolean"}
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plane",
+        "namespaceDigest",
+        "manifestDigest",
+        "objectCount",
+        "objectSetDigest",
+        "imageReferenceCount",
+        "imageSetDigest",
+        "boundImageReferenceCount",
+        "unboundImageReferenceCount",
+        "unboundImageSetDigest",
+        "secretReferenceCount",
+        "secretReferenceSetDigest",
+        "serverDryRunAccepted",
+        "acceptedObjectCount",
+        "noPersistenceObserved"
+      ],
+      "properties": {
+        "plane": {"enum": ["platform", "runtimeHost", "modelPlane"]},
+        "namespaceDigest": {"$ref": "#/$defs/digest"},
+        "manifestDigest": {"$ref": "#/$defs/digest"},
+        "objectCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "objectSetDigest": {"$ref": "#/$defs/digest"},
+        "imageReferenceCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "imageSetDigest": {"$ref": "#/$defs/digest"},
+        "boundImageReferenceCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "unboundImageReferenceCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "unboundImageSetDigest": {"$ref": "#/$defs/digest"},
+        "secretReferenceCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "secretReferenceSetDigest": {"$ref": "#/$defs/digest"},
+        "serverDryRunAccepted": {"type": "boolean"},
+        "acceptedObjectCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "noPersistenceObserved": {"type": "boolean"}
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifestCount",
+        "objectCount",
+        "acceptedObjectCount",
+        "allServerDryRunsAccepted",
+        "allNonPersistent",
+        "imageReferenceCount",
+        "boundImageReferenceCount",
+        "unboundImageReferenceCount",
+        "allImagesArtifactBound",
+        "secretReferenceCount",
+        "externalReferencesResolved",
+        "liveImagePullVerified",
+        "destinationMirrorVerified"
+      ],
+      "properties": {
+        "manifestCount": {"const": 3},
+        "objectCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "acceptedObjectCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "allServerDryRunsAccepted": {"type": "boolean"},
+        "allNonPersistent": {"type": "boolean"},
+        "imageReferenceCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "boundImageReferenceCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "unboundImageReferenceCount": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "allImagesArtifactBound": {"type": "boolean"},
+        "secretReferenceCount": {"$ref": "#/$defs/nonnegativeInteger"},
+        "externalReferencesResolved": {"type": "boolean"},
+        "liveImagePullVerified": {"type": "boolean"},
+        "destinationMirrorVerified": {"type": "boolean"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes", "nextAction"],
+      "properties": {
+        "status": {
+          "enum": ["SERVER_DRY_RUN_OBSERVED_WITH_GAPS", "BLOCKED"]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "CLUSTER_BASELINE_INVALID",
+              "SERVER_DRY_RUN_FAILED",
+              "DRY_RUN_OBJECT_PERSISTED",
+              "CAPACITY_HEADROOM_NEGATIVE",
+              "CAPACITY_MARGIN_TIGHT",
+              "MIGRATION_IMAGE_NOT_ARTIFACT_BOUND",
+              "EXTERNAL_REFERENCES_UNRESOLVED",
+              "LIVE_PULL_NOT_VERIFIED",
+              "DESTINATION_MIRROR_NOT_VERIFIED"
+            ]
+          }
+        },
+        "nextAction": {
+          "enum": [
+            "reconcile-dry-run-or-capacity",
+            "bind-images-and-resolve-external-references"
+          ]
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commandPolicy",
+        "rawManifestContentStored",
+        "rawCommandOutputStored",
+        "objectNamesStored",
+        "secretValuesStored",
+        "kubeconfigStored",
+        "liveImagePullAttempted",
+        "artifactAdmissionStateAdvanced",
+        "cloudMutationAuthorized",
+        "workloadActivationAuthorized",
+        "deploymentAuthorized",
+        "teardownAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "commandPolicy": {"const": "server-side-dry-run-only"},
+        "rawManifestContentStored": {"const": false},
+        "rawCommandOutputStored": {"const": false},
+        "objectNamesStored": {"const": false},
+        "secretValuesStored": {"const": false},
+        "kubeconfigStored": {"const": false},
+        "liveImagePullAttempted": {"const": false},
+        "artifactAdmissionStateAdvanced": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "workloadActivationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "teardownAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}
