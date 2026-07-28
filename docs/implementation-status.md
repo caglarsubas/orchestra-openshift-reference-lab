@@ -62,6 +62,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Published signed lab service image indexes | Yes | N/A | N/A | Yes | No |
 | Source-only production chat/embedding artifact candidate | Yes | Yes | No | No | No |
 | Payload-free local production model source-file inspection | Yes | Yes | No | No | No |
+| Production model custody and two-person licence-review contract | Yes | Yes | No | No | No |
 | Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
@@ -478,6 +479,19 @@ production-model observation is checked in or claimed, and even a matching
 unsigned report remains only review input: it cannot establish immutable
 custody, licence approval, source admission, mirroring, deployment, or campaign
 evidence.
+
+The additive production-model custody and licence-review contract is also
+source-declared and CI-tested. It binds the two exact model artifacts to a
+future CMEK-backed, retained, create-only GCS custody prefix; requires
+generation- and metageneration-pinned independent digest replay; separates the
+uploader, custody verifier, model-risk reviewer, and service owner; and defines
+strict payload-free custody and human-review records. Adversarial tests reject
+object substitution, mutable reads, identity reuse, automated approval,
+pre-custody review, and incomplete or rejected two-person review sets. Storage,
+KMS, WIF, protected workflows, detached signatures, and human decisions remain
+undeclared or unexecuted. No model bytes were downloaded or copied, the frozen
+BOM and admission contract remain unchanged, and no custody, licence,
+deployment, campaign, or certification claim is made.
 
 The next live increment starts by applying the exact plan-bound required-reviewer
 configuration to all six existing environment shells after an eligible non-owner

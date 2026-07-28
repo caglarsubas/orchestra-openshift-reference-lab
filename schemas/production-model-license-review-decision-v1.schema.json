@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/production-model-license-review-decision-v1.schema.json",
+  "title": "Orchestra production model licence review decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "reviewId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "reviewer",
+    "artifactReviews",
+    "decision",
+    "reviewedAt",
+    "attestation",
+    "claims",
+    "reviewDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.production-model-license-review-decision.v1"
+    },
+    "reviewId": {
+      "type": "string",
+      "pattern": "^production-model-license-review-[a-z0-9][a-z0-9._-]{7,127}$"
+    },
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live-human-review"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "reviewer": {"$ref": "#/$defs/reviewer"},
+    "artifactReviews": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/artifactReview"}
+    },
+    "decision": {"enum": ["APPROVED", "REJECTED"]},
+    "reviewedAt": {"$ref": "#/$defs/timestamp"},
+    "attestation": {"$ref": "#/$defs/attestation"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reviewDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateDigest",
+        "custodyPolicyId",
+        "custodyPolicyDigest",
+        "custodyRecordId",
+        "custodyRecordDigest",
+        "reviewDecisionSchemaDigest"
+      ],
+      "properties": {
+        "candidateId": {
+          "const": "orchestra-production-model-artifacts-2026-07-28.1"
+        },
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "custodyPolicyId": {
+          "const": "orchestra-production-model-artifact-custody-2026-07-28.1"
+        },
+        "custodyPolicyDigest": {"$ref": "#/$defs/digest"},
+        "custodyRecordId": {
+          "type": "string",
+          "pattern": "^production-model-custody-[a-z0-9][a-z0-9._-]{7,127}$"
+        },
+        "custodyRecordDigest": {"$ref": "#/$defs/digest"},
+        "reviewDecisionSchemaDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "identityDigest"],
+      "properties": {
+        "role": {"enum": ["model-risk-reviewer", "service-owner"]},
+        "identityDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "artifactReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactId",
+        "declaredLicense",
+        "licenseTextDigest",
+        "modelCardDigest",
+        "usageRestrictions",
+        "decision",
+        "reasonCodes"
+      ],
+      "properties": {
+        "artifactId": {
+          "enum": [
+            "orchestra-reference-chat-model",
+            "orchestra-reference-embedding-model"
+          ]
+        },
+        "declaredLicense": {"const": "Apache-2.0"},
+        "licenseTextDigest": {"$ref": "#/$defs/digest"},
+        "modelCardDigest": {"$ref": "#/$defs/digest"},
+        "usageRestrictions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+          }
+        },
+        "decision": {"enum": ["APPROVED", "REJECTED"]},
+        "reasonCodes": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+          }
+        }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "humanPerformed",
+        "automatedApproval",
+        "independentFromUploader",
+        "independentFromCustodyVerifier",
+        "noConflictDeclared",
+        "sourceTermsReviewed",
+        "modelCardsReviewed"
+      ],
+      "properties": {
+        "humanPerformed": {"const": true},
+        "automatedApproval": {"const": false},
+        "independentFromUploader": {"const": true},
+        "independentFromCustodyVerifier": {"const": true},
+        "noConflictDeclared": {"const": true},
+        "sourceTermsReviewed": {"const": true},
+        "modelCardsReviewed": {"const": true}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "singleReviewerDecisionRecorded",
+        "aggregateLicenseApproval",
+        "sourceAdmissionAuthorized",
+        "dependencyAdmissionAuthorized",
+        "deploymentAuthorized",
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla"
+      ],
+      "properties": {
+        "singleReviewerDecisionRecorded": {"const": true},
+        "aggregateLicenseApproval": {"const": false},
+        "sourceAdmissionAuthorized": {"const": false},
+        "dependencyAdmissionAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false}
+      }
+    }
+  }
+}

@@ -64,9 +64,10 @@ and OpenShift compatibility remain unverified.
    make validate-production-model-artifact-intake
    ```
 
-2. An independent reviewer confirms each upstream revision, object size,
-   digest, licence, model card, and usage restriction. Record review evidence
-   under restricted custody; never add downloaded model bytes to Git.
+2. A preliminary reviewer confirms each upstream revision, object size,
+   digest, licence, model card, and usage restriction. This pre-copy check does
+   not satisfy the two final decisions, which bind the independently verified
+   custody record. Never add downloaded model bytes to Git.
 3. Scan the exact llama.cpp image manifest with the signed certification
    runner. Review its SBOM, vulnerabilities, licence inventory, and
    arbitrary-UID/read-only-root behavior.
@@ -118,6 +119,46 @@ admission, mirror authorization, deployment, campaign evidence, and every
 certification claim false. A simulated snapshot always produces `SIMULATED`,
 even if its declared identifiers match.
 
+## Custody and licence-review contract
+
+The next boundary is now source-declared by
+`config/production-model-artifact-custody-policy.lock.json`, digest
+`sha256:053862e4dc557472bc0e90561427356268ccb76dbc9161be5d82daa1c93edc4c`.
+Validate it with:
+
+```bash
+make validate-production-model-artifact-custody
+```
+
+This policy does not provision storage or an identity and does not download or
+copy either model. It defines the records that a later protected live workflow
+must produce:
+
+- `production-model-artifact-custody-record-v1` binds the exact candidate,
+  fresh source observation, GCS bucket and prefix, object generation and
+  metageneration, size, CRC32C, SHA-256, CMEK key version, object hold, distinct
+  uploader and verifier identities, and generation-pinned replay;
+- `production-model-license-review-decision-v1` binds one human decision to the
+  exact custody record, licence text, model card, usage restrictions, reviewer
+  role, and reviewer identity; and
+- the semantic validator requires one approved decision from
+  `model-risk-reviewer` and one from `service-owner`, with two distinct people
+  who are also distinct from the uploader and custody verifier.
+
+The uploader is limited to create-only object custody. The verifier is a
+separate generation-pinned reader and future detached-KMS signer. Neither has
+mirror, source-admission, deployment, or campaign authority. An individual
+review record cannot claim aggregate licence approval.
+
+Local validation of either record proves only schema and semantic consistency.
+It does not verify the future detached custody signature or human-review
+signatures. The CLI therefore reports `detachedSignatureVerified=false`,
+`reviewerSignaturesVerified=false`, and `admissionAuthorized=false`. The later
+live implementation must provision the dedicated bucket, CMEK and signing key,
+short-lived uploader and verifier identities, protected workflow environments,
+signature replay, and an independently reviewed aggregate. None of those live
+surfaces exists merely because this contract is checked in.
+
 ## Materialize and admit
 
 1. Download each model from its revision-bound URL into restricted staging.
@@ -125,9 +166,15 @@ even if its declared identifiers match.
 2. Run the local source-file inspection before making the object available to
    any cluster or registry process. Reject a mismatch without retrying from a
    mutable URL. This local report is review input, not custody evidence.
-3. Copy approved objects into the lab's immutable model custody store. Record
-   object generation, digest, actor identity digest, and source candidate
-   digest.
+3. Provision the separately reviewed custody authority and copy source-verified
+   objects into a review-pending, held prefix in the lab's immutable model
+   custody store. Record object generation and metageneration, size, CRC32C,
+   SHA-256, CMEK key version, object hold, actor identity digests, source
+   observation, and candidate digest. Verify the bytes through a distinct
+   read-only identity and publish the detached KMS signature last. The
+   model-risk reviewer and service owner then sign separate decisions bound to
+   that exact custody record. A rejected object stays held and cannot enter the
+   BOM or admission contract.
 4. Mirror the exact llama.cpp linux/amd64 manifest into the lab registry and
    apply the lab KMS signature. Verify the destination digest and admission
    policy from both cluster planes.
