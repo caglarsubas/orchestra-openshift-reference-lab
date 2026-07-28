@@ -5,7 +5,7 @@ TERRAFORM ?= terraform
 .PHONY: observe-sno-trial-dependency-inputs verify-sno-trial-dependency-inputs materialize-sno-trial-dependency-manifests verify-sno-trial-dependency-materialization observe-sno-trial-dependency-integrity verify-sno-trial-dependency-integrity validate-sno-trial-dependency-dry-run-contract observe-sno-trial-dependency-dry-run verify-sno-trial-dependency-dry-run
 .PHONY: plan-reference-lab-environment apply-reference-lab-environment verify-reference-lab-environment
 .PHONY: validate-production-model-artifact-candidate
-.PHONY: validate-production-model-artifact-intake inspect-production-model-artifacts verify-production-model-artifact-intake
+.PHONY: validate-production-model-artifact-intake inspect-production-model-artifacts verify-production-model-artifact-intake validate-production-model-artifact-custody
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -29,6 +29,7 @@ validate:
 	$(PYTHON) scripts/validate_dependency_admission.py
 	$(PYTHON) scripts/validate_production_model_artifact_candidate.py
 	$(PYTHON) scripts/production_model_artifact_intake.py validate-policy
+	$(PYTHON) scripts/production_model_artifact_custody.py validate-policy
 	$(PYTHON) scripts/validate_dependency_supply_chain.py
 	$(PYTHON) scripts/validate_dependency_risk_intake.py
 	$(PYTHON) scripts/validate_dependency_risk_execution.py
@@ -91,6 +92,9 @@ validate-production-model-artifact-candidate:
 
 validate-production-model-artifact-intake:
 	$(PYTHON) scripts/production_model_artifact_intake.py validate-policy
+
+validate-production-model-artifact-custody:
+	$(PYTHON) scripts/production_model_artifact_custody.py validate-policy
 
 inspect-production-model-artifacts:
 	test -n "$(CHAT_MODEL)"
