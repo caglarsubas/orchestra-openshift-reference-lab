@@ -1,0 +1,10 @@
+{
+  "artifactIds": [
+    "orchestra-reference-chat-model",
+    "orchestra-reference-embedding-model"
+  ],
+  "executionMode": "simulated",
+  "kind": "orchestra.openshift.production-model-artifact-intake-snapshot.v1",
+  "observedAt": "2026-07-28T00:00:00Z",
+  "schemaVersion": 1
+}

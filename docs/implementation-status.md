@@ -61,6 +61,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Immutable publication and read-only replay lanes | Yes | Yes | No | No | No |
 | Published signed lab service image indexes | Yes | N/A | N/A | Yes | No |
 | Source-only production chat/embedding artifact candidate | Yes | Yes | No | No | No |
+| Payload-free local production model source-file inspection | Yes | Yes | No | No | No |
 | Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
@@ -465,6 +466,18 @@ destination mirror, signature, licence decision, PVC proof, Secret/TLS
 resolution, server-side dry run, live inference result, manifest, deployment,
 or campaign evidence exists. A new BOM and admission revision is required
 before an admitted GitOps candidate can be created.
+
+The production model source-intake policy and inspector are now source-declared
+and CI-tested. They accept only regular, non-writable model files under ignored
+`restricted/`, reject exact-size drift before opening or reading, use
+descriptor-relative `O_NOFOLLOW` opens for each ancestor and the leaf, bind the
+open file descriptor to the pre-read inode/device/size/time, stream a bounded
+SHA-256, recheck descriptor state, and write only a create-only `0600`
+payload-free report. Simulation cannot claim local source observation. No local
+production-model observation is checked in or claimed, and even a matching
+unsigned report remains only review input: it cannot establish immutable
+custody, licence approval, source admission, mirroring, deployment, or campaign
+evidence.
 
 The next live increment starts by applying the exact plan-bound required-reviewer
 configuration to all six existing environment shells after an eligible non-owner

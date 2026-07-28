@@ -182,6 +182,9 @@ jobs:
       - name: Validate inert production model artifact candidate
         run: python3 scripts/validate_production_model_artifact_candidate.py
 
+      - name: Validate fail-closed production model source intake
+        run: python3 scripts/production_model_artifact_intake.py validate-policy
+
       - name: Validate source verification and empty mirror intake
         run: python3 scripts/validate_dependency_supply_chain.py
 

@@ -1,4 +1,4 @@
-# Production model artifact candidate
+# Production model artifacts and source intake
 
 This runbook governs the source-only chat and embedding model candidate for the
 `orchestra-ocp-4.20-amd64-v1` reference profile. The candidate closes the
@@ -13,6 +13,11 @@ It binds its strict schema, the current dependency BOM, the current dependency
 admission contract, and the cross-plane release set. The current BOM remains
 unchanged and continues to mark `model-backend` and `embedding-model` as
 `unselected` with `MODEL_ARTIFACT_CONTRACT_MISSING`.
+
+The source-file inspection policy is
+`config/production-model-artifact-intake-policy.lock.json`, digest
+`sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7`.
+It is bound to the candidate and its strict payload-free observation schema.
 
 ## Locked source candidate
 
@@ -56,6 +61,7 @@ and OpenShift compatibility remain unverified.
 
    ```bash
    make validate-production-model-artifact-candidate
+   make validate-production-model-artifact-intake
    ```
 
 2. An independent reviewer confirms each upstream revision, object size,
@@ -68,13 +74,57 @@ and OpenShift compatibility remain unverified.
    bind the exact platform digest and an unexpired two-person decision. A
    generic repository exception is insufficient.
 
+## Local source-file inspection
+
+Download and licence review are operator responsibilities. The repository
+inspector never makes a network request and never copies a model. Place both
+operator-obtained files under a private directory beneath ignored
+`restricted/`, then run:
+
+```bash
+mkdir -m 700 restricted/production-model-intake
+make inspect-production-model-artifacts \
+  CHAT_MODEL="$PWD/restricted/production-model-intake/qwen2.5-0.5b-instruct-q4_k_m.gguf" \
+  EMBEDDING_MODEL="$PWD/restricted/production-model-intake/nomic-embed-text-v1.5.Q4_K_M.gguf" \
+  OBSERVATION_ID="production-model-intake-$(date -u +%Y%m%d%H%M%S).1" \
+  OUTPUT="$PWD/restricted/production-model-intake/observation.json"
+```
+
+For each file, the inspector:
+
+1. rejects a missing path, symlink, non-regular object, path outside
+   `restricted/`, or group/world-writable file;
+2. compares the filesystem size with the exact expected size and maximum before
+   calling `open` or reading a byte;
+3. walks every ancestor using descriptor-relative `O_NOFOLLOW` directory opens,
+   opens the leaf relative to that verified parent, and compares the file
+   descriptor with the pre-read device, inode, size, and modification time;
+4. streams SHA-256 with a bounded byte count; and
+5. rechecks descriptor identity and size after reading.
+
+The report is created once with mode `0600`. It contains artifact identities,
+sizes, digests, booleans, reason codes, timestamps, and contract bindings. It
+contains no file path, model byte, credential, or Secret value. Verify it with:
+
+```bash
+make verify-production-model-artifact-intake \
+  REPORT="$PWD/restricted/production-model-intake/observation.json"
+```
+
+`SOURCE_BYTES_OBSERVED` means only that two local files matched the locked
+source metadata during one bounded inspection. The report is unsigned, expires
+after 24 hours, and explicitly keeps artifact custody, licence approval, source
+admission, mirror authorization, deployment, campaign evidence, and every
+certification claim false. A simulated snapshot always produces `SIMULATED`,
+even if its declared identifiers match.
+
 ## Materialize and admit
 
 1. Download each model from its revision-bound URL into restricted staging.
    Enforce the declared maximum size before and during transfer.
-2. Recompute SHA-256 and byte size before making the object available to any
-   cluster or registry process. Reject a mismatch without retrying from a
-   mutable URL.
+2. Run the local source-file inspection before making the object available to
+   any cluster or registry process. Reject a mismatch without retrying from a
+   mutable URL. This local report is review input, not custody evidence.
 3. Copy approved objects into the lab's immutable model custody store. Record
    object generation, digest, actor identity digest, and source candidate
    digest.

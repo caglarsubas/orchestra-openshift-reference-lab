@@ -27,7 +27,8 @@ source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, a digest-bound source-only dependency GitOps
 candidate, a schema- and lineage-bound source-only production chat/embedding
-artifact candidate, a payload-free live dependency-input observer and private
+artifact candidate with a payload-free no-follow local source-file inspector,
+a payload-free live dependency-input observer and private
 non-authorizing manifest materializer, an atomic signed-runner scan collector
 and detached attestation verifier, an exact public OpenShift SNO toolchain
 archive lock and payload-free local intake verifier, a stage-aware prerequisite
@@ -496,6 +497,17 @@ OpenShift dry run, live quality evidence, and connectivity are absent. The
 candidate emits no manifest and is not referenced by active GitOps; a new BOM
 and admission revision is required before deployment review.
 
+The production model source-intake policy digest is
+`sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7`.
+Its local inspector accepts only non-writable regular files beneath ignored
+`restricted/`, rejects size drift before opening or reading, uses
+descriptor-relative `O_NOFOLLOW` opens for every ancestor and the leaf, checks
+descriptor identity before and after bounded SHA-256 streaming, and writes a
+create-only `0600` payload-free report. It performs no download or copy. Even
+`SOURCE_BYTES_OBSERVED` is an unsigned local source observation, not immutable
+custody, licence approval, source admission, mirroring, deployment, or campaign
+evidence. No such live observation is checked in or claimed here.
+
 The bounded source-verification digest is
 `sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
 It records exact keyless verification for three subjects and explicit
@@ -698,8 +710,8 @@ make terraform-fmt
 
 `make validate` checks the topology, immutable cross-plane release set,
 platform-owned certification contract intake, dependency BOM, fail-closed
-dependency admission, inert production model artifact candidate, bounded
-signature observation, unsigned-source risk
+dependency admission, inert production model artifact candidate and source-file
+intake, bounded signature observation, unsigned-source risk
 policy, empty exception intake, empty mirror intake, and source-only dependency
 GitOps candidate, plus the staged
 prerequisite observation policy and review-bound foundation-apply authority.

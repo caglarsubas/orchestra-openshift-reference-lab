@@ -1,0 +1,352 @@
+{
+  "$defs": {
+    "artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "type": "string"
+        },
+        "descriptorStable": {
+          "type": "boolean"
+        },
+        "expectedDigestMatched": {
+          "type": "boolean"
+        },
+        "expectedSizeMatched": {
+          "type": "boolean"
+        },
+        "observedDigest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/digest"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "postReadSizeBytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preReadGuardPassed": {
+          "type": "boolean"
+        },
+        "preReadSizeBytes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reasonCodes": {
+          "items": {
+            "enum": [
+              "SIMULATED_INPUT",
+              "ARTIFACT_INPUT_MISSING",
+              "ARTIFACT_OUTSIDE_RESTRICTED",
+              "ARTIFACT_PARENT_UNSAFE",
+              "ARTIFACT_SYMLINK",
+              "ARTIFACT_NOT_REGULAR",
+              "ARTIFACT_GROUP_OR_WORLD_WRITABLE",
+              "ARTIFACT_SIZE_MISMATCH",
+              "ARTIFACT_DESCRIPTOR_CHANGED",
+              "ARTIFACT_READ_FAILED",
+              "ARTIFACT_DIGEST_MISMATCH"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "result": {
+          "enum": [
+            "VERIFIED",
+            "BLOCKED_PRE_READ",
+            "BLOCKED_DURING_READ",
+            "SIMULATED"
+          ]
+        }
+      },
+      "required": [
+        "artifactId",
+        "preReadSizeBytes",
+        "postReadSizeBytes",
+        "observedDigest",
+        "preReadGuardPassed",
+        "descriptorStable",
+        "expectedSizeMatched",
+        "expectedDigestMatched",
+        "reasonCodes",
+        "result"
+      ],
+      "type": "object"
+    },
+    "bindings": {
+      "additionalProperties": false,
+      "properties": {
+        "candidateDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "candidateId": {
+          "type": "string"
+        },
+        "policyDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "policyId": {
+          "type": "string"
+        },
+        "schemaDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "policyId",
+        "policyDigest",
+        "candidateId",
+        "candidateDigest",
+        "schemaDigest"
+      ],
+      "type": "object"
+    },
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactCustodyVerified": {
+          "const": false
+        },
+        "campaignEvidence": {
+          "const": false
+        },
+        "contractualSla": {
+          "const": false
+        },
+        "customerCertified": {
+          "const": false
+        },
+        "dependencyAdmissionAuthorized": {
+          "const": false
+        },
+        "deploymentAuthorized": {
+          "const": false
+        },
+        "licenseApproved": {
+          "const": false
+        },
+        "mirrorAuthorization": {
+          "const": false
+        },
+        "productionSupported": {
+          "const": false
+        },
+        "redHatCertified": {
+          "const": false
+        },
+        "referenceProfileVerified": {
+          "const": false
+        },
+        "sourceAdmissionAuthorized": {
+          "const": false
+        }
+      },
+      "required": [
+        "artifactCustodyVerified",
+        "campaignEvidence",
+        "contractualSla",
+        "customerCertified",
+        "dependencyAdmissionAuthorized",
+        "deploymentAuthorized",
+        "licenseApproved",
+        "mirrorAuthorization",
+        "productionSupported",
+        "redHatCertified",
+        "referenceProfileVerified",
+        "sourceAdmissionAuthorized"
+      ],
+      "type": "object"
+    },
+    "controls": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactCopyPerformed": {
+          "const": false
+        },
+        "campaignEligible": {
+          "const": false
+        },
+        "cloudMutationAuthorized": {
+          "const": false
+        },
+        "inputPathsStored": {
+          "const": false
+        },
+        "modelBytesStoredInReport": {
+          "const": false
+        },
+        "networkDownloadPerformed": {
+          "const": false
+        },
+        "outputContainsPayloadBytes": {
+          "const": false
+        },
+        "scope": {
+          "const": "production-model-source-file-inspection-only"
+        },
+        "secretValuesStored": {
+          "const": false
+        },
+        "sourceOnly": {
+          "const": true
+        }
+      },
+      "required": [
+        "scope",
+        "sourceOnly",
+        "networkDownloadPerformed",
+        "artifactCopyPerformed",
+        "inputPathsStored",
+        "modelBytesStoredInReport",
+        "outputContainsPayloadBytes",
+        "secretValuesStored",
+        "cloudMutationAuthorized",
+        "campaignEligible"
+      ],
+      "type": "object"
+    },
+    "decision": {
+      "additionalProperties": false,
+      "properties": {
+        "reasonCodes": {
+          "items": {
+            "enum": [
+              "SIMULATED_INPUT",
+              "ARTIFACT_INPUT_MISSING",
+              "ARTIFACT_OUTSIDE_RESTRICTED",
+              "ARTIFACT_PARENT_UNSAFE",
+              "ARTIFACT_SYMLINK",
+              "ARTIFACT_NOT_REGULAR",
+              "ARTIFACT_GROUP_OR_WORLD_WRITABLE",
+              "ARTIFACT_SIZE_MISMATCH",
+              "ARTIFACT_DESCRIPTOR_CHANGED",
+              "ARTIFACT_READ_FAILED",
+              "ARTIFACT_DIGEST_MISMATCH"
+            ]
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "status": {
+          "enum": [
+            "SIMULATED",
+            "SOURCE_BYTES_OBSERVED",
+            "BLOCKED"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "reasonCodes"
+      ],
+      "type": "object"
+    },
+    "digest": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/production-model-artifact-intake-observation-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {
+      "items": false,
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/artifact"
+        },
+        {
+          "$ref": "#/$defs/artifact"
+        }
+      ],
+      "type": "array"
+    },
+    "bindings": {
+      "$ref": "#/$defs/bindings"
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "controls": {
+      "$ref": "#/$defs/controls"
+    },
+    "decision": {
+      "$ref": "#/$defs/decision"
+    },
+    "executionMode": {
+      "enum": [
+        "simulated",
+        "local-file-inspection"
+      ]
+    },
+    "expiresAt": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "kind": {
+      "const": "orchestra.openshift.production-model-artifact-intake-observation.v1"
+    },
+    "observationId": {
+      "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$",
+      "type": "string"
+    },
+    "observedAt": {
+      "$ref": "#/$defs/timestamp"
+    },
+    "profileId": {
+      "const": "orchestra-ocp-4.20-amd64-v1"
+    },
+    "reportDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "targetClass": {
+      "const": "source-intake"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "observationId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "observedAt",
+    "expiresAt",
+    "artifacts",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "title": "Orchestra production model artifact intake observation v1",
+  "type": "object"
+}
