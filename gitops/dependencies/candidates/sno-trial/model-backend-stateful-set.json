@@ -145,6 +145,12 @@
                 "mountPath": "/var/run/secrets/orchestra-model/tls.key",
                 "subPath": "tls.key",
                 "readOnly": true
+              },
+              {
+                "name": "tls",
+                "mountPath": "/var/run/secrets/orchestra-model/ca.crt",
+                "subPath": "ca.crt",
+                "readOnly": true
               }
             ]
           }
@@ -183,6 +189,10 @@
                 {
                   "key": "tls.key",
                   "path": "tls.key"
+                },
+                {
+                  "key": "ca.crt",
+                  "path": "ca.crt"
                 }
               ]
             }

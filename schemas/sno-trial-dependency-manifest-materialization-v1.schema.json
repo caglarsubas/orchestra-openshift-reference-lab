@@ -60,7 +60,7 @@
       ],
       "properties": {
         "candidateId": {
-          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.1"
+          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.2"
         },
         "candidateDigest": {"$ref": "#/$defs/digest"},
         "sourceManifestSetDigest": {"$ref": "#/$defs/digest"},

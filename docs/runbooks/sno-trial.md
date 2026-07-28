@@ -256,8 +256,51 @@ create-only directory with mode-0600 resources and receipt. The receipt binds
 the source candidate, live observation, output resource digests, and selected
 class digest without storing the class name. It emits no Secret object or
 model bytes, changes no active Kustomization, and grants no apply authority.
-The resulting artifact must still pass OpenShift server-side dry-run, model
-digest/certificate checks, and live connectivity before activation review.
+The resulting artifact must still pass OpenShift server-side dry-run and a
+separately reviewed dependency deployment before the mounted-byte checks can
+run. Applying it is outside this materialization command and requires its own
+authorization and cleanup record.
+
+The model TLS Secret must contain `ca.crt` in addition to `tls.crt` and
+`tls.key`; this binds the client-trust material used for chain validation. Once
+the exact materialized dependency candidate is running under separate
+authorization, execute the integrity observer from the Linux operator host:
+
+```bash
+INTEGRITY_ID=sno-dependency-integrity-$(date -u +%Y%m%d%H%M%S).1
+INTEGRITY_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+make observe-sno-trial-dependency-integrity \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  KUBECONFIG=restricted/cluster/auth/kubeconfig \
+  OPENSSL=/usr/bin/openssl \
+  INPUT_REPORT="restricted/$DEPENDENCY_INPUT_ID.json" \
+  MATERIALIZATION_RECEIPT="restricted/dependencies/$MATERIALIZATION_ID/materialization-receipt.json" \
+  ASSESSMENT_ID="$INTEGRITY_ID" \
+  OBSERVED_AT="$INTEGRITY_AT" \
+  OUTPUT="restricted/$INTEGRITY_ID.json"
+
+make verify-sno-trial-dependency-integrity \
+  REPORT="restricted/$INTEGRITY_ID.json"
+```
+
+The observer accepts only a live successful input report and its exact private
+materialization receipt, both no more than one hour old. It requires the pinned
+model pod to be running and ready on the exact llama.cpp image, then executes a
+static read-only `wc`/`sha256sum` probe against the model mount. It requests
+only the Valkey and model TLS Secrets, never the Valkey password or model API
+keys. OpenSSL 3 receives certificate, private-key, and CA bytes through process
+memory and anonymous Linux file descriptors. The report stores only
+fingerprints, resource-version and SAN-set digests, validity timestamps,
+remaining lifetime, counts, and match booleans.
+
+`DEPENDENCY_INTEGRITY_VERIFIED` requires the exact 491,400,032-byte Qwen
+SHA-256, a non-writable mounted model, at least 24 hours of certificate
+validity, all required service DNS SANs, matching private keys, and valid CA
+chains for both services. This observation does not perform server-side
+dry-run, network connectivity, activation, deployment, or campaign work. Its
+source and CI fixtures have not been exercised against the destroyed cluster.
+Live connectivity and activation review remain separate blockers.
 
 A future candidate revision must bind the contract-set digest; that change
 deliberately requires a fresh product-artifact replay. The three product planes

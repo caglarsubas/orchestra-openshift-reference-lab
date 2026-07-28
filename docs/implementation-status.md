@@ -85,6 +85,7 @@ any certification campaign slot.
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
 | Inactive Valkey/model-backend dependency manifest candidate | Yes | Yes | No | No | Not eligible |
 | Payload-free six-input observer and private manifest materializer | Yes | Yes | No | No | Not eligible |
+| Payload-free model/TLS integrity observer and strict policy | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | Yes | Yes | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
@@ -273,13 +274,19 @@ dropped capabilities, probes, headless Services, and namespace-scoped
 default-deny/allowlist policies. Its strict lock binds the source manifests,
 runtime contracts, artifact set, six external input references, and two
 workloads. CI renders it, but the active dependency Kustomization does not
-reference it. Upstream review, destination and live-cluster pull proof, live
-input observation, private storage-class materialization, model-PVC digest
-proof, populated dependency Secret/TLS inputs, workload-candidate rebinding,
-server-side dry-run, and live connectivity remain blockers. The source now
-includes a payload-free observer and create-only private materializer, but
-neither has been exercised against the destroyed cluster. Their contracts keep
-all apply, deployment, campaign, and certification authority false. The
+reference it. The model TLS reference now also requires `ca.crt`, closing the
+previous unbound client-trust input. Upstream review, destination and
+live-cluster pull proof, live input observation, private storage-class
+materialization, model-PVC digest proof, populated dependency Secret/TLS
+inputs, workload-candidate rebinding, server-side dry-run, and live
+connectivity remain blockers. The source now includes a payload-free input
+observer, create-only private materializer, and model/TLS integrity observer.
+The integrity observer hashes the exact model inside the pinned pod and uses
+OpenSSL 3 with anonymous Linux file descriptors to check certificate lifetime,
+required DNS SANs, private-key match, and CA chain. It requests only the two TLS
+Secrets and persists only digests, timestamps, counts, and booleans. None of
+these paths has been exercised against the destroyed cluster. Their contracts
+keep all apply, deployment, campaign, and certification authority false. The
 operator-input source contract inventories all 17 external objects and
 validates their references against the July 27 renders, but no live read-only
 input report exists. Live capacity and server-side API acceptance were

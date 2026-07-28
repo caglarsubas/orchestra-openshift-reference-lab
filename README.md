@@ -357,11 +357,24 @@ binds the operator's private storage-class file by digest, and replaces exactly
 one identifier. Its receipt omits the storage-class name and keeps apply,
 deployment, campaign, and certification authority false.
 
+The model TLS input now includes an explicit `ca.crt` client-trust artifact.
+A separate integrity policy and observer bind the live input report and private
+materialization receipt to the exact Qwen size/SHA-256 and both server
+certificate contracts. On a separately authorized running dependency
+deployment, it hashes the model inside the pinned model pod and validates only
+the two TLS Secrets with OpenSSL 3. The payload-free output keeps certificate,
+private-key, CA, and model bytes out of the report; authentication Secret values
+are never requested. Validate the source contract with:
+
+```bash
+make validate-sno-trial-dependency-integrity-policy
+```
+
 This path has CI fixture coverage but has not been run against the destroyed
 trial cluster. Upstream review, destination admission and signing, certificate
-validity, model-byte/digest proof, live allocatable capacity,
+validity and model-byte/digest live evidence, live allocatable capacity,
 workload-candidate rebinding, server-side dry-run, connectivity, and activation
-review remain blocked. Neither the artifact set, observation, nor private
+review remain blocked. Neither the artifact set, observations, nor private
 materialization changes the current product replay lineage or authorizes apply.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one

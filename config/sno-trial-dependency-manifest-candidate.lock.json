@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "orchestra.openshift.sno-trial-dependency-manifest-candidate.v1",
-  "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.1",
+  "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.2",
   "profileId": "orchestra-ocp-sno-trial-amd64-v1",
   "targetClass": "engineering-trial",
   "executionMode": "source-only",
@@ -161,6 +161,7 @@
       "namespace": "orchestra-sno-model-backend",
       "name": "orchestra-sno-model-server-tls",
       "requiredKeys": [
+        "ca.crt",
         "tls.crt",
         "tls.key"
       ],
@@ -205,7 +206,7 @@
       "modelArtifactReadOnly": true
     }
   ],
-  "manifestSetDigest": "sha256:14ccfdcf06eae506b701c9674fd536eb2024f616bc3b711438783033be566d7f",
+  "manifestSetDigest": "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728",
   "activation": {
     "state": "blocked",
     "reasonCodes": [
@@ -251,5 +252,5 @@
     "highAvailability": false,
     "rpoRtoVerified": false
   },
-  "candidateDigest": "sha256:fd39f3b7e21d5ed6472557d5884ef4bf1fdd6dc26785475af98449c90aa672c0"
+  "candidateDigest": "sha256:7f5d0518e87e27f982c80a2bcd63e03d56af151f024d88737fda89f682be1e5f"
 }
