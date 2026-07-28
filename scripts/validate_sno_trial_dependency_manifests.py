@@ -738,6 +738,22 @@ def validate_candidate(
     return manifests_digest, candidate_digest
 
 
+def load_validated_candidate() -> dict[str, Any]:
+    value = load_json(CANDIDATE_PATH)
+    validate_candidate(
+        value,
+        load_resources(),
+        load_json(WORKLOAD_PATH),
+        load_json(RUNTIME_PATH),
+        load_json(ARTIFACT_PATH),
+        active_kustomization_text=ACTIVE_DEPENDENCY_KUSTOMIZATION.read_text(
+            encoding="utf-8"
+        ),
+        kustomization_file_list=kustomization_resources(),
+    )
+    return value
+
+
 def main() -> int:
     resources = load_resources()
     manifests_digest, candidate_digest = validate_candidate(

@@ -60,6 +60,13 @@ jobs:
       - name: Validate inactive SNO dependency manifest candidate
         run: python3 scripts/validate_sno_trial_dependency_manifests.py
 
+      - name: Prove SNO dependency inputs and materialization remain non-authorizing
+        run: >-
+          python3 -m unittest
+          tests.test_sno_trial_dependency_inputs
+          tests.test_materialize_sno_trial_dependency_manifests
+          -v
+
       - name: Validate complete SNO workload image artifact set
         run: python3 scripts/sno_trial_product_artifacts.py validate-lock
 

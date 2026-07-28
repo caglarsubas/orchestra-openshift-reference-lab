@@ -83,6 +83,8 @@ any certification campaign slot.
 | Digest-locked four-workload-image, three-plane signed publication set | Yes | Yes | No | No | Not eligible |
 | Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
+| Inactive Valkey/model-backend dependency manifest candidate | Yes | Yes | No | No | Not eligible |
+| Payload-free six-input observer and private manifest materializer | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | Yes | Yes | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
@@ -271,10 +273,13 @@ dropped capabilities, probes, headless Services, and namespace-scoped
 default-deny/allowlist policies. Its strict lock binds the source manifests,
 runtime contracts, artifact set, six external input references, and two
 workloads. CI renders it, but the active dependency Kustomization does not
-reference it. Upstream review, destination and live-cluster pull proof,
-storage-class materialization, model-PVC digest proof, populated dependency
-Secret/TLS inputs, workload-candidate rebinding, server-side dry-run, and live
-connectivity remain blockers. The
+reference it. Upstream review, destination and live-cluster pull proof, live
+input observation, private storage-class materialization, model-PVC digest
+proof, populated dependency Secret/TLS inputs, workload-candidate rebinding,
+server-side dry-run, and live connectivity remain blockers. The source now
+includes a payload-free observer and create-only private materializer, but
+neither has been exercised against the destroyed cluster. Their contracts keep
+all apply, deployment, campaign, and certification authority false. The
 operator-input source contract inventories all 17 external objects and
 validates their references against the July 27 renders, but no live read-only
 input report exists. Live capacity and server-side API acceptance were
