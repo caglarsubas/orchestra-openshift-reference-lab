@@ -273,7 +273,7 @@
           "const": "orchestra-model-custody-writer"
         },
         "verifierServiceAccountId": {
-          "const": "orchestra-model-custody-verifier"
+          "const": "orchestra-model-custody-verify"
         }
       }
     },

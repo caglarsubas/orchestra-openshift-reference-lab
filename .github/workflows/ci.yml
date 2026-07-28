@@ -188,6 +188,9 @@ jobs:
       - name: Validate production model custody and review contract
         run: python3 scripts/production_model_artifact_custody.py validate-policy
 
+      - name: Validate production model custody cloud authority
+        run: python3 scripts/validate_production_model_artifact_custody_execution.py
+
       - name: Validate source verification and empty mirror intake
         run: python3 scripts/validate_dependency_supply_chain.py
 

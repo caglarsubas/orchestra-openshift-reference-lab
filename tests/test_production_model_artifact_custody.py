@@ -149,7 +149,7 @@ class ProductionModelArtifactCustodyTests(unittest.TestCase):
                 "verifierIdentityDigest": self.identity("c"),
                 "identitiesDistinct": True,
                 "uploaderServiceAccountId": "orchestra-model-custody-writer",
-                "verifierServiceAccountId": "orchestra-model-custody-verifier",
+                "verifierServiceAccountId": "orchestra-model-custody-verify",
             },
             "timestamps": {
                 "copyStartedAt": "2026-07-28T00:59:00Z",
