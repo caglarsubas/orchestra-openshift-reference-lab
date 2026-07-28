@@ -231,8 +231,9 @@ platform migration image was not. Thirteen Secret references were reduced to
 counts and digests only. External references, live pulls, and destination
 mirroring remain unverified, and no deployment or admission state advanced.
 The current source contract now binds all four images; the immutable report
-still describes the prior set and requires a fresh live replay and future
-server-side observation.
+still describes the prior set and requires a future server-side observation.
+The separate exact-main registry replay now covers the rebound four-image set,
+but independent human admission remains absent.
 
 The public-toolchain row records local archive integrity only. On 2026-07-25,
 the exact versioned linux/amd64 installer and client archives matched Red Hat's
@@ -258,6 +259,12 @@ Exact-main run `30293130839` replayed the resulting four-image set from
 revision `2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; immutable artifact
 `8663575783` contains report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
+That report became historical when the workload candidate was rebound.
+Exact-main run `30331064883` replayed the rebound set from revision
+`3a3793bdc955c747e01aaf01afbfd000a1d58c36`; immutable artifact
+`8677385356` contains report digest
+`sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`
+and expires on 2026-08-11.
 Source-only direct dependency runtime requirements now exist for PostgreSQL,
 ClickHouse, JetStream, Valkey, and the CPU model backend. The strict lock binds
 the current candidate, selected dependency artifact set, source admission, and
@@ -299,10 +306,9 @@ authorize deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.4` marks the previous
-exact-main replay stale after workload-candidate rebinding. A fresh four-image
-replay is required before admission, and no admission record exists. Even a
-valid future admission removes only the replay-review reason and leaves all
+`orchestra-sno-trial-product-admission-2026-07-28.5` binds the fresh exact-main
+replay with `replayState=current`. No admission record exists. Even a valid
+future admission removes only the replay-review reason and leaves all
 deployment/provider blockers and every certifying claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence

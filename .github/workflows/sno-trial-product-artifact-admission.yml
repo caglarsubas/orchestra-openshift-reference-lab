@@ -30,8 +30,8 @@ jobs:
     env:
       EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
       REPLAY_ARTIFACT_ID: ${{ inputs.replay_artifact_id }}
-      REPLAY_RUN_ID: "30211883723"
-      REPLAY_ARTIFACT_NAME: sno-trial-product-artifact-replay-30211883723-1
+      REPLAY_RUN_ID: "30331064883"
+      REPLAY_ARTIFACT_NAME: sno-trial-product-artifact-replay-30331064883-1
 
     steps:
       - name: Require exact reviewed first-attempt main execution
@@ -40,7 +40,7 @@ jobs:
           [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
           [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
-          [[ "$REPLAY_ARTIFACT_ID" == "8634695656" ]]
+          [[ "$REPLAY_ARTIFACT_ID" == "8677385356" ]]
 
       - name: Check out exact admission implementation
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -79,7 +79,7 @@ jobs:
             --arg name "$REPLAY_ARTIFACT_NAME" \
             --argjson run_id "$REPLAY_RUN_ID" \
             '
-              .id == 8634695656
+              .id == 8677385356
               and .name == $name
               and .expired == false
               and .workflow_run.id == $run_id

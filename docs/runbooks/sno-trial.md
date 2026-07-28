@@ -388,7 +388,12 @@ Exact-main run `30211883723` completed on 2026-07-26 against verifier revision
 `sha256:7fe8801345099fa1ad1073cdfdae7204f6aa3f577474a462200c1a5f7b7eb359`.
 Artifact `8634695656` is named
 `sno-trial-product-artifact-replay-30211883723-1` and expires on
-2026-08-09. The downloaded report verifies against the current Planeon-bound
+2026-08-09. That report is historical evidence for an earlier lock.
+Exact-main run `30331064883` completed on 2026-07-28 against verifier revision
+`3a3793bdc955c747e01aaf01afbfd000a1d58c36`. Artifact `8677385356` is named
+`sno-trial-product-artifact-replay-30331064883-1`, contains report digest
+`sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`,
+and expires on 2026-08-11. The downloaded report verifies against the rebound
 artifact and workload locks. It remains a time-bounded GitHub Actions artifact
 and does not by itself record human admission.
 
@@ -406,13 +411,15 @@ The source contract for that later review is locked in
 `config/sno-trial-product-artifact-admission-policy.lock.json`; its output
 schema is
 `schemas/sno-trial-product-artifact-admission-v1.schema.json`. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.4` records exact-main replay
-run `30293130839`, artifact ID `8663575783`, and report digest
-`sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
-That replay predates the current workload-candidate binding. Its replay state
-is `refresh-required`, and the admission command fails closed until a new
-exact-main replay is bound. Admission remains a separate protected action and
-does not grant deployment authority.
+`orchestra-sno-trial-product-admission-2026-07-28.5` records exact-main replay
+run `30331064883`, artifact ID `8677385356`, and report digest
+`sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`.
+The replay binds workload candidate
+`sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4`
+and artifact set
+`sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1`.
+Its replay state is `current`. Admission remains a separate protected action
+and does not grant deployment authority.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:
