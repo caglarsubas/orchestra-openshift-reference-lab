@@ -224,12 +224,39 @@ The workflow runs only inside the pinned signed certification image. It
 requires Cosign to return the specific no-signature condition for both locked
 indexes, scans the platform manifests with Trivy and Syft, checks model
 metadata before downloading, verifies all 491,400,032 bytes, deletes the model
-bytes, KMS-signs the collection statement, and creates restricted GCS objects
-without overwrite authority. Do not upload raw output as a normal Actions
-artifact.
+bytes, and KMS-signs both the inner collection statement and an outer raw
+custody statement. It creates exactly four non-overwritable objects beneath
+the existing `dependency-risk/` managed folder; the detached custody signature
+is the completion marker and is uploaded last. Do not upload raw output as a
+normal Actions artifact.
 
-Use the payload-free `risk-evidence.json` from restricted custody as the input
-to human review. A populated intake can be checked without granting authority:
+Record the exact completed evidence ID and use a separately approved custody
+run to pin object generations, verify both signatures, safely inspect the
+archive, and rebuild `risk-evidence.json` from the raw reports:
+
+```bash
+gh workflow run dependency-risk-custody-verification.yml \
+  --ref main \
+  -f verification_scope='sno-trial-dependencies' \
+  -f expected_main_sha="$revision" \
+  -f evidence_id='<exact-completed-evidence-id>' \
+  -f collection_kms_key_version='<reviewed-collection-version>' \
+  -f expected_collection_public_key_digest='sha256:<reviewed-pem-digest>' \
+  -f verification_kms_key_version='<reviewed-verification-version>' \
+  -f expected_verification_public_key_digest='sha256:<reviewed-pem-digest>' \
+  -f reason='Independently verify SNO dependency risk raw custody'
+```
+
+The second workflow uses the distinct custody-verifier identity and writes
+only a new signed report beneath `dependency-risk-custody/`. It cannot update
+or delete raw objects, read or delete signed reports, mirror artifacts, or
+authorize activation. Do not dispatch either workflow while the environment
+has only branch policy. A current-run approval by an eligible non-owner
+reviewer is mandatory.
+
+Only after the signed custody report verifies should the payload-free
+`risk-evidence.json` enter human review. A populated intake can be checked
+without granting authority:
 
 ```bash
 python3 scripts/sno_trial_dependency_risk.py validate-exceptions \
