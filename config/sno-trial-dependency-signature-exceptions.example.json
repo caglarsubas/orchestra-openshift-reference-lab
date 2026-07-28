@@ -10,6 +10,18 @@
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "riskPolicyDigest": "sha256:e3a5e149a34d36ad4d3f187ffde43a299b5da4bfbf17236d52b10ca6cdaa69aa"
   },
+  "custody": {
+    "status": "verification-required",
+    "verificationId": null,
+    "evidenceId": null,
+    "reportDigest": null,
+    "signatureBundleDigest": null,
+    "verificationSigningPublicKeyDigest": null,
+    "riskEvidenceDigest": null,
+    "riskEvidenceCanonicalDigest": null,
+    "verifierIdentityDigest": null,
+    "verifiedAt": null
+  },
   "subjects": [
     {
       "id": "model-backend-image",
@@ -47,6 +59,7 @@
       "sourceAdmissionState": "blocked",
       "reasonCodes": [
         "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_CUSTODY_VERIFICATION_MISSING",
         "LICENSE_REVIEW_MISSING",
         "RISK_REVIEW_MISSING",
         "INDEPENDENT_REVIEWS_MISSING"
@@ -88,6 +101,7 @@
       "sourceAdmissionState": "blocked",
       "reasonCodes": [
         "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+        "INDEPENDENT_CUSTODY_VERIFICATION_MISSING",
         "LICENSE_REVIEW_MISSING",
         "RISK_REVIEW_MISSING",
         "INDEPENDENT_REVIEWS_MISSING"
@@ -99,6 +113,7 @@
     "reviewReadySubjects": 0,
     "approvedExceptions": 0,
     "allExceptionsApproved": false,
+    "custodyVerified": false,
     "sourceAdmissionAuthorized": false,
     "mirrorAuthorization": false,
     "activationAuthorized": false,
@@ -113,6 +128,7 @@
     "approvedExceptionCount": 0,
     "reasonCodes": [
       "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+      "INDEPENDENT_CUSTODY_VERIFICATION_MISSING",
       "LICENSE_REVIEWS_MISSING",
       "RISK_REVIEWS_MISSING",
       "MODEL_LICENSE_REVIEW_MISSING",

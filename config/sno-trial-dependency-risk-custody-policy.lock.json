@@ -16,7 +16,7 @@
     "publisherScriptDigest": "sha256:b87e250bc0bc4f1cc0a215a6d7aeba98c6c0c64e12b0b2764e26791f209f1735",
     "verifierModuleDigest": "sha256:db6ed760ec2b33f56a990ccca5025479865e9d612ebb50b943f04fd1b95f3730",
     "verificationScriptDigest": "sha256:22e5521b700f1408332bccfa8e4a2a945976adff3c34988c24bcd3edc065c5a8",
-    "reportValidatorDigest": "sha256:dc2637dcce7c19f414515ef669ffc657b3fb2cc54cb331d995e64ca185e18305"
+    "reportValidatorDigest": "sha256:adc1f40020cc2f25834a979dadfea6300aca814387d84599ebc557541a3647e1"
   },
   "collection": {
     "managedFolder": "dependency-risk/",

@@ -16,6 +16,7 @@ from scripts.sno_trial_dependency_risk import (
     expected_bindings,
     expected_subjects,
     load_inputs as load_risk_inputs,
+    verified_custody_proof,
 )
 from scripts.sno_trial_dependency_risk_custody import (
     EXPECTED_POLICY_DIGEST,
@@ -664,6 +665,70 @@ class SnoTrialDependencyRiskCustodyTests(unittest.TestCase):
         changed["claims"]["deploymentAuthorized"] = True
         with self.assertRaisesRegex(ValueError, "report_claim_invalid"):
             validate_report(changed, self.policy)
+
+    def test_exception_proof_requires_signed_report_and_exact_evidence_bytes(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            work = Path(directory_name)
+            fixture = self.prepare_fixture(work)
+            report = self.verify_fixture(work, fixture)
+            report_path = work / "custody-report.json"
+            signature_path = work / "custody-report.sigstore.json"
+            signature_path.write_text(
+                '{"fixture":"report-signature"}\n',
+                encoding="utf-8",
+            )
+            evidence_path = fixture["collection_dir"] / "risk-evidence.json"
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+            with patch.dict(
+                os.environ,
+                {"COSIGN_CALL_LOG": str(work / "exception-cosign.log")},
+            ):
+                proof = verified_custody_proof(
+                    report_path=report_path,
+                    verification_public_key=fixture["verification_public_key"],
+                    signature_bundle=signature_path,
+                    expected_verification_public_key_digest=fixture[
+                        "verification_public_key_digest"
+                    ],
+                    risk_evidence_path=evidence_path,
+                    risk_evidence=evidence,
+                    cosign=str(fixture["cosign"]),
+                )
+            self.assertEqual(proof["status"], "verified")
+            self.assertEqual(proof["verificationId"], report["verificationId"])
+            self.assertEqual(
+                proof["riskEvidenceCanonicalDigest"],
+                report["collection"]["riskEvidenceCanonicalDigest"],
+            )
+            evidence_path.write_text(
+                evidence_path.read_text(encoding="utf-8") + " ",
+                encoding="utf-8",
+            )
+            with patch.dict(
+                os.environ,
+                {"COSIGN_CALL_LOG": str(work / "tamper-cosign.log")},
+            ):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "custody_evidence_binding_invalid",
+                ):
+                    verified_custody_proof(
+                        report_path=report_path,
+                        verification_public_key=fixture[
+                            "verification_public_key"
+                        ],
+                        signature_bundle=signature_path,
+                        expected_verification_public_key_digest=fixture[
+                            "verification_public_key_digest"
+                        ],
+                        risk_evidence_path=evidence_path,
+                        risk_evidence=json.loads(
+                            evidence_path.read_text(encoding="utf-8")
+                        ),
+                        cosign=str(fixture["cosign"]),
+                    )
 
     def test_workflows_preserve_production_defaults_and_use_scoped_publishers(
         self,

@@ -42,7 +42,7 @@ EXPECTED_POLICY_DIGEST = (
     "sha256:e3a5e149a34d36ad4d3f187ffde43a299b5da4bfbf17236d52b10ca6cdaa69aa"
 )
 EXPECTED_EXCEPTION_TEMPLATE_DIGEST = (
-    "sha256:5e50d25c8b21e9bc0135e1007491424c755db9c957d028bdc3c8765fdf447e83"
+    "sha256:9a6273de24871d092347d641f5687edcfa2f75680fe2d376a932df03b8fa9e98"
 )
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 TARGET_CLASS = "engineering-trial"
@@ -55,6 +55,10 @@ EVIDENCE_ID = re.compile(
 )
 EXCEPTION_ID = re.compile(
     r"^orchestra-sno-trial-dependency-signature-exception-[a-z0-9][a-z0-9.-]+$"
+)
+CUSTODY_VERIFICATION_ID = re.compile(
+    r"^orchestra-sno-trial-dependency-risk-custody-verification-"
+    r"[a-z0-9][a-z0-9.-]+$"
 )
 CONTROL_PLAN = [
     {"id": "exact-index-and-platform-digests", "requiredBefore": "review"},
@@ -106,8 +110,21 @@ EMPTY_DECISION = {
     "expiresAt": None,
     "approvalDigest": None,
 }
+EMPTY_CUSTODY = {
+    "status": "verification-required",
+    "verificationId": None,
+    "evidenceId": None,
+    "reportDigest": None,
+    "signatureBundleDigest": None,
+    "verificationSigningPublicKeyDigest": None,
+    "riskEvidenceDigest": None,
+    "riskEvidenceCanonicalDigest": None,
+    "verifierIdentityDigest": None,
+    "verifiedAt": None,
+}
 EMPTY_REASONS = [
     "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+    "INDEPENDENT_CUSTODY_VERIFICATION_MISSING",
     "LICENSE_REVIEW_MISSING",
     "RISK_REVIEW_MISSING",
     "INDEPENDENT_REVIEWS_MISSING",
@@ -759,6 +776,7 @@ def exception_candidate_digest(
             "targetClass": intake["targetClass"],
             "executionMode": intake["executionMode"],
             "bindings": intake["bindings"],
+            "custody": intake["custody"],
             "subject": {
                 "id": subject["id"],
                 "indexSubject": subject["indexSubject"],
@@ -788,6 +806,7 @@ def exception_approval_digest(
 def expected_intake_summary(
     subjects: list[dict[str, Any]],
     risk_evidence: dict[str, Any] | None,
+    custody_verified: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     evidence_digests = {
         item["evidence"]["riskEvidenceDigest"]
@@ -808,11 +827,14 @@ def expected_intake_summary(
         "reviewReadySubjects": review_ready,
         "approvedExceptions": approved,
         "allExceptionsApproved": approved == 2,
+        "custodyVerified": custody_verified,
         **NON_AUTHORIZING_CLAIMS,
     }
     reasons: list[str] = []
     if not evidence_digests:
         reasons.append("SIGNED_RUNNER_RISK_EVIDENCE_MISSING")
+    if not custody_verified:
+        reasons.append("INDEPENDENT_CUSTODY_VERIFICATION_MISSING")
     if review_ready != 2:
         reasons.extend(["LICENSE_REVIEWS_MISSING", "RISK_REVIEWS_MISSING"])
     if not model_review_complete:
@@ -841,6 +863,7 @@ def validate_exception_intake(
     artifacts: dict[str, Any],
     release_set: dict[str, Any],
     risk_evidence: dict[str, Any] | None = None,
+    custody_proof: dict[str, Any] | None = None,
     *,
     now: datetime | None = None,
     require_template_digest: bool = False,
@@ -855,6 +878,7 @@ def validate_exception_intake(
             "targetClass",
             "executionMode",
             "bindings",
+            "custody",
             "subjects",
             "claims",
             "admission",
@@ -883,10 +907,30 @@ def validate_exception_intake(
     subjects = value["subjects"]
     if not isinstance(subjects, list) or len(subjects) != len(expected):
         fail("sno_dependency_exception_inventory_invalid")
+    review_requested = any(
+        isinstance(item, dict)
+        and isinstance(item.get("request"), dict)
+        and item["request"].get("status") != "evidence-required"
+        for item in subjects
+    )
+    if review_requested:
+        if custody_proof is None:
+            fail("sno_dependency_exception_custody_required")
+        strict_keys(
+            custody_proof,
+            set(EMPTY_CUSTODY),
+            "sno_dependency_exception_custody_shape_invalid",
+        )
+        if value["custody"] != custody_proof:
+            fail("sno_dependency_exception_custody_binding_invalid")
+    elif custody_proof is not None or value["custody"] != EMPTY_CUSTODY:
+        fail("sno_dependency_exception_empty_custody_invalid")
     evidence_by_id: dict[str, dict[str, Any]] = {}
     evidence_digest: str | None = None
     collector_identity: str | None = None
     evidence_completed_at: datetime | None = None
+    custody_verified_at: datetime | None = None
+    assessed_at = now or datetime.now(timezone.utc)
     if risk_evidence is not None:
         evidence_digest = validate_risk_evidence(
             risk_evidence, artifacts, release_set
@@ -897,7 +941,42 @@ def validate_exception_intake(
             risk_evidence["collection"]["completedAt"],
             "sno_dependency_exception_evidence_time_invalid",
         )
-    assessed_at = now or datetime.now(timezone.utc)
+    if custody_proof is not None:
+        if risk_evidence is None or evidence_digest is None:
+            fail("sno_dependency_exception_custody_evidence_required")
+        if (
+            custody_proof.get("status") != "verified"
+            or not isinstance(custody_proof.get("verificationId"), str)
+            or not CUSTODY_VERIFICATION_ID.fullmatch(
+                custody_proof["verificationId"]
+            )
+            or custody_proof.get("evidenceId") != risk_evidence["evidenceId"]
+            or custody_proof.get("riskEvidenceCanonicalDigest")
+            != evidence_digest
+        ):
+            fail("sno_dependency_exception_custody_evidence_binding_invalid")
+        for field in (
+            "reportDigest",
+            "signatureBundleDigest",
+            "verificationSigningPublicKeyDigest",
+            "riskEvidenceDigest",
+            "riskEvidenceCanonicalDigest",
+            "verifierIdentityDigest",
+        ):
+            require_digest(
+                custody_proof.get(field),
+                f"sno_dependency_exception_custody_digest_invalid:{field}",
+            )
+        custody_verified_at = parse_utc(
+            custody_proof.get("verifiedAt"),
+            "sno_dependency_exception_custody_time_invalid",
+        )
+        if (
+            evidence_completed_at is None
+            or custody_verified_at < evidence_completed_at
+            or custody_verified_at > assessed_at
+        ):
+            fail("sno_dependency_exception_custody_time_invalid")
     seen: set[str] = set()
     for item in subjects:
         strict_keys(
@@ -1019,6 +1098,8 @@ def validate_exception_intake(
         )
         if requested_at < evidence_completed_at or requested_at > assessed_at:
             fail(f"sno_dependency_exception_request_time_invalid:{subject_id}")
+        if custody_verified_at is None or requested_at < custody_verified_at:
+            fail(f"sno_dependency_exception_custody_time_invalid:{subject_id}")
         candidate = exception_candidate_digest(value, item)
         if request["candidateDigest"] != candidate:
             fail(f"sno_dependency_exception_candidate_digest_invalid:{subject_id}")
@@ -1112,7 +1193,7 @@ def validate_exception_intake(
     if seen != set(expected):
         fail("sno_dependency_exception_inventory_invalid")
     expected_claims, expected_admission = expected_intake_summary(
-        subjects, risk_evidence
+        subjects, risk_evidence, custody_verified=custody_proof is not None
     )
     if value["claims"] != expected_claims:
         fail("sno_dependency_exception_claims_invalid")
@@ -1130,6 +1211,62 @@ def parse_assessed_at(value: str | None) -> datetime:
     return parse_utc(value, "sno_dependency_risk_validation_time_invalid")
 
 
+def verified_custody_proof(
+    *,
+    report_path: Path,
+    verification_public_key: Path,
+    signature_bundle: Path,
+    expected_verification_public_key_digest: str,
+    risk_evidence_path: Path,
+    risk_evidence: dict[str, Any],
+    cosign: str = "cosign",
+) -> dict[str, Any]:
+    try:
+        from scripts.validate_sno_trial_dependency_risk_custody_report import (
+            validate_signed_report,
+        )
+        from scripts.verify_dependency_risk_raw_custody import file_digest
+    except ModuleNotFoundError:
+        from validate_sno_trial_dependency_risk_custody_report import (
+            validate_signed_report,
+        )
+        from verify_dependency_risk_raw_custody import file_digest
+
+    report, _, signature_verified = validate_signed_report(
+        report_path=report_path,
+        verification_public_key=verification_public_key,
+        signature_bundle=signature_bundle,
+        expected_verification_public_key_digest=(
+            expected_verification_public_key_digest
+        ),
+        cosign=cosign,
+    )
+    risk_evidence_digest = file_digest(risk_evidence_path)
+    risk_evidence_canonical_digest = canonical_digest(risk_evidence)
+    if (
+        signature_verified is not True
+        or report["evidenceId"] != risk_evidence["evidenceId"]
+        or report["collection"]["riskEvidenceDigest"] != risk_evidence_digest
+        or report["collection"]["riskEvidenceCanonicalDigest"]
+        != risk_evidence_canonical_digest
+    ):
+        fail("sno_dependency_exception_custody_evidence_binding_invalid")
+    return {
+        "status": "verified",
+        "verificationId": report["verificationId"],
+        "evidenceId": report["evidenceId"],
+        "reportDigest": file_digest(report_path),
+        "signatureBundleDigest": file_digest(signature_bundle),
+        "verificationSigningPublicKeyDigest": (
+            expected_verification_public_key_digest
+        ),
+        "riskEvidenceDigest": risk_evidence_digest,
+        "riskEvidenceCanonicalDigest": risk_evidence_canonical_digest,
+        "verifierIdentityDigest": report["verifier"]["actorIdentityDigest"],
+        "verifiedAt": report["verifier"]["completedAt"],
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -1139,6 +1276,11 @@ def main(argv: list[str] | None = None) -> int:
     exception_parser = subparsers.add_parser("validate-exceptions")
     exception_parser.add_argument("--intake", type=Path)
     exception_parser.add_argument("--risk-evidence", type=Path)
+    exception_parser.add_argument("--custody-report", type=Path)
+    exception_parser.add_argument("--custody-public-key", type=Path)
+    exception_parser.add_argument("--custody-signature-bundle", type=Path)
+    exception_parser.add_argument("--expected-custody-public-key-digest")
+    exception_parser.add_argument("--cosign", default="cosign")
     exception_parser.add_argument("--at")
     args = parser.parse_args(argv)
     artifacts, release_set, policy = load_inputs()
@@ -1168,14 +1310,40 @@ def main(argv: list[str] | None = None) -> int:
             "sourceAdmission=false activation=false deployment=false"
         )
         return 0
-    evidence = load_json(args.risk_evidence) if args.risk_evidence else None
     intake_path = args.intake or EXCEPTION_TEMPLATE_PATH
     intake = load_json(intake_path)
+    evidence = load_json(args.risk_evidence) if args.risk_evidence else None
+    custody_arguments = (
+        args.custody_report,
+        args.custody_public_key,
+        args.custody_signature_bundle,
+        args.expected_custody_public_key_digest,
+    )
+    if any(value is not None for value in custody_arguments) and not all(
+        value is not None for value in custody_arguments
+    ):
+        fail("sno_dependency_exception_custody_inputs_incomplete")
+    custody_proof = None
+    if all(value is not None for value in custody_arguments):
+        if evidence is None or args.risk_evidence is None:
+            fail("sno_dependency_exception_custody_evidence_required")
+        custody_proof = verified_custody_proof(
+            report_path=args.custody_report,
+            verification_public_key=args.custody_public_key,
+            signature_bundle=args.custody_signature_bundle,
+            expected_verification_public_key_digest=(
+                args.expected_custody_public_key_digest
+            ),
+            risk_evidence_path=args.risk_evidence,
+            risk_evidence=evidence,
+            cosign=args.cosign,
+        )
     intake_digest = validate_exception_intake(
         intake,
         artifacts,
         release_set,
         evidence,
+        custody_proof,
         now=parse_assessed_at(args.at),
         require_template_digest=args.intake is None,
     )

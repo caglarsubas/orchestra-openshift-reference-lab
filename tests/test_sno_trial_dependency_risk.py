@@ -257,6 +257,22 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
         *,
         approved: bool,
     ) -> None:
+        if intake["custody"]["status"] == "verification-required":
+            intake["custody"] = {
+                "status": "verified",
+                "verificationId": (
+                    "orchestra-sno-trial-dependency-risk-"
+                    "custody-verification-test.1"
+                ),
+                "evidenceId": evidence["evidenceId"],
+                "reportDigest": digest(200),
+                "signatureBundleDigest": digest(201),
+                "verificationSigningPublicKeyDigest": digest(202),
+                "riskEvidenceDigest": digest(203),
+                "riskEvidenceCanonicalDigest": canonical_digest(evidence),
+                "verifierIdentityDigest": digest(204),
+                "verifiedAt": "2026-07-28T01:15:00Z",
+            }
         item = intake["subjects"][subject_index]
         risk_subject = {entry["id"]: entry for entry in evidence["subjects"]}[
             item["id"]
@@ -342,7 +358,11 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
         ]
 
     def finalize_summary(self, intake: dict, evidence: dict | None) -> None:
-        claims, admission = expected_intake_summary(intake["subjects"], evidence)
+        claims, admission = expected_intake_summary(
+            intake["subjects"],
+            evidence,
+            custody_verified=intake["custody"]["status"] == "verified",
+        )
         intake["claims"] = claims
         intake["admission"] = admission
 
@@ -524,6 +544,7 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
                 self.artifacts,
                 self.release_set,
                 evidence,
+                intake["custody"],
                 now=self.assessed_at,
             )
 
@@ -542,6 +563,7 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
                 self.artifacts,
                 self.release_set,
                 evidence,
+                intake["custody"],
                 now=self.assessed_at,
             )
 
@@ -559,6 +581,7 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
                 self.artifacts,
                 self.release_set,
                 evidence,
+                intake["custody"],
                 now=datetime(2026, 8, 1, 2, tzinfo=timezone.utc),
             )
 
@@ -591,6 +614,7 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
                         self.artifacts,
                         self.release_set,
                         evidence,
+                        intake["custody"],
                         now=self.assessed_at,
                     )
 
@@ -605,6 +629,7 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
             self.artifacts,
             self.release_set,
             evidence,
+            intake["custody"],
             now=self.assessed_at,
         )
         self.assertTrue(intake["claims"]["allExceptionsApproved"])
@@ -637,6 +662,94 @@ class SnoTrialDependencyRiskTests(unittest.TestCase):
                 self.artifacts,
                 self.release_set,
                 evidence,
+                intake["custody"],
+                now=self.assessed_at,
+            )
+
+    def test_populated_review_requires_exact_verified_custody(self) -> None:
+        evidence = self.evidence()
+        intake = copy.deepcopy(self.template)
+        for index in range(2):
+            self.populate_subject(intake, evidence, index, approved=False)
+        self.finalize_summary(intake, evidence)
+        with self.assertRaisesRegex(
+            ValueError, "sno_dependency_exception_custody_required"
+        ):
+            validate_exception_intake(
+                intake,
+                self.artifacts,
+                self.release_set,
+                evidence,
+                now=self.assessed_at,
+            )
+        changed = copy.deepcopy(intake["custody"])
+        changed["reportDigest"] = digest(999)
+        with self.assertRaisesRegex(
+            ValueError, "sno_dependency_exception_custody_binding_invalid"
+        ):
+            validate_exception_intake(
+                intake,
+                self.artifacts,
+                self.release_set,
+                evidence,
+                changed,
+                now=self.assessed_at,
+            )
+
+    def test_reviewer_candidate_digest_binds_verified_custody(self) -> None:
+        evidence = self.evidence()
+        intake = copy.deepcopy(self.template)
+        for index in range(2):
+            self.populate_subject(intake, evidence, index, approved=False)
+        self.finalize_summary(intake, evidence)
+        intake["custody"]["reportDigest"] = digest(999)
+        with self.assertRaisesRegex(
+            ValueError, "sno_dependency_exception_candidate_digest_invalid"
+        ):
+            validate_exception_intake(
+                intake,
+                self.artifacts,
+                self.release_set,
+                evidence,
+                intake["custody"],
+                now=self.assessed_at,
+            )
+
+    def test_custody_chronology_precedes_every_review(self) -> None:
+        evidence = self.evidence()
+        intake = copy.deepcopy(self.template)
+        for index in range(2):
+            self.populate_subject(intake, evidence, index, approved=False)
+        self.finalize_summary(intake, evidence)
+
+        before_collection = copy.deepcopy(intake)
+        before_collection["custody"]["verifiedAt"] = "2026-07-28T00:59:59Z"
+        with self.assertRaisesRegex(
+            ValueError, "sno_dependency_exception_custody_time_invalid"
+        ):
+            validate_exception_intake(
+                before_collection,
+                self.artifacts,
+                self.release_set,
+                evidence,
+                before_collection["custody"],
+                now=self.assessed_at,
+            )
+
+        before_custody = copy.deepcopy(intake)
+        before_custody["subjects"][0]["request"]["requestedAt"] = (
+            "2026-07-28T01:14:59Z"
+        )
+        with self.assertRaisesRegex(
+            ValueError,
+            "sno_dependency_exception_custody_time_invalid:model-backend-image",
+        ):
+            validate_exception_intake(
+                before_custody,
+                self.artifacts,
+                self.release_set,
+                evidence,
+                before_custody["custody"],
                 now=self.assessed_at,
             )
 
