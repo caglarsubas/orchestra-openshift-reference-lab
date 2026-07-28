@@ -80,7 +80,7 @@ VERIFICATION_KEY = re.compile(
     r"[1-9][0-9]*$"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:3a8923e05eaf7411557993ad6ac58a8f5ae4cd39849adfee162d7544a52927dc"
+    "sha256:8d357e30da0e95a68fd3f85cf7b7bcb2df0c589292b6249a5c69f87e0a4e8519"
 )
 RAW_OBJECTS = {
     "sno-dependency-risk-raw-collection.tar.gz": "raw-archive",

@@ -87,6 +87,7 @@ any certification campaign slot.
 | SNO-only unsigned dependency risk and two-person exception contracts | Yes | Yes | No | No | Not eligible |
 | SNO signed-runner collection and signature-last raw-custody workflow | Yes | Yes | No | No | Not eligible |
 | Independent generation-pinned SNO raw-custody verification workflow | Yes | Yes | No | No | Not eligible |
+| Custody-bound SNO human exception review contract | Yes | Yes | No | No | Not eligible |
 | Live SNO dependency risk evidence and reviewed exceptions | No | N/A | No | No | Not eligible |
 | Live independently verified SNO raw custody | No | N/A | No | No | Not eligible |
 | Payload-free six-input observer and private manifest materializer | Yes | Yes | No | No | Not eligible |
@@ -331,12 +332,16 @@ cover marker ordering, archive traversal, object-size drift, evidence
 recomputation, and report claim tamper. The strict exception controls still
 reject critical/high/unknown findings, stale evidence, self-review, duplicate
 reviewers, missing explicit licence/risk decisions, overlong exceptions,
-digest drift, and authority escalation. No live collection, independent
-custody verification, or human approval has occurred; the GitHub environments
-currently have branch policy but no eligible non-owner reviewer. Even two
-valid future exceptions leave source admission blocked until the artifact set
-is reissued and never authorize mirroring, activation, deployment, or campaign
-evidence.
+digest drift, and authority escalation. A populated intake now additionally
+requires the exact signed custody report, detached signature bundle, reviewed
+verification key digest, matching raw and canonical risk-evidence digests, and
+a custody completion time that precedes every review. The custody proof is
+included in each reviewer's candidate digest, so replacement or drift
+invalidates the approvals. No live collection, independent custody
+verification, or human approval has occurred; the GitHub environments currently
+have branch policy but no eligible non-owner reviewer. Even two valid future
+exceptions leave source admission blocked until the artifact set is reissued
+and never authorize mirroring, activation, deployment, or campaign evidence.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy

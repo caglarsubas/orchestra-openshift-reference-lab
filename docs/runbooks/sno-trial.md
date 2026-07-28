@@ -261,9 +261,20 @@ without granting authority:
 ```bash
 python3 scripts/sno_trial_dependency_risk.py validate-exceptions \
   --risk-evidence restricted/<collection>/risk-evidence.json \
+  --custody-report restricted/<custody>/sno-dependency-risk-custody-verification.json \
+  --custody-public-key restricted/<custody>/sno-dependency-risk-custody-verification-public-key.pem \
+  --custody-signature-bundle restricted/<custody>/sno-dependency-risk-custody-verification-signature.sigstore.json \
+  --expected-custody-public-key-digest 'sha256:<reviewed-pem-digest>' \
   --intake restricted/<review>/sno-signature-exceptions.json \
   --at '<current-UTC-timestamp>'
 ```
+
+The validator verifies the detached custody signature and binds the exception
+intake to the exact custody verification ID, evidence ID, report and signature
+digests, reviewed public-key digest, raw and canonical risk-evidence digests,
+verifier identity, and completion time. That custody block is part of each
+reviewer's candidate digest. A populated review without the complete proof
+fails closed; replacing any custody artifact invalidates the approvals.
 
 An approved exception is limited to 720 hours and still reports
 `sourceAdmissionAuthorized=false`. Reissue the immutable artifact set in a

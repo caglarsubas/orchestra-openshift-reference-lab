@@ -12,6 +12,7 @@
     "targetClass",
     "executionMode",
     "bindings",
+    "custody",
     "subjects",
     "claims",
     "admission"
@@ -27,6 +28,7 @@
     "targetClass": {"const": "engineering-trial"},
     "executionMode": {"const": "live"},
     "bindings": {"$ref": "#/$defs/bindings"},
+    "custody": {"$ref": "#/$defs/custody"},
     "subjects": {
       "type": "array",
       "minItems": 2,
@@ -63,6 +65,98 @@
         "releaseSetDigest": {"$ref": "#/$defs/digest"},
         "riskPolicyDigest": {"$ref": "#/$defs/digest"}
       }
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "verificationId",
+        "evidenceId",
+        "reportDigest",
+        "signatureBundleDigest",
+        "verificationSigningPublicKeyDigest",
+        "riskEvidenceDigest",
+        "riskEvidenceCanonicalDigest",
+        "verifierIdentityDigest",
+        "verifiedAt"
+      ],
+      "properties": {
+        "status": {"enum": ["verification-required", "verified"]},
+        "verificationId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^orchestra-sno-trial-dependency-risk-custody-verification-[a-z0-9][a-z0-9.-]+$"
+            },
+            {"type": "null"}
+          ]
+        },
+        "evidenceId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^orchestra-sno-trial-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+            },
+            {"type": "null"}
+          ]
+        },
+        "reportDigest": {"$ref": "#/$defs/nullableDigest"},
+        "signatureBundleDigest": {"$ref": "#/$defs/nullableDigest"},
+        "verificationSigningPublicKeyDigest": {
+          "$ref": "#/$defs/nullableDigest"
+        },
+        "riskEvidenceDigest": {"$ref": "#/$defs/nullableDigest"},
+        "riskEvidenceCanonicalDigest": {"$ref": "#/$defs/nullableDigest"},
+        "verifierIdentityDigest": {"$ref": "#/$defs/nullableDigest"},
+        "verifiedAt": {"$ref": "#/$defs/nullableTimestamp"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"const": "verification-required"}}
+          },
+          "then": {
+            "properties": {
+              "verificationId": {"const": null},
+              "evidenceId": {"const": null},
+              "reportDigest": {"const": null},
+              "signatureBundleDigest": {"const": null},
+              "verificationSigningPublicKeyDigest": {"const": null},
+              "riskEvidenceDigest": {"const": null},
+              "riskEvidenceCanonicalDigest": {"const": null},
+              "verifierIdentityDigest": {"const": null},
+              "verifiedAt": {"const": null}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"const": "verified"}}},
+          "then": {
+            "properties": {
+              "verificationId": {
+                "type": "string",
+                "pattern": "^orchestra-sno-trial-dependency-risk-custody-verification-[a-z0-9][a-z0-9.-]+$"
+              },
+              "evidenceId": {
+                "type": "string",
+                "pattern": "^orchestra-sno-trial-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+              },
+              "reportDigest": {"$ref": "#/$defs/digest"},
+              "signatureBundleDigest": {"$ref": "#/$defs/digest"},
+              "verificationSigningPublicKeyDigest": {"$ref": "#/$defs/digest"},
+              "riskEvidenceDigest": {"$ref": "#/$defs/digest"},
+              "riskEvidenceCanonicalDigest": {"$ref": "#/$defs/digest"},
+              "verifierIdentityDigest": {"$ref": "#/$defs/digest"},
+              "verifiedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "Z$"
+              }
+            }
+          }
+        }
+      ]
     },
     "evidence": {
       "type": "object",
@@ -211,6 +305,7 @@
         "reviewReadySubjects",
         "approvedExceptions",
         "allExceptionsApproved",
+        "custodyVerified",
         "sourceAdmissionAuthorized",
         "mirrorAuthorization",
         "activationAuthorized",
@@ -223,6 +318,7 @@
         "reviewReadySubjects": {"type": "integer", "minimum": 0, "maximum": 2},
         "approvedExceptions": {"type": "integer", "minimum": 0, "maximum": 2},
         "allExceptionsApproved": {"type": "boolean"},
+        "custodyVerified": {"type": "boolean"},
         "sourceAdmissionAuthorized": {"const": false},
         "mirrorAuthorization": {"const": false},
         "activationAuthorized": {"const": false},
