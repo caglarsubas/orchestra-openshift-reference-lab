@@ -20,9 +20,14 @@ cannot materialize the model. They require operator-owned objects:
 | `Secret` | `orchestra-sno-model-backend` | `orchestra-sno-model-server-tls` | `tls.crt`, `tls.key` |
 
 The uppercase storage-class value is an unresolved identifier, not a shell
-template. A later materialization step must replace it with the exact
-live-observed class and produce a new digest-bound artifact before server-side
-dry-run. Applying this source directory directly is not authorized.
+template. The payload-free observer in
+`scripts/sno_trial_dependency_inputs.py` verifies all six live references
+without reading Secret values. The private materializer in
+`scripts/materialize_sno_trial_dependency_manifests.py` then replaces exactly
+one identifier and emits a new digest-bound artifact under ignored
+`restricted/` storage. See `docs/runbooks/sno-trial.md` for the operator
+commands. Applying this source directory or the private artifact directly is
+not authorized.
 
 Validate the candidate with:
 
@@ -32,6 +37,6 @@ make validate-sno-trial-dependency-manifests
 
 The controlling contract is
 [`config/sno-trial-dependency-manifest-candidate.lock.json`](../../../../config/sno-trial-dependency-manifest-candidate.lock.json).
-It remains blocked on upstream review, destination admission, operator inputs,
-model materialization, live capacity, OpenShift server-side dry-run, and
-connectivity proof.
+It remains blocked on upstream review, destination admission, a live input
+observation, model digest and certificate proof, live capacity, OpenShift
+server-side dry-run, connectivity proof, and activation review.

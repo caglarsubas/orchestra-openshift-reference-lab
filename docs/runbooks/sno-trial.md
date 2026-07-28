@@ -200,14 +200,64 @@ non-root UIDs, read-only roots, dropped capabilities, runtime-default seccomp,
 tokenless service accounts, default-deny networking, and exact namespace
 allowlists. Runtime model download remains absent.
 
-Do not apply this source directory. After the cluster is observable, select a
-live StorageClass only after verifying RWO provisioning,
-`WaitForFirstConsumer`, expansion support, and the intended GCP PD behavior.
-Materialize the six required external inputs in restricted operator state,
-replace the storage-class identifier, and produce a new immutable artifact
-whose content digest differs from this source candidate. That future artifact
-must pass OpenShift server-side dry-run and live connectivity before any
-activation review.
+Do not apply this source directory. After the cluster is observable, create the
+four operator-owned Secrets and pre-stage the model PVC outside Git. The
+read-only observer checks only Secret types/key names, PVC status, and storage
+semantics; it never requests or stores Secret values:
+
+```bash
+DEPENDENCY_INPUT_ID=sno-dependency-inputs-operator-$(date -u +%Y%m%d%H%M%S).1
+STORAGE_CLASS='<live-rwo-storage-class>'
+
+make observe-sno-trial-dependency-inputs \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  KUBECONFIG=restricted/cluster/auth/kubeconfig \
+  STORAGE_CLASS="$STORAGE_CLASS" \
+  ASSESSMENT_ID="$DEPENDENCY_INPUT_ID" \
+  OUTPUT="restricted/$DEPENDENCY_INPUT_ID.json"
+
+make verify-sno-trial-dependency-inputs \
+  REPORT="restricted/$DEPENDENCY_INPUT_ID.json"
+```
+
+`DEPENDENCY_INPUTS_OBSERVED` requires all six references to exist. The
+StorageClass must use `pd.csi.storage.gke.io`, `WaitForFirstConsumer`, and
+expansion. The model PVC must be bound, `ReadWriteOnce`, `Filesystem`, at least
+10 GiB, and use the same StorageClass. This observation does not validate TLS
+certificate bytes or lifetime, model bytes or digest, a server-side dry-run,
+connectivity, or activation.
+
+Within one hour of observation, write the selected class to a private file and
+materialize the exact candidate under ignored storage:
+
+```bash
+install -d -m 0700 restricted/operator restricted/dependencies
+printf '%s\n' "$STORAGE_CLASS" \
+  > restricted/operator/sno-dependency-storage-class.txt
+chmod 0600 restricted/operator/sno-dependency-storage-class.txt
+
+MATERIALIZATION_ID=sno-dependency-materialization-$(date -u +%Y%m%d%H%M%S).1
+MATERIALIZED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+make materialize-sno-trial-dependency-manifests \
+  INPUT_REPORT="restricted/$DEPENDENCY_INPUT_ID.json" \
+  STORAGE_CLASS_FILE=restricted/operator/sno-dependency-storage-class.txt \
+  OUTPUT_DIR="restricted/dependencies/$MATERIALIZATION_ID" \
+  MATERIALIZATION_ID="$MATERIALIZATION_ID" \
+  MATERIALIZED_AT="$MATERIALIZED_AT"
+
+make verify-sno-trial-dependency-materialization \
+  DIRECTORY="restricted/dependencies/$MATERIALIZATION_ID"
+```
+
+The materializer requires private regular input, rejects symlinks and output
+escape, replaces exactly one storage-class identifier, and writes a mode-0700
+create-only directory with mode-0600 resources and receipt. The receipt binds
+the source candidate, live observation, output resource digests, and selected
+class digest without storing the class name. It emits no Secret object or
+model bytes, changes no active Kustomization, and grants no apply authority.
+The resulting artifact must still pass OpenShift server-side dry-run, model
+digest/certificate checks, and live connectivity before activation review.
 
 A future candidate revision must bind the contract-set digest; that change
 deliberately requires a fresh product-artifact replay. The three product planes

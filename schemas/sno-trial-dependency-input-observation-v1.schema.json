@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/orchestra/sno-trial-dependency-input-observation-v1.schema.json",
+  "title": "Orchestra SNO trial dependency input observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "observedAt",
+    "assessedAt",
+    "bindings",
+    "aggregate",
+    "observations",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-dependency-input-observation.v1"
+    },
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {
+      "enum": ["simulated", "live-read-only"]
+    },
+    "observedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "assessedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "aggregate": {"$ref": "#/$defs/aggregate"},
+    "observations": {
+      "type": "array",
+      "prefixItems": [
+        {"$ref": "#/$defs/storageClassObservation"},
+        {"$ref": "#/$defs/valkeyAuthObservation"},
+        {"$ref": "#/$defs/valkeyTlsObservation"},
+        {"$ref": "#/$defs/modelPvcObservation"},
+        {"$ref": "#/$defs/modelAuthObservation"},
+        {"$ref": "#/$defs/modelTlsObservation"}
+      ],
+      "items": false,
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "digestOrNull": {
+      "oneOf": [
+        {"$ref": "#/$defs/digest"},
+        {"type": "null"}
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateDigest",
+        "manifestSetDigest"
+      ],
+      "properties": {
+        "candidateId": {
+          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.1"
+        },
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "manifestSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputCount",
+        "observedCount",
+        "validCount",
+        "unresolvedCount",
+        "referenceSetDigest",
+        "storageClassNameDigest"
+      ],
+      "properties": {
+        "inputCount": {"const": 6},
+        "observedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "validCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "unresolvedCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "referenceSetDigest": {"$ref": "#/$defs/digest"},
+        "storageClassNameDigest": {"$ref": "#/$defs/digestOrNull"}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputId",
+        "referenceDigest",
+        "kind",
+        "observed",
+        "resolvedNameDigest",
+        "requiredKeyCount",
+        "observedRequiredKeyCount",
+        "missingRequiredKeyCount",
+        "missingRequiredKeySetDigest",
+        "propertiesValid",
+        "propertySetDigest",
+        "reasonCodes"
+      ],
+      "properties": {
+        "inputId": {"type": "string"},
+        "referenceDigest": {"$ref": "#/$defs/digest"},
+        "kind": {
+          "enum": ["StorageClass", "Secret", "PersistentVolumeClaim"]
+        },
+        "observed": {"type": "boolean"},
+        "resolvedNameDigest": {"$ref": "#/$defs/digestOrNull"},
+        "requiredKeyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "observedRequiredKeyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "missingRequiredKeyCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "missingRequiredKeySetDigest": {"$ref": "#/$defs/digest"},
+        "propertiesValid": {"type": "boolean"},
+        "propertySetDigest": {"$ref": "#/$defs/digest"},
+        "reasonCodes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "INPUT_OBJECT_MISSING",
+              "INPUT_KEY_MISSING",
+              "INPUT_TYPE_MISMATCH",
+              "STORAGE_CLASS_INCOMPATIBLE",
+              "MODEL_PVC_INCOMPATIBLE"
+            ]
+          },
+          "uniqueItems": true,
+          "maxItems": 3
+        }
+      }
+    },
+    "storageClassObservation": {
+      "allOf": [
+        {"$ref": "#/$defs/observation"},
+        {
+          "type": "object",
+          "properties": {
+            "inputId": {"const": "storage-class"},
+            "kind": {"const": "StorageClass"},
+            "requiredKeyCount": {"const": 0},
+            "observedRequiredKeyCount": {"const": 0},
+            "missingRequiredKeyCount": {"const": 0}
+          }
+        }
+      ]
+    },
+    "valkeyAuthObservation": {
+      "allOf": [
+        {"$ref": "#/$defs/observation"},
+        {
+          "type": "object",
+          "properties": {
+            "inputId": {"const": "valkey-auth"},
+            "kind": {"const": "Secret"},
+            "requiredKeyCount": {"const": 1}
+          }
+        }
+      ]
+    },
+    "valkeyTlsObservation": {
+      "allOf": [
+        {"$ref": "#/$defs/observation"},
+        {
+          "type": "object",
+          "properties": {
+            "inputId": {"const": "valkey-server-tls"},
+            "kind": {"const": "Secret"},
+            "requiredKeyCount": {"const": 3}
+          }
+        }
+      ]
+    },
+    "modelPvcObservation": {
+      "allOf": [
+        {"$ref": "#/$defs/observation"},
+        {
+          "type": "object",
+          "properties": {
+            "inputId": {"const": "model-artifact-pvc"},
+            "kind": {"const": "PersistentVolumeClaim"},
+            "requiredKeyCount": {"const": 0},
+            "observedRequiredKeyCount": {"const": 0},
+            "missingRequiredKeyCount": {"const": 0}
+          }
+        }
+      ]
+    },
+    "modelAuthObservation": {
+      "allOf": [
+        {"$ref": "#/$defs/observation"},
+        {
+          "type": "object",
+          "properties": {
+            "inputId": {"const": "model-auth"},
+            "kind": {"const": "Secret"},
+            "requiredKeyCount": {"const": 1}
+          }
+        }
+      ]
+    },
+    "modelTlsObservation": {
+      "allOf": [
+        {"$ref": "#/$defs/observation"},
+        {
+          "type": "object",
+          "properties": {
+            "inputId": {"const": "model-server-tls"},
+            "kind": {"const": "Secret"},
+            "requiredKeyCount": {"const": 2}
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes"],
+      "properties": {
+        "status": {
+          "enum": [
+            "DEPENDENCY_INPUTS_OBSERVED",
+            "DEPENDENCY_INPUTS_UNRESOLVED"
+          ]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "LIVE_OBSERVATION_REQUIRED",
+              "INPUT_OBJECT_MISSING",
+              "INPUT_KEY_MISSING",
+              "INPUT_TYPE_MISMATCH",
+              "STORAGE_CLASS_INCOMPATIBLE",
+              "MODEL_PVC_INCOMPATIBLE"
+            ]
+          },
+          "uniqueItems": true,
+          "maxItems": 6
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "secretValuesObserved",
+        "secretValuesStored",
+        "certificateValidityVerified",
+        "modelArtifactBytesVerified",
+        "modelArtifactDigestVerified",
+        "serverSideDryRunExecuted",
+        "connectivityVerified",
+        "manifestsMaterialized",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "secretValuesObserved": {"const": false},
+        "secretValuesStored": {"const": false},
+        "certificateValidityVerified": {"const": false},
+        "modelArtifactBytesVerified": {"const": false},
+        "modelArtifactDigestVerified": {"const": false},
+        "serverSideDryRunExecuted": {"const": false},
+        "connectivityVerified": {"const": false},
+        "manifestsMaterialized": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

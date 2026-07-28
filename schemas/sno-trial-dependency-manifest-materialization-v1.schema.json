@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/orchestra/sno-trial-dependency-manifest-materialization-v1.schema.json",
+  "title": "Orchestra SNO trial dependency manifest materialization v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "materializationId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "materializedAt",
+    "bindings",
+    "outputs",
+    "decision",
+    "controls",
+    "claims",
+    "receiptDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-dependency-manifest-materialization.v1"
+    },
+    "materializationId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "local-restricted-materialization"},
+    "materializedAt": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "outputs": {"$ref": "#/$defs/outputs"},
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receiptDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateDigest",
+        "sourceManifestSetDigest",
+        "inputObservationId",
+        "inputObservationDigest",
+        "storageClassNameDigest"
+      ],
+      "properties": {
+        "candidateId": {
+          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.1"
+        },
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "sourceManifestSetDigest": {"$ref": "#/$defs/digest"},
+        "inputObservationId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"
+        },
+        "inputObservationDigest": {"$ref": "#/$defs/digest"},
+        "storageClassNameDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resourceCount",
+        "storageClassReplacementCount",
+        "kustomizationDigest",
+        "materializedManifestSetDigest",
+        "resourceDigests"
+      ],
+      "properties": {
+        "resourceCount": {"const": 12},
+        "storageClassReplacementCount": {"const": 1},
+        "kustomizationDigest": {"$ref": "#/$defs/digest"},
+        "materializedManifestSetDigest": {"$ref": "#/$defs/digest"},
+        "resourceDigests": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {"$ref": "#/$defs/resourceDigest"}
+        }
+      }
+    },
+    "resourceDigest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "digest"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+\\.json$"
+        },
+        "digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "remainingReasonCodes"],
+      "properties": {
+        "state": {"const": "materialized-non-authorizing"},
+        "remainingReasonCodes": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "UPSTREAM_VERIFICATION_PENDING"},
+            {"const": "DESTINATION_MIRROR_PROOF_MISSING"},
+            {"const": "LAB_SIGNATURE_MISSING"},
+            {"const": "MODEL_ARTIFACT_DIGEST_PROOF_MISSING"},
+            {"const": "CERTIFICATE_VALIDITY_PROOF_MISSING"},
+            {"const": "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING"},
+            {"const": "LIVE_DEPENDENCY_CONNECTIVITY_MISSING"},
+            {"const": "ACTIVATION_REVIEW_MISSING"}
+          ],
+          "items": false,
+          "minItems": 8,
+          "maxItems": 8
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "sourceCandidateMutated",
+        "manifestsMaterialized",
+        "storageClassNameStoredInReceipt",
+        "secretObjectsEmitted",
+        "secretValuesObserved",
+        "secretValuesStored",
+        "modelBytesStored",
+        "activeKustomizationReferenced",
+        "serverSideDryRunExecuted",
+        "connectivityVerified",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "scope": {
+          "const": "sno-engineering-trial-valkey-and-model-backend-only"
+        },
+        "sourceCandidateMutated": {"const": false},
+        "manifestsMaterialized": {"const": true},
+        "storageClassNameStoredInReceipt": {"const": false},
+        "secretObjectsEmitted": {"const": false},
+        "secretValuesObserved": {"const": false},
+        "secretValuesStored": {"const": false},
+        "modelBytesStored": {"const": false},
+        "activeKustomizationReferenced": {"const": false},
+        "serverSideDryRunExecuted": {"const": false},
+        "connectivityVerified": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

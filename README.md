@@ -26,11 +26,13 @@ immutable platform-owned certification contract intake,
 source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, a digest-bound source-only dependency GitOps
-candidate, an atomic signed-runner scan collector and detached
-attestation verifier, an exact public OpenShift SNO toolchain archive lock and
-payload-free local intake verifier, a stage-aware prerequisite observation policy and
-payload-free read-only collector, gate-controlled product and dependency
-GitOps floors, an environment-bound read-only Terraform planning lane, a
+candidate, a payload-free live dependency-input observer and private
+non-authorizing manifest materializer, an atomic signed-runner scan collector
+and detached attestation verifier, an exact public OpenShift SNO toolchain
+archive lock and payload-free local intake verifier, a stage-aware prerequisite
+observation policy and payload-free read-only collector, gate-controlled
+product and dependency GitOps floors, an environment-bound read-only Terraform
+planning lane, a
 create-only signed saved-plan package lane, a private generation-pinned plan
 review helper, a separately federated saved-plan-only apply lane with signed
 self-attested receipts, a separately federated read-only provider-refresh
@@ -343,14 +345,24 @@ the source and render contract with:
 make validate-sno-trial-dependency-manifests
 ```
 
-This closes manifest authoring only. The candidate uses a conspicuous
+This closes source manifest authoring only. The candidate uses a conspicuous
 unresolved storage-class identifier and references operator-owned
 authentication/TLS Secrets and model PVC without creating them. It is absent
 from the active dependency Kustomization and emits no Argo CD Application.
-Upstream review, destination admission and signing, input materialization,
-live allocatable capacity, workload-candidate rebinding, server-side dry-run,
-and connectivity remain blocked. Neither the artifact set nor this manifest
-candidate changes the current product replay lineage or authorizes apply.
+The repository now provides a read-only live observer for the six references
+and a create-only materializer under ignored `restricted/` storage. The
+observer stores Secret key-name and resource-property digests, never Secret
+values. The materializer accepts only a fresh successful live observation,
+binds the operator's private storage-class file by digest, and replaces exactly
+one identifier. Its receipt omits the storage-class name and keeps apply,
+deployment, campaign, and certification authority false.
+
+This path has CI fixture coverage but has not been run against the destroyed
+trial cluster. Upstream review, destination admission and signing, certificate
+validity, model-byte/digest proof, live allocatable capacity,
+workload-candidate rebinding, server-side dry-run, connectivity, and activation
+review remain blocked. Neither the artifact set, observation, nor private
+materialization changes the current product replay lineage or authorizes apply.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,

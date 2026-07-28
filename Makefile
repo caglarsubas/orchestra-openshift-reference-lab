@@ -2,6 +2,7 @@ PYTHON ?= python3
 TERRAFORM ?= terraform
 
 .PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-dependency-runtime-contracts validate-sno-trial-dependency-artifacts validate-sno-trial-dependency-manifests validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: observe-sno-trial-dependency-inputs verify-sno-trial-dependency-inputs materialize-sno-trial-dependency-manifests verify-sno-trial-dependency-materialization
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -186,6 +187,42 @@ verify-sno-trial-operator-inputs:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_operator_inputs.py verify \
 		--report "$(REPORT)"
+
+observe-sno-trial-dependency-inputs:
+	test -n "$(CLIENT)"
+	test -n "$(KUBECONFIG)"
+	test -n "$(STORAGE_CLASS)"
+	test -n "$(ASSESSMENT_ID)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_dependency_inputs.py collect \
+		--client "$(CLIENT)" \
+		--kubeconfig "$(KUBECONFIG)" \
+		--storage-class "$(STORAGE_CLASS)" \
+		--assessment-id "$(ASSESSMENT_ID)" \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-dependency-inputs:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/sno_trial_dependency_inputs.py verify \
+		--report "$(REPORT)"
+
+materialize-sno-trial-dependency-manifests:
+	test -n "$(INPUT_REPORT)"
+	test -n "$(STORAGE_CLASS_FILE)"
+	test -n "$(OUTPUT_DIR)"
+	test -n "$(MATERIALIZATION_ID)"
+	test -n "$(MATERIALIZED_AT)"
+	$(PYTHON) scripts/materialize_sno_trial_dependency_manifests.py materialize \
+		--input-report "$(INPUT_REPORT)" \
+		--storage-class-file "$(STORAGE_CLASS_FILE)" \
+		--output-dir "$(OUTPUT_DIR)" \
+		--materialization-id "$(MATERIALIZATION_ID)" \
+		--at "$(MATERIALIZED_AT)"
+
+verify-sno-trial-dependency-materialization:
+	test -n "$(DIRECTORY)"
+	$(PYTHON) scripts/materialize_sno_trial_dependency_manifests.py verify \
+		--directory "$(DIRECTORY)"
 
 observe-sno-trial-product-dry-run:
 	test -n "$(CLUSTER_REPORT)"
