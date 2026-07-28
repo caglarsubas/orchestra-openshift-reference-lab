@@ -307,9 +307,16 @@ authorize deployment.
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
 `orchestra-sno-trial-product-admission-2026-07-28.5` binds the fresh exact-main
-replay with `replayState=current`. No admission record exists. Even a valid
-future admission removes only the replay-review reason and leaves all
-deployment/provider blockers and every certifying claim false.
+replay with `replayState=current`. A separate source-only environment
+bootstrap now validates a non-owner collaborator, emits a payload-free
+create-only plan, requires the reviewed plan digest at apply time, reconciles
+only the required-reviewer and exact-`main` branch protections, rejects
+environment Secrets, and verifies the result. It has not been applied because
+no eligible non-owner reviewer is attached to the repository; private-repo
+required-reviewer support also remains an external GitHub-plan gate. No
+admission record exists. Even a valid future admission removes only the
+replay-review reason and leaves all deployment/provider blockers and every
+certifying claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

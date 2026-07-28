@@ -1,7 +1,7 @@
 PYTHON ?= python3
 TERRAFORM ?= terraform
 
-.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-dependency-runtime-contracts validate-sno-trial-dependency-artifacts validate-sno-trial-dependency-manifests validate-sno-trial-dependency-integrity-policy validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
+.PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-dependency-runtime-contracts validate-sno-trial-dependency-artifacts validate-sno-trial-dependency-manifests validate-sno-trial-dependency-integrity-policy validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts plan-sno-trial-product-admission-environment apply-sno-trial-product-admission-environment verify-sno-trial-product-admission-environment verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 .PHONY: observe-sno-trial-dependency-inputs verify-sno-trial-dependency-inputs materialize-sno-trial-dependency-manifests verify-sno-trial-dependency-materialization observe-sno-trial-dependency-integrity verify-sno-trial-dependency-integrity validate-sno-trial-dependency-dry-run-contract observe-sno-trial-dependency-dry-run verify-sno-trial-dependency-dry-run
 
 validate:
@@ -379,6 +379,31 @@ replay-sno-trial-product-artifacts:
 verify-sno-trial-product-artifacts:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_product_artifacts.py verify --report "$(REPORT)"
+
+plan-sno-trial-product-admission-environment:
+	test -n "$(TOKEN_FILE)"
+	test -n "$(REVIEWER_LOGIN)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/configure_sno_trial_product_admission_environment.py plan \
+		--token-file "$(TOKEN_FILE)" \
+		--reviewer-login "$(REVIEWER_LOGIN)" \
+		--output "$(OUTPUT)"
+
+apply-sno-trial-product-admission-environment:
+	test -n "$(TOKEN_FILE)"
+	test -n "$(REVIEWER_LOGIN)"
+	test -n "$(PLAN)"
+	test -n "$(EXPECTED_PLAN_DIGEST)"
+	$(PYTHON) scripts/configure_sno_trial_product_admission_environment.py apply \
+		--token-file "$(TOKEN_FILE)" \
+		--reviewer-login "$(REVIEWER_LOGIN)" \
+		--plan "$(PLAN)" \
+		--expected-plan-digest "$(EXPECTED_PLAN_DIGEST)"
+
+verify-sno-trial-product-admission-environment:
+	test -n "$(TOKEN_FILE)"
+	$(PYTHON) scripts/configure_sno_trial_product_admission_environment.py verify \
+		--token-file "$(TOKEN_FILE)"
 
 verify-sno-trial-product-admission:
 	test -n "$(REPORT)"

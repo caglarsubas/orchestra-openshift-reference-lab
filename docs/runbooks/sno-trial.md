@@ -430,6 +430,50 @@ Before dispatching `SNO trial product artifact admission`, configure the
 - no environment Secrets, OIDC, cloud credentials, registry credentials, or
   deployment authority.
 
+Do not configure this environment through an unreviewed UI session. First add
+one non-owner GitHub `User` as a repository collaborator with at least read
+access. Store a short-lived repository-administration token in a mode-`0600`
+file; the token requires repository `Administration: write`,
+`Environments: read`, and `Metadata: read`. Generate a payload-free,
+create-only plan:
+
+```bash
+make plan-sno-trial-product-admission-environment \
+  TOKEN_FILE=restricted/github-environment-admin-token \
+  REVIEWER_LOGIN='<non-owner-reviewer>' \
+  OUTPUT=restricted/sno-product-admission-environment-plan.json
+```
+
+Review the plan status, operations, controls, and `planDigest`. Apply only that
+exact digest:
+
+```bash
+make apply-sno-trial-product-admission-environment \
+  TOKEN_FILE=restricted/github-environment-admin-token \
+  REVIEWER_LOGIN='<non-owner-reviewer>' \
+  PLAN=restricted/sno-product-admission-environment-plan.json \
+  EXPECTED_PLAN_DIGEST='sha256:<reviewed-plan-digest>'
+
+make verify-sno-trial-product-admission-environment \
+  TOKEN_FILE=restricted/github-environment-admin-token
+```
+
+Planning validates the repository identity, rejects the repository owner,
+requires current collaborator access, hashes rather than records the reviewer
+identity, and checks that an existing environment contains no Secrets. Apply
+re-reads the complete plan immediately before mutation, configures one exact
+reviewer, replaces custom branch policies with only `main`, and verifies the
+result. It never creates, reads, updates, or deletes Secret values and never
+grants cloud, deployment, registry, or OIDC authority.
+
+GitHub makes required-reviewer protection for private repositories dependent
+on the account plan. If the environment update returns
+`github_environment_required_reviewers_unavailable`, stop. Do not create an
+unprotected environment or make the repository public merely to pass this
+gate. Move the repository to an eligible private organization/account or
+approve a separately designed, ADR-backed independent-review mechanism before
+changing the admission workflow.
+
 The repository owner and workflow initiator cannot approve the run. A rerun
 cannot reuse an approval. The workflow downloads only the exact immutable
 replay artifact, validates it again, obtains the environment and approval event
