@@ -26,7 +26,8 @@ immutable platform-owned certification contract intake,
 source-resolved dependency admission contract, bounded source-signature
 observation, locked unsigned-source risk policy, empty signature-exception and
 mirror-intake contracts, a digest-bound source-only dependency GitOps
-candidate, a payload-free live dependency-input observer and private
+candidate, a schema- and lineage-bound source-only production chat/embedding
+artifact candidate, a payload-free live dependency-input observer and private
 non-authorizing manifest materializer, an atomic signed-runner scan collector
 and detached attestation verifier, an exact public OpenShift SNO toolchain
 archive lock and payload-free local intake verifier, a stage-aware prerequisite
@@ -482,6 +483,19 @@ signature, destination mirror, lab signature, live identity, backup target,
 dry run, and approval remains blocked. Source resolution is not mirror
 admission.
 
+The inert production model-artifact candidate digest is
+`sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc`.
+It source-locks a linux/amd64 llama.cpp CPU server, a Qwen chat GGUF, and a
+Nomic embedding GGUF, with two chat replicas and one embedding replica behind
+internal HTTPS, API-key files, operator-provided TLS, and pre-staged read-only
+PVCs. The candidate binds its strict schema and the current BOM, admission, and
+release-set digests. It does not mutate those frozen inputs: both production
+model services remain unselected. Model bytes, independent licence review,
+destination mirroring, lab signatures, PVC custody, Secret/TLS resolution,
+OpenShift dry run, live quality evidence, and connectivity are absent. The
+candidate emits no manifest and is not referenced by active GitOps; a new BOM
+and admission revision is required before deployment review.
+
 The bounded source-verification digest is
 `sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
 It records exact keyless verification for three subjects and explicit
@@ -684,7 +698,8 @@ make terraform-fmt
 
 `make validate` checks the topology, immutable cross-plane release set,
 platform-owned certification contract intake, dependency BOM, fail-closed
-dependency admission, bounded signature observation, unsigned-source risk
+dependency admission, inert production model artifact candidate, bounded
+signature observation, unsigned-source risk
 policy, empty exception intake, empty mirror intake, and source-only dependency
 GitOps candidate, plus the staged
 prerequisite observation policy and review-bound foundation-apply authority.
