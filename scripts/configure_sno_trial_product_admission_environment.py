@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plan, apply, and verify the SNO product-admission GitHub environment."""
+"""Plan, apply, and verify supported GitHub environment contracts."""
 
 from __future__ import annotations
 
@@ -18,9 +18,14 @@ try:
     from scripts.github_environment_contract import (
         API_ROOT,
         API_VERSION,
+        ENVIRONMENT_CONTRACTS,
         fetch_environment_evidence,
+        load_expected_environment,
         payload_digest,
         read_restricted_token,
+    )
+    from scripts.operator_control_plane_readiness import (
+        load_policy as load_operator_control_plane_policy,
     )
     from scripts.sno_trial_product_artifact_admission import (
         POLICY_PATH,
@@ -35,15 +40,45 @@ except ModuleNotFoundError:
     from github_environment_contract import (
         API_ROOT,
         API_VERSION,
+        ENVIRONMENT_CONTRACTS,
         fetch_environment_evidence,
+        load_expected_environment,
         payload_digest,
         read_restricted_token,
+    )
+    from operator_control_plane_readiness import (
+        load_policy as load_operator_control_plane_policy,
     )
     from sno_trial_product_artifact_admission import POLICY_PATH, validate_policy
     from sno_trial_product_artifacts import CANDIDATE_PATH, LOCK_PATH, load_json
 
 
 PLAN_KIND = "orchestra.openshift.sno-trial-product-admission-environment-plan.v1"
+REFERENCE_LAB_PLAN_KIND = (
+    "orchestra.openshift.reference-lab-github-environment-plan.v1"
+)
+DEFAULT_CONTRACT = "sno-trial-product-admission"
+SUPPORTED_CONTRACTS = (DEFAULT_CONTRACT, *ENVIRONMENT_CONTRACTS)
+REFERENCE_LAB_ENVIRONMENT_SECRETS = {
+    "foundation-plan": {"LAB_FOUNDATION_PREREQUISITES_JSON"},
+    "foundation-apply": set(),
+    "foundation-observation": set(),
+    "dependency-risk-preflight": {
+        "DEPENDENCY_RISK_GITHUB_APP_ID",
+        "DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID",
+        "DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY",
+    },
+    "dependency-risk-collection": {
+        "DEPENDENCY_RISK_GITHUB_APP_ID",
+        "DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID",
+        "DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY",
+    },
+    "dependency-risk-custody-verification": {
+        "DEPENDENCY_RISK_GITHUB_APP_ID",
+        "DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID",
+        "DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY",
+    },
+}
 PLAN_CONTROLS = {
     "cloudMutationAuthorized": False,
     "deploymentAuthorized": False,
@@ -124,12 +159,48 @@ def github_request_json(
         raise ValueError("github_environment_api_read_failed") from error
 
 
-def load_contract() -> tuple[dict[str, Any], str]:
+def load_contract(
+    contract: str = DEFAULT_CONTRACT,
+) -> tuple[dict[str, Any], str]:
+    if contract not in SUPPORTED_CONTRACTS:
+        fail("github_environment_contract_invalid")
+    if contract != DEFAULT_CONTRACT:
+        policy, policy_digest = load_operator_control_plane_policy()
+        if contract not in policy["environmentContracts"]:
+            fail("github_environment_contract_invalid")
+        expected = load_expected_environment(contract)
+        return expected, payload_digest(
+            {
+                "kind": (
+                    "orchestra.openshift."
+                    "reference-lab-github-environment-contract.v1"
+                ),
+                "operatorControlPlanePolicyDigest": policy_digest,
+                "contract": contract,
+                "environmentContractDigest": payload_digest(expected),
+                "allowedEnvironmentSecretNames": sorted(
+                    allowed_environment_secret_names(contract)
+                ),
+            }
+        )
     policy = load_json(POLICY_PATH)
     lock = load_json(LOCK_PATH)
     candidate = load_json(CANDIDATE_PATH)
     validate_policy(policy, lock, candidate)
     return policy["github"], policy["policyDigest"]
+
+
+def plan_kind(contract: str) -> str:
+    return PLAN_KIND if contract == DEFAULT_CONTRACT else REFERENCE_LAB_PLAN_KIND
+
+
+def allowed_environment_secret_names(contract: str) -> set[str]:
+    if contract == DEFAULT_CONTRACT:
+        return set()
+    try:
+        return set(REFERENCE_LAB_ENVIRONMENT_SECRETS[contract])
+    except KeyError:
+        fail("github_environment_contract_invalid")
 
 
 def _positive_id(value: Any, code: str) -> int:
@@ -263,23 +334,36 @@ def _read_branch_policies(
     return value
 
 
-def _verify_no_environment_secrets(
+def _read_environment_secret_names(
     request: GithubRequest,
     environment_path: str,
     token: str,
-) -> None:
+    allowed_names: set[str],
+) -> list[str]:
     value = request(
         "GET",
         f"{environment_path}/secrets?per_page=100",
         token,
         None,
     )
+    if not isinstance(value, dict) or not isinstance(value.get("secrets"), list):
+        fail("github_environment_secrets_invalid")
+    names: list[str] = []
+    for secret in value["secrets"]:
+        if (
+            not isinstance(secret, dict)
+            or not isinstance(secret.get("name"), str)
+            or not secret["name"]
+        ):
+            fail("github_environment_secrets_invalid")
+        names.append(secret["name"])
     if (
-        not isinstance(value, dict)
-        or value.get("total_count") != 0
-        or value.get("secrets") != []
+        value.get("total_count") != len(names)
+        or len(names) != len(set(names))
+        or not set(names).issubset(allowed_names)
     ):
         fail("github_environment_secrets_forbidden")
+    return sorted(names)
 
 
 def _current_state_digest(
@@ -289,6 +373,7 @@ def _current_state_digest(
     permission: str,
     environment: dict[str, Any] | None,
     branches: dict[str, Any] | None,
+    secret_names: list[str],
 ) -> str:
     return payload_digest(
         {
@@ -298,6 +383,7 @@ def _current_state_digest(
             "reviewerPermission": permission,
             "environment": environment,
             "branchPolicies": branches,
+            "environmentSecretNamesDigest": payload_digest(secret_names),
         }
     )
 
@@ -328,13 +414,14 @@ def build_plan(
     token_path: Path,
     reviewer_login: str,
     *,
+    contract: str = DEFAULT_CONTRACT,
     request: GithubRequest | None = None,
 ) -> dict[str, Any]:
     if not reviewer_login or any(character.isspace() for character in reviewer_login):
         fail("github_environment_reviewer_login_invalid")
     token = read_restricted_token(token_path)
     call = request or github_request_json
-    expected, policy_digest = load_contract()
+    expected, policy_digest = load_contract(contract)
     repository_path = f"/repos/{expected['repository']}"
     repository = call("GET", repository_path, token, None)
     if not isinstance(repository, dict):
@@ -365,8 +452,16 @@ def build_plan(
         if environment is not None
         else None
     )
-    if environment is not None:
-        _verify_no_environment_secrets(call, environment_path, token)
+    secret_names = (
+        _read_environment_secret_names(
+            call,
+            environment_path,
+            token,
+            allowed_environment_secret_names(contract),
+        )
+        if environment is not None
+        else []
+    )
     status = _configuration_status(repository, environment, branches, expected)
     operations = {
         "MISSING": [
@@ -383,7 +478,7 @@ def build_plan(
     }[status]
     plan = {
         "schemaVersion": 1,
-        "kind": PLAN_KIND,
+        "kind": plan_kind(contract),
         "policyDigest": policy_digest,
         "repositoryIdentityDigest": payload_digest(
             {
@@ -406,6 +501,7 @@ def build_plan(
             repository_permission,
             environment,
             branches,
+            secret_names,
         ),
         "desiredStateDigest": payload_digest(
             {
@@ -419,11 +515,15 @@ def build_plan(
         "controls": PLAN_CONTROLS,
     }
     plan["planDigest"] = payload_digest(plan)
-    validate_plan(plan)
+    validate_plan(plan, contract=contract)
     return plan
 
 
-def validate_plan(plan: Any) -> dict[str, Any]:
+def validate_plan(
+    plan: Any,
+    *,
+    contract: str = DEFAULT_CONTRACT,
+) -> dict[str, Any]:
     value = exact_keys(
         plan,
         {
@@ -443,10 +543,10 @@ def validate_plan(plan: Any) -> dict[str, Any]:
         },
         "github_environment_plan_keys_invalid",
     )
-    expected, policy_digest = load_contract()
+    expected, policy_digest = load_contract(contract)
     if (
         value["schemaVersion"] != 1
-        or value["kind"] != PLAN_KIND
+        or value["kind"] != plan_kind(contract)
         or value["policyDigest"] != policy_digest
         or value["environment"] != expected["environment"]
         or value["status"] not in {"MISSING", "DRIFTED", "READY"}
@@ -493,7 +593,11 @@ def validate_plan(plan: Any) -> dict[str, Any]:
     return value
 
 
-def read_plan(path: Path) -> dict[str, Any]:
+def read_plan(
+    path: Path,
+    *,
+    contract: str = DEFAULT_CONTRACT,
+) -> dict[str, Any]:
     try:
         if path.is_symlink():
             fail("github_environment_plan_symlink_forbidden")
@@ -505,7 +609,7 @@ def read_plan(path: Path) -> dict[str, Any]:
         value = json.loads(path.read_text(encoding="ascii"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
         raise ValueError("github_environment_plan_read_failed") from error
-    return validate_plan(value)
+    return validate_plan(value, contract=contract)
 
 
 def write_plan(path: Path, plan: dict[str, Any]) -> None:
@@ -528,15 +632,21 @@ def write_plan(path: Path, plan: dict[str, Any]) -> None:
 def verify_environment(
     token_path: Path,
     *,
+    contract: str = DEFAULT_CONTRACT,
     request: GithubRequest | None = None,
 ) -> dict[str, Any]:
-    expected, _ = load_contract()
+    expected, _ = load_contract(contract)
     if request is None:
         evidence = fetch_environment_evidence(token_path, expected)
         token = read_restricted_token(token_path)
-        _verify_no_environment_secrets(
-            github_request_json, _environment_path(expected), token
+        secret_names = _read_environment_secret_names(
+            github_request_json,
+            _environment_path(expected),
+            token,
+            allowed_environment_secret_names(contract),
         )
+        evidence["environmentSecretCount"] = len(secret_names)
+        evidence["environmentSecretNamesDigest"] = payload_digest(secret_names)
         return evidence
     token = read_restricted_token(token_path)
 
@@ -546,7 +656,14 @@ def verify_environment(
         return request("GET", path, supplied_token, None)
 
     evidence = fetch_environment_evidence(token_path, expected, get_json=get)
-    _verify_no_environment_secrets(request, _environment_path(expected), token)
+    secret_names = _read_environment_secret_names(
+        request,
+        _environment_path(expected),
+        token,
+        allowed_environment_secret_names(contract),
+    )
+    evidence["environmentSecretCount"] = len(secret_names)
+    evidence["environmentSecretNamesDigest"] = payload_digest(secret_names)
     return evidence
 
 
@@ -556,20 +673,26 @@ def apply_plan(
     reviewer_login: str,
     expected_plan_digest: str,
     *,
+    contract: str = DEFAULT_CONTRACT,
     request: GithubRequest | None = None,
 ) -> dict[str, Any]:
-    stored = read_plan(plan_path)
+    stored = read_plan(plan_path, contract=contract)
     if stored["planDigest"] != expected_plan_digest:
         fail("github_environment_expected_plan_digest_mismatch")
     call = request or github_request_json
-    current = build_plan(token_path, reviewer_login, request=call)
+    current = build_plan(
+        token_path,
+        reviewer_login,
+        contract=contract,
+        request=call,
+    )
     if current != stored:
         fail("github_environment_plan_stale")
     if current["status"] == "READY":
-        return verify_environment(token_path, request=call)
+        return verify_environment(token_path, contract=contract, request=call)
 
     token = read_restricted_token(token_path)
-    expected, _ = load_contract()
+    expected, _ = load_contract(contract)
     reviewer_id_digest = current["reviewerIdentityDigest"]
     encoded_login = urllib.parse.quote(reviewer_login, safe="")
     reviewer = call("GET", f"/users/{encoded_login}", token, None)
@@ -623,34 +746,58 @@ def apply_plan(
             token,
             {"name": expected["deploymentBranch"], "type": "branch"},
         )
-    return verify_environment(token_path, request=call)
+    return verify_environment(token_path, contract=contract, request=call)
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None,
+    *,
+    contract_choices: tuple[str, ...] = (DEFAULT_CONTRACT,),
+    contract_required: bool = False,
+) -> int:
+    if (
+        not contract_choices
+        or len(contract_choices) != len(set(contract_choices))
+        or not set(contract_choices).issubset(SUPPORTED_CONTRACTS)
+    ):
+        fail("github_environment_contract_choices_invalid")
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
+    contract_argument: dict[str, Any] = {"choices": contract_choices}
+    if contract_required:
+        contract_argument["required"] = True
+    else:
+        contract_argument["default"] = contract_choices[0]
 
     plan_parser = subparsers.add_parser("plan")
     plan_parser.add_argument("--token-file", type=Path, required=True)
     plan_parser.add_argument("--reviewer-login", required=True)
     plan_parser.add_argument("--output", type=Path, required=True)
+    plan_parser.add_argument("--contract", **contract_argument)
 
     apply_parser = subparsers.add_parser("apply")
     apply_parser.add_argument("--token-file", type=Path, required=True)
     apply_parser.add_argument("--reviewer-login", required=True)
     apply_parser.add_argument("--plan", type=Path, required=True)
     apply_parser.add_argument("--expected-plan-digest", required=True)
+    apply_parser.add_argument("--contract", **contract_argument)
 
     verify_parser = subparsers.add_parser("verify")
     verify_parser.add_argument("--token-file", type=Path, required=True)
+    verify_parser.add_argument("--contract", **contract_argument)
 
     args = parser.parse_args(argv)
     if args.command == "plan":
-        value = build_plan(args.token_file, args.reviewer_login)
+        value = build_plan(
+            args.token_file,
+            args.reviewer_login,
+            contract=args.contract,
+        )
         write_plan(args.output.resolve(), value)
         print(
             "github_environment_plan_created "
-            f"status={value['status']} digest={value['planDigest']} "
+            f"contract={args.contract} status={value['status']} "
+            f"digest={value['planDigest']} "
             f"operations={len(value['operations'])}"
         )
         return 0
@@ -660,18 +807,19 @@ def main(argv: list[str] | None = None) -> int:
             args.plan,
             args.reviewer_login,
             args.expected_plan_digest,
+            contract=args.contract,
         )
         print(
             "github_environment_configuration_valid "
-            f"digest={payload_digest(evidence)} "
+            f"contract={args.contract} digest={payload_digest(evidence)} "
             f"reviewers={evidence['reviewerCount']} "
             "preventSelfReview=true deploymentBranch=main"
         )
         return 0
-    evidence = verify_environment(args.token_file)
+    evidence = verify_environment(args.token_file, contract=args.contract)
     print(
         "github_environment_configuration_valid "
-        f"digest={payload_digest(evidence)} "
+        f"contract={args.contract} digest={payload_digest(evidence)} "
         f"reviewers={evidence['reviewerCount']} "
         "preventSelfReview=true deploymentBranch=main"
     )

@@ -7,7 +7,7 @@ authorization digest, independent timing, and cleanup verification.
 | Runbook | State |
 |---|---|
 | Prerequisite verification | Implemented in `docs/prerequisites.md` |
-| Operator control-plane readiness | Six-environment aggregate and full-scope read-only GitHub App verifier implemented; external configuration and live observation pending |
+| Operator control-plane readiness | Plan-bound six-environment protection bootstrap plus aggregate and full-scope read-only GitHub App verifier implemented; non-owner collaborator, external apply, and live observation pending |
 | Project/state bootstrap | Procedure implemented; live rehearsal pending |
 | Immutable foundation plan | Read-only planner, create-only signer/publisher, private generation-pinned review helper, strict package contract, and payload-free summary implemented; bootstrap/environment/live run pending |
 | Review-bound foundation apply | Separate exact-subject executor, saved-plan-only workflow, state-lock/lineage checks, and signed self-attested receipt implemented; secure review, live apply, and independent observation pending |

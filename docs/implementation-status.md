@@ -16,6 +16,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Separately federated exact saved-plan foundation apply | Yes | Yes | No | No | No |
 | Signed self-attested foundation apply receipt | Yes | Yes | No | No | No |
 | Independent post-apply foundation observation | Yes | Yes | No | No | No |
+| Plan-bound six-environment protection bootstrap | Yes | Yes | No | No | No |
 | Aggregate six-environment and GitHub App installation observation | Yes | Yes | No | No | No |
 | Monthly budget thresholds | Yes | Yes | No | No | No |
 | Dual VPC, subnets, NAT, peering, flow logs | Yes | Yes | No | No | No |
@@ -428,8 +429,9 @@ an independently expected key digest, and uploads that signature last. Tests
 exercise extra-object, marker-order, size-drift, key-substitution,
 archive-traversal, report-tamper, invalid-report-signature, and
 failed-final-upload cases. This remains local source evidence: no Terraform
-resource or protected environment has been created, and no live raw prefix or
-signed custody report has been verified.
+authority has been applied, the six GitHub environment shells have only branch
+policy and no required reviewer, and no live raw prefix or signed custody report
+has been verified.
 All six GitHub providers use distinct provider-prefixed subjects, and IAM
 impersonation binds each service account to one exact subject instead of a
 repository-wide principal set. The planner and create-only packager share only
@@ -450,15 +452,18 @@ and requires external cert-manager issuance for the External Secrets webhook.
 CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
 
-The next live increment is bootstrap/foundation application and independent
-verification of all six WIF providers, seven service accounts, foundation and
-dependency-risk KMS versions/public-key digests, managed-folder and bucket IAM,
-all six protected environments, reviewer-group plan access, and the GitHub
-App installation. The aggregate operator-control-plane collector and strict
-one-hour report are now source-declared and CI-tested. The App verifier mints an
-unrestricted installation token, rejects a broader repository set or any write
-permission, and requires revocation, but no environment, App, secret, or live
-observation exists merely because the verifier is present. The
+The next live increment starts by applying the exact plan-bound required-reviewer
+configuration to all six existing environment shells after an eligible non-owner
+collaborator is added. Bootstrap/foundation application and independent
+verification must then cover all six WIF providers, seven service accounts,
+foundation and dependency-risk KMS versions/public-key digests, managed-folder
+and bucket IAM, all six protected environments, reviewer-group plan access, and
+the GitHub App installation. The aggregate operator-control-plane collector and
+strict one-hour report are source-declared and CI-tested. The App verifier mints
+an unrestricted installation token, rejects a broader repository set or any
+write permission, and requires revocation, but no required-reviewer protection,
+App, secret value, or live observation exists merely because the bootstrap and
+verifier are present. The
 protected launch preflight executes first; a successful result still does not
 start collection. A separately approved full-collection run may then publish
 only a completed raw prefix. A third approval runs the independent custody lane
