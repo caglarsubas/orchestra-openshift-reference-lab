@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/orchestra/sno-trial-dependency-integrity-observation-v1.schema.json",
+  "title": "Orchestra SNO trial dependency integrity observation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "observedAt",
+    "assessedAt",
+    "bindings",
+    "executionContext",
+    "modelArtifact",
+    "certificates",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-dependency-integrity-observation.v1"
+    },
+    "assessmentId": {"$ref": "#/$defs/identifier"},
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {
+      "enum": ["simulated", "live-cluster-read-only"]
+    },
+    "observedAt": {"$ref": "#/$defs/timestamp"},
+    "assessedAt": {"$ref": "#/$defs/timestamp"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "executionContext": {"$ref": "#/$defs/executionContext"},
+    "modelArtifact": {"$ref": "#/$defs/modelArtifact"},
+    "certificates": {
+      "type": "array",
+      "prefixItems": [
+        {"$ref": "#/$defs/valkeyCertificate"},
+        {"$ref": "#/$defs/modelCertificate"}
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "decision": {"$ref": "#/$defs/decision"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "digestOrNull": {
+      "oneOf": [
+        {"$ref": "#/$defs/digest"},
+        {"type": "null"}
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "timestampOrNull": {
+      "oneOf": [
+        {"$ref": "#/$defs/timestamp"},
+        {"type": "null"}
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateDigest",
+        "manifestSetDigest",
+        "artifactSetId",
+        "artifactSetDigest",
+        "policyId",
+        "policyDigest",
+        "inputObservationId",
+        "inputObservationDigest",
+        "materializationId",
+        "materializationDigest",
+        "opensslExecutableDigest",
+        "opensslVersionDigest"
+      ],
+      "properties": {
+        "candidateId": {
+          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.2"
+        },
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "manifestSetDigest": {"$ref": "#/$defs/digest"},
+        "artifactSetId": {
+          "const": "orchestra-sno-trial-dependency-artifacts-2026-07-28.1"
+        },
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "policyId": {
+          "const": "orchestra-sno-trial-dependency-integrity-2026-07-28.1"
+        },
+        "policyDigest": {"$ref": "#/$defs/digest"},
+        "inputObservationId": {"$ref": "#/$defs/identifier"},
+        "inputObservationDigest": {"$ref": "#/$defs/digest"},
+        "materializationId": {"$ref": "#/$defs/identifier"},
+        "materializationDigest": {"$ref": "#/$defs/digest"},
+        "opensslExecutableDigest": {"$ref": "#/$defs/digest"},
+        "opensslVersionDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "executionContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["podUidDigest", "nodeNameDigest", "modelImage"],
+      "properties": {
+        "podUidDigest": {"$ref": "#/$defs/digestOrNull"},
+        "nodeNameDigest": {"$ref": "#/$defs/digestOrNull"},
+        "modelImage": {
+          "const": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b"
+        }
+      }
+    },
+    "modelArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactId",
+        "observed",
+        "sizeBytes",
+        "digest",
+        "sizeMatches",
+        "digestMatches",
+        "readOnly",
+        "reasonCodes"
+      ],
+      "properties": {
+        "artifactId": {"const": "orchestra-reference-cpu-model"},
+        "observed": {"type": "boolean"},
+        "sizeBytes": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967296
+            },
+            {"type": "null"}
+          ]
+        },
+        "digest": {"$ref": "#/$defs/digestOrNull"},
+        "sizeMatches": {"type": "boolean"},
+        "digestMatches": {"type": "boolean"},
+        "readOnly": {"type": "boolean"},
+        "reasonCodes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "MODEL_ARTIFACT_SIZE_MISMATCH",
+              "MODEL_ARTIFACT_DIGEST_MISMATCH",
+              "MODEL_ARTIFACT_WRITABLE"
+            ]
+          },
+          "uniqueItems": true,
+          "maxItems": 3
+        }
+      }
+    },
+    "certificate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "certificateId",
+        "secretReferenceDigest",
+        "secretResourceVersionDigest",
+        "observed",
+        "leafCertificateDigest",
+        "trustBundleDigest",
+        "publicKeyDigest",
+        "notBefore",
+        "notAfter",
+        "remainingSeconds",
+        "dnsNameCount",
+        "dnsNameSetDigest",
+        "requiredDnsNameSetDigest",
+        "validityValid",
+        "sansValid",
+        "keyMatches",
+        "chainVerified",
+        "reasonCodes"
+      ],
+      "properties": {
+        "certificateId": {"type": "string"},
+        "secretReferenceDigest": {"$ref": "#/$defs/digest"},
+        "secretResourceVersionDigest": {"$ref": "#/$defs/digestOrNull"},
+        "observed": {"type": "boolean"},
+        "leafCertificateDigest": {"$ref": "#/$defs/digestOrNull"},
+        "trustBundleDigest": {"$ref": "#/$defs/digestOrNull"},
+        "publicKeyDigest": {"$ref": "#/$defs/digestOrNull"},
+        "notBefore": {"$ref": "#/$defs/timestampOrNull"},
+        "notAfter": {"$ref": "#/$defs/timestampOrNull"},
+        "remainingSeconds": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": -315360000,
+              "maximum": 315360000
+            },
+            {"type": "null"}
+          ]
+        },
+        "dnsNameCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 256
+        },
+        "dnsNameSetDigest": {"$ref": "#/$defs/digest"},
+        "requiredDnsNameSetDigest": {"$ref": "#/$defs/digest"},
+        "validityValid": {"type": "boolean"},
+        "sansValid": {"type": "boolean"},
+        "keyMatches": {"type": "boolean"},
+        "chainVerified": {"type": "boolean"},
+        "reasonCodes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "CERTIFICATE_INVALID",
+              "CERTIFICATE_NOT_YET_VALID",
+              "CERTIFICATE_EXPIRES_TOO_SOON",
+              "CERTIFICATE_SAN_MISMATCH",
+              "CERTIFICATE_KEY_MISMATCH",
+              "CERTIFICATE_CHAIN_INVALID"
+            ]
+          },
+          "uniqueItems": true,
+          "maxItems": 5
+        }
+      }
+    },
+    "valkeyCertificate": {
+      "allOf": [
+        {"$ref": "#/$defs/certificate"},
+        {
+          "type": "object",
+          "properties": {
+            "certificateId": {"const": "valkey-server"}
+          }
+        }
+      ]
+    },
+    "modelCertificate": {
+      "allOf": [
+        {"$ref": "#/$defs/certificate"},
+        {
+          "type": "object",
+          "properties": {
+            "certificateId": {"const": "model-backend-server"}
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes"],
+      "properties": {
+        "status": {
+          "enum": [
+            "DEPENDENCY_INTEGRITY_VERIFIED",
+            "DEPENDENCY_INTEGRITY_UNRESOLVED"
+          ]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "LIVE_CLUSTER_OBSERVATION_REQUIRED",
+              "MODEL_ARTIFACT_SIZE_MISMATCH",
+              "MODEL_ARTIFACT_DIGEST_MISMATCH",
+              "MODEL_ARTIFACT_WRITABLE",
+              "CERTIFICATE_INVALID",
+              "CERTIFICATE_NOT_YET_VALID",
+              "CERTIFICATE_EXPIRES_TOO_SOON",
+              "CERTIFICATE_SAN_MISMATCH",
+              "CERTIFICATE_KEY_MISMATCH",
+              "CERTIFICATE_CHAIN_INVALID"
+            ]
+          },
+          "uniqueItems": true,
+          "maxItems": 10
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "secretValuesObserved",
+        "secretValuesStored",
+        "authenticationSecretValuesObserved",
+        "certificateBytesObserved",
+        "certificateBytesStored",
+        "privateKeyBytesObserved",
+        "privateKeyBytesStored",
+        "modelArtifactReadInCluster",
+        "modelBytesStored",
+        "modelArtifactDigestVerified",
+        "certificateValidityVerified",
+        "certificateKeyMatchVerified",
+        "certificateChainVerified",
+        "serverSideDryRunExecuted",
+        "connectivityVerified",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "secretValuesObserved": {"type": "boolean"},
+        "secretValuesStored": {"const": false},
+        "authenticationSecretValuesObserved": {"const": false},
+        "certificateBytesObserved": {"type": "boolean"},
+        "certificateBytesStored": {"const": false},
+        "privateKeyBytesObserved": {"type": "boolean"},
+        "privateKeyBytesStored": {"const": false},
+        "modelArtifactReadInCluster": {"type": "boolean"},
+        "modelBytesStored": {"const": false},
+        "modelArtifactDigestVerified": {"type": "boolean"},
+        "certificateValidityVerified": {"type": "boolean"},
+        "certificateKeyMatchVerified": {"type": "boolean"},
+        "certificateChainVerified": {"type": "boolean"},
+        "serverSideDryRunExecuted": {"const": false},
+        "connectivityVerified": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

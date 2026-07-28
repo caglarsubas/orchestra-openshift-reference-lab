@@ -23,6 +23,7 @@ ALLOWED_TRIAL_CONFIG_NAMES = {
     "sno-trial-billing-execution.lock.json",
     "sno-trial-cost-rate-card.lock.json",
     "sno-trial-dependency-artifacts.lock.json",
+    "sno-trial-dependency-integrity-policy.lock.json",
     "sno-trial-dependency-manifest-candidate.lock.json",
     "sno-trial-dependency-runtime-contracts.lock.json",
     "sno-trial-openshift-toolchain.lock.json",

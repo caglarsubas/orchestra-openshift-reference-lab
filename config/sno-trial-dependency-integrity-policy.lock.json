@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-dependency-integrity-policy.v1",
+  "policyId": "orchestra-sno-trial-dependency-integrity-2026-07-28.1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "bindings": {
+    "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.2",
+    "candidateDigest": "sha256:7f5d0518e87e27f982c80a2bcd63e03d56af151f024d88737fda89f682be1e5f",
+    "manifestSetDigest": "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728",
+    "artifactSetId": "orchestra-sno-trial-dependency-artifacts-2026-07-28.1",
+    "artifactSetDigest": "sha256:5b60283c1e02f20f4a224b55a218d62b308315adf6d58c8120f021e1f8333073"
+  },
+  "modelArtifact": {
+    "artifactId": "orchestra-reference-cpu-model",
+    "filename": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "mountPath": "/models/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "digest": "sha256:74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+    "sizeBytes": 491400032,
+    "maximumAllowedBytes": 4294967296
+  },
+  "certificates": [
+    {
+      "certificateId": "valkey-server",
+      "secretInputId": "valkey-server-tls",
+      "certificateMountPath": "/var/run/secrets/orchestra-valkey/tls.crt",
+      "privateKeyMountPath": "/var/run/secrets/orchestra-valkey/tls.key",
+      "trustBundleMountPath": "/var/run/secrets/orchestra-valkey/ca.crt",
+      "requiredDnsNames": [
+        "orchestra-sno-valkey",
+        "orchestra-sno-valkey.orchestra-sno-valkey",
+        "orchestra-sno-valkey.orchestra-sno-valkey.svc",
+        "orchestra-sno-valkey.orchestra-sno-valkey.svc.cluster.local"
+      ],
+      "minimumRemainingSeconds": 86400
+    },
+    {
+      "certificateId": "model-backend-server",
+      "secretInputId": "model-server-tls",
+      "certificateMountPath": "/var/run/secrets/orchestra-model/tls.crt",
+      "privateKeyMountPath": "/var/run/secrets/orchestra-model/tls.key",
+      "trustBundleMountPath": "/var/run/secrets/orchestra-model/ca.crt",
+      "requiredDnsNames": [
+        "orchestra-sno-model-backend",
+        "orchestra-sno-model-backend.orchestra-sno-model-backend",
+        "orchestra-sno-model-backend.orchestra-sno-model-backend.svc",
+        "orchestra-sno-model-backend.orchestra-sno-model-backend.svc.cluster.local"
+      ],
+      "minimumRemainingSeconds": 86400
+    }
+  ],
+  "execution": {
+    "requiredMode": "live-cluster-read-only",
+    "maximumInputObservationAgeSeconds": 3600,
+    "maximumMaterializationAgeSeconds": 3600,
+    "opensslMajorVersion": 3,
+    "maximumCertificateBytes": 65536,
+    "maximumPrivateKeyBytes": 65536,
+    "maximumTrustBundleBytes": 262144
+  },
+  "controls": {
+    "scope": "sno-engineering-trial-model-and-tls-integrity-only",
+    "liveClusterInputsRequired": true,
+    "secretValuesStored": false,
+    "certificateBytesStored": false,
+    "privateKeyBytesStored": false,
+    "modelBytesStored": false,
+    "operatorClusterAccessRequired": true,
+    "dependencyEgressRequired": false,
+    "serverSideDryRunExecuted": false,
+    "connectivityVerified": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEligible": false,
+    "allowedCertificationSlots": []
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "referenceProfileVerified": false,
+    "customerCertified": false,
+    "redHatCertified": false,
+    "contractualSla": false,
+    "productionSupported": false,
+    "highAvailability": false,
+    "rpoRtoVerified": false
+  },
+  "policyDigest": "sha256:f10490c0fca830844dbedc7e697206dfc74c5d2ec288a5238531523d84ec224f"
+}

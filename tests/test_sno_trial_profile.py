@@ -100,6 +100,10 @@ class SnoTrialProfileTests(unittest.TestCase):
             ).write_text(TRIAL_PROFILE_ID, encoding="utf-8")
             (
                 config
+                / "sno-trial-dependency-integrity-policy.lock.json"
+            ).write_text(TRIAL_PROFILE_ID, encoding="utf-8")
+            (
+                config
                 / "sno-trial-dependency-manifest-candidate.lock.json"
             ).write_text(TRIAL_PROFILE_ID, encoding="utf-8")
             (config / "sno-trial-operator-inputs.lock.json").write_text(

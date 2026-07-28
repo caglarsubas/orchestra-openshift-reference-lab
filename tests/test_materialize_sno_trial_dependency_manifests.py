@@ -58,7 +58,11 @@ class OcMetadataFixture:
                 "orchestra-sno-model-auth\nOpaque\napi-keys\n"
             ),
             ("secret", "orchestra-sno-model-server-tls"): (
-                "orchestra-sno-model-server-tls\nkubernetes.io/tls\ntls.crt\ntls.key\n"
+                "orchestra-sno-model-server-tls\n"
+                "kubernetes.io/tls\n"
+                "ca.crt\n"
+                "tls.crt\n"
+                "tls.key\n"
             ),
         }
         return subprocess.CompletedProcess(

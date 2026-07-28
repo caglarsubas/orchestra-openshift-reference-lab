@@ -17,7 +17,7 @@ cannot materialize the model. They require operator-owned objects:
 | `Secret` | `orchestra-sno-valkey` | `orchestra-sno-valkey-server-tls` | `tls.crt`, `tls.key`, `ca.crt` |
 | `PersistentVolumeClaim` | `orchestra-sno-model-backend` | `orchestra-sno-model-artifact` | Pre-staged, digest-verified GGUF; mounted read-only |
 | `Secret` | `orchestra-sno-model-backend` | `orchestra-sno-model-auth` | `api-keys` |
-| `Secret` | `orchestra-sno-model-backend` | `orchestra-sno-model-server-tls` | `tls.crt`, `tls.key` |
+| `Secret` | `orchestra-sno-model-backend` | `orchestra-sno-model-server-tls` | `tls.crt`, `tls.key`, `ca.crt` |
 
 The uppercase storage-class value is an unresolved identifier, not a shell
 template. The payload-free observer in
@@ -25,9 +25,12 @@ template. The payload-free observer in
 without reading Secret values. The private materializer in
 `scripts/materialize_sno_trial_dependency_manifests.py` then replaces exactly
 one identifier and emits a new digest-bound artifact under ignored
-`restricted/` storage. See `docs/runbooks/sno-trial.md` for the operator
-commands. Applying this source directory or the private artifact directly is
-not authorized.
+`restricted/` storage. A separately authorized running candidate can then be
+checked by `scripts/sno_trial_dependency_integrity.py`, which hashes the model
+inside the pinned pod and validates certificate lifetime, SANs, key matches,
+and CA chains without persisting payload bytes. See
+`docs/runbooks/sno-trial.md` for the operator commands. Applying this source
+directory or the private artifact directly is not authorized.
 
 Validate the candidate with:
 
@@ -38,5 +41,6 @@ make validate-sno-trial-dependency-manifests
 The controlling contract is
 [`config/sno-trial-dependency-manifest-candidate.lock.json`](../../../../config/sno-trial-dependency-manifest-candidate.lock.json).
 It remains blocked on upstream review, destination admission, a live input
-observation, model digest and certificate proof, live capacity, OpenShift
-server-side dry-run, connectivity proof, and activation review.
+observation and materialization, live model digest and certificate proof, live
+capacity, OpenShift server-side dry-run, connectivity proof, and activation
+review.

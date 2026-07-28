@@ -23,7 +23,7 @@ ACTIVE_DEPENDENCY_KUSTOMIZATION = (
     ROOT / "gitops" / "dependencies" / "reference-lab" / "kustomization.yaml"
 )
 KIND = "orchestra.openshift.sno-trial-dependency-manifest-candidate.v1"
-CANDIDATE_ID = "orchestra-sno-trial-dependency-manifests-2026-07-28.1"
+CANDIDATE_ID = "orchestra-sno-trial-dependency-manifests-2026-07-28.2"
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 MANIFEST_ROOT = ROOT / "gitops" / "dependencies" / "candidates" / "sno-trial"
 KUSTOMIZATION_PATH = MANIFEST_ROOT / "kustomization.yaml"
@@ -31,10 +31,10 @@ STORAGE_CLASS_PLACEHOLDER = "ORCHESTRA_SNO_STORAGE_CLASS_REQUIRED"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 IMMUTABLE_IMAGE = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
 EXPECTED_CANDIDATE_DIGEST = (
-    "sha256:fd39f3b7e21d5ed6472557d5884ef4bf1fdd6dc26785475af98449c90aa672c0"
+    "sha256:7f5d0518e87e27f982c80a2bcd63e03d56af151f024d88737fda89f682be1e5f"
 )
 EXPECTED_MANIFEST_SET_DIGEST = (
-    "sha256:14ccfdcf06eae506b701c9674fd536eb2024f616bc3b711438783033be566d7f"
+    "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728"
 )
 RESOURCE_FILES = [
     "namespace-valkey.json",
@@ -101,7 +101,7 @@ EXPECTED_INPUTS = [
         "kind": "Secret",
         "namespace": "orchestra-sno-model-backend",
         "name": "orchestra-sno-model-server-tls",
-        "requiredKeys": ["tls.crt", "tls.key"],
+        "requiredKeys": ["ca.crt", "tls.crt", "tls.key"],
         "usage": "llama-server-tls",
         "materialization": "operator-created-out-of-band",
     },
@@ -532,10 +532,22 @@ def validate_model_backend(
         fail("dependency_manifest_model_pvc_invalid")
     if collect_secret_refs(stateful_set) != {
         ("orchestra-sno-model-auth", "api-keys"),
+        ("orchestra-sno-model-server-tls", "ca.crt"),
         ("orchestra-sno-model-server-tls", "tls.crt"),
         ("orchestra-sno-model-server-tls", "tls.key"),
     }:
         fail("dependency_manifest_model_secret_refs_invalid")
+    tls_mounts = {
+        (item.get("mountPath"), item.get("subPath"), item.get("readOnly"))
+        for item in container.get("volumeMounts", [])
+        if item.get("name") == "tls"
+    }
+    if tls_mounts != {
+        ("/var/run/secrets/orchestra-model/ca.crt", "ca.crt", True),
+        ("/var/run/secrets/orchestra-model/tls.crt", "tls.crt", True),
+        ("/var/run/secrets/orchestra-model/tls.key", "tls.key", True),
+    }:
+        fail("dependency_manifest_model_tls_mounts_invalid")
     if service.get("spec", {}).get("type") != "ClusterIP" or service.get(
         "spec", {}
     ).get("ports") != [
