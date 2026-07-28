@@ -370,6 +370,16 @@ are never requested. Validate the source contract with:
 make validate-sno-trial-dependency-integrity-policy
 ```
 
+The next non-mutating gate accepts only a fresh live cluster report and the
+exact private materialization directory. It submits all 12 resources with
+strict OpenShift server-side dry-run, compares digested object metadata before
+and after, and remains blocked on image pulls, deployment, connectivity, and
+activation:
+
+```bash
+make validate-sno-trial-dependency-dry-run-contract
+```
+
 This path has CI fixture coverage but has not been run against the destroyed
 trial cluster. Upstream review, destination admission and signing, certificate
 validity and model-byte/digest live evidence, live allocatable capacity,

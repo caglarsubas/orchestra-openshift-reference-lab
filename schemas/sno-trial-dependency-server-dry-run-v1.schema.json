@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://planeon.ai/schemas/orchestra/sno-trial-dependency-server-dry-run-v1.schema.json",
+  "title": "Orchestra SNO dependency server dry-run observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "assessmentId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "observedAt",
+    "assessedAt",
+    "bindings",
+    "aggregate",
+    "resources",
+    "decision",
+    "controls",
+    "claims",
+    "reportDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-dependency-server-dry-run.v1"},
+    "assessmentId": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"},
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "live-server-dry-run"},
+    "observedAt": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "assessedAt": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clusterObservationId",
+        "clusterObservationDigest",
+        "materializationId",
+        "materializationDigest",
+        "candidateId",
+        "candidateDigest",
+        "materializedManifestSetDigest"
+      ],
+      "properties": {
+        "clusterObservationId": {"type": "string"},
+        "clusterObservationDigest": {"$ref": "#/$defs/digest"},
+        "materializationId": {"type": "string"},
+        "materializationDigest": {"$ref": "#/$defs/digest"},
+        "candidateId": {"type": "string"},
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "materializedManifestSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "aggregate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resourceCount", "acceptedCount", "unchangedCount", "resourceResultSetDigest"],
+      "properties": {
+        "resourceCount": {"const": 12},
+        "acceptedCount": {"type": "integer", "minimum": 0, "maximum": 12},
+        "unchangedCount": {"type": "integer", "minimum": 0, "maximum": 12},
+        "resourceResultSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/resource"}
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reasonCodes"],
+      "properties": {
+        "status": {"enum": ["SERVER_DRY_RUN_OBSERVED_WITH_GAPS", "BLOCKED"]},
+        "reasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "SERVER_DRY_RUN_REJECTED",
+              "DRY_RUN_OBJECT_STATE_CHANGED",
+              "LIVE_IMAGE_PULL_NOT_VERIFIED",
+              "LIVE_DEPENDENCY_CONNECTIVITY_MISSING",
+              "ACTIVATION_REVIEW_MISSING"
+            ]
+          }
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "commandPolicy",
+        "strictFieldValidation",
+        "rawManifestContentStored",
+        "rawCommandOutputStored",
+        "objectNamesStored",
+        "secretValuesObserved",
+        "secretValuesStored",
+        "serverSideDryRunExecuted",
+        "objectPersistenceObserved",
+        "liveImagePullAttempted",
+        "connectivityVerified",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "properties": {
+        "scope": {"const": "sno-engineering-trial-dependency-api-admission-only"},
+        "commandPolicy": {"const": "get-and-server-side-dry-run-only"},
+        "strictFieldValidation": {"const": true},
+        "rawManifestContentStored": {"const": false},
+        "rawCommandOutputStored": {"const": false},
+        "objectNamesStored": {"const": false},
+        "secretValuesObserved": {"const": false},
+        "secretValuesStored": {"const": false},
+        "serverSideDryRunExecuted": {"const": true},
+        "objectPersistenceObserved": {"const": false},
+        "liveImagePullAttempted": {"const": false},
+        "connectivityVerified": {"const": false},
+        "cloudMutationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEligible": {"const": false},
+        "allowedCertificationSlots": {"type": "array", "maxItems": 0}
+      }
+    },
+    "claims": {"$ref": "#/$defs/claims"},
+    "reportDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "file",
+        "apiVersionDigest",
+        "kindDigest",
+        "namespaceDigest",
+        "nameDigest",
+        "manifestDigest",
+        "acceptedObjectDigest",
+        "preexisting",
+        "serverDryRunAccepted",
+        "objectStateUnchanged"
+      ],
+      "properties": {
+        "file": {"type": "string"},
+        "apiVersionDigest": {"$ref": "#/$defs/digest"},
+        "kindDigest": {"$ref": "#/$defs/digest"},
+        "namespaceDigest": {"oneOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]},
+        "nameDigest": {"$ref": "#/$defs/digest"},
+        "manifestDigest": {"$ref": "#/$defs/digest"},
+        "acceptedObjectDigest": {"$ref": "#/$defs/digest"},
+        "preexisting": {"type": "boolean"},
+        "serverDryRunAccepted": {"type": "boolean"},
+        "objectStateUnchanged": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified"
+      ],
+      "properties": {
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false},
+        "productionSupported": {"const": false},
+        "highAvailability": {"const": false},
+        "rpoRtoVerified": {"const": false}
+      }
+    }
+  }
+}

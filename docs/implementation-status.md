@@ -86,6 +86,7 @@ any certification campaign slot.
 | Inactive Valkey/model-backend dependency manifest candidate | Yes | Yes | No | No | Not eligible |
 | Payload-free six-input observer and private manifest materializer | Yes | Yes | No | No | Not eligible |
 | Payload-free model/TLS integrity observer and strict policy | Yes | Yes | No | No | Not eligible |
+| Strict dependency server dry-run and object-state observer | Yes | Yes | No | No | Not eligible |
 | Secret-free lease-gated installer renderer | Yes | Yes | Yes | Yes | Not eligible |
 | Standalone trial Terraform for project, APIs, budget, and delegation zone | Yes | Yes | Yes | Yes | Not eligible |
 | Payload-free read-only provider-readiness assessment | Yes | Yes | No | Yes | Not eligible |
