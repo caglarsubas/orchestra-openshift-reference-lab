@@ -1,7 +1,6 @@
 {
   "activation": {
     "remainingReasonCodes": [
-      "product-artifact-replay-refresh-required",
       "destination-mirror-verification-missing",
       "live-cluster-pull-verification-missing",
       "operator-secret-and-ca-inputs-missing",
@@ -15,14 +14,14 @@
     "artifactSetId": "orchestra-sno-trial-products-2026-07-28.5",
     "profileId": "orchestra-ocp-sno-trial-amd64-v1",
     "replay": {
-      "artifactId": 8663575783,
-      "artifactName": "sno-trial-product-artifact-replay-30293130839-1",
-      "generatedAt": "2026-07-27T18:18:18Z",
-      "reportDigest": "sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615",
-      "verificationId": "sno-product-replay-30293130839.1",
-      "verifierRevision": "2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee",
+      "artifactId": 8677385356,
+      "artifactName": "sno-trial-product-artifact-replay-30331064883-1",
+      "generatedAt": "2026-07-28T05:15:06Z",
+      "reportDigest": "sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844",
+      "verificationId": "sno-product-replay-30331064883.1",
+      "verifierRevision": "3a3793bdc955c747e01aaf01afbfd000a1d58c36",
       "verifierRunAttempt": 1,
-      "verifierRunId": 30293130839
+      "verifierRunId": 30331064883
     },
     "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
   },
@@ -55,12 +54,12 @@
     "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/sno-trial-product-artifact-admission.yml@refs/heads/main"
   },
   "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
-  "policyDigest": "sha256:bb82c3e06d16b8eee6d52434b65349739c0dae1826ebc32a1c12cbc498537fc6",
-  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.4",
+  "policyDigest": "sha256:190c755b6d22069a18010c84344254c2f1ce685a24ad5df941f72520780d826e",
+  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.5",
   "review": {
     "maximumAdmissionAgeSeconds": 2592000,
     "maximumReplayAgeSeconds": 1209600,
-    "replayState": "refresh-required",
+    "replayState": "current",
     "requiredChecks": [
       "replay-report-schema-and-digest",
       "three-plane-publication-lineage",

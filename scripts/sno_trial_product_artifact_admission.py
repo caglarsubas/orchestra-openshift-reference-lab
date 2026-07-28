@@ -49,7 +49,7 @@ POLICY_KIND = (
     "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1"
 )
 ADMISSION_KIND = "orchestra.openshift.sno-trial-product-artifact-admission.v1"
-POLICY_ID = "orchestra-sno-trial-product-admission-2026-07-28.4"
+POLICY_ID = "orchestra-sno-trial-product-admission-2026-07-28.5"
 TARGET_CLASS = "engineering-trial"
 ADMISSION_ID = re.compile(r"^sno-product-admission-[a-z0-9][a-z0-9.-]{5,79}$")
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")

@@ -43,7 +43,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         self.current_policy = self.policy_for_report(self.report)
         self.environment_evidence = self.valid_environment_evidence()
         self.admitted_at = datetime(
-            2026, 7, 27, 19, 0, tzinfo=timezone.utc
+            2026, 7, 28, 6, 0, tzinfo=timezone.utc
         )
         self.expires_at = datetime(
             2026, 8, 10, 19, 0, tzinfo=timezone.utc
@@ -104,8 +104,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         value: dict[str, object] = {
             "schemaVersion": 2,
             "kind": REPORT_KIND,
-            "verificationId": "sno-product-replay-30293130839.1",
-            "generatedAt": "2026-07-27T18:18:18Z",
+            "verificationId": "sno-product-replay-30331064883.1",
+            "generatedAt": "2026-07-28T05:15:06Z",
             "targetClass": "engineering-trial",
             "executionMode": REPORT_EXECUTION_MODE,
             "bindings": {
@@ -113,8 +113,8 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
                 "artifactSetId": self.lock["artifactSetId"],
                 "artifactSetDigest": self.lock["artifactSetDigest"],
                 "workloadCandidateDigest": self.candidate["candidateDigest"],
-                "verifierRevision": "2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee",
-                "verifierRunId": 30293130839,
+                "verifierRevision": "3a3793bdc955c747e01aaf01afbfd000a1d58c36",
+                "verifierRunId": 30331064883,
                 "verifierRunAttempt": 1,
             },
             "artifacts": artifacts,
@@ -215,27 +215,37 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
         validate_policy(self.policy, self.lock, self.candidate)
         self.assertEqual(
-            self.policy["review"]["replayState"], "refresh-required"
+            self.policy["review"]["replayState"], "current"
         )
         self.assertEqual(
             self.policy["activation"]["remainingReasonCodes"],
-            REMAINING_REASONS,
+            DEPLOYMENT_REASONS,
         )
-        with self.assertRaisesRegex(
-            ValueError, "replay_refresh_required"
-        ):
-            validate_replay_binding(
-                self.report,
-                self.policy,
-                self.lock,
-                self.candidate,
-            )
+        validate_replay_binding(
+            self.report,
+            self.policy,
+            self.lock,
+            self.candidate,
+        )
         validate_replay_binding(
             self.report,
             self.current_policy,
             self.lock,
             self.candidate,
         )
+
+        stale = copy.deepcopy(self.policy)
+        stale["review"]["replayState"] = "refresh-required"
+        stale["activation"]["remainingReasonCodes"] = list(REMAINING_REASONS)
+        stale["policyDigest"] = unsigned_digest(stale, "policyDigest")
+        validate_policy(stale, self.lock, self.candidate)
+        with self.assertRaisesRegex(ValueError, "replay_refresh_required"):
+            validate_replay_binding(
+                self.report,
+                stale,
+                self.lock,
+                self.candidate,
+            )
 
         malformed = copy.deepcopy(self.current_policy)
         malformed["bindings"]["replay"]["verifierRunAttempt"] = True
@@ -414,7 +424,13 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
             "environment: sno-trial-product-artifact-admission", source
         )
         self.assertIn('[[ "$GITHUB_RUN_ATTEMPT" == "1" ]]', source)
-        self.assertIn('[[ "$REPLAY_ARTIFACT_ID" == "8634695656" ]]', source)
+        self.assertIn('[[ "$REPLAY_ARTIFACT_ID" == "8677385356" ]]', source)
+        self.assertIn('REPLAY_RUN_ID: "30331064883"', source)
+        self.assertIn(
+            "REPLAY_ARTIFACT_NAME: "
+            "sno-trial-product-artifact-replay-30331064883-1",
+            source,
+        )
         self.assertIn("Require a current replay binding", source)
         self.assertIn('.review.replayState == "current"', source)
         self.assertIn(

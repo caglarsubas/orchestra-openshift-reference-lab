@@ -383,9 +383,9 @@ This path has CI fixture coverage but has not been run against the destroyed
 trial cluster. Upstream review, destination admission and signing, certificate
 validity and model-byte/digest live evidence, live allocatable capacity,
 server-side dry-run, connectivity, and activation review remain blocked.
-Rebinding invalidated the previous product replay for current admission, so a
-fresh four-image replay is also required. Neither the artifact set,
-observations, nor private materialization authorizes apply.
+The rebound four-image set has a fresh exact-main replay, but independent human
+admission is still required. Neither the artifact set, observations, replay,
+nor private materialization authorizes apply.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
@@ -448,15 +448,19 @@ Exact-main run `30293130839` replayed the current four-image set from revision
 contains payload-free report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
 That replay is historical evidence for the pre-rebind candidate and cannot
-admit the current artifact set. Admission policy
-`orchestra-sno-trial-product-admission-2026-07-28.4` is fail-closed with
-`replayState=refresh-required` until a new exact-main replay is recorded. The
-value-free operator-input contract
+admit the current artifact set. Exact-main run `30331064883` replayed the
+rebound set from revision `3a3793bdc955c747e01aaf01afbfd000a1d58c36`;
+artifact `8677385356` contains payload-free report digest
+`sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`
+and expires on 2026-08-11. Admission policy
+`orchestra-sno-trial-product-admission-2026-07-28.5` binds only that replay
+with `replayState=current`. No human admission record exists. The value-free
+operator-input contract
 now locks 14 Secret references, three CA ConfigMaps, their required key names,
 and the three rendered-manifest bindings; no live input observation exists.
-Destination mirror and live-cluster pulls, populated operator inputs, a fresh
-server-side dry run, and provider readiness remain absent; activation and
-every certifying claim remain false.
+Destination mirror and live-cluster pulls, populated operator inputs, a current
+server-side dry run, provider readiness, and independent replay admission
+remain absent; activation and every certifying claim remain false.
 
 The independently locked dependency BOM digest is
 `sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc`.
