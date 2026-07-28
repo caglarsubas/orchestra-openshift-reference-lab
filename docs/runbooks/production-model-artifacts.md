@@ -123,7 +123,7 @@ even if its declared identifiers match.
 
 The next boundary is now source-declared by
 `config/production-model-artifact-custody-policy.lock.json`, digest
-`sha256:053862e4dc557472bc0e90561427356268ccb76dbc9161be5d82daa1c93edc4c`.
+`sha256:ca2fc2092f0b1fdb652a465f8d1502804ee26ca3274edc130d312577edcad22a`.
 Validate it with:
 
 ```bash
@@ -154,10 +154,56 @@ Local validation of either record proves only schema and semantic consistency.
 It does not verify the future detached custody signature or human-review
 signatures. The CLI therefore reports `detachedSignatureVerified=false`,
 `reviewerSignaturesVerified=false`, and `admissionAuthorized=false`. The later
-live implementation must provision the dedicated bucket, CMEK and signing key,
-short-lived uploader and verifier identities, protected workflow environments,
-signature replay, and an independently reviewed aggregate. None of those live
-surfaces exists merely because this contract is checked in.
+live implementation must review and apply the source-declared bucket, CMEK,
+signing key, and short-lived identities, then add protected workflow
+environments, signature replay, and an independently reviewed aggregate. None
+of those live surfaces exists merely because this contract is checked in.
+
+## Source-declared cloud authority
+
+The bounded cloud authority is
+`config/production-model-artifact-custody-execution.lock.json`, digest
+`sha256:06177cea76457b3ba7bee48521eb02a7ecfbaec93ded4c157099b277e0eb4195`.
+Validate its policy, file bindings, Terraform resources, IAM scope, and
+non-live claims with:
+
+```bash
+make validate-production-model-artifact-custody-authority
+```
+
+The bootstrap module declares two distinct short-lived exact-main WIF
+identities. `orchestra-model-custody-writer` can create objects only in
+`production-model-artifacts/`; `orchestra-model-custody-verify` can read that
+managed folder, create reports only in `production-model-custody/`, and sign
+with the dedicated verification key. Both service-account IDs satisfy GCP's
+30-character limit. Neither identity receives a project role, user-managed
+key, object-delete permission, mirror access, admission authority, deployment
+authority, or campaign authority.
+
+The foundation module declares a dedicated bucket. It defaults to
+`{servicesProjectId}-production-model-artifacts`; the optional
+`production_model_artifact_bucket_name` input permits a reviewed globally
+unique override without breaking existing foundation plan/apply callers. The
+bucket uses CMEK, uniform bucket access, enforced public-access prevention,
+versioning, object retention, a 400-day unlocked retention policy, and
+`prevent_destroy`. It is intentionally distinct from raw and signed evidence
+custody. Keeping retention unlocked at this stage avoids an irreversible
+provider action before plan review; every copied model must still receive the
+policy-required event-based hold.
+
+This increment does not contain
+`.github/workflows/production-model-artifact-custody.yml` and does not configure
+its two reserved protected environments. A GitHub-hosted runner cannot read an
+operator's local ignored `restricted/` directory. The later workflow must
+therefore bind an explicitly reviewed transfer surface, such as a controlled
+self-hosted runner or a separately attested source-staging mechanism, before
+any model byte is copied. Generic GitHub Actions artifacts and Git commits are
+not approved transfer surfaces.
+
+The current claim is `terraformDeclared=true`, `workflowDeclared=false`, and
+`applied=false`. Storage provisioning, live identity/KMS verification, custody,
+licence approval, admission, deployment, campaign evidence, and certification
+all remain false.
 
 ## Materialize and admit
 

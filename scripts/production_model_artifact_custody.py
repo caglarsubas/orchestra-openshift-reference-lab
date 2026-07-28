@@ -42,7 +42,7 @@ REVIEW_KIND = "orchestra.openshift.production-model-license-review-decision.v1"
 POLICY_ID = "orchestra-production-model-artifact-custody-2026-07-28.1"
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 EXPECTED_POLICY_DIGEST = (
-    "sha256:053862e4dc557472bc0e90561427356268ccb76dbc9161be5d82daa1c93edc4c"
+    "sha256:ca2fc2092f0b1fdb652a465f8d1502804ee26ca3274edc130d312577edcad22a"
 )
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 RECORD_ID = re.compile(r"^production-model-custody-[a-z0-9][a-z0-9._-]{7,127}$")
@@ -313,7 +313,7 @@ def validate_policy(
         "uploaderManagedFolderRole": "roles/storage.objectCreator",
         "uploaderObjectReadGranted": False,
         "uploaderObjectDeleteGranted": False,
-        "verifierServiceAccountId": "orchestra-model-custody-verifier",
+        "verifierServiceAccountId": "orchestra-model-custody-verify",
         "verifierManagedFolderRole": "roles/storage.objectViewer",
         "verifierSignedRecordRole": "roles/storage.objectCreator",
         "verifierReportCreateGranted": True,
