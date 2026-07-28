@@ -261,6 +261,34 @@ separately reviewed dependency deployment before the mounted-byte checks can
 run. Applying it is outside this materialization command and requires its own
 authorization and cleanup record.
 
+Before any dependency deployment, use a fresh live cluster observation and
+the exact private materialization directory to exercise OpenShift admission:
+
+```bash
+DEPENDENCY_DRY_RUN_ID=sno-dependency-dry-run-$(date -u +%Y%m%d%H%M%S).1
+DEPENDENCY_DRY_RUN_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+make observe-sno-trial-dependency-dry-run \
+  CLUSTER_REPORT=restricted/sno-cluster-live.json \
+  CLIENT=restricted/redhat/4.20.27/oc \
+  KUBECONFIG=restricted/cluster/auth/kubeconfig \
+  DIRECTORY="restricted/dependencies/$MATERIALIZATION_ID" \
+  ASSESSMENT_ID="$DEPENDENCY_DRY_RUN_ID" \
+  OBSERVED_AT="$DEPENDENCY_DRY_RUN_AT" \
+  OUTPUT="restricted/$DEPENDENCY_DRY_RUN_ID.json"
+
+make verify-sno-trial-dependency-dry-run \
+  REPORT="restricted/$DEPENDENCY_DRY_RUN_ID.json"
+```
+
+The observer applies each of the 12 exact resources with
+`--dry-run=server --validate=strict --output=json`. It compares hashed
+UID/resource-version/generation state before and after every request, stores
+no names or raw command output, and rejects Secret manifests. A successful
+result is `SERVER_DRY_RUN_OBSERVED_WITH_GAPS`: it proves API admission and no
+observed object-state change, but does not pull images, deploy workloads,
+verify connectivity, authorize activation, or produce campaign evidence.
+
 The model TLS Secret must contain `ca.crt` in addition to `tls.crt` and
 `tls.key`; this binds the client-trust material used for chain validation. Once
 the exact materialized dependency candidate is running under separate

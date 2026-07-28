@@ -2,7 +2,7 @@ PYTHON ?= python3
 TERRAFORM ?= terraform
 
 .PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-dependency-runtime-contracts validate-sno-trial-dependency-artifacts validate-sno-trial-dependency-manifests validate-sno-trial-dependency-integrity-policy validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
-.PHONY: observe-sno-trial-dependency-inputs verify-sno-trial-dependency-inputs materialize-sno-trial-dependency-manifests verify-sno-trial-dependency-materialization observe-sno-trial-dependency-integrity verify-sno-trial-dependency-integrity
+.PHONY: observe-sno-trial-dependency-inputs verify-sno-trial-dependency-inputs materialize-sno-trial-dependency-manifests verify-sno-trial-dependency-materialization observe-sno-trial-dependency-integrity verify-sno-trial-dependency-integrity validate-sno-trial-dependency-dry-run-contract observe-sno-trial-dependency-dry-run verify-sno-trial-dependency-dry-run
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -14,6 +14,7 @@ validate:
 	$(PYTHON) scripts/validate_sno_trial_dependency_artifacts.py
 	$(PYTHON) scripts/validate_sno_trial_dependency_manifests.py
 	$(PYTHON) scripts/sno_trial_dependency_integrity.py validate-policy
+	$(PYTHON) scripts/sno_trial_dependency_dry_run.py validate-contract
 	$(PYTHON) scripts/sno_trial_product_artifacts.py validate-lock
 	$(PYTHON) scripts/sno_trial_product_artifact_admission.py validate-policy
 	$(PYTHON) scripts/sno_trial_operator_inputs.py validate-lock
@@ -250,6 +251,31 @@ observe-sno-trial-dependency-integrity:
 verify-sno-trial-dependency-integrity:
 	test -n "$(REPORT)"
 	$(PYTHON) scripts/sno_trial_dependency_integrity.py verify \
+		--report "$(REPORT)"
+
+validate-sno-trial-dependency-dry-run-contract:
+	$(PYTHON) scripts/sno_trial_dependency_dry_run.py validate-contract
+
+observe-sno-trial-dependency-dry-run:
+	test -n "$(CLUSTER_REPORT)"
+	test -n "$(CLIENT)"
+	test -n "$(KUBECONFIG)"
+	test -n "$(DIRECTORY)"
+	test -n "$(ASSESSMENT_ID)"
+	test -n "$(OBSERVED_AT)"
+	test -n "$(OUTPUT)"
+	$(PYTHON) scripts/sno_trial_dependency_dry_run.py collect \
+		--cluster-report "$(CLUSTER_REPORT)" \
+		--client "$(CLIENT)" \
+		--kubeconfig "$(KUBECONFIG)" \
+		--directory "$(DIRECTORY)" \
+		--assessment-id "$(ASSESSMENT_ID)" \
+		--observed-at "$(OBSERVED_AT)" \
+		--output "$(OUTPUT)"
+
+verify-sno-trial-dependency-dry-run:
+	test -n "$(REPORT)"
+	$(PYTHON) scripts/sno_trial_dependency_dry_run.py verify \
 		--report "$(REPORT)"
 
 observe-sno-trial-product-dry-run:
