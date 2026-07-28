@@ -43,6 +43,9 @@ RELEASE_SET_PATH = ROOT / "config" / "cross-plane-release-set.lock.json"
 DEPENDENCY_PATH = ROOT / "config" / "dependency-admission.lock.json"
 DEPENDENCY_BOM_PATH = ROOT / "config" / "dependency-bom.lock.json"
 LAB_SERVICES_PATH = ROOT / "config" / "lab-services.lock.json"
+DEPENDENCY_ARTIFACT_PATH = (
+    ROOT / "config" / "sno-trial-dependency-artifacts.lock.json"
+)
 TOPOLOGY_PATH = ROOT / "config" / "lab.lock.json"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 IMMUTABLE_REF = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
@@ -175,10 +178,9 @@ ACTIVATION_REASONS = [
     "LINUX_INSTALLER_EXECUTION_MISSING",
     "SOURCE_ADMISSION_INCOMPLETE",
     "TRIAL_CHART_PROFILES_MISSING",
-    "TRIAL_DEPENDENCY_RUNTIME_CONTRACTS_MISSING",
+    "TRIAL_DEPENDENCY_RUNTIME_CONTRACT_REFRESH_PENDING",
+    "TRIAL_DEPENDENCY_MANIFEST_REFRESH_PENDING",
     "DESTINATION_PULL_PROOF_MISSING",
-    "MODEL_ARTIFACT_CONTRACT_MISSING",
-    "VALKEY_ARTIFACT_CONTRACT_MISSING",
     "SECRET_REFERENCES_UNRESOLVED",
     "TLS_REFERENCES_UNRESOLVED",
     "LIVE_ALLOCATABLE_NOT_OBSERVED",
@@ -353,14 +355,31 @@ def expected_artifacts(
     release_set: dict[str, Any],
     admission: dict[str, Any],
     lab_services: dict[str, Any],
+    dependency_artifacts: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
-    def unresolved(source_id: str) -> dict[str, Any]:
+    def selected(source_id: str) -> dict[str, Any]:
+        item = find_by_id(
+            dependency_artifacts.get("containers"),
+            source_id,
+            "sno_candidate_selected_dependency_artifact_missing",
+        )
+        reference = item.get("resolvedReference")
+        digest = item.get("platformDigest")
+        if (
+            not isinstance(reference, str)
+            or not IMMUTABLE_REF.fullmatch(reference)
+            or not isinstance(digest, str)
+            or not DIGEST.fullmatch(digest)
+            or not reference.endswith(digest)
+            or item.get("platform") != "linux/amd64"
+        ):
+            fail("sno_candidate_selected_dependency_artifact_invalid")
         return {
-            "sourceClass": "unresolved",
+            "sourceClass": "trial-dependency-artifact",
             "sourceId": source_id,
-            "reference": None,
-            "platformDigest": None,
-            "admissionState": "unresolved",
+            "reference": reference,
+            "platformDigest": digest,
+            "admissionState": "source-resolved-not-mirrored",
             "usableForCapacityOnly": True,
         }
 
@@ -371,8 +390,8 @@ def expected_artifacts(
         "postgresql": dependency_artifact(admission, "cloudnative-pg-postgresql-16"),
         "clickhouse": dependency_artifact(admission, "clickhouse-server-lts"),
         "jetstream": dependency_artifact(admission, "nats-server"),
-        "valkey": unresolved("valkey"),
-        "model-backend": unresolved("model-backend"),
+        "valkey": selected("valkey-image"),
+        "model-backend": selected("model-backend-image"),
         "synthetic-tenant-kit": lab_service_artifact(
             lab_services, "synthetic-tenant-kit"
         ),
@@ -400,6 +419,7 @@ def validate_bindings(
     release_set: dict[str, Any],
     admission: dict[str, Any],
     lab_services: dict[str, Any],
+    dependency_artifacts: dict[str, Any],
 ) -> None:
     expected = {
         "trialProfileDigest": canonical_digest(trial),
@@ -407,6 +427,9 @@ def validate_bindings(
         "artifactReleaseSetDigest": canonical_digest(release_set),
         "dependencySourceDigest": canonical_digest(admission),
         "labServicesDigest": canonical_digest(lab_services),
+        "dependencyArtifactSetDigest": dependency_artifacts.get(
+            "artifactSetDigest"
+        ),
     }
     if value != expected or not all(DIGEST.fullmatch(item) for item in value.values()):
         fail("sno_candidate_bindings_invalid")
@@ -481,6 +504,7 @@ def validate_candidate(
     release_set: dict[str, Any],
     admission: dict[str, Any],
     lab_services: dict[str, Any],
+    dependency_artifacts: dict[str, Any],
 ) -> str:
     validate_profile(trial, production)
     validate_release_set(release_set)
@@ -490,7 +514,7 @@ def validate_candidate(
     if (
         value["schemaVersion"] != 1
         or value["kind"] != "orchestra.openshift.sno-trial-workload-candidate.v1"
-        or value["candidateId"] != "orchestra-sno-trial-workload-candidate-2026-07-25.1"
+        or value["candidateId"] != "orchestra-sno-trial-workload-candidate-2026-07-28.2"
         or value["profileId"] != TRIAL_PROFILE_ID
         or value["targetClass"] != "engineering-trial"
         or value["executionMode"] != "source-only"
@@ -504,6 +528,7 @@ def validate_candidate(
         release_set,
         admission,
         lab_services,
+        dependency_artifacts,
     )
     workloads = value["workloads"]
     if not isinstance(workloads, list) or len(workloads) != len(RESOURCE_PLAN):
@@ -511,7 +536,9 @@ def validate_candidate(
     expected_ids = list(RESOURCE_PLAN)
     if [item.get("id") for item in workloads if isinstance(item, dict)] != expected_ids:
         fail("sno_candidate_workload_order_invalid")
-    artifacts = expected_artifacts(release_set, admission, lab_services)
+    artifacts = expected_artifacts(
+        release_set, admission, lab_services, dependency_artifacts
+    )
     for workload in workloads:
         if not isinstance(workload, dict):
             fail("sno_candidate_workload_invalid")
@@ -575,6 +602,7 @@ def main() -> int:
     dependency_bom = load_json(DEPENDENCY_BOM_PATH)
     topology = load_json(TOPOLOGY_PATH)
     lab_services = load_json(LAB_SERVICES_PATH)
+    dependency_artifacts = load_json(DEPENDENCY_ARTIFACT_PATH)
     validate_admission(admission, dependency_bom, topology)
     digest = validate_candidate(
         candidate,
@@ -584,6 +612,7 @@ def main() -> int:
         release_set,
         admission,
         lab_services,
+        dependency_artifacts,
     )
     validate_production_isolation()
     print(

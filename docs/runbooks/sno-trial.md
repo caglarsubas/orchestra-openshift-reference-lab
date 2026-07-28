@@ -155,7 +155,8 @@ plane, PostgreSQL, ClickHouse, JetStream, Valkey, CPU model backend, and
 synthetic tenant kit. It reserves 3 vCPU and 12 GiB for OpenShift/system
 services, limits steady workload requests to 3.4 vCPU and 14.375 GiB, allows
 only one serial 250m/256 MiB transient operation, and records 48 GiB of
-persistent volumes.
+persistent volumes. Valkey and the CPU backend bind the exact artifact-set
+linux/amd64 manifests; the candidate remains capacity-only and unadmitted.
 
 Do not render or apply this file. It contains artifact observations and
 capacity assumptions, not Kubernetes resources. The production chart profiles
@@ -169,8 +170,8 @@ security, failure, and self-digest bindings with:
 make validate-sno-trial-dependency-runtime-contracts
 ```
 
-This lock emits no Kubernetes objects. The source selection itself is now
-locked in
+This lock emits no Kubernetes objects. It consumes the selected artifact set
+and the rebound candidate. The source selection itself is locked upstream in
 `config/sno-trial-dependency-artifacts.lock.json`:
 
 ```bash
@@ -183,7 +184,8 @@ Instruct Q4_K_M model digest. The model contract requires operator
 pre-staging onto a read-only PVC and prohibits runtime network download.
 This is source-only selection: it emits no manifest, stores no model bytes,
 does not satisfy upstream review or mirror/signature gates, and does not
-authorize deployment.
+authorize deployment. Keeping this selection independent of runtime contracts
+prevents a circular digest chain.
 
 The selected Valkey and CPU backend artifacts now have an inactive, renderable
 manifest candidate:
@@ -330,9 +332,10 @@ dry-run, network connectivity, activation, deployment, or campaign work. Its
 source and CI fixtures have not been exercised against the destroyed cluster.
 Live connectivity and activation review remain separate blockers.
 
-A future candidate revision must bind the contract-set digest; that change
-deliberately requires a fresh product-artifact replay. The three product planes
-now expose source-only SNO values, but their registry replay, human admission,
+The current manifest candidate binds the rebound workload candidate, refreshed
+runtime contracts, and selected artifact set. That lineage change deliberately
+invalidates the prior product-artifact replay. The three product planes expose
+source-only SNO values, but a fresh registry replay, human admission,
 Secret/TLS references, destination pull proofs, live allocatable capacity,
 calibration, and OpenShift server-side dry runs must still pass.
 
@@ -403,11 +406,13 @@ The source contract for that later review is locked in
 `config/sno-trial-product-artifact-admission-policy.lock.json`; its output
 schema is
 `schemas/sno-trial-product-artifact-admission-v1.schema.json`. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.3` binds exact-main replay
+`orchestra-sno-trial-product-admission-2026-07-28.4` records exact-main replay
 run `30293130839`, artifact ID `8663575783`, and report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
-Its replay state is `current`; admission remains a separate protected action
-and does not grant deployment authority.
+That replay predates the current workload-candidate binding. Its replay state
+is `refresh-required`, and the admission command fails closed until a new
+exact-main replay is bound. Admission remains a separate protected action and
+does not grant deployment authority.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:

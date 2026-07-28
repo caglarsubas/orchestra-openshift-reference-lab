@@ -1,330 +1,5 @@
 {
-  "schemaVersion": 1,
-  "kind": "orchestra.openshift.sno-trial-workload-candidate.v1",
-  "candidateId": "orchestra-sno-trial-workload-candidate-2026-07-25.1",
-  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
-  "targetClass": "engineering-trial",
-  "executionMode": "source-only",
-  "architecture": "linux/amd64",
-  "bindings": {
-    "trialProfileDigest": "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a",
-    "toolchainLockDigest": "sha256:c9ace01bc3d0c6e0dd9f404b2781ed70c8f82e01ced3bff431eca316649e0c9d",
-    "artifactReleaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
-    "dependencySourceDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
-    "labServicesDigest": "sha256:bcb33ebb8ff8d539780ed4fdfb728196744832491e5aa61ad714613d968a290e"
-  },
-  "nodeEnvelope": {
-    "machineType": "n2-standard-8",
-    "physical": {
-      "cpuMillicores": 8000,
-      "memoryMiB": 32768
-    },
-    "systemReserve": {
-      "cpuMillicores": 3000,
-      "memoryMiB": 12288
-    },
-    "workloadRequestBudget": {
-      "cpuMillicores": 5000,
-      "memoryMiB": 20480
-    },
-    "steadyRequests": {
-      "cpuMillicores": 3400,
-      "memoryMiB": 14720
-    },
-    "transientPeakAllowance": {
-      "cpuMillicores": 250,
-      "memoryMiB": 256,
-      "scheduling": "serial-only"
-    },
-    "peakRequests": {
-      "cpuMillicores": 3650,
-      "memoryMiB": 14976
-    },
-    "requestHeadroom": {
-      "cpuMillicores": 1350,
-      "memoryMiB": 5504
-    },
-    "aggregateLimits": {
-      "cpuMillicores": 7250,
-      "memoryMiB": 25600
-    },
-    "persistentVolumeGiB": 48
-  },
-  "workloads": [
-    {
-      "id": "platform",
-      "category": "product",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 250,
-          "memoryMiB": 512
-        },
-        "limits": {
-          "cpuMillicores": 1000,
-          "memoryMiB": 1024
-        }
-      },
-      "persistentVolumeGiB": 0,
-      "artifact": {
-        "sourceClass": "cross-plane-release",
-        "sourceId": "platform",
-        "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2",
-        "platformDigest": "sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2",
-        "admissionState": "published-not-trial-admitted",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "observeFirst": true,
-        "agentQuerying": false,
-        "toolExecution": false,
-        "orchestrationRun": false
-      }
-    },
-    {
-      "id": "runtime-host",
-      "category": "product",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 100,
-          "memoryMiB": 128
-        },
-        "limits": {
-          "cpuMillicores": 500,
-          "memoryMiB": 512
-        }
-      },
-      "persistentVolumeGiB": 0,
-      "artifact": {
-        "sourceClass": "cross-plane-release",
-        "sourceId": "runtimeHost",
-        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144",
-        "platformDigest": "sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144",
-        "admissionState": "published-not-trial-admitted",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "modelCalls": true,
-        "mcp": "read-only",
-        "writeTools": false,
-        "productionHostedByPlatform": false
-      }
-    },
-    {
-      "id": "model-plane",
-      "category": "product",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 500,
-          "memoryMiB": 4096
-        },
-        "limits": {
-          "cpuMillicores": 1500,
-          "memoryMiB": 8192
-        }
-      },
-      "persistentVolumeGiB": 1,
-      "artifact": {
-        "sourceClass": "cross-plane-release",
-        "sourceId": "modelPlane",
-        "reference": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
-        "platformDigest": "sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
-        "admissionState": "published-not-trial-admitted",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "backend": "remote-in-cluster",
-        "routingPolicyRequired": true,
-        "rateLimitScope": "deployment-shared",
-        "fallbackRequired": true
-      }
-    },
-    {
-      "id": "postgresql",
-      "category": "dependency",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 250,
-          "memoryMiB": 1024
-        },
-        "limits": {
-          "cpuMillicores": 500,
-          "memoryMiB": 2048
-        }
-      },
-      "persistentVolumeGiB": 10,
-      "artifact": {
-        "sourceClass": "dependency-source",
-        "sourceId": "cloudnative-pg-postgresql-16",
-        "reference": "ghcr.io/cloudnative-pg/postgresql:16.10-system-trixie",
-        "platformDigest": "sha256:dea92d39d38abf4d87c0b0bd43cbf956dc2de03db3a78b5829ac629ef296b8e1",
-        "admissionState": "source-resolved-not-mirrored",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "implementation": "trial-direct-single-instance",
-        "logicalDatabases": 2,
-        "backup": false,
-        "highAvailability": false
-      }
-    },
-    {
-      "id": "clickhouse",
-      "category": "dependency",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 500,
-          "memoryMiB": 2048
-        },
-        "limits": {
-          "cpuMillicores": 1000,
-          "memoryMiB": 4096
-        }
-      },
-      "persistentVolumeGiB": 20,
-      "artifact": {
-        "sourceClass": "dependency-source",
-        "sourceId": "clickhouse-server-lts",
-        "reference": "docker.io/clickhouse/clickhouse-server:25.8.28.1",
-        "platformDigest": "sha256:cb75da0e596b8115d10bea34cef1414eafebfbcb5f5136c03e022c7b525899b3",
-        "admissionState": "source-resolved-not-mirrored",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "implementation": "trial-direct-single-instance",
-        "keeper": false,
-        "backup": false,
-        "highAvailability": false
-      }
-    },
-    {
-      "id": "jetstream",
-      "category": "dependency",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 100,
-          "memoryMiB": 256
-        },
-        "limits": {
-          "cpuMillicores": 250,
-          "memoryMiB": 512
-        }
-      },
-      "persistentVolumeGiB": 5,
-      "artifact": {
-        "sourceClass": "dependency-source",
-        "sourceId": "nats-server",
-        "reference": "docker.io/library/nats:2.14.2-alpine",
-        "platformDigest": "sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
-        "admissionState": "source-resolved-not-mirrored",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "implementation": "trial-direct-single-instance",
-        "streamReplicas": 1,
-        "durableTelemetry": true,
-        "highAvailability": false
-      }
-    },
-    {
-      "id": "valkey",
-      "category": "dependency",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 100,
-          "memoryMiB": 256
-        },
-        "limits": {
-          "cpuMillicores": 250,
-          "memoryMiB": 512
-        }
-      },
-      "persistentVolumeGiB": 2,
-      "artifact": {
-        "sourceClass": "unresolved",
-        "sourceId": "valkey",
-        "reference": null,
-        "platformDigest": null,
-        "admissionState": "unresolved",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "implementation": "trial-direct-single-instance",
-        "sentinel": false,
-        "aof": true,
-        "highAvailability": false
-      }
-    },
-    {
-      "id": "model-backend",
-      "category": "dependency",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 1500,
-          "memoryMiB": 6144
-        },
-        "limits": {
-          "cpuMillicores": 2000,
-          "memoryMiB": 8192
-        }
-      },
-      "persistentVolumeGiB": 10,
-      "artifact": {
-        "sourceClass": "unresolved",
-        "sourceId": "model-backend",
-        "reference": null,
-        "platformDigest": null,
-        "admissionState": "unresolved",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "implementation": "cpu-only-single-backend",
-        "quantizationRequired": true,
-        "maximumModelBytes": 4294967296,
-        "chatRequired": true,
-        "embeddingQualityCertifying": false
-      }
-    },
-    {
-      "id": "synthetic-tenant-kit",
-      "category": "synthetic-surface",
-      "replicas": 1,
-      "resources": {
-        "requests": {
-          "cpuMillicores": 100,
-          "memoryMiB": 256
-        },
-        "limits": {
-          "cpuMillicores": 250,
-          "memoryMiB": 512
-        }
-      },
-      "persistentVolumeGiB": 0,
-      "artifact": {
-        "sourceClass": "lab-service-publication",
-        "sourceId": "synthetic-tenant-kit",
-        "reference": "ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit@sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69",
-        "platformDigest": "sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69",
-        "admissionState": "published-not-trial-admitted",
-        "usableForCapacityOnly": true
-      },
-      "mode": {
-        "tenantGateway": true,
-        "mcp": "read-only",
-        "faultSurfaces": true,
-        "customerData": false
-      }
-    }
-  ],
   "activation": {
-    "state": "blocked",
     "reasonCodes": [
       "BILLING_ASSOCIATION_PENDING",
       "FOUNDATION_NOT_APPLIED",
@@ -334,49 +9,374 @@
       "LINUX_INSTALLER_EXECUTION_MISSING",
       "SOURCE_ADMISSION_INCOMPLETE",
       "TRIAL_CHART_PROFILES_MISSING",
-      "TRIAL_DEPENDENCY_RUNTIME_CONTRACTS_MISSING",
+      "TRIAL_DEPENDENCY_RUNTIME_CONTRACT_REFRESH_PENDING",
+      "TRIAL_DEPENDENCY_MANIFEST_REFRESH_PENDING",
       "DESTINATION_PULL_PROOF_MISSING",
-      "MODEL_ARTIFACT_CONTRACT_MISSING",
-      "VALKEY_ARTIFACT_CONTRACT_MISSING",
       "SECRET_REFERENCES_UNRESOLVED",
       "TLS_REFERENCES_UNRESOLVED",
       "LIVE_ALLOCATABLE_NOT_OBSERVED",
       "CAPACITY_CALIBRATION_PENDING",
       "SERVER_SIDE_DRY_RUN_MISSING"
-    ]
+    ],
+    "state": "blocked"
   },
-  "controls": {
-    "profileScope": "sno-engineering-trial-only",
-    "registryMode": "direct-source-by-digest-after-review",
-    "secretStrategy": "operator-created-existing-secret-references",
-    "tlsStrategy": "operator-provided-trial-secret-references",
-    "backupMode": "none-ephemeral-trial",
-    "replicaPolicy": "single-replica-no-ha",
-    "autoscalingEnabled": false,
-    "podDisruptionBudgetsEnabled": false,
-    "topologySpreadEnabled": false,
-    "platformInSynchronousRuntimePath": false,
-    "platformProductionToolExecution": false,
-    "runtimeMcpMode": "read-only",
-    "manifestsEmitted": false,
-    "argocdApplicationsEmitted": false,
-    "kustomizationReferenced": false,
-    "secretValuesStored": false,
-    "cloudMutationAuthorized": false,
-    "installAuthorized": false,
-    "activationAuthorized": false,
-    "campaignEligible": false,
-    "allowedCertificationSlots": []
+  "architecture": "linux/amd64",
+  "bindings": {
+    "artifactReleaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
+    "dependencyArtifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
+    "dependencySourceDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "labServicesDigest": "sha256:bcb33ebb8ff8d539780ed4fdfb728196744832491e5aa61ad714613d968a290e",
+    "toolchainLockDigest": "sha256:c9ace01bc3d0c6e0dd9f404b2781ed70c8f82e01ced3bff431eca316649e0c9d",
+    "trialProfileDigest": "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a"
   },
+  "candidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4",
+  "candidateId": "orchestra-sno-trial-workload-candidate-2026-07-28.2",
   "claims": {
     "campaignEvidence": false,
-    "referenceProfileVerified": false,
-    "customerCertified": false,
-    "redHatCertified": false,
     "contractualSla": false,
-    "productionSupported": false,
+    "customerCertified": false,
     "highAvailability": false,
+    "productionSupported": false,
+    "redHatCertified": false,
+    "referenceProfileVerified": false,
     "rpoRtoVerified": false
   },
-  "candidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9"
+  "controls": {
+    "activationAuthorized": false,
+    "allowedCertificationSlots": [],
+    "argocdApplicationsEmitted": false,
+    "autoscalingEnabled": false,
+    "backupMode": "none-ephemeral-trial",
+    "campaignEligible": false,
+    "cloudMutationAuthorized": false,
+    "installAuthorized": false,
+    "kustomizationReferenced": false,
+    "manifestsEmitted": false,
+    "platformInSynchronousRuntimePath": false,
+    "platformProductionToolExecution": false,
+    "podDisruptionBudgetsEnabled": false,
+    "profileScope": "sno-engineering-trial-only",
+    "registryMode": "direct-source-by-digest-after-review",
+    "replicaPolicy": "single-replica-no-ha",
+    "runtimeMcpMode": "read-only",
+    "secretStrategy": "operator-created-existing-secret-references",
+    "secretValuesStored": false,
+    "tlsStrategy": "operator-provided-trial-secret-references",
+    "topologySpreadEnabled": false
+  },
+  "executionMode": "source-only",
+  "kind": "orchestra.openshift.sno-trial-workload-candidate.v1",
+  "nodeEnvelope": {
+    "aggregateLimits": {
+      "cpuMillicores": 7250,
+      "memoryMiB": 25600
+    },
+    "machineType": "n2-standard-8",
+    "peakRequests": {
+      "cpuMillicores": 3650,
+      "memoryMiB": 14976
+    },
+    "persistentVolumeGiB": 48,
+    "physical": {
+      "cpuMillicores": 8000,
+      "memoryMiB": 32768
+    },
+    "requestHeadroom": {
+      "cpuMillicores": 1350,
+      "memoryMiB": 5504
+    },
+    "steadyRequests": {
+      "cpuMillicores": 3400,
+      "memoryMiB": 14720
+    },
+    "systemReserve": {
+      "cpuMillicores": 3000,
+      "memoryMiB": 12288
+    },
+    "transientPeakAllowance": {
+      "cpuMillicores": 250,
+      "memoryMiB": 256,
+      "scheduling": "serial-only"
+    },
+    "workloadRequestBudget": {
+      "cpuMillicores": 5000,
+      "memoryMiB": 20480
+    }
+  },
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "schemaVersion": 1,
+  "targetClass": "engineering-trial",
+  "workloads": [
+    {
+      "artifact": {
+        "admissionState": "published-not-trial-admitted",
+        "platformDigest": "sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2",
+        "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:377c03cc1379c27e5a3120931a4772a50f361861d5564987345c64b69b6e13c2",
+        "sourceClass": "cross-plane-release",
+        "sourceId": "platform",
+        "usableForCapacityOnly": true
+      },
+      "category": "product",
+      "id": "platform",
+      "mode": {
+        "agentQuerying": false,
+        "observeFirst": true,
+        "orchestrationRun": false,
+        "toolExecution": false
+      },
+      "persistentVolumeGiB": 0,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 1000,
+          "memoryMiB": 1024
+        },
+        "requests": {
+          "cpuMillicores": 250,
+          "memoryMiB": 512
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "published-not-trial-admitted",
+        "platformDigest": "sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144",
+        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:09675478f3c45a636106df6a8e943ae0132d39c3fa814798a7470a8d84f11144",
+        "sourceClass": "cross-plane-release",
+        "sourceId": "runtimeHost",
+        "usableForCapacityOnly": true
+      },
+      "category": "product",
+      "id": "runtime-host",
+      "mode": {
+        "mcp": "read-only",
+        "modelCalls": true,
+        "productionHostedByPlatform": false,
+        "writeTools": false
+      },
+      "persistentVolumeGiB": 0,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 500,
+          "memoryMiB": 512
+        },
+        "requests": {
+          "cpuMillicores": 100,
+          "memoryMiB": 128
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "published-not-trial-admitted",
+        "platformDigest": "sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
+        "reference": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
+        "sourceClass": "cross-plane-release",
+        "sourceId": "modelPlane",
+        "usableForCapacityOnly": true
+      },
+      "category": "product",
+      "id": "model-plane",
+      "mode": {
+        "backend": "remote-in-cluster",
+        "fallbackRequired": true,
+        "rateLimitScope": "deployment-shared",
+        "routingPolicyRequired": true
+      },
+      "persistentVolumeGiB": 1,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 1500,
+          "memoryMiB": 8192
+        },
+        "requests": {
+          "cpuMillicores": 500,
+          "memoryMiB": 4096
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "source-resolved-not-mirrored",
+        "platformDigest": "sha256:dea92d39d38abf4d87c0b0bd43cbf956dc2de03db3a78b5829ac629ef296b8e1",
+        "reference": "ghcr.io/cloudnative-pg/postgresql:16.10-system-trixie",
+        "sourceClass": "dependency-source",
+        "sourceId": "cloudnative-pg-postgresql-16",
+        "usableForCapacityOnly": true
+      },
+      "category": "dependency",
+      "id": "postgresql",
+      "mode": {
+        "backup": false,
+        "highAvailability": false,
+        "implementation": "trial-direct-single-instance",
+        "logicalDatabases": 2
+      },
+      "persistentVolumeGiB": 10,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 500,
+          "memoryMiB": 2048
+        },
+        "requests": {
+          "cpuMillicores": 250,
+          "memoryMiB": 1024
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "source-resolved-not-mirrored",
+        "platformDigest": "sha256:cb75da0e596b8115d10bea34cef1414eafebfbcb5f5136c03e022c7b525899b3",
+        "reference": "docker.io/clickhouse/clickhouse-server:25.8.28.1",
+        "sourceClass": "dependency-source",
+        "sourceId": "clickhouse-server-lts",
+        "usableForCapacityOnly": true
+      },
+      "category": "dependency",
+      "id": "clickhouse",
+      "mode": {
+        "backup": false,
+        "highAvailability": false,
+        "implementation": "trial-direct-single-instance",
+        "keeper": false
+      },
+      "persistentVolumeGiB": 20,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 1000,
+          "memoryMiB": 4096
+        },
+        "requests": {
+          "cpuMillicores": 500,
+          "memoryMiB": 2048
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "source-resolved-not-mirrored",
+        "platformDigest": "sha256:8c0cf827d557b41c5973875a2618eb886aa26d20921471f03ed1185702ad1cf2",
+        "reference": "docker.io/library/nats:2.14.2-alpine",
+        "sourceClass": "dependency-source",
+        "sourceId": "nats-server",
+        "usableForCapacityOnly": true
+      },
+      "category": "dependency",
+      "id": "jetstream",
+      "mode": {
+        "durableTelemetry": true,
+        "highAvailability": false,
+        "implementation": "trial-direct-single-instance",
+        "streamReplicas": 1
+      },
+      "persistentVolumeGiB": 5,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 250,
+          "memoryMiB": 512
+        },
+        "requests": {
+          "cpuMillicores": 100,
+          "memoryMiB": 256
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "source-resolved-not-mirrored",
+        "platformDigest": "sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+        "reference": "docker.io/valkey/valkey@sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+        "sourceClass": "trial-dependency-artifact",
+        "sourceId": "valkey-image",
+        "usableForCapacityOnly": true
+      },
+      "category": "dependency",
+      "id": "valkey",
+      "mode": {
+        "aof": true,
+        "highAvailability": false,
+        "implementation": "trial-direct-single-instance",
+        "sentinel": false
+      },
+      "persistentVolumeGiB": 2,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 250,
+          "memoryMiB": 512
+        },
+        "requests": {
+          "cpuMillicores": 100,
+          "memoryMiB": 256
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "source-resolved-not-mirrored",
+        "platformDigest": "sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+        "reference": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+        "sourceClass": "trial-dependency-artifact",
+        "sourceId": "model-backend-image",
+        "usableForCapacityOnly": true
+      },
+      "category": "dependency",
+      "id": "model-backend",
+      "mode": {
+        "chatRequired": true,
+        "embeddingQualityCertifying": false,
+        "implementation": "cpu-only-single-backend",
+        "maximumModelBytes": 4294967296,
+        "quantizationRequired": true
+      },
+      "persistentVolumeGiB": 10,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 2000,
+          "memoryMiB": 8192
+        },
+        "requests": {
+          "cpuMillicores": 1500,
+          "memoryMiB": 6144
+        }
+      }
+    },
+    {
+      "artifact": {
+        "admissionState": "published-not-trial-admitted",
+        "platformDigest": "sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69",
+        "reference": "ghcr.io/caglarsubas/orchestra-lab-synthetic-tenant-kit@sha256:3a2b60873dcfbad1e704a94880127c0c41bacc93e81ba86faaf37fc48956fb69",
+        "sourceClass": "lab-service-publication",
+        "sourceId": "synthetic-tenant-kit",
+        "usableForCapacityOnly": true
+      },
+      "category": "synthetic-surface",
+      "id": "synthetic-tenant-kit",
+      "mode": {
+        "customerData": false,
+        "faultSurfaces": true,
+        "mcp": "read-only",
+        "tenantGateway": true
+      },
+      "persistentVolumeGiB": 0,
+      "replicas": 1,
+      "resources": {
+        "limits": {
+          "cpuMillicores": 250,
+          "memoryMiB": 512
+        },
+        "requests": {
+          "cpuMillicores": 100,
+          "memoryMiB": 256
+        }
+      }
+    }
+  ]
 }

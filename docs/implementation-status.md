@@ -260,11 +260,14 @@ revision `2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; immutable artifact
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
 Source-only direct dependency runtime requirements now exist for PostgreSQL,
 ClickHouse, JetStream, Valkey, and the CPU model backend. The strict lock binds
-the current candidate, source admission, and operator-input contract and
-requires restricted-v2, arbitrary UID, read-only roots, TLS/authentication,
-default-deny networking, persistent single replicas, no runtime model download,
-and fail-closed degradation. It emits no manifests and is not yet bound back
-into a new workload candidate. Source artifact selection now pins Valkey 9.1.0,
+the current candidate, selected dependency artifact set, source admission, and
+operator-input contract and requires restricted-v2, arbitrary UID, read-only
+roots, TLS/authentication, default-deny networking, persistent single replicas,
+no runtime model download, and fail-closed degradation. Artifact selection is
+now upstream of the candidate, eliminating the previous circular provenance
+edge. The rebound candidate resolves Valkey and the CPU backend to their exact
+linux/amd64 manifests, and the inactive manifest candidate binds the resulting
+candidate/runtime/artifact lineage. Source artifact selection pins Valkey 9.1.0,
 the linux/amd64 llama.cpp `b10143` server manifest, and the exact Qwen2.5 0.5B
 Instruct Q4_K_M revision, size, license, and SHA-256 digest. The separate
 artifact lock requires operator pre-staging on a read-only PVC and prohibits
@@ -279,8 +282,8 @@ reference it. The model TLS reference now also requires `ca.crt`, closing the
 previous unbound client-trust input. Upstream review, destination and
 live-cluster pull proof, live input observation, private storage-class
 materialization, model-PVC digest proof, populated dependency Secret/TLS
-inputs, workload-candidate rebinding, server-side dry-run, and live
-connectivity remain blockers. The source now includes a payload-free input
+inputs, server-side dry-run, and live connectivity remain blockers. The source
+now includes a payload-free input
 observer, create-only private materializer, and model/TLS integrity observer.
 The integrity observer hashes the exact model inside the pinned pod and uses
 OpenSSL 3 with anonymous Linux file descriptors to check certificate lifetime,
@@ -296,10 +299,11 @@ authorize deployment.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.3` binds the current
-exact-main replay. No admission record exists. Even a valid future admission
-removes only the replay-review reason and leaves all deployment/provider
-blockers and every certifying claim false.
+`orchestra-sno-trial-product-admission-2026-07-28.4` marks the previous
+exact-main replay stale after workload-candidate rebinding. A fresh four-image
+replay is required before admission, and no admission record exists. Even a
+valid future admission removes only the replay-review reason and leaves all
+deployment/provider blockers and every certifying claim false.
 
 The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
 policy, prerequisite gates, and active GitOps overlays remain unchanged.

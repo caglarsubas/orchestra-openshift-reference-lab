@@ -51,7 +51,7 @@ except ModuleNotFoundError:
 
 LOCK_PATH = ROOT / "config" / "sno-trial-operator-inputs.lock.json"
 EXPECTED_CONTRACT_DIGEST = (
-    "sha256:3a50c77bc2be59354b29d3f60f8913871f109adbb197d3b53296894b92dae502"
+    "sha256:6e29d2320b618dc8bb42c8ac30d37beae18f8f0ebd5ab97cc1f121c969be4ed6"
 )
 REPORT_KIND = "orchestra.openshift.sno-trial-operator-inputs.v1"
 SNAPSHOT_KIND = "orchestra.openshift.sno-trial-operator-inputs-snapshot.v1"
@@ -334,7 +334,7 @@ def validate_contract(value: dict[str, Any]) -> None:
     if (
         value["schemaVersion"] != 1
         or value["kind"] != CONTRACT_KIND
-        or value["contractId"] != "orchestra-sno-trial-operator-inputs-2026-07-28.1"
+        or value["contractId"] != "orchestra-sno-trial-operator-inputs-2026-07-28.2"
         or value["profileId"] != TRIAL_PROFILE_ID
         or value["targetClass"] != "engineering-trial"
     ):

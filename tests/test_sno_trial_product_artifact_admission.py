@@ -40,6 +40,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         self.lock = load_json(LOCK_PATH)
         self.candidate = load_json(CANDIDATE_PATH)
         self.report = self.valid_replay_report()
+        self.current_policy = self.policy_for_report(self.report)
         self.environment_evidence = self.valid_environment_evidence()
         self.admitted_at = datetime(
             2026, 7, 27, 19, 0, tzinfo=timezone.utc
@@ -122,17 +123,35 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
             "claims": copy.deepcopy(CLAIMS),
         }
         value["reportDigest"] = report_digest(value)
-        self.assertEqual(
-            value["reportDigest"],
-            "sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615",
-        )
         validate_report(value, self.lock, self.candidate)
+        return value
+
+    def policy_for_report(
+        self, report: dict[str, object]
+    ) -> dict[str, object]:
+        value = copy.deepcopy(self.policy)
+        replay = value["bindings"]["replay"]
+        bindings = report["bindings"]
+        replay.update(
+            {
+                "verificationId": report["verificationId"],
+                "generatedAt": report["generatedAt"],
+                "reportDigest": report["reportDigest"],
+                "verifierRevision": bindings["verifierRevision"],
+                "verifierRunId": bindings["verifierRunId"],
+                "verifierRunAttempt": bindings["verifierRunAttempt"],
+            }
+        )
+        value["review"]["replayState"] = "current"
+        value["activation"]["remainingReasonCodes"] = list(DEPLOYMENT_REASONS)
+        value["policyDigest"] = unsigned_digest(value, "policyDigest")
+        validate_policy(value, self.lock, self.candidate)
         return value
 
     def valid_environment_evidence(self) -> dict[str, object]:
         requester_id = 13579
         reviewer_id = 24681012
-        expected = self.policy["github"]
+        expected = self.current_policy["github"]
         environment = {
             "id": 987654,
             "name": expected["environment"],
@@ -180,7 +199,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def build_valid_admission(self) -> dict[str, object]:
         return build_admission(
             self.report,
-            self.policy,
+            self.current_policy,
             self.lock,
             self.candidate,
             self.environment_evidence,
@@ -196,29 +215,29 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
         validate_policy(self.policy, self.lock, self.candidate)
         self.assertEqual(
-            self.policy["review"]["replayState"], "current"
+            self.policy["review"]["replayState"], "refresh-required"
         )
         self.assertEqual(
             self.policy["activation"]["remainingReasonCodes"],
-            DEPLOYMENT_REASONS,
+            REMAINING_REASONS,
         )
-
-        stale = copy.deepcopy(self.policy)
-        stale["review"]["replayState"] = "refresh-required"
-        stale["activation"]["remainingReasonCodes"] = list(REMAINING_REASONS)
-        stale["policyDigest"] = unsigned_digest(stale, "policyDigest")
-        validate_policy(stale, self.lock, self.candidate)
         with self.assertRaisesRegex(
             ValueError, "replay_refresh_required"
         ):
             validate_replay_binding(
                 self.report,
-                stale,
+                self.policy,
                 self.lock,
                 self.candidate,
             )
+        validate_replay_binding(
+            self.report,
+            self.current_policy,
+            self.lock,
+            self.candidate,
+        )
 
-        malformed = copy.deepcopy(self.policy)
+        malformed = copy.deepcopy(self.current_policy)
         malformed["bindings"]["replay"]["verifierRunAttempt"] = True
         malformed["policyDigest"] = unsigned_digest(
             malformed, "policyDigest"
@@ -239,7 +258,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         admission = self.build_valid_admission()
         validate_admission(
             admission,
-            self.policy,
+            self.current_policy,
             self.report,
             self.lock,
             self.candidate,
@@ -264,7 +283,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "replay_binding_invalid"):
             build_admission(
                 changed_report,
-                self.policy,
+                self.current_policy,
                 self.lock,
                 self.candidate,
                 self.environment_evidence,
@@ -285,7 +304,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "admission_controls_invalid"):
             validate_admission(
                 admission,
-                self.policy,
+                self.current_policy,
                 self.report,
                 self.lock,
                 self.candidate,
@@ -301,7 +320,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "workflow_approval_invalid"):
             validate_admission(
                 admission,
-                self.policy,
+                self.current_policy,
                 self.report,
                 self.lock,
                 self.candidate,
@@ -315,7 +334,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "workflow_approval_invalid"):
             build_admission(
                 self.report,
-                self.policy,
+                self.current_policy,
                 self.lock,
                 self.candidate,
                 evidence,
@@ -331,7 +350,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "workflow_invalid"):
             build_admission(
                 self.report,
-                self.policy,
+                self.current_policy,
                 self.lock,
                 self.candidate,
                 self.environment_evidence,
@@ -348,7 +367,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "admission_time_invalid"):
             validate_admission(
                 admission,
-                self.policy,
+                self.current_policy,
                 self.report,
                 self.lock,
                 self.candidate,
@@ -358,7 +377,7 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "admission_time_invalid"):
             build_admission(
                 self.report,
-                self.policy,
+                self.current_policy,
                 self.lock,
                 self.candidate,
                 self.environment_evidence,
@@ -396,6 +415,11 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
         )
         self.assertIn('[[ "$GITHUB_RUN_ATTEMPT" == "1" ]]', source)
         self.assertIn('[[ "$REPLAY_ARTIFACT_ID" == "8634695656" ]]', source)
+        self.assertIn("Require a current replay binding", source)
+        self.assertIn('.review.replayState == "current"', source)
+        self.assertIn(
+            "Refresh and review exact-main replay evidence before admission.", source
+        )
         self.assertIn("actions: read", source)
         self.assertNotIn("packages: write", source)
         self.assertNotIn("id-token: write", source)

@@ -26,7 +26,7 @@
       "const": "orchestra.openshift.sno-trial-dependency-runtime-contract-set.v1"
     },
     "contractSetId": {
-      "const": "orchestra-sno-trial-dependency-runtime-2026-07-28.1"
+      "const": "orchestra-sno-trial-dependency-runtime-2026-07-28.2"
     },
     "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
     "targetClass": {"const": "engineering-trial"},
@@ -64,15 +64,17 @@
         "workloadCandidateId",
         "workloadCandidateDigest",
         "dependencyAdmissionDigest",
-        "operatorInputContractDigest"
+        "operatorInputContractDigest",
+        "dependencyArtifactSetDigest"
       ],
       "properties": {
         "workloadCandidateId": {
-          "const": "orchestra-sno-trial-workload-candidate-2026-07-25.1"
+          "const": "orchestra-sno-trial-workload-candidate-2026-07-28.2"
         },
         "workloadCandidateDigest": {"$ref": "#/$defs/digest"},
         "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
-        "operatorInputContractDigest": {"$ref": "#/$defs/digest"}
+        "operatorInputContractDigest": {"$ref": "#/$defs/digest"},
+        "dependencyArtifactSetDigest": {"$ref": "#/$defs/digest"}
       }
     },
     "security": {
@@ -152,7 +154,11 @@
       ],
       "properties": {
         "sourceClass": {
-          "enum": ["dependency-source", "unresolved"]
+          "enum": [
+            "dependency-source",
+            "trial-dependency-artifact",
+            "unresolved"
+          ]
         },
         "sourceId": {"type": "string", "minLength": 1},
         "reference": {
@@ -367,13 +373,11 @@
         "state": {"const": "blocked"},
         "reasonCodes": {
           "type": "array",
-          "minItems": 9,
-          "maxItems": 9,
+          "minItems": 7,
+          "maxItems": 7,
           "uniqueItems": true,
           "prefixItems": [
             {"const": "DEPENDENCY_SOURCE_ADMISSION_INCOMPLETE"},
-            {"const": "VALKEY_ARTIFACT_CONTRACT_MISSING"},
-            {"const": "MODEL_ARTIFACT_CONTRACT_MISSING"},
             {"const": "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED"},
             {"const": "DEPENDENCY_TLS_REFERENCES_UNRESOLVED"},
             {"const": "STORAGE_CLASS_REFERENCE_UNRESOLVED"},

@@ -11,7 +11,6 @@ from scripts.validate_sno_trial_dependency_artifacts import (
     ARTIFACT_SET_PATH,
     BOM_PATH,
     EXPECTED_ARTIFACT_SET_DIGEST,
-    RUNTIME_CONTRACT_PATH,
     validate_artifact_set,
 )
 
@@ -21,14 +20,12 @@ class SnoTrialDependencyArtifactTests(unittest.TestCase):
         self.value = load_json(ARTIFACT_SET_PATH)
         self.bom = load_json(BOM_PATH)
         self.admission = load_json(ADMISSION_PATH)
-        self.runtime = load_json(RUNTIME_CONTRACT_PATH)
 
     def validate(self, value: dict) -> str:
         return validate_artifact_set(
             value,
             self.bom,
             self.admission,
-            self.runtime,
         )
 
     def container(self, value: dict, identifier: str) -> dict:
@@ -69,10 +66,13 @@ class SnoTrialDependencyArtifactTests(unittest.TestCase):
 
     def test_binding_drift_is_rejected(self) -> None:
         changed = copy.deepcopy(self.value)
-        changed["bindings"]["runtimeContractSetDigest"] = "sha256:" + ("f" * 64)
+        changed["bindings"]["dependencyAdmissionDigest"] = "sha256:" + ("f" * 64)
         self.resign(changed)
         with self.assertRaisesRegex(ValueError, "dependency_artifact_bindings_invalid"):
             self.validate(changed)
+
+    def test_artifact_selection_is_upstream_of_runtime_contracts(self) -> None:
+        self.assertNotIn("runtimeContractSetDigest", self.value["bindings"])
 
     def test_mutable_resolved_reference_is_rejected(self) -> None:
         changed = copy.deepcopy(self.value)

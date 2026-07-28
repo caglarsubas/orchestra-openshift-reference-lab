@@ -25,7 +25,7 @@
       "const": "orchestra.openshift.sno-trial-product-artifact-set.v2"
     },
     "artifactSetId": {
-      "const": "orchestra-sno-trial-products-2026-07-28.4"
+      "const": "orchestra-sno-trial-products-2026-07-28.5"
     },
     "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
     "targetClass": {"const": "engineering-trial"},

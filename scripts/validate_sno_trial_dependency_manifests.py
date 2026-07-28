@@ -23,7 +23,7 @@ ACTIVE_DEPENDENCY_KUSTOMIZATION = (
     ROOT / "gitops" / "dependencies" / "reference-lab" / "kustomization.yaml"
 )
 KIND = "orchestra.openshift.sno-trial-dependency-manifest-candidate.v1"
-CANDIDATE_ID = "orchestra-sno-trial-dependency-manifests-2026-07-28.2"
+CANDIDATE_ID = "orchestra-sno-trial-dependency-manifests-2026-07-28.3"
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 MANIFEST_ROOT = ROOT / "gitops" / "dependencies" / "candidates" / "sno-trial"
 KUSTOMIZATION_PATH = MANIFEST_ROOT / "kustomization.yaml"
@@ -31,7 +31,7 @@ STORAGE_CLASS_PLACEHOLDER = "ORCHESTRA_SNO_STORAGE_CLASS_REQUIRED"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 IMMUTABLE_IMAGE = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
 EXPECTED_CANDIDATE_DIGEST = (
-    "sha256:7f5d0518e87e27f982c80a2bcd63e03d56af151f024d88737fda89f682be1e5f"
+    "sha256:1af48913dfc27d16095b6024d7db59432102c9802db7950a77fc1b166deca1e9"
 )
 EXPECTED_MANIFEST_SET_DIGEST = (
     "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728"
@@ -117,7 +117,6 @@ ACTIVATION_REASONS = [
     "LIVE_ALLOCATABLE_NOT_OBSERVED",
     "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING",
     "LIVE_DEPENDENCY_CONNECTIVITY_MISSING",
-    "WORKLOAD_CANDIDATE_BINDING_PENDING",
 ]
 CONTROLS = {
     "scope": "sno-engineering-trial-valkey-and-model-backend-only",

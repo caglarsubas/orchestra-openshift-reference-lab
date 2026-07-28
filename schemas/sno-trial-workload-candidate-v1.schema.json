@@ -26,7 +26,7 @@
       "const": "orchestra.openshift.sno-trial-workload-candidate.v1"
     },
     "candidateId": {
-      "const": "orchestra-sno-trial-workload-candidate-2026-07-25.1"
+      "const": "orchestra-sno-trial-workload-candidate-2026-07-28.2"
     },
     "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
     "targetClass": {"const": "engineering-trial"},
@@ -58,14 +58,16 @@
         "toolchainLockDigest",
         "artifactReleaseSetDigest",
         "dependencySourceDigest",
-        "labServicesDigest"
+        "labServicesDigest",
+        "dependencyArtifactSetDigest"
       ],
       "properties": {
         "trialProfileDigest": {"$ref": "#/$defs/digest"},
         "toolchainLockDigest": {"$ref": "#/$defs/digest"},
         "artifactReleaseSetDigest": {"$ref": "#/$defs/digest"},
         "dependencySourceDigest": {"$ref": "#/$defs/digest"},
-        "labServicesDigest": {"$ref": "#/$defs/digest"}
+        "labServicesDigest": {"$ref": "#/$defs/digest"},
+        "dependencyArtifactSetDigest": {"$ref": "#/$defs/digest"}
       }
     },
     "quantities": {
@@ -141,6 +143,7 @@
             "cross-plane-release",
             "dependency-source",
             "lab-service-publication",
+            "trial-dependency-artifact",
             "unresolved"
           ]
         },
@@ -367,8 +370,8 @@
         "state": {"const": "blocked"},
         "reasonCodes": {
           "type": "array",
-          "minItems": 17,
-          "maxItems": 17,
+          "minItems": 16,
+          "maxItems": 16,
           "uniqueItems": true,
           "items": {
             "type": "string",
