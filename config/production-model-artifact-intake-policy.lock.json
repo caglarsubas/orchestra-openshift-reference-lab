@@ -1,0 +1,93 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "orchestra-reference-chat-model",
+      "digest": "sha256:74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+      "filename": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "immutableUrl": "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/9217f5db79a29953eb74d5343926648285ec7e67/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "maximumAllowedBytes": 1073741824,
+      "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+      "serviceId": "model-backend",
+      "sizeBytes": 491400032
+    },
+    {
+      "artifactId": "orchestra-reference-embedding-model",
+      "digest": "sha256:d4e388894e09cf3816e8b0896d81d265b55e7a9fff9ab03fe8bf4ef5e11295ac",
+      "filename": "nomic-embed-text-v1.5.Q4_K_M.gguf",
+      "immutableUrl": "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/f750a25aba2d24830d874eb4e1af468f37248a37/nomic-embed-text-v1.5.Q4_K_M.gguf",
+      "maximumAllowedBytes": 268435456,
+      "revision": "f750a25aba2d24830d874eb4e1af468f37248a37",
+      "serviceId": "embedding-model",
+      "sizeBytes": 84106624
+    }
+  ],
+  "bindings": {
+    "candidateDigest": "sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc",
+    "candidateId": "orchestra-production-model-artifacts-2026-07-28.1",
+    "candidateSchemaDigest": "sha256:55f15091cab9d0941aa43fa7d45a926638e09ce295945242a3ae5ce4446d6582",
+    "observationSchemaDigest": "sha256:7ffa31330ed4014d08d54c296c6b7881712d1c0fa11113209dffa437009fce50"
+  },
+  "claims": {
+    "artifactCustodyVerified": false,
+    "campaignEvidence": false,
+    "contractualSla": false,
+    "customerCertified": false,
+    "dependencyAdmissionAuthorized": false,
+    "deploymentAuthorized": false,
+    "licenseApproved": false,
+    "mirrorAuthorization": false,
+    "productionSupported": false,
+    "redHatCertified": false,
+    "referenceProfileVerified": false,
+    "sourceAdmissionAuthorized": false
+  },
+  "controls": {
+    "artifactCopyPerformed": false,
+    "campaignEligible": false,
+    "cloudMutationAuthorized": false,
+    "inputPathsStored": false,
+    "modelBytesStoredInReport": false,
+    "networkDownloadPerformed": false,
+    "outputContainsPayloadBytes": false,
+    "scope": "production-model-source-file-inspection-only",
+    "secretValuesStored": false,
+    "sourceOnly": true
+  },
+  "execution": {
+    "ancestorDescriptorWalkRequired": true,
+    "artifactCopyPerformed": false,
+    "chunkSizeBytes": 1048576,
+    "descriptorIdentityRecheckRequired": true,
+    "groupOrWorldWritableAllowed": false,
+    "maximumObservationAgeSeconds": 86400,
+    "maximumReportBytes": 65536,
+    "networkDownloadPerformed": false,
+    "noFollowOpenRequired": true,
+    "outputCreateOnly": true,
+    "outputMode": "0600",
+    "postReadStatRequired": true,
+    "preReadExactSizeRequired": true,
+    "regularFilesOnly": true,
+    "requiredInputRoot": "restricted",
+    "symlinksAllowed": false
+  },
+  "kind": "orchestra.openshift.production-model-artifact-intake-policy.v1",
+  "policyDigest": "sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7",
+  "policyId": "orchestra-production-model-artifact-intake-2026-07-28.1",
+  "profileId": "orchestra-ocp-4.20-amd64-v1",
+  "reviewBoundary": {
+    "automatedApprovalAllowed": false,
+    "dependencyAdmissionReissueRequired": true,
+    "distinctReviewerIdentities": true,
+    "humanLicenseReviewRequired": true,
+    "minimumReviewers": 2,
+    "observationMayApprove": false,
+    "productionBomReissueRequired": true,
+    "requiredReviewerRoles": [
+      "model-risk-reviewer",
+      "service-owner"
+    ]
+  },
+  "schemaVersion": 1,
+  "targetClass": "vendor-reference-lab"
+}
