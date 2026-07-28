@@ -454,8 +454,12 @@ artifact `8677385356` contains payload-free report digest
 `sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`
 and expires on 2026-08-11. Admission policy
 `orchestra-sno-trial-product-admission-2026-07-28.5` binds only that replay
-with `replayState=current`. No human admission record exists. The value-free
-operator-input contract
+with `replayState=current`. Its protected environment now has a source-only
+plan/apply/verify bootstrap that rejects owner reviewers, absent collaborator
+access, changed plan state, environment Secrets, and non-`main` branch-policy
+drift. It has not been applied: an eligible non-owner collaborator and
+private-repository required-reviewer support are still external gates. No
+human admission record exists. The value-free operator-input contract
 now locks 14 Secret references, three CA ConfigMaps, their required key names,
 and the three rendered-manifest bindings; no live input observation exists.
 Destination mirror and live-cluster pulls, populated operator inputs, a current

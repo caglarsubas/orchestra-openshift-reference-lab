@@ -14,7 +14,7 @@ authorization digest, independent timing, and cleanup verification.
 | Network/dependency foundation | Procedure implemented; live rehearsal pending |
 | Split-horizon DNS and delegation | Procedure and Terraform contract implemented; trial parent delegation observed live, production split-horizon rehearsal pending |
 | Private OpenShift installation | Production template delivered; separate public-ingress SNO trial installed and observed live, private production profile pending |
-| Cost-bounded SNO engineering trial | Locked non-certifying profile, exact toolchain, DNS/operator/render admissions, clean OpenShift 4.20.27 SNO install, exact-main cluster/cost/product-dry-run observations, and zero-managed-residual teardown exercised live; product activation and certification remain blocked |
+| Cost-bounded SNO engineering trial | Locked non-certifying profile, exact toolchain, DNS/operator/render admissions, clean OpenShift 4.20.27 SNO install, exact-main cluster/cost/product-dry-run observations, and zero-managed-residual teardown exercised live; payload-free product-admission environment bootstrap implemented but reviewer/plan eligibility and activation remain blocked |
 | GitOps bootstrap | Pending Wave 1 operator installation |
 | Dependency image admission | Source contract and offline values candidate implemented; live mirror intake and admitted overlay pending |
 | Dependency supply-chain intake | Bounded signature observation and risk/exception contracts implemented; live runner evidence, approvals, and mirror receipts pending |
