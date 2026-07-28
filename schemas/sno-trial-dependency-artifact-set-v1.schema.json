@@ -27,7 +27,7 @@
       "const": "orchestra.openshift.sno-trial-dependency-artifact-set.v1"
     },
     "artifactSetId": {
-      "const": "orchestra-sno-trial-dependency-artifacts-2026-07-28.1"
+      "const": "orchestra-sno-trial-dependency-artifacts-2026-07-28.2"
     },
     "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
     "targetClass": {"const": "engineering-trial"},
@@ -69,13 +69,11 @@
       "additionalProperties": false,
       "required": [
         "dependencyBomDigest",
-        "dependencyAdmissionDigest",
-        "runtimeContractSetDigest"
+        "dependencyAdmissionDigest"
       ],
       "properties": {
         "dependencyBomDigest": {"$ref": "#/$defs/digest"},
-        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"},
-        "runtimeContractSetDigest": {"$ref": "#/$defs/digest"}
+        "dependencyAdmissionDigest": {"$ref": "#/$defs/digest"}
       }
     },
     "upstreamVerification": {

@@ -19,8 +19,11 @@ CONTRACT_PATH = ROOT / "config" / "sno-trial-dependency-runtime-contracts.lock.j
 CANDIDATE_PATH = ROOT / "config" / "sno-trial-workload-candidate.lock.json"
 DEPENDENCY_PATH = ROOT / "config" / "dependency-admission.lock.json"
 OPERATOR_INPUT_PATH = ROOT / "config" / "sno-trial-operator-inputs.lock.json"
+DEPENDENCY_ARTIFACT_PATH = (
+    ROOT / "config" / "sno-trial-dependency-artifacts.lock.json"
+)
 KIND = "orchestra.openshift.sno-trial-dependency-runtime-contract-set.v1"
-CONTRACT_SET_ID = "orchestra-sno-trial-dependency-runtime-2026-07-28.1"
+CONTRACT_SET_ID = "orchestra-sno-trial-dependency-runtime-2026-07-28.2"
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 SERVICE_IDS = (
@@ -267,8 +270,6 @@ SERVICE_SPECS = {
 }
 ACTIVATION_REASONS = [
     "DEPENDENCY_SOURCE_ADMISSION_INCOMPLETE",
-    "VALKEY_ARTIFACT_CONTRACT_MISSING",
-    "MODEL_ARTIFACT_CONTRACT_MISSING",
     "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED",
     "DEPENDENCY_TLS_REFERENCES_UNRESOLVED",
     "STORAGE_CLASS_REFERENCE_UNRESOLVED",
@@ -349,6 +350,7 @@ def validate_contract_set(
     candidate: dict[str, Any],
     dependency_admission: dict[str, Any],
     operator_inputs: dict[str, Any],
+    dependency_artifacts: dict[str, Any],
 ) -> str:
     reject_inline_deployment(value)
     exact_keys(value, TOP_KEYS, "sno_dependency_runtime_keys_invalid")
@@ -368,6 +370,9 @@ def validate_contract_set(
         "workloadCandidateDigest": candidate.get("candidateDigest"),
         "dependencyAdmissionDigest": canonical_digest(dependency_admission),
         "operatorInputContractDigest": operator_inputs.get("contractDigest"),
+        "dependencyArtifactSetDigest": dependency_artifacts.get(
+            "artifactSetDigest"
+        ),
     }
     bindings = exact_keys(
         value["bindings"],
@@ -417,7 +422,7 @@ def validate_contract_set(
         for item in contracts
         if item["artifact"]["admissionState"] == "unresolved"
     }
-    if unresolved != {"valkey", "model-backend"}:
+    if unresolved:
         fail("sno_dependency_runtime_unresolved_artifacts_invalid")
     if value["activation"] != {
         "state": "blocked",
@@ -443,11 +448,13 @@ def main() -> int:
     candidate = load_json(CANDIDATE_PATH)
     dependency_admission = load_json(DEPENDENCY_PATH)
     operator_inputs = load_json(OPERATOR_INPUT_PATH)
+    dependency_artifacts = load_json(DEPENDENCY_ARTIFACT_PATH)
     digest = validate_contract_set(
         value,
         candidate,
         dependency_admission,
         operator_inputs,
+        dependency_artifacts,
     )
     print(
         "sno_trial_dependency_runtime_contracts_valid "

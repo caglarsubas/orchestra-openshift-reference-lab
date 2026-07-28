@@ -55,6 +55,15 @@ jobs:
       - name: Validate locked admission policy
         run: python3 scripts/sno_trial_product_artifact_admission.py validate-policy
 
+      - name: Require a current replay binding
+        run: |
+          set -euo pipefail
+          if ! jq -e '.review.replayState == "current"' \
+            config/sno-trial-product-artifact-admission-policy.lock.json >/dev/null; then
+            echo "::error::The locked replay is historical. Refresh and review exact-main replay evidence before admission."
+            exit 1
+          fi
+
       - name: Download exact replay artifact without retaining API payloads
         env:
           GH_TOKEN: ${{ github.token }}

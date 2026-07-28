@@ -1,40 +1,66 @@
 {
-  "schemaVersion": 1,
-  "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
-  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.3",
-  "targetClass": "engineering-trial",
+  "activation": {
+    "remainingReasonCodes": [
+      "product-artifact-replay-refresh-required",
+      "destination-mirror-verification-missing",
+      "live-cluster-pull-verification-missing",
+      "operator-secret-and-ca-inputs-missing",
+      "openshift-server-side-dry-run-missing",
+      "provider-readiness-not-approved"
+    ],
+    "state": "blocked"
+  },
   "bindings": {
+    "artifactSetDigest": "sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1",
+    "artifactSetId": "orchestra-sno-trial-products-2026-07-28.5",
     "profileId": "orchestra-ocp-sno-trial-amd64-v1",
-    "artifactSetId": "orchestra-sno-trial-products-2026-07-28.4",
-    "artifactSetDigest": "sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948",
-    "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9",
     "replay": {
-      "verificationId": "sno-product-replay-30293130839.1",
+      "artifactId": 8663575783,
+      "artifactName": "sno-trial-product-artifact-replay-30293130839-1",
       "generatedAt": "2026-07-27T18:18:18Z",
       "reportDigest": "sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615",
+      "verificationId": "sno-product-replay-30293130839.1",
       "verifierRevision": "2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee",
-      "verifierRunId": 30293130839,
       "verifierRunAttempt": 1,
-      "artifactId": 8663575783,
-      "artifactName": "sno-trial-product-artifact-replay-30293130839-1"
-    }
+      "verifierRunId": 30293130839
+    },
+    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
+  },
+  "claims": {
+    "campaignEvidence": false,
+    "contractualSla": false,
+    "customerCertified": false,
+    "productionSupported": false,
+    "redHatCertified": false,
+    "referenceProfileVerified": false
+  },
+  "controls": {
+    "allowedCertificationSlots": [],
+    "campaignEligible": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "manifestsEmitted": false,
+    "productionReleaseSetMutated": false
   },
   "github": {
+    "deploymentBranch": "main",
+    "environment": "sno-trial-product-artifact-admission",
+    "minimumIndependentReviewers": 1,
+    "preventSelfReview": true,
     "repository": "caglarsubas/orchestra-openshift-reference-lab",
     "repositoryId": "1307302690",
     "repositoryOwnerId": "37515097",
     "repositoryVisibility": "private",
-    "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/sno-trial-product-artifact-admission.yml@refs/heads/main",
-    "environment": "sno-trial-product-artifact-admission",
-    "minimumIndependentReviewers": 1,
     "reviewerType": "User",
-    "preventSelfReview": true,
-    "deploymentBranch": "main"
+    "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/sno-trial-product-artifact-admission.yml@refs/heads/main"
   },
+  "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
+  "policyDigest": "sha256:bb82c3e06d16b8eee6d52434b65349739c0dae1826ebc32a1c12cbc498537fc6",
+  "policyId": "orchestra-sno-trial-product-admission-2026-07-28.4",
   "review": {
-    "maximumReplayAgeSeconds": 1209600,
     "maximumAdmissionAgeSeconds": 2592000,
-    "replayState": "current",
+    "maximumReplayAgeSeconds": 1209600,
+    "replayState": "refresh-required",
     "requiredChecks": [
       "replay-report-schema-and-digest",
       "three-plane-publication-lineage",
@@ -43,31 +69,6 @@
       "non-authorizing-claims-and-controls"
     ]
   },
-  "activation": {
-    "state": "blocked",
-    "remainingReasonCodes": [
-      "destination-mirror-verification-missing",
-      "live-cluster-pull-verification-missing",
-      "operator-secret-and-ca-inputs-missing",
-      "openshift-server-side-dry-run-missing",
-      "provider-readiness-not-approved"
-    ]
-  },
-  "controls": {
-    "productionReleaseSetMutated": false,
-    "manifestsEmitted": false,
-    "cloudMutationAuthorized": false,
-    "deploymentAuthorized": false,
-    "campaignEligible": false,
-    "allowedCertificationSlots": []
-  },
-  "claims": {
-    "campaignEvidence": false,
-    "referenceProfileVerified": false,
-    "customerCertified": false,
-    "redHatCertified": false,
-    "contractualSla": false,
-    "productionSupported": false
-  },
-  "policyDigest": "sha256:f55c3bb222ee52f561780e86e6b2304620fe3bd961fa2bad2bb349f4961db03f"
+  "schemaVersion": 1,
+  "targetClass": "engineering-trial"
 }

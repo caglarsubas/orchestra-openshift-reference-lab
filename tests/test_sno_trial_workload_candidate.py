@@ -15,6 +15,7 @@ from scripts.validate_sno_trial_workload_candidate import (
     CANDIDATE_PATH,
     CLAIMS,
     CONTROLS,
+    DEPENDENCY_ARTIFACT_PATH,
     DEPENDENCY_PATH,
     LAB_SERVICES_PATH,
     RELEASE_SET_PATH,
@@ -35,6 +36,7 @@ class SnoTrialWorkloadCandidateTests(unittest.TestCase):
         self.release_set = load_json(RELEASE_SET_PATH)
         self.admission = load_json(DEPENDENCY_PATH)
         self.lab_services = load_json(LAB_SERVICES_PATH)
+        self.dependency_artifacts = load_json(DEPENDENCY_ARTIFACT_PATH)
 
     def validate(self, candidate: dict[str, object] | None = None) -> str:
         return validate_candidate(
@@ -45,6 +47,7 @@ class SnoTrialWorkloadCandidateTests(unittest.TestCase):
             self.release_set,
             self.admission,
             self.lab_services,
+            self.dependency_artifacts,
         )
 
     def workload(
@@ -129,7 +132,7 @@ class SnoTrialWorkloadCandidateTests(unittest.TestCase):
         ):
             self.validate(changed)
 
-    def test_artifacts_remain_source_bound_and_two_are_unresolved(self) -> None:
+    def test_artifacts_remain_source_bound_and_selected_dependencies_resolve(self) -> None:
         artifacts = {
             item["id"]: item["artifact"] for item in self.candidate["workloads"]
         }
@@ -138,7 +141,19 @@ class SnoTrialWorkloadCandidateTests(unittest.TestCase):
             for identifier, artifact in artifacts.items()
             if artifact["admissionState"] == "unresolved"
         }
-        self.assertEqual(unresolved, {"valkey", "model-backend"})
+        self.assertEqual(unresolved, set())
+        self.assertEqual(
+            artifacts["valkey"]["sourceId"],
+            "valkey-image",
+        )
+        self.assertEqual(
+            artifacts["model-backend"]["sourceId"],
+            "model-backend-image",
+        )
+        self.assertEqual(
+            artifacts["valkey"]["sourceClass"],
+            "trial-dependency-artifact",
+        )
         self.assertTrue(
             all(
                 artifact["usableForCapacityOnly"] is True
@@ -210,6 +225,11 @@ class SnoTrialWorkloadCandidateTests(unittest.TestCase):
 
         changed = copy.deepcopy(self.candidate)
         changed["bindings"]["artifactReleaseSetDigest"] = f"sha256:{8:064x}"
+        with self.assertRaisesRegex(ValueError, "sno_candidate_bindings_invalid"):
+            self.validate(changed)
+
+        changed = copy.deepcopy(self.candidate)
+        changed["bindings"]["dependencyArtifactSetDigest"] = f"sha256:{8:064x}"
         with self.assertRaisesRegex(ValueError, "sno_candidate_bindings_invalid"):
             self.validate(changed)
 

@@ -1,18 +1,130 @@
 {
-  "schemaVersion": 1,
-  "kind": "orchestra.openshift.sno-trial-dependency-manifest-candidate.v1",
-  "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.2",
-  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
-  "targetClass": "engineering-trial",
-  "executionMode": "source-only",
+  "activation": {
+    "reasonCodes": [
+      "UPSTREAM_VERIFICATION_PENDING",
+      "DESTINATION_MIRROR_PROOF_MISSING",
+      "LAB_SIGNATURE_MISSING",
+      "STORAGE_CLASS_REFERENCE_UNRESOLVED",
+      "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED",
+      "DEPENDENCY_TLS_REFERENCES_UNRESOLVED",
+      "MODEL_PVC_MATERIALIZATION_PROOF_MISSING",
+      "LIVE_ALLOCATABLE_NOT_OBSERVED",
+      "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING",
+      "LIVE_DEPENDENCY_CONNECTIVITY_MISSING"
+    ],
+    "state": "blocked"
+  },
   "architecture": "linux/amd64",
   "bindings": {
-    "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9",
-    "runtimeContractSetDigest": "sha256:76b0b5ce5a540a4e35cd90a0f40656354ef9812383d5f23974a424fbbbf9c3e3",
-    "dependencyArtifactSetDigest": "sha256:5b60283c1e02f20f4a224b55a218d62b308315adf6d58c8120f021e1f8333073"
+    "dependencyArtifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
+    "runtimeContractSetDigest": "sha256:8dc40a772864d03240784a0d73559edfba52cad4df65b48cc636522c10cae777",
+    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
   },
-  "manifestRoot": "gitops/dependencies/candidates/sno-trial",
+  "candidateDigest": "sha256:1af48913dfc27d16095b6024d7db59432102c9802db7950a77fc1b166deca1e9",
+  "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.3",
+  "claims": {
+    "campaignEvidence": false,
+    "contractualSla": false,
+    "customerCertified": false,
+    "highAvailability": false,
+    "productionSupported": false,
+    "redHatCertified": false,
+    "referenceProfileVerified": false,
+    "rpoRtoVerified": false
+  },
+  "controls": {
+    "activeKustomizationReferenced": false,
+    "allowedCertificationSlots": [],
+    "argocdApplicationsEmitted": false,
+    "campaignEligible": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "manifestsEmitted": true,
+    "modelBytesStored": false,
+    "operatorMaterializationRequired": true,
+    "productionDependencyProfileMutated": false,
+    "renderable": true,
+    "runtimeModelDownloadAllowed": false,
+    "scope": "sno-engineering-trial-valkey-and-model-backend-only",
+    "secretObjectsEmitted": false,
+    "secretValuesStored": false,
+    "sourceOnly": true,
+    "workloadCandidateMutated": false
+  },
+  "executionMode": "source-only",
+  "kind": "orchestra.openshift.sno-trial-dependency-manifest-candidate.v1",
   "kustomization": "gitops/dependencies/candidates/sno-trial/kustomization.yaml",
+  "manifestRoot": "gitops/dependencies/candidates/sno-trial",
+  "manifestSetDigest": "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "requiredInputs": [
+    {
+      "id": "storage-class",
+      "kind": "StorageClass",
+      "materialization": "replace-with-live-observed-name",
+      "name": "ORCHESTRA_SNO_STORAGE_CLASS_REQUIRED",
+      "namespace": null,
+      "requiredKeys": [],
+      "usage": "valkey-volume-claim-template"
+    },
+    {
+      "id": "valkey-auth",
+      "kind": "Secret",
+      "materialization": "operator-created-out-of-band",
+      "name": "orchestra-sno-valkey-auth",
+      "namespace": "orchestra-sno-valkey",
+      "requiredKeys": [
+        "password"
+      ],
+      "usage": "valkey-server-and-probe-authentication"
+    },
+    {
+      "id": "valkey-server-tls",
+      "kind": "Secret",
+      "materialization": "operator-created-out-of-band",
+      "name": "orchestra-sno-valkey-server-tls",
+      "namespace": "orchestra-sno-valkey",
+      "requiredKeys": [
+        "ca.crt",
+        "tls.crt",
+        "tls.key"
+      ],
+      "usage": "valkey-server-tls"
+    },
+    {
+      "id": "model-artifact-pvc",
+      "kind": "PersistentVolumeClaim",
+      "materialization": "operator-prestaged-and-digest-verified",
+      "name": "orchestra-sno-model-artifact",
+      "namespace": "orchestra-sno-model-backend",
+      "requiredKeys": [],
+      "usage": "read-only-pinned-gguf"
+    },
+    {
+      "id": "model-auth",
+      "kind": "Secret",
+      "materialization": "operator-created-out-of-band",
+      "name": "orchestra-sno-model-auth",
+      "namespace": "orchestra-sno-model-backend",
+      "requiredKeys": [
+        "api-keys"
+      ],
+      "usage": "llama-server-api-key-file"
+    },
+    {
+      "id": "model-server-tls",
+      "kind": "Secret",
+      "materialization": "operator-created-out-of-band",
+      "name": "orchestra-sno-model-server-tls",
+      "namespace": "orchestra-sno-model-backend",
+      "requiredKeys": [
+        "ca.crt",
+        "tls.crt",
+        "tls.key"
+      ],
+      "usage": "llama-server-tls"
+    }
+  ],
   "resourceFiles": [
     "namespace-valkey.json",
     "namespace-model-backend.json",
@@ -31,226 +143,113 @@
     {
       "apiVersion": "v1",
       "kind": "Namespace",
-      "namespace": null,
-      "name": "orchestra-sno-valkey"
+      "name": "orchestra-sno-valkey",
+      "namespace": null
     },
     {
       "apiVersion": "v1",
       "kind": "Namespace",
-      "namespace": null,
-      "name": "orchestra-sno-model-backend"
+      "name": "orchestra-sno-model-backend",
+      "namespace": null
     },
     {
       "apiVersion": "v1",
       "kind": "ServiceAccount",
-      "namespace": "orchestra-sno-valkey",
-      "name": "orchestra-sno-valkey"
+      "name": "orchestra-sno-valkey",
+      "namespace": "orchestra-sno-valkey"
     },
     {
       "apiVersion": "v1",
       "kind": "Service",
-      "namespace": "orchestra-sno-valkey",
-      "name": "orchestra-sno-valkey"
+      "name": "orchestra-sno-valkey",
+      "namespace": "orchestra-sno-valkey"
     },
     {
       "apiVersion": "apps/v1",
       "kind": "StatefulSet",
-      "namespace": "orchestra-sno-valkey",
-      "name": "orchestra-sno-valkey"
+      "name": "orchestra-sno-valkey",
+      "namespace": "orchestra-sno-valkey"
     },
     {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "NetworkPolicy",
-      "namespace": "orchestra-sno-valkey",
-      "name": "default-deny"
+      "name": "default-deny",
+      "namespace": "orchestra-sno-valkey"
     },
     {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "NetworkPolicy",
-      "namespace": "orchestra-sno-valkey",
-      "name": "allow-valkey-clients"
+      "name": "allow-valkey-clients",
+      "namespace": "orchestra-sno-valkey"
     },
     {
       "apiVersion": "v1",
       "kind": "ServiceAccount",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "orchestra-sno-model-backend"
+      "name": "orchestra-sno-model-backend",
+      "namespace": "orchestra-sno-model-backend"
     },
     {
       "apiVersion": "v1",
       "kind": "Service",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "orchestra-sno-model-backend"
+      "name": "orchestra-sno-model-backend",
+      "namespace": "orchestra-sno-model-backend"
     },
     {
       "apiVersion": "apps/v1",
       "kind": "StatefulSet",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "orchestra-sno-model-backend"
+      "name": "orchestra-sno-model-backend",
+      "namespace": "orchestra-sno-model-backend"
     },
     {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "NetworkPolicy",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "default-deny"
+      "name": "default-deny",
+      "namespace": "orchestra-sno-model-backend"
     },
     {
       "apiVersion": "networking.k8s.io/v1",
       "kind": "NetworkPolicy",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "allow-model-plane"
+      "name": "allow-model-plane",
+      "namespace": "orchestra-sno-model-backend"
     }
   ],
-  "requiredInputs": [
-    {
-      "id": "storage-class",
-      "kind": "StorageClass",
-      "namespace": null,
-      "name": "ORCHESTRA_SNO_STORAGE_CLASS_REQUIRED",
-      "requiredKeys": [],
-      "usage": "valkey-volume-claim-template",
-      "materialization": "replace-with-live-observed-name"
-    },
-    {
-      "id": "valkey-auth",
-      "kind": "Secret",
-      "namespace": "orchestra-sno-valkey",
-      "name": "orchestra-sno-valkey-auth",
-      "requiredKeys": [
-        "password"
-      ],
-      "usage": "valkey-server-and-probe-authentication",
-      "materialization": "operator-created-out-of-band"
-    },
-    {
-      "id": "valkey-server-tls",
-      "kind": "Secret",
-      "namespace": "orchestra-sno-valkey",
-      "name": "orchestra-sno-valkey-server-tls",
-      "requiredKeys": [
-        "ca.crt",
-        "tls.crt",
-        "tls.key"
-      ],
-      "usage": "valkey-server-tls",
-      "materialization": "operator-created-out-of-band"
-    },
-    {
-      "id": "model-artifact-pvc",
-      "kind": "PersistentVolumeClaim",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "orchestra-sno-model-artifact",
-      "requiredKeys": [],
-      "usage": "read-only-pinned-gguf",
-      "materialization": "operator-prestaged-and-digest-verified"
-    },
-    {
-      "id": "model-auth",
-      "kind": "Secret",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "orchestra-sno-model-auth",
-      "requiredKeys": [
-        "api-keys"
-      ],
-      "usage": "llama-server-api-key-file",
-      "materialization": "operator-created-out-of-band"
-    },
-    {
-      "id": "model-server-tls",
-      "kind": "Secret",
-      "namespace": "orchestra-sno-model-backend",
-      "name": "orchestra-sno-model-server-tls",
-      "requiredKeys": [
-        "ca.crt",
-        "tls.crt",
-        "tls.key"
-      ],
-      "usage": "llama-server-tls",
-      "materialization": "operator-created-out-of-band"
-    }
-  ],
+  "schemaVersion": 1,
+  "targetClass": "engineering-trial",
   "workloads": [
     {
-      "id": "valkey",
-      "namespace": "orchestra-sno-valkey",
-      "statefulSet": "orchestra-sno-valkey",
-      "service": "orchestra-sno-valkey",
-      "serviceAccount": "orchestra-sno-valkey",
-      "container": "valkey",
-      "image": "docker.io/valkey/valkey@sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
-      "replicas": 1,
-      "port": 6379,
-      "protocol": "valkey-tls",
       "allowedClientNamespaces": [
         "orchestra-platform",
         "orchestra-model"
       ],
+      "container": "valkey",
+      "id": "valkey",
+      "image": "docker.io/valkey/valkey@sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+      "modelArtifactReadOnly": null,
+      "namespace": "orchestra-sno-valkey",
       "persistentVolumeGiB": 2,
-      "modelArtifactReadOnly": null
+      "port": 6379,
+      "protocol": "valkey-tls",
+      "replicas": 1,
+      "service": "orchestra-sno-valkey",
+      "serviceAccount": "orchestra-sno-valkey",
+      "statefulSet": "orchestra-sno-valkey"
     },
     {
-      "id": "model-backend",
-      "namespace": "orchestra-sno-model-backend",
-      "statefulSet": "orchestra-sno-model-backend",
-      "service": "orchestra-sno-model-backend",
-      "serviceAccount": "orchestra-sno-model-backend",
-      "container": "model-backend",
-      "image": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
-      "replicas": 1,
-      "port": 8000,
-      "protocol": "openai-compatible-https",
       "allowedClientNamespaces": [
         "orchestra-model"
       ],
+      "container": "model-backend",
+      "id": "model-backend",
+      "image": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+      "modelArtifactReadOnly": true,
+      "namespace": "orchestra-sno-model-backend",
       "persistentVolumeGiB": 10,
-      "modelArtifactReadOnly": true
+      "port": 8000,
+      "protocol": "openai-compatible-https",
+      "replicas": 1,
+      "service": "orchestra-sno-model-backend",
+      "serviceAccount": "orchestra-sno-model-backend",
+      "statefulSet": "orchestra-sno-model-backend"
     }
-  ],
-  "manifestSetDigest": "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728",
-  "activation": {
-    "state": "blocked",
-    "reasonCodes": [
-      "UPSTREAM_VERIFICATION_PENDING",
-      "DESTINATION_MIRROR_PROOF_MISSING",
-      "LAB_SIGNATURE_MISSING",
-      "STORAGE_CLASS_REFERENCE_UNRESOLVED",
-      "DEPENDENCY_SECRET_REFERENCES_UNRESOLVED",
-      "DEPENDENCY_TLS_REFERENCES_UNRESOLVED",
-      "MODEL_PVC_MATERIALIZATION_PROOF_MISSING",
-      "LIVE_ALLOCATABLE_NOT_OBSERVED",
-      "OPENSHIFT_SERVER_SIDE_DRY_RUN_MISSING",
-      "LIVE_DEPENDENCY_CONNECTIVITY_MISSING",
-      "WORKLOAD_CANDIDATE_BINDING_PENDING"
-    ]
-  },
-  "controls": {
-    "scope": "sno-engineering-trial-valkey-and-model-backend-only",
-    "sourceOnly": true,
-    "renderable": true,
-    "operatorMaterializationRequired": true,
-    "productionDependencyProfileMutated": false,
-    "workloadCandidateMutated": false,
-    "manifestsEmitted": true,
-    "argocdApplicationsEmitted": false,
-    "activeKustomizationReferenced": false,
-    "secretObjectsEmitted": false,
-    "secretValuesStored": false,
-    "modelBytesStored": false,
-    "runtimeModelDownloadAllowed": false,
-    "cloudMutationAuthorized": false,
-    "deploymentAuthorized": false,
-    "campaignEligible": false,
-    "allowedCertificationSlots": []
-  },
-  "claims": {
-    "campaignEvidence": false,
-    "referenceProfileVerified": false,
-    "customerCertified": false,
-    "redHatCertified": false,
-    "contractualSla": false,
-    "productionSupported": false,
-    "highAvailability": false,
-    "rpoRtoVerified": false
-  },
-  "candidateDigest": "sha256:7f5d0518e87e27f982c80a2bcd63e03d56af151f024d88737fda89f682be1e5f"
+  ]
 }

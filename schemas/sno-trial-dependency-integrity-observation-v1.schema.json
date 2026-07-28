@@ -98,16 +98,16 @@
       ],
       "properties": {
         "candidateId": {
-          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.2"
+          "const": "orchestra-sno-trial-dependency-manifests-2026-07-28.3"
         },
         "candidateDigest": {"$ref": "#/$defs/digest"},
         "manifestSetDigest": {"$ref": "#/$defs/digest"},
         "artifactSetId": {
-          "const": "orchestra-sno-trial-dependency-artifacts-2026-07-28.1"
+          "const": "orchestra-sno-trial-dependency-artifacts-2026-07-28.2"
         },
         "artifactSetDigest": {"$ref": "#/$defs/digest"},
         "policyId": {
-          "const": "orchestra-sno-trial-dependency-integrity-2026-07-28.1"
+          "const": "orchestra-sno-trial-dependency-integrity-2026-07-28.2"
         },
         "policyDigest": {"$ref": "#/$defs/digest"},
         "inputObservationId": {"$ref": "#/$defs/identifier"},

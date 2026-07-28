@@ -11,6 +11,7 @@ from scripts.validate_sno_trial_dependency_runtime_contracts import (
     CLAIMS,
     CONTRACT_PATH,
     CONTROLS,
+    DEPENDENCY_ARTIFACT_PATH,
     DEPENDENCY_PATH,
     OPERATOR_INPUT_PATH,
     RUNTIME_DEFAULTS,
@@ -27,6 +28,7 @@ class SnoTrialDependencyRuntimeContractTests(unittest.TestCase):
         self.candidate = load_json(CANDIDATE_PATH)
         self.dependency_admission = load_json(DEPENDENCY_PATH)
         self.operator_inputs = load_json(OPERATOR_INPUT_PATH)
+        self.dependency_artifacts = load_json(DEPENDENCY_ARTIFACT_PATH)
 
     def validate(self, value: dict[str, object]) -> str:
         return validate_contract_set(
@@ -34,6 +36,7 @@ class SnoTrialDependencyRuntimeContractTests(unittest.TestCase):
             self.candidate,
             self.dependency_admission,
             self.operator_inputs,
+            self.dependency_artifacts,
         )
 
     def contract(self, value: dict[str, object], identifier: str) -> dict[str, object]:
@@ -72,7 +75,7 @@ class SnoTrialDependencyRuntimeContractTests(unittest.TestCase):
             for item in self.contract_set["contracts"]
             if item["artifact"]["admissionState"] == "unresolved"
         }
-        self.assertEqual(unresolved, {"valkey", "model-backend"})
+        self.assertEqual(unresolved, set())
 
     def test_security_transport_and_network_defaults_fail_closed(self) -> None:
         defaults = self.contract_set["runtimeDefaults"]

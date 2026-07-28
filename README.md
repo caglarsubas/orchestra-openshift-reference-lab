@@ -302,22 +302,21 @@ make validate-sno-trial-workload-candidate
 
 This is a capacity decision record, not deployment input. It emits no
 manifests, Argo CD applications, Secret values, lease, or cloud authority.
-Its Valkey and CPU model-backend entries intentionally remain unresolved
-because the candidate predates the artifact selection below, and
-the new trial-specific single-replica manifest candidate is not yet bound back
-into this capacity record. The
-source-only dependency runtime requirements are locked separately in
+Its Valkey and CPU model-backend entries now bind the exact selected
+linux/amd64 artifact manifests below. Artifact selection is deliberately
+upstream of the candidate, removing the previous artifact/runtime/candidate
+digest cycle. The source-only dependency runtime requirements are locked in
 [`config/sno-trial-dependency-runtime-contracts.lock.json`](config/sno-trial-dependency-runtime-contracts.lock.json).
-Its five contracts bind the current candidate, dependency admission, and
-operator-input contract while requiring restricted-v2, arbitrary UID,
-read-only roots, TLS/authentication, default-deny networking, persistent
-single replicas, no runtime model download, and fail-closed degradation.
-They emit no Kubernetes objects and remain blocked on artifact, Secret/TLS,
+Its five contracts bind the rebound candidate, selected artifact set,
+dependency admission, and operator-input contract while requiring
+restricted-v2, arbitrary UID, read-only roots, TLS/authentication,
+default-deny networking, persistent single replicas, no runtime model
+download, and fail-closed degradation. The inactive manifest candidate binds
+that complete lineage and no longer carries a workload-candidate binding
+blocker. All three remain blocked on upstream review, Secret/TLS,
 storage-class, mirror, dry-run, and live-connectivity evidence. The candidate
-will retain its runtime-contract blocker until a new candidate revision binds
-this contract set and forces a fresh product-artifact replay. Its canonical
 digest is
-`sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9`;
+`sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4`;
 all production, HA, campaign, certification, and SLA claims remain false.
 
 The remaining source artifacts are now selected in
@@ -326,7 +325,7 @@ Valkey 9.1.0, the linux/amd64 llama.cpp `b10143` server manifest, and Qwen2.5
 0.5B Instruct Q4_K_M at its immutable Hugging Face revision, byte count, and
 SHA-256 digest. The model must be operator-prestaged on a read-only PVC;
 runtime download is prohibited. Validate the strict derivation from the
-dependency BOM and runtime contracts with:
+dependency BOM and source admission with:
 
 ```bash
 make validate-sno-trial-dependency-artifacts
@@ -383,9 +382,10 @@ make validate-sno-trial-dependency-dry-run-contract
 This path has CI fixture coverage but has not been run against the destroyed
 trial cluster. Upstream review, destination admission and signing, certificate
 validity and model-byte/digest live evidence, live allocatable capacity,
-workload-candidate rebinding, server-side dry-run, connectivity, and activation
-review remain blocked. Neither the artifact set, observations, nor private
-materialization changes the current product replay lineage or authorizes apply.
+server-side dry-run, connectivity, and activation review remain blocked.
+Rebinding invalidated the previous product replay for current admission, so a
+fresh four-image replay is also required. Neither the artifact set,
+observations, nor private materialization authorizes apply.
 
 Red Hat documents GCP x86_64 as a supported SNO cloud target and requires one
 control-plane replica, zero compute replicas, OVN-Kubernetes, at least 8 vCPU,
@@ -434,7 +434,7 @@ SNO values are also bound for read-only registry replay. Every artifact binds
 its first successful publication attempt. Runtime `v0.18.7` also binds the
 supported Cosign v3 publisher used by the independent replay. The artifact-set
 digest is
-`sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948`.
+`sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1`.
 The replay uses two separate environment credentials: a classic token limited
 to package-read access across the locked GHCR namespaces and a fine-grained
 token limited to Actions-read plus required metadata on the private platform
@@ -447,8 +447,11 @@ Exact-main run `30293130839` replayed the current four-image set from revision
 `2350e41cb0db00b96f70cc4d5f9c9c1b09cd17ee`; artifact `8663575783`
 contains payload-free report digest
 `sha256:e67081bf9ee0d0402d97d23be4b646d059d5fa3e0c30b9ad8e53209157a15615`.
-Admission policy `orchestra-sno-trial-product-admission-2026-07-28.3`
-binds only that replay and is current. The value-free operator-input contract
+That replay is historical evidence for the pre-rebind candidate and cannot
+admit the current artifact set. Admission policy
+`orchestra-sno-trial-product-admission-2026-07-28.4` is fail-closed with
+`replayState=refresh-required` until a new exact-main replay is recorded. The
+value-free operator-input contract
 now locks 14 Secret references, three CA ConfigMaps, their required key names,
 and the three rendered-manifest bindings; no live input observation exists.
 Destination mirror and live-cluster pulls, populated operator inputs, a fresh

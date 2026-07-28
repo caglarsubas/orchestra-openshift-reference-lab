@@ -1,171 +1,5 @@
 {
-  "schemaVersion": 2,
-  "kind": "orchestra.openshift.sno-trial-product-artifact-set.v2",
-  "artifactSetId": "orchestra-sno-trial-products-2026-07-28.4",
-  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
-  "targetClass": "engineering-trial",
-  "executionMode": "source-observation",
-  "completeness": "published-three-plane-workload-images-bound-not-trial-admitted",
-  "bindings": {
-    "workloadCandidateDigest": "sha256:f94c20abad9070ca1e1ca0f5e232bc4e1e6805783bd3088ef337608f6df8a0c9"
-  },
-  "artifacts": [
-    {
-      "plane": "platform",
-      "release": "platform-v0.1.0-rc.11",
-      "source": {
-        "repository": "caglarsubas/agent-hook-v2",
-        "revision": "13fcacafedd16eb88a0bf0f3b49e176625e15e02"
-      },
-      "image": {
-        "repository": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi",
-        "digest": "sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
-        "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
-        "platform": "linux/amd64",
-        "platformManifestDigest": "sha256:998db0c5a1110bbaf551e44d362af63e4d844db8d115380ec7215680ad564a14",
-        "variant": "ubi9"
-      },
-      "auxiliaryImages": [
-        {
-          "repository": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi",
-          "digest": "sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4",
-          "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4",
-          "platform": "linux/amd64",
-          "platformManifestDigest": "sha256:2e6cf720844096da1483f00eafaf316e2b2203a048ad1a8d820bd4030babcf71",
-          "variant": "ubi9"
-        }
-      ],
-      "chart": {
-        "repository": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa",
-        "digest": "sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
-        "reference": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa@sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
-        "name": "prometa",
-        "version": "0.3.0-rc.11",
-        "appVersion": "0.1.0",
-        "packageDigest": "sha256:baed4c981742e8179edc752da261c0bb811736372bdfa46d72dbcc9487ee3d84",
-        "trialValuesPath": "prometa/values.openshift-sno-trial.yaml",
-        "trialValuesDigest": "sha256:3b5e5150afc64141a4a0487241b041111712983cdb5b0dc89e9bd3e3d1e44d2b"
-      },
-      "publication": {
-        "workflow": ".github/workflows/publish-platform-release.yml",
-        "workflowName": "publish-platform-release",
-        "runId": 30157474312,
-        "runAttempt": 1,
-        "runUrl": "https://github.com/caglarsubas/agent-hook-v2/actions/runs/30157474312",
-        "tag": "platform-v0.1.0-rc.11",
-        "signatureIdentity": "https://github.com/caglarsubas/agent-hook-v2/.github/workflows/publish-platform-release.yml@refs/tags/platform-v0.1.0-rc.11",
-        "oidcIssuer": "https://token.actions.githubusercontent.com"
-      },
-      "admission": {
-        "state": "published-not-trial-admitted",
-        "sourceOnly": true,
-        "publicReplayRequired": true,
-        "destinationMirrorVerified": false,
-        "liveClusterPullVerified": false,
-        "secretReferencesResolved": false,
-        "serverSideDryRunVerified": false,
-        "activationAuthorized": false
-      }
-    },
-    {
-      "plane": "runtimeHost",
-      "release": "v0.18.7",
-      "source": {
-        "repository": "prometa-ai/orchestra-python-sdk",
-        "revision": "2dbbbe13bc1764ed8bd5225dc8214906acd3310b"
-      },
-      "image": {
-        "repository": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9",
-        "digest": "sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
-        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
-        "platform": "linux/amd64",
-        "platformManifestDigest": "sha256:5f397db663f26d7e33a01faf656a8fa3eebee73ccdb348e4dfae84d7f2ec713f",
-        "variant": "ubi9"
-      },
-      "auxiliaryImages": [],
-      "chart": {
-        "repository": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime",
-        "digest": "sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
-        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime@sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
-        "name": "prometa-runtime",
-        "version": "0.3.8",
-        "appVersion": "0.18.7",
-        "packageDigest": "sha256:dc77a8e181729ac91e6453a48e1f9b78c1fbae561f43d9e0717d72ff4c16f6b6",
-        "trialValuesPath": "prometa-runtime/values.openshift-sno-trial.yaml",
-        "trialValuesDigest": "sha256:11fe28f037b111fee2723a09999f913a220dbd5c07b28458f340b6d883027b63"
-      },
-      "publication": {
-        "workflow": ".github/workflows/publish-runtime-artifacts.yml",
-        "workflowName": "Publish runtime artifacts",
-        "runId": 30171938726,
-        "runAttempt": 1,
-        "runUrl": "https://github.com/prometa-ai/orchestra-python-sdk/actions/runs/30171938726",
-        "tag": "v0.18.7",
-        "signatureIdentity": "https://github.com/prometa-ai/orchestra-python-sdk/.github/workflows/publish-runtime-artifacts.yml@refs/heads/main",
-        "oidcIssuer": "https://token.actions.githubusercontent.com"
-      },
-      "admission": {
-        "state": "published-not-trial-admitted",
-        "sourceOnly": true,
-        "publicReplayRequired": true,
-        "destinationMirrorVerified": false,
-        "liveClusterPullVerified": false,
-        "secretReferencesResolved": false,
-        "serverSideDryRunVerified": false,
-        "activationAuthorized": false
-      }
-    },
-    {
-      "plane": "modelPlane",
-      "release": "v0.1.11",
-      "source": {
-        "repository": "caglarsubas/llm_inference_engine",
-        "revision": "6c3f2a0cb34ca5110760b53d9cc8d65a3a5c2df2"
-      },
-      "image": {
-        "repository": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi",
-        "digest": "sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
-        "reference": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
-        "platform": "linux/amd64",
-        "platformManifestDigest": "sha256:52e9da1065dfa539c70aae79beccafc58a47db17f5422bc500e3ab9b3c394c7a",
-        "variant": "ubi9"
-      },
-      "auxiliaryImages": [],
-      "chart": {
-        "repository": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine",
-        "digest": "sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
-        "reference": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine@sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
-        "name": "orchestra-inference-engine",
-        "version": "0.1.3",
-        "appVersion": "0.1.11",
-        "packageDigest": "sha256:bde3db9f6849e3a25a19d5671b0db4e8f14e14f96218b0552920f182fe8467b3",
-        "trialValuesPath": "orchestra-inference-engine/values.openshift-sno-trial.yaml",
-        "trialValuesDigest": "sha256:21affdee56d51be89396a209819d6a5b0a6d74fe6aa4210b1bd0096384023c1c"
-      },
-      "publication": {
-        "workflow": ".github/workflows/publish-images.yml",
-        "workflowName": "publish-release-artifacts",
-        "runId": 30151836099,
-        "runAttempt": 1,
-        "runUrl": "https://github.com/caglarsubas/llm_inference_engine/actions/runs/30151836099",
-        "tag": "v0.1.11",
-        "signatureIdentity": "https://github.com/caglarsubas/llm_inference_engine/.github/workflows/publish-images.yml@refs/tags/v0.1.11",
-        "oidcIssuer": "https://token.actions.githubusercontent.com"
-      },
-      "admission": {
-        "state": "published-not-trial-admitted",
-        "sourceOnly": true,
-        "publicReplayRequired": true,
-        "destinationMirrorVerified": false,
-        "liveClusterPullVerified": false,
-        "secretReferencesResolved": false,
-        "serverSideDryRunVerified": false,
-        "activationAuthorized": false
-      }
-    }
-  ],
   "activation": {
-    "state": "blocked",
     "reasonCodes": [
       "product-artifact-replay-review-missing",
       "destination-mirror-verification-missing",
@@ -173,23 +7,189 @@
       "operator-secret-and-ca-inputs-missing",
       "openshift-server-side-dry-run-missing",
       "provider-readiness-not-approved"
-    ]
+    ],
+    "state": "blocked"
   },
-  "controls": {
-    "productionReleaseSetMutated": false,
-    "manifestsEmitted": false,
-    "cloudMutationAuthorized": false,
-    "deploymentAuthorized": false,
-    "campaignEligible": false,
-    "allowedCertificationSlots": []
+  "artifactSetDigest": "sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1",
+  "artifactSetId": "orchestra-sno-trial-products-2026-07-28.5",
+  "artifacts": [
+    {
+      "admission": {
+        "activationAuthorized": false,
+        "destinationMirrorVerified": false,
+        "liveClusterPullVerified": false,
+        "publicReplayRequired": true,
+        "secretReferencesResolved": false,
+        "serverSideDryRunVerified": false,
+        "sourceOnly": true,
+        "state": "published-not-trial-admitted"
+      },
+      "auxiliaryImages": [
+        {
+          "digest": "sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4",
+          "platform": "linux/amd64",
+          "platformManifestDigest": "sha256:2e6cf720844096da1483f00eafaf316e2b2203a048ad1a8d820bd4030babcf71",
+          "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi@sha256:036deaf047725283f158efdc872b8a79cef20b0dbf2bcebd80155dfd38f4a1e4",
+          "repository": "ghcr.io/caglarsubas/agent-hook-v2/prometa-tools-ubi",
+          "variant": "ubi9"
+        }
+      ],
+      "chart": {
+        "appVersion": "0.1.0",
+        "digest": "sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
+        "name": "prometa",
+        "packageDigest": "sha256:baed4c981742e8179edc752da261c0bb811736372bdfa46d72dbcc9487ee3d84",
+        "reference": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa@sha256:b82fe64341de376819e0012dd184f12ff68bf33581f927ed66b839ce06959a2d",
+        "repository": "ghcr.io/caglarsubas/agent-hook-v2/charts/prometa",
+        "trialValuesDigest": "sha256:3b5e5150afc64141a4a0487241b041111712983cdb5b0dc89e9bd3e3d1e44d2b",
+        "trialValuesPath": "prometa/values.openshift-sno-trial.yaml",
+        "version": "0.3.0-rc.11"
+      },
+      "image": {
+        "digest": "sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
+        "platform": "linux/amd64",
+        "platformManifestDigest": "sha256:998db0c5a1110bbaf551e44d362af63e4d844db8d115380ec7215680ad564a14",
+        "reference": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi@sha256:f2444f162328d0716338d0c3d151310a908e2f022c1f32d2d01e08f320e9e56d",
+        "repository": "ghcr.io/caglarsubas/agent-hook-v2/prometa-ubi",
+        "variant": "ubi9"
+      },
+      "plane": "platform",
+      "publication": {
+        "oidcIssuer": "https://token.actions.githubusercontent.com",
+        "runAttempt": 1,
+        "runId": 30157474312,
+        "runUrl": "https://github.com/caglarsubas/agent-hook-v2/actions/runs/30157474312",
+        "signatureIdentity": "https://github.com/caglarsubas/agent-hook-v2/.github/workflows/publish-platform-release.yml@refs/tags/platform-v0.1.0-rc.11",
+        "tag": "platform-v0.1.0-rc.11",
+        "workflow": ".github/workflows/publish-platform-release.yml",
+        "workflowName": "publish-platform-release"
+      },
+      "release": "platform-v0.1.0-rc.11",
+      "source": {
+        "repository": "caglarsubas/agent-hook-v2",
+        "revision": "13fcacafedd16eb88a0bf0f3b49e176625e15e02"
+      }
+    },
+    {
+      "admission": {
+        "activationAuthorized": false,
+        "destinationMirrorVerified": false,
+        "liveClusterPullVerified": false,
+        "publicReplayRequired": true,
+        "secretReferencesResolved": false,
+        "serverSideDryRunVerified": false,
+        "sourceOnly": true,
+        "state": "published-not-trial-admitted"
+      },
+      "auxiliaryImages": [],
+      "chart": {
+        "appVersion": "0.18.7",
+        "digest": "sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
+        "name": "prometa-runtime",
+        "packageDigest": "sha256:dc77a8e181729ac91e6453a48e1f9b78c1fbae561f43d9e0717d72ff4c16f6b6",
+        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime@sha256:1e6b346b096ae9aeba799ab5461b6bd3e206fd319457d43be53f6fa627bbb5a6",
+        "repository": "ghcr.io/prometa-ai/orchestra-python-sdk/charts/prometa-runtime",
+        "trialValuesDigest": "sha256:11fe28f037b111fee2723a09999f913a220dbd5c07b28458f340b6d883027b63",
+        "trialValuesPath": "prometa-runtime/values.openshift-sno-trial.yaml",
+        "version": "0.3.8"
+      },
+      "image": {
+        "digest": "sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
+        "platform": "linux/amd64",
+        "platformManifestDigest": "sha256:5f397db663f26d7e33a01faf656a8fa3eebee73ccdb348e4dfae84d7f2ec713f",
+        "reference": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9@sha256:0ad1cc268da818d1b0c6ed850d50fdd937df79f1ab5e29cb6f7c3740b380029b",
+        "repository": "ghcr.io/prometa-ai/orchestra-python-sdk/prometa-runtime-host-ubi9",
+        "variant": "ubi9"
+      },
+      "plane": "runtimeHost",
+      "publication": {
+        "oidcIssuer": "https://token.actions.githubusercontent.com",
+        "runAttempt": 1,
+        "runId": 30171938726,
+        "runUrl": "https://github.com/prometa-ai/orchestra-python-sdk/actions/runs/30171938726",
+        "signatureIdentity": "https://github.com/prometa-ai/orchestra-python-sdk/.github/workflows/publish-runtime-artifacts.yml@refs/heads/main",
+        "tag": "v0.18.7",
+        "workflow": ".github/workflows/publish-runtime-artifacts.yml",
+        "workflowName": "Publish runtime artifacts"
+      },
+      "release": "v0.18.7",
+      "source": {
+        "repository": "prometa-ai/orchestra-python-sdk",
+        "revision": "2dbbbe13bc1764ed8bd5225dc8214906acd3310b"
+      }
+    },
+    {
+      "admission": {
+        "activationAuthorized": false,
+        "destinationMirrorVerified": false,
+        "liveClusterPullVerified": false,
+        "publicReplayRequired": true,
+        "secretReferencesResolved": false,
+        "serverSideDryRunVerified": false,
+        "sourceOnly": true,
+        "state": "published-not-trial-admitted"
+      },
+      "auxiliaryImages": [],
+      "chart": {
+        "appVersion": "0.1.11",
+        "digest": "sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
+        "name": "orchestra-inference-engine",
+        "packageDigest": "sha256:bde3db9f6849e3a25a19d5671b0db4e8f14e14f96218b0552920f182fe8467b3",
+        "reference": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine@sha256:a8acbe5d54efba912547e1ca6b783344d5821b7b7ab19d4c262948d015974637",
+        "repository": "ghcr.io/caglarsubas/llm_inference_engine/charts/orchestra-inference-engine",
+        "trialValuesDigest": "sha256:21affdee56d51be89396a209819d6a5b0a6d74fe6aa4210b1bd0096384023c1c",
+        "trialValuesPath": "orchestra-inference-engine/values.openshift-sno-trial.yaml",
+        "version": "0.1.3"
+      },
+      "image": {
+        "digest": "sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
+        "platform": "linux/amd64",
+        "platformManifestDigest": "sha256:52e9da1065dfa539c70aae79beccafc58a47db17f5422bc500e3ab9b3c394c7a",
+        "reference": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi@sha256:6eb6052cfc38fa6304021a2887536b5d7c77dc9f0ca4331491324021a0732549",
+        "repository": "ghcr.io/caglarsubas/llm_inference_engine/inference-engine-ubi",
+        "variant": "ubi9"
+      },
+      "plane": "modelPlane",
+      "publication": {
+        "oidcIssuer": "https://token.actions.githubusercontent.com",
+        "runAttempt": 1,
+        "runId": 30151836099,
+        "runUrl": "https://github.com/caglarsubas/llm_inference_engine/actions/runs/30151836099",
+        "signatureIdentity": "https://github.com/caglarsubas/llm_inference_engine/.github/workflows/publish-images.yml@refs/tags/v0.1.11",
+        "tag": "v0.1.11",
+        "workflow": ".github/workflows/publish-images.yml",
+        "workflowName": "publish-release-artifacts"
+      },
+      "release": "v0.1.11",
+      "source": {
+        "repository": "caglarsubas/llm_inference_engine",
+        "revision": "6c3f2a0cb34ca5110760b53d9cc8d65a3a5c2df2"
+      }
+    }
+  ],
+  "bindings": {
+    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
   },
   "claims": {
     "campaignEvidence": false,
-    "referenceProfileVerified": false,
-    "customerCertified": false,
-    "redHatCertified": false,
     "contractualSla": false,
-    "productionSupported": false
+    "customerCertified": false,
+    "productionSupported": false,
+    "redHatCertified": false,
+    "referenceProfileVerified": false
   },
-  "artifactSetDigest": "sha256:865f1a9b6112da2594856c40405e2bbe630b0e524896937d1b12b7d5196d2948"
+  "completeness": "published-three-plane-workload-images-bound-not-trial-admitted",
+  "controls": {
+    "allowedCertificationSlots": [],
+    "campaignEligible": false,
+    "cloudMutationAuthorized": false,
+    "deploymentAuthorized": false,
+    "manifestsEmitted": false,
+    "productionReleaseSetMutated": false
+  },
+  "executionMode": "source-observation",
+  "kind": "orchestra.openshift.sno-trial-product-artifact-set.v2",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "schemaVersion": 2,
+  "targetClass": "engineering-trial"
 }

@@ -18,16 +18,13 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_SET_PATH = ROOT / "config" / "sno-trial-dependency-artifacts.lock.json"
 BOM_PATH = ROOT / "config" / "dependency-bom.lock.json"
 ADMISSION_PATH = ROOT / "config" / "dependency-admission.lock.json"
-RUNTIME_CONTRACT_PATH = (
-    ROOT / "config" / "sno-trial-dependency-runtime-contracts.lock.json"
-)
 KIND = "orchestra.openshift.sno-trial-dependency-artifact-set.v1"
-ARTIFACT_SET_ID = "orchestra-sno-trial-dependency-artifacts-2026-07-28.1"
+ARTIFACT_SET_ID = "orchestra-sno-trial-dependency-artifacts-2026-07-28.2"
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 IMMUTABLE_REF = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
 EXPECTED_ARTIFACT_SET_DIGEST = (
-    "sha256:5b60283c1e02f20f4a224b55a218d62b308315adf6d58c8120f021e1f8333073"
+    "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0"
 )
 EXPECTED_CONTAINERS = {
     "valkey-image": {
@@ -241,12 +238,10 @@ def validate_bindings(
     value: dict[str, Any],
     bom: dict[str, Any],
     admission: dict[str, Any],
-    runtime_contracts: dict[str, Any],
 ) -> None:
     expected = {
         "dependencyBomDigest": canonical_digest(bom),
         "dependencyAdmissionDigest": canonical_digest(admission),
-        "runtimeContractSetDigest": runtime_contracts.get("contractSetDigest"),
     }
     if value.get("bindings") != expected:
         fail("dependency_artifact_bindings_invalid")
@@ -255,15 +250,9 @@ def validate_bindings(
 def validate_valkey_derivation(
     container: dict[str, Any],
     bom: dict[str, Any],
-    runtime_contracts: dict[str, Any],
 ) -> None:
     chart = find_by_id(
         bom.get("chartPackages"), "valkey", "dependency_artifact_valkey_chart_missing"
-    )
-    runtime = find_by_id(
-        runtime_contracts.get("contracts"),
-        "valkey",
-        "dependency_artifact_valkey_runtime_missing",
     )
     if (
         chart.get("chart") != "valkey"
@@ -271,7 +260,6 @@ def validate_valkey_derivation(
         or chart.get("appVersion") != container["version"]
         or chart.get("packageDigest")
         != "sha256:6497e784e1b707c303e358f6f9d6f82f931618f4b1e5a7aeb0946df51a081fe6"
-        or runtime.get("artifact", {}).get("sourceClass") != "unresolved"
     ):
         fail("dependency_artifact_valkey_derivation_invalid")
 
@@ -279,16 +267,9 @@ def validate_valkey_derivation(
 def validate_model_derivation(
     container: dict[str, Any],
     model: dict[str, Any],
-    runtime_contracts: dict[str, Any],
 ) -> None:
-    runtime = find_by_id(
-        runtime_contracts.get("contracts"),
-        "model-backend",
-        "dependency_artifact_model_runtime_missing",
-    )
     if (
-        runtime.get("artifact", {}).get("sourceClass") != "unresolved"
-        or model["serviceId"] != container["serviceId"]
+        model["serviceId"] != container["serviceId"]
         or model["sizeBytes"] > model["maximumAllowedBytes"]
         or model["runtimeDownloadAllowed"]
         or not model["immutableUrl"].endswith(model["filename"])
@@ -300,7 +281,6 @@ def validate_artifact_set(
     value: dict[str, Any],
     bom: dict[str, Any],
     admission: dict[str, Any],
-    runtime_contracts: dict[str, Any],
 ) -> str:
     reject_forbidden_keys(value)
     if (
@@ -313,7 +293,7 @@ def validate_artifact_set(
         or value.get("architecture") != "linux/amd64"
     ):
         fail("dependency_artifact_identity_invalid")
-    validate_bindings(value, bom, admission, runtime_contracts)
+    validate_bindings(value, bom, admission)
 
     containers = value.get("containers")
     if not isinstance(containers, list) or [
@@ -338,8 +318,8 @@ def validate_artifact_set(
         fail("dependency_artifact_model_invalid")
     if value.get("runtimeBinding") != EXPECTED_RUNTIME_BINDING:
         fail("dependency_artifact_runtime_binding_invalid")
-    validate_valkey_derivation(containers[0], bom, runtime_contracts)
-    validate_model_derivation(containers[1], models[0], runtime_contracts)
+    validate_valkey_derivation(containers[0], bom)
+    validate_model_derivation(containers[1], models[0])
 
     if value.get("activation") != {
         "state": "blocked",
@@ -365,7 +345,6 @@ def main() -> int:
         value,
         load_json(BOM_PATH),
         load_json(ADMISSION_PATH),
-        load_json(RUNTIME_CONTRACT_PATH),
     )
     print(
         "sno_trial_dependency_artifacts_valid "

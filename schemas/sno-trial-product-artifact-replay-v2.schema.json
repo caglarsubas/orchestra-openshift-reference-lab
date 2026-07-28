@@ -67,7 +67,7 @@
       "properties": {
         "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
         "artifactSetId": {
-          "const": "orchestra-sno-trial-products-2026-07-28.4"
+          "const": "orchestra-sno-trial-products-2026-07-28.5"
         },
         "artifactSetDigest": {"$ref": "#/$defs/digest"},
         "workloadCandidateDigest": {"$ref": "#/$defs/digest"},
