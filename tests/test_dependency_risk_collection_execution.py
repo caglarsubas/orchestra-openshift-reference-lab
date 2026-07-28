@@ -124,8 +124,13 @@ class DependencyRiskCollectionExecutionTests(unittest.TestCase):
             ),
             2,
         )
+        self.assertEqual(
+            workflow.count(
+                "scripts/publish_sno_trial_dependency_risk_collection.sh"
+            ),
+            1,
+        )
         self.assertEqual(workflow.count("--preflight-only"), 2)
-        self.assertGreaterEqual(workflow.count("--if-generation-match=0"), 4)
 
     def test_raw_custody_schema_is_strict_at_every_object_boundary(self) -> None:
         schema = load_json(

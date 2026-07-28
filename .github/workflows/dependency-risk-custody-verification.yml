@@ -3,6 +3,14 @@ name: dependency-risk-custody-verification
 on:
   workflow_dispatch:
     inputs:
+      verification_scope:
+        description: Exact dependency custody lane to verify
+        required: true
+        default: production-dependencies
+        type: choice
+        options:
+          - production-dependencies
+          - sno-trial-dependencies
       expected_main_sha:
         description: Exact 40-character main revision reviewed for this verification
         required: true
@@ -52,6 +60,7 @@ jobs:
     steps:
       - name: Require reviewed identity and bounded inputs
         env:
+          VERIFICATION_SCOPE: ${{ inputs.verification_scope }}
           EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
           EVIDENCE_ID: ${{ inputs.evidence_id }}
           COLLECTION_KEY_VERSION: ${{ inputs.collection_kms_key_version }}
@@ -67,9 +76,14 @@ jobs:
           SIGNED_EVIDENCE_BUCKET: ${{ vars.GCP_SIGNED_EVIDENCE_BUCKET }}
         run: |
           set -euo pipefail
+          [[ "$VERIFICATION_SCOPE" == "production-dependencies" || "$VERIFICATION_SCOPE" == "sno-trial-dependencies" ]]
           [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
-          [[ "$EVIDENCE_ID" =~ ^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$ ]]
+          if [[ "$VERIFICATION_SCOPE" == "production-dependencies" ]]; then
+            [[ "$EVIDENCE_ID" =~ ^orchestra-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$ ]]
+          else
+            [[ "$EVIDENCE_ID" =~ ^orchestra-sno-trial-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$ ]]
+          fi
           [[ "$COLLECTION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
           [[ "$EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
           [[ "$VERIFICATION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
@@ -94,9 +108,14 @@ jobs:
           python-version: "3.12"
 
       - name: Validate custody authority and report contracts
+        env:
+          VERIFICATION_SCOPE: ${{ inputs.verification_scope }}
         run: |
           python3 scripts/validate_repository.py
           python3 scripts/validate_dependency_risk_custody_verification.py
+          if [[ "$VERIFICATION_SCOPE" == "sno-trial-dependencies" ]]; then
+            python3 scripts/sno_trial_dependency_risk_custody.py validate-policy
+          fi
           python3 scripts/operator_control_plane_readiness.py validate-policy
 
       - name: Verify independent environment protection for this run
@@ -170,6 +189,7 @@ jobs:
 
       - name: Capture generations, verify raw custody, and publish signed report
         env:
+          VERIFICATION_SCOPE: ${{ inputs.verification_scope }}
           EVIDENCE_ID: ${{ inputs.evidence_id }}
           COLLECTION_KEY_VERSION: ${{ inputs.collection_kms_key_version }}
           EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_collection_public_key_digest }}
@@ -194,15 +214,52 @@ jobs:
             --arg workflowRunAttempt "$GITHUB_RUN_ATTEMPT" \
             --arg actorId "$GITHUB_ACTOR_ID" \
             --arg sourceRevision "$GITHUB_SHA" \
+            --arg verificationScope "$VERIFICATION_SCOPE" \
             --arg evidenceId "$EVIDENCE_ID" \
             --arg collectionKeyVersion "$COLLECTION_KEY_VERSION" \
             --arg verificationKeyVersion "$VERIFICATION_KEY_VERSION" \
             --arg environmentApprovalDigest "$ENVIRONMENT_APPROVAL_DIGEST" \
             --arg githubAppInstallationDigest "$GITHUB_APP_INSTALLATION_DIGEST" \
             --arg reasonDigest "$reason_digest" \
-            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,evidenceId:$evidenceId,collectionKeyVersion:$collectionKeyVersion,verificationKeyVersion:$verificationKeyVersion,environmentApprovalDigest:$environmentApprovalDigest,githubAppInstallationDigest:$githubAppInstallationDigest,reasonDigest:$reasonDigest}' \
+            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,verificationScope:$verificationScope,evidenceId:$evidenceId,collectionKeyVersion:$collectionKeyVersion,verificationKeyVersion:$verificationKeyVersion,environmentApprovalDigest:$environmentApprovalDigest,githubAppInstallationDigest:$githubAppInstallationDigest,reasonDigest:$reasonDigest}' \
             | sha256sum | cut -d' ' -f1)"
           DOCKER_CONFIG="$RUNNER_TEMP/docker" docker pull "$runner" >/dev/null
+
+          if [[ "$VERIFICATION_SCOPE" == "sno-trial-dependencies" ]]; then
+            verification_id="orchestra-sno-trial-dependency-risk-custody-verification-$GITHUB_RUN_ID.$GITHUB_RUN_ATTEMPT"
+            docker run --rm --platform linux/amd64 \
+              --entrypoint /bin/bash \
+              --user "$(id -u):$(id -g)" \
+              --read-only \
+              --cap-drop ALL \
+              --security-opt no-new-privileges \
+              --pids-limit 512 \
+              --tmpfs /tmp:rw,noexec,nosuid,size=4g \
+              --env HOME=/tmp/orchestra-home \
+              --env CLOUDSDK_CONFIG=/tmp/gcloud \
+              --env GOOGLE_APPLICATION_CREDENTIALS=/run/orchestra-auth/gcp-wif.json \
+              --volume "$GCP_CREDENTIALS_FILE:/run/orchestra-auth/gcp-wif.json:ro" \
+              --volume "$GITHUB_WORKSPACE:/workspace:ro" \
+              --volume "$GITHUB_WORKSPACE/restricted:/workspace/restricted:rw" \
+              --workdir /workspace \
+              "$runner" \
+              scripts/verify_and_publish_sno_trial_dependency_risk_custody.sh \
+                --raw-evidence-bucket "$RAW_EVIDENCE_BUCKET" \
+                --signed-evidence-bucket "$SIGNED_EVIDENCE_BUCKET" \
+                --evidence-id "$EVIDENCE_ID" \
+                --verification-id "$verification_id" \
+                --collection-signing-key "$collection_signing_key" \
+                --expected-collection-signing-public-key-digest "$EXPECTED_COLLECTION_PUBLIC_KEY_DIGEST" \
+                --verification-signing-key "$verification_signing_key" \
+                --expected-verification-signing-public-key-digest "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" \
+                --actor-identity-digest "$actor_identity_digest" \
+              | tee "$RUNNER_TEMP/sno-dependency-risk-custody-verification.log"
+            grep -F "custodyVerified=true" \
+              "$RUNNER_TEMP/sno-dependency-risk-custody-verification.log" >/dev/null
+            grep -F "sourceAdmission=false" \
+              "$RUNNER_TEMP/sno-dependency-risk-custody-verification.log" >/dev/null
+            exit 0
+          fi
 
           docker run --rm --platform linux/amd64 \
             --entrypoint /bin/bash \
@@ -242,5 +299,6 @@ jobs:
             "$RUNNER_TEMP/github-token" \
             "$RUNNER_TEMP/github-app-private-key.pem" \
             "$RUNNER_TEMP/dependency-risk-custody-verification.log" \
+            "$RUNNER_TEMP/sno-dependency-risk-custody-verification.log" \
             "$GITHUB_WORKSPACE/restricted"
           find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

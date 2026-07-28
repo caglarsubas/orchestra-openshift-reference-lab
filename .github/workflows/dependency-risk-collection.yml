@@ -261,29 +261,16 @@ jobs:
             grep -F "sourceAdmission=false activation=false deployment=false" \
               "$RUNNER_TEMP/sno-dependency-risk-collection.log" >/dev/null
 
-            profile_id="$(jq -er '.profileId' config/sno-trial.lock.json)"
-            prefix="sno-dependency-risk/v1/$profile_id/$evidence_id"
-            docker run "${common_args[@]}" -c '
-              set -Eeuo pipefail
-              collection_dir="$1"
-              bucket="$2"
-              prefix="$3"
-              archive="/tmp/sno-dependency-risk-raw.tar.gz"
-              tar -C "$collection_dir" -czf "$archive" .
-              gcloud storage cp --if-generation-match=0 \
-                "$archive" "gs://$bucket/$prefix/raw.tar.gz"
-              gcloud storage cp --if-generation-match=0 \
-                "$collection_dir/risk-evidence.json" \
-                "gs://$bucket/$prefix/risk-evidence.json"
-              gcloud storage cp --if-generation-match=0 \
-                "$collection_dir/collection-statement.json" \
-                "gs://$bucket/$prefix/collection-statement.json"
-              gcloud storage cp --if-generation-match=0 \
-                "$collection_dir/collection-statement.sigstore.json" \
-                "gs://$bucket/$prefix/collection-statement.sigstore.json"
-            ' -- "$collection_dir" "$RAW_EVIDENCE_BUCKET" "$prefix"
-            printf 'sno_dependency_risk_custody_created prefix=gs://%s/%s sourceAdmission=false activation=false deployment=false\n' \
-              "$RAW_EVIDENCE_BUCKET" "$prefix"
+            docker run "${common_args[@]}" \
+              scripts/publish_sno_trial_dependency_risk_collection.sh \
+                --collection-dir "$collection_dir" \
+                --raw-evidence-bucket "$RAW_EVIDENCE_BUCKET" \
+                --signing-key "$signing_key" \
+                --expected-signing-public-key-digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" \
+                --actor-identity-digest "$actor_identity_digest" \
+              | tee "$RUNNER_TEMP/sno-dependency-risk-publish.log"
+            grep -F "custodyVerified=false" \
+              "$RUNNER_TEMP/sno-dependency-risk-publish.log" >/dev/null
             exit 0
           fi
 
@@ -383,5 +370,6 @@ jobs:
             "$RUNNER_TEMP/dependency-risk-publish.log" \
             "$RUNNER_TEMP/sno-dependency-risk-preflight.log" \
             "$RUNNER_TEMP/sno-dependency-risk-collection.log" \
+            "$RUNNER_TEMP/sno-dependency-risk-publish.log" \
             "$GITHUB_WORKSPACE/restricted"
           find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

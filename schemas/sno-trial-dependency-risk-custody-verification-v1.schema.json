@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/sno-trial-dependency-risk-custody-verification-v1.schema.json",
+  "title": "Orchestra SNO trial dependency-risk custody verification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "verificationId",
+    "evidenceId",
+    "bindings",
+    "rawCustody",
+    "collection",
+    "verifier",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.sno-trial-dependency-risk.custody-verification.v1"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "live"},
+    "verificationId": {
+      "type": "string",
+      "pattern": "^orchestra-sno-trial-dependency-risk-custody-verification-[a-z0-9][a-z0-9.-]+$"
+    },
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^orchestra-sno-trial-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+    },
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "rawCustody": {"$ref": "#/$defs/rawCustody"},
+    "collection": {"$ref": "#/$defs/collection"},
+    "verifier": {"$ref": "#/$defs/verifier"},
+    "claims": {"$ref": "#/$defs/claims"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactSetDigest",
+        "releaseSetDigest",
+        "riskPolicyDigest",
+        "collectionAuthorityDigest",
+        "custodyAuthorityDigest",
+        "rawCustodySchemaDigest",
+        "custodyVerificationSchemaDigest",
+        "publisherScriptDigest",
+        "verifierModuleDigest",
+        "verificationScriptDigest",
+        "reportValidatorDigest"
+      ],
+      "properties": {
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"},
+        "collectionAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "custodyAuthorityDigest": {"$ref": "#/$defs/digest"},
+        "rawCustodySchemaDigest": {"$ref": "#/$defs/digest"},
+        "custodyVerificationSchemaDigest": {"$ref": "#/$defs/digest"},
+        "publisherScriptDigest": {"$ref": "#/$defs/digest"},
+        "verifierModuleDigest": {"$ref": "#/$defs/digest"},
+        "verificationScriptDigest": {"$ref": "#/$defs/digest"},
+        "reportValidatorDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "rawObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "name",
+        "generation",
+        "metageneration",
+        "sizeBytes",
+        "crc32c",
+        "md5Hash",
+        "etag",
+        "contentDigest",
+        "timeCreated",
+        "updated"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "raw-archive",
+            "collection-signing-public-key",
+            "custody-statement",
+            "completion-marker"
+          ]
+        },
+        "name": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "generation": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "metageneration": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "sizeBytes": {"type": "integer", "minimum": 1},
+        "crc32c": {"type": "string", "pattern": "^[A-Za-z0-9+/]{6}==$"},
+        "md5Hash": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9+/]{22}==$"
+        },
+        "etag": {"type": "string", "minLength": 1, "maxLength": 256},
+        "contentDigest": {"$ref": "#/$defs/digest"},
+        "timeCreated": {"$ref": "#/$defs/timestamp"},
+        "updated": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "rawCustody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "managedFolder",
+        "objectCount",
+        "objects",
+        "completionMarkerObject",
+        "completionMarkerGeneration",
+        "custodyStatementDigest",
+        "custodySignatureBundleDigest",
+        "collectionSigningPublicKeyDigest",
+        "collectionSigningKeyVersionResource"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$"
+        },
+        "prefix": {
+          "type": "string",
+          "pattern": "^dependency-risk/sno-trial/v1/orchestra-ocp-sno-trial-amd64-v1/orchestra-sno-trial-dependency-risk-evidence-[a-z0-9][a-z0-9.-]+$"
+        },
+        "managedFolder": {"const": "dependency-risk/"},
+        "objectCount": {"const": 4},
+        "objects": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"$ref": "#/$defs/rawObject"}
+        },
+        "completionMarkerObject": {
+          "const": "sno-dependency-risk-raw-custody-signature.sigstore.json"
+        },
+        "completionMarkerGeneration": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "custodyStatementDigest": {"$ref": "#/$defs/digest"},
+        "custodySignatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "collectionSigningPublicKeyDigest": {"$ref": "#/$defs/digest"},
+        "collectionSigningKeyVersionResource": {
+          "type": "string",
+          "pattern": "^gcpkms://projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/dependency-risk-collection-signing/cryptoKeyVersions/[1-9][0-9]*$"
+        }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rawArchiveDigest",
+        "manifestDigest",
+        "riskEvidenceDigest",
+        "riskEvidenceCanonicalDigest",
+        "collectionStatementDigest",
+        "collectionSignatureBundleDigest",
+        "safeArchiveVerified",
+        "collectionStatementVerified",
+        "riskEvidenceRecomputed"
+      ],
+      "properties": {
+        "rawArchiveDigest": {"$ref": "#/$defs/digest"},
+        "manifestDigest": {"$ref": "#/$defs/digest"},
+        "riskEvidenceDigest": {"$ref": "#/$defs/digest"},
+        "riskEvidenceCanonicalDigest": {"$ref": "#/$defs/digest"},
+        "collectionStatementDigest": {"$ref": "#/$defs/digest"},
+        "collectionSignatureBundleDigest": {"$ref": "#/$defs/digest"},
+        "safeArchiveVerified": {"const": true},
+        "collectionStatementVerified": {"const": true},
+        "riskEvidenceRecomputed": {"const": true}
+      }
+    },
+    "verifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "actorIdentityDigest",
+        "startedAt",
+        "completedAt",
+        "verificationSigningKeyVersionResource",
+        "verificationSigningPublicKeyDigest"
+      ],
+      "properties": {
+        "executionClass": {"const": "signed-certification-runner"},
+        "actorIdentityDigest": {"$ref": "#/$defs/digest"},
+        "startedAt": {"$ref": "#/$defs/timestamp"},
+        "completedAt": {"$ref": "#/$defs/timestamp"},
+        "verificationSigningKeyVersionResource": {
+          "type": "string",
+          "pattern": "^gcpkms://projects/[a-z][a-z0-9-]{4,28}[a-z0-9]/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/dependency-risk-custody-verification-signing/cryptoKeyVersions/[1-9][0-9]*$"
+        },
+        "verificationSigningPublicKeyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "custodyVerified",
+        "objectGenerationsRecorded",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "deploymentAuthorized",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "custodyVerified": {"const": true},
+        "objectGenerationsRecorded": {"const": true},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  }
+}

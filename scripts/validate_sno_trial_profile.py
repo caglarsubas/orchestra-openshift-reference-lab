@@ -25,6 +25,7 @@ ALLOWED_TRIAL_CONFIG_NAMES = {
     "sno-trial-dependency-artifacts.lock.json",
     "sno-trial-dependency-integrity-policy.lock.json",
     "sno-trial-dependency-manifest-candidate.lock.json",
+    "sno-trial-dependency-risk-custody-policy.lock.json",
     "sno-trial-dependency-risk-policy.lock.json",
     "sno-trial-dependency-runtime-contracts.lock.json",
     "sno-trial-dependency-signature-exceptions.example.json",

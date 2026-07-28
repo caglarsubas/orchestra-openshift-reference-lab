@@ -480,6 +480,15 @@ def validate_declared_implementation() -> None:
         fail("dependency_risk_custody_workflow_authority_invalid")
     if workflow.count("scripts/verify_and_publish_dependency_risk_custody.sh") != 1:
         fail("dependency_risk_custody_workflow_invocation_invalid")
+    if (
+        workflow.count(
+            "scripts/verify_and_publish_sno_trial_dependency_risk_custody.sh"
+        )
+        != 1
+        or "default: production-dependencies" not in workflow
+        or "sno-trial-dependencies" not in workflow
+    ):
+        fail("dependency_risk_custody_workflow_invocation_invalid")
 
     upload_order = (
         'upload_create_only "$REPORT" "$REPORT_NAME"',

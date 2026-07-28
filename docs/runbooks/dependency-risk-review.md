@@ -208,6 +208,7 @@ completion marker:
 revision="$(git rev-parse origin/main)"
 gh workflow run dependency-risk-custody-verification.yml \
   --ref main \
+  -f verification_scope='production-dependencies' \
   -f expected_main_sha="$revision" \
   -f evidence_id='<completed-evidence-id>' \
   -f collection_kms_key_version='<reviewed-collection-version>' \
