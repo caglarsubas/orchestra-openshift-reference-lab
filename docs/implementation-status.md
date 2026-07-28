@@ -60,6 +60,7 @@ States are recorded independently. `declared` or `CI-validated` never implies
 | Synthetic tenant gateway and read-only MCP fault surfaces | Yes | Yes | No | No | No |
 | Immutable publication and read-only replay lanes | Yes | Yes | No | No | No |
 | Published signed lab service image indexes | Yes | N/A | N/A | Yes | No |
+| Source-only production chat/embedding artifact candidate | Yes | Yes | No | No | No |
 | Pinned CPU model and embedding backends | No | N/A | No | No | No |
 | Slots 1-17 rehearsal and frozen runs | No | N/A | No | No | No |
 | 72-hour burn-in | No | N/A | No | No | No |
@@ -451,6 +452,19 @@ the Altinity mutable CRD hook, uses the chart-provided Vault Raft node identity,
 and requires external cert-manager issuance for the External Secrets webhook.
 CI proves it contains no deployable manifest or destination reference and is
 not reachable from the active Kustomization. This is not an admitted overlay.
+
+A separate inert production model-artifact candidate now selects exact
+linux/amd64 llama.cpp server, Qwen chat GGUF, and Nomic embedding GGUF source
+artifacts and binds their immutable revisions, digests, sizes, runtime
+arguments, replica intent, strict schema, dependency BOM/admission, and release
+set. It requires pre-staged read-only PVCs, API-key files, operator TLS files,
+arbitrary UIDs, read-only roots, and model-plane-only ingress. The frozen
+dependency BOM deliberately remains unchanged: both model services are still
+`unselected` with `MODEL_ARTIFACT_CONTRACT_MISSING`. No artifact bytes,
+destination mirror, signature, licence decision, PVC proof, Secret/TLS
+resolution, server-side dry run, live inference result, manifest, deployment,
+or campaign evidence exists. A new BOM and admission revision is required
+before an admitted GitOps candidate can be created.
 
 The next live increment starts by applying the exact plan-bound required-reviewer
 configuration to all six existing environment shells after an eligible non-owner

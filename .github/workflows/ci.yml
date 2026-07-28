@@ -179,6 +179,9 @@ jobs:
       - name: Validate fail-closed dependency admission
         run: python3 scripts/validate_dependency_admission.py
 
+      - name: Validate inert production model artifact candidate
+        run: python3 scripts/validate_production_model_artifact_candidate.py
+
       - name: Validate source verification and empty mirror intake
         run: python3 scripts/validate_dependency_supply_chain.py
 

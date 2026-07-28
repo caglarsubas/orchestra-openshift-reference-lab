@@ -1,0 +1,670 @@
+{
+  "$defs": {
+    "activation": {
+      "additionalProperties": false,
+      "properties": {
+        "reasonCodes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 12,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "state": {
+          "const": "blocked"
+        }
+      },
+      "required": [
+        "state",
+        "reasonCodes"
+      ],
+      "type": "object"
+    },
+    "bindings": {
+      "additionalProperties": false,
+      "properties": {
+        "dependencyAdmissionDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "dependencyBomDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "dependencyBomId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "releaseSetDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "releaseSetId": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "schemaDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "dependencyBomId",
+        "dependencyBomDigest",
+        "dependencyAdmissionDigest",
+        "releaseSetId",
+        "releaseSetDigest",
+        "schemaDigest"
+      ],
+      "type": "object"
+    },
+    "capabilities": {
+      "additionalProperties": false,
+      "properties": {
+        "chat": {
+          "type": "boolean"
+        },
+        "embeddings": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "chat",
+        "embeddings"
+      ],
+      "type": "object"
+    },
+    "chatModel": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/model"
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "const": {
+                "chat": true,
+                "embeddings": false
+              }
+            },
+            "id": {
+              "const": "orchestra-reference-chat-model"
+            },
+            "provider": {
+              "const": "Qwen"
+            },
+            "serviceId": {
+              "const": "model-backend"
+            }
+          }
+        }
+      ]
+    },
+    "chatRuntime": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/runtime"
+        },
+        {
+          "properties": {
+            "modelId": {
+              "const": "orchestra-reference-chat-model"
+            },
+            "openAiPath": {
+              "const": "/v1/chat/completions"
+            },
+            "replicas": {
+              "const": 2
+            },
+            "serviceId": {
+              "const": "model-backend"
+            }
+          }
+        }
+      ]
+    },
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "campaignEvidence": {
+          "const": false
+        },
+        "chatQualityVerified": {
+          "const": false
+        },
+        "contractualSla": {
+          "const": false
+        },
+        "customerCertified": {
+          "const": false
+        },
+        "embeddingQualityVerified": {
+          "const": false
+        },
+        "highAvailability": {
+          "const": false
+        },
+        "productionSupported": {
+          "const": false
+        },
+        "redHatCertified": {
+          "const": false
+        },
+        "referenceProfileVerified": {
+          "const": false
+        },
+        "rpoRtoVerified": {
+          "const": false
+        }
+      },
+      "required": [
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla",
+        "productionSupported",
+        "highAvailability",
+        "rpoRtoVerified",
+        "chatQualityVerified",
+        "embeddingQualityVerified"
+      ],
+      "type": "object"
+    },
+    "container": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "const": "llama-cpp-cpu-server"
+        },
+        "indexDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "license": {
+          "const": "MIT"
+        },
+        "platform": {
+          "const": "linux/amd64"
+        },
+        "platformDigest": {
+          "$ref": "#/$defs/digest"
+        },
+        "resolvedReference": {
+          "pattern": "^[^\\s@]+@sha256:[a-f0-9]{64}$",
+          "type": "string"
+        },
+        "runtimeCompatibility": {
+          "$ref": "#/$defs/runtimeCompatibility"
+        },
+        "sourceReference": {
+          "const": "ghcr.io/ggml-org/llama.cpp:server"
+        },
+        "sourceRevision": {
+          "const": "88b47a755c72fed4b22fba0fd262e2d7b7d01583"
+        },
+        "sourceUrl": {
+          "const": "https://github.com/ggml-org/llama.cpp"
+        },
+        "upstreamVerification": {
+          "$ref": "#/$defs/upstreamVerification"
+        },
+        "version": {
+          "const": "b10143"
+        }
+      },
+      "required": [
+        "id",
+        "sourceReference",
+        "resolvedReference",
+        "indexDigest",
+        "platformDigest",
+        "platform",
+        "version",
+        "sourceRevision",
+        "sourceUrl",
+        "license",
+        "upstreamVerification",
+        "runtimeCompatibility"
+      ],
+      "type": "object"
+    },
+    "controls": {
+      "additionalProperties": false,
+      "properties": {
+        "activeKustomizationReferenced": {
+          "const": false
+        },
+        "allowedCertificationSlots": {
+          "maxItems": 0,
+          "type": "array"
+        },
+        "argocdApplicationsEmitted": {
+          "const": false
+        },
+        "artifactBytesStored": {
+          "const": false
+        },
+        "campaignEligible": {
+          "const": false
+        },
+        "cloudMutationAuthorized": {
+          "const": false
+        },
+        "dependencyAdmissionMutated": {
+          "const": false
+        },
+        "deploymentAuthorized": {
+          "const": false
+        },
+        "manifestsEmitted": {
+          "const": false
+        },
+        "productionDependencyBomMutated": {
+          "const": false
+        },
+        "runtimeModelDownloadAllowed": {
+          "const": false
+        },
+        "scope": {
+          "const": "production-model-artifact-candidate-only"
+        },
+        "secretValuesStored": {
+          "const": false
+        },
+        "sourceOnly": {
+          "const": true
+        }
+      },
+      "required": [
+        "scope",
+        "sourceOnly",
+        "artifactBytesStored",
+        "productionDependencyBomMutated",
+        "dependencyAdmissionMutated",
+        "manifestsEmitted",
+        "argocdApplicationsEmitted",
+        "activeKustomizationReferenced",
+        "secretValuesStored",
+        "runtimeModelDownloadAllowed",
+        "cloudMutationAuthorized",
+        "deploymentAuthorized",
+        "campaignEligible",
+        "allowedCertificationSlots"
+      ],
+      "type": "object"
+    },
+    "digest": {
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "type": "string"
+    },
+    "embeddingModel": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/model"
+        },
+        {
+          "properties": {
+            "capabilities": {
+              "const": {
+                "chat": false,
+                "embeddings": true
+              }
+            },
+            "id": {
+              "const": "orchestra-reference-embedding-model"
+            },
+            "provider": {
+              "const": "Nomic"
+            },
+            "serviceId": {
+              "const": "embedding-model"
+            }
+          }
+        }
+      ]
+    },
+    "embeddingRuntime": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/runtime"
+        },
+        {
+          "properties": {
+            "modelId": {
+              "const": "orchestra-reference-embedding-model"
+            },
+            "openAiPath": {
+              "const": "/v1/embeddings"
+            },
+            "replicas": {
+              "const": 1
+            },
+            "serviceId": {
+              "const": "embedding-model"
+            }
+          }
+        }
+      ]
+    },
+    "model": {
+      "additionalProperties": false,
+      "properties": {
+        "capabilities": {
+          "$ref": "#/$defs/capabilities"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "filename": {
+          "pattern": "^[A-Za-z0-9._-]+\\.gguf$",
+          "type": "string"
+        },
+        "format": {
+          "const": "gguf"
+        },
+        "id": {
+          "enum": [
+            "orchestra-reference-chat-model",
+            "orchestra-reference-embedding-model"
+          ]
+        },
+        "immutableUrl": {
+          "pattern": "^https://huggingface\\.co/[^\\s]+/resolve/[a-f0-9]{40}/[^\\s]+\\.gguf$",
+          "type": "string"
+        },
+        "license": {
+          "const": "Apache-2.0"
+        },
+        "licenseReviewStatus": {
+          "const": "pending-independent-review"
+        },
+        "materialization": {
+          "const": "operator-prestaged-read-only-pvc"
+        },
+        "maximumAllowedBytes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "mountPath": {
+          "pattern": "^/models/[A-Za-z0-9._-]+\\.gguf$",
+          "type": "string"
+        },
+        "provider": {
+          "enum": [
+            "Qwen",
+            "Nomic"
+          ]
+        },
+        "qualityStatus": {
+          "const": "pending-live-inference"
+        },
+        "quantization": {
+          "const": "Q4_K_M"
+        },
+        "repository": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[a-f0-9]{40}$",
+          "type": "string"
+        },
+        "runtimeDownloadAllowed": {
+          "const": false
+        },
+        "servedModelId": {
+          "pattern": "^orchestra-reference-[a-z]+$",
+          "type": "string"
+        },
+        "serviceId": {
+          "enum": [
+            "model-backend",
+            "embedding-model"
+          ]
+        },
+        "sizeBytes": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "serviceId",
+        "provider",
+        "repository",
+        "revision",
+        "filename",
+        "immutableUrl",
+        "digest",
+        "sizeBytes",
+        "format",
+        "quantization",
+        "license",
+        "licenseReviewStatus",
+        "servedModelId",
+        "mountPath",
+        "materialization",
+        "runtimeDownloadAllowed",
+        "maximumAllowedBytes",
+        "qualityStatus",
+        "capabilities"
+      ],
+      "type": "object"
+    },
+    "runtime": {
+      "additionalProperties": false,
+      "properties": {
+        "authentication": {
+          "const": "api-key-file"
+        },
+        "containerId": {
+          "const": "llama-cpp-cpu-server"
+        },
+        "healthPath": {
+          "const": "/health"
+        },
+        "modelId": {
+          "enum": [
+            "orchestra-reference-chat-model",
+            "orchestra-reference-embedding-model"
+          ]
+        },
+        "modelInventoryPath": {
+          "const": "/v1/models"
+        },
+        "networkIngress": {
+          "const": "model-plane-only"
+        },
+        "openAiPath": {
+          "enum": [
+            "/v1/chat/completions",
+            "/v1/embeddings"
+          ]
+        },
+        "port": {
+          "const": 8000
+        },
+        "protocol": {
+          "const": "openai-compatible-https"
+        },
+        "replicas": {
+          "maximum": 2,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "serviceId": {
+          "enum": [
+            "model-backend",
+            "embedding-model"
+          ]
+        },
+        "startupArguments": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 23,
+          "minItems": 19,
+          "type": "array"
+        },
+        "tls": {
+          "const": "operator-secret-files"
+        }
+      },
+      "required": [
+        "serviceId",
+        "replicas",
+        "containerId",
+        "modelId",
+        "protocol",
+        "port",
+        "authentication",
+        "tls",
+        "networkIngress",
+        "healthPath",
+        "modelInventoryPath",
+        "openAiPath",
+        "startupArguments"
+      ],
+      "type": "object"
+    },
+    "runtimeCompatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "arbitraryUidRequired": {
+          "const": true
+        },
+        "fixedUidAllowed": {
+          "const": false
+        },
+        "readOnlyRootFilesystemRequired": {
+          "const": true
+        },
+        "requiredWritablePaths": {
+          "maxItems": 0,
+          "type": "array"
+        },
+        "serviceAccountTokenAutomount": {
+          "const": false
+        }
+      },
+      "required": [
+        "arbitraryUidRequired",
+        "fixedUidAllowed",
+        "readOnlyRootFilesystemRequired",
+        "serviceAccountTokenAutomount",
+        "requiredWritablePaths"
+      ],
+      "type": "object"
+    },
+    "upstreamVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "identityPolicy": {
+          "type": "null"
+        },
+        "method": {
+          "const": "reviewed-exception"
+        },
+        "status": {
+          "const": "pending"
+        }
+      },
+      "required": [
+        "status",
+        "method",
+        "identityPolicy"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/production-model-artifact-candidate-v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activation": {
+      "$ref": "#/$defs/activation"
+    },
+    "architecture": {
+      "const": "linux/amd64"
+    },
+    "bindings": {
+      "$ref": "#/$defs/bindings"
+    },
+    "candidateDigest": {
+      "$ref": "#/$defs/digest"
+    },
+    "candidateId": {
+      "const": "orchestra-production-model-artifacts-2026-07-28.1"
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "container": {
+      "$ref": "#/$defs/container"
+    },
+    "controls": {
+      "$ref": "#/$defs/controls"
+    },
+    "executionMode": {
+      "const": "source-only"
+    },
+    "kind": {
+      "const": "orchestra.openshift.production-model-artifact-candidate.v1"
+    },
+    "models": {
+      "items": false,
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/chatModel"
+        },
+        {
+          "$ref": "#/$defs/embeddingModel"
+        }
+      ],
+      "type": "array"
+    },
+    "profileId": {
+      "const": "orchestra-ocp-4.20-amd64-v1"
+    },
+    "runtimeBindings": {
+      "items": false,
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/chatRuntime"
+        },
+        {
+          "$ref": "#/$defs/embeddingRuntime"
+        }
+      ],
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "targetClass": {
+      "const": "vendor-reference-lab"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "candidateId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "architecture",
+    "bindings",
+    "container",
+    "models",
+    "runtimeBindings",
+    "activation",
+    "controls",
+    "claims",
+    "candidateDigest"
+  ],
+  "title": "Orchestra production model artifact candidate v1",
+  "type": "object"
+}

@@ -4,6 +4,7 @@ TERRAFORM ?= terraform
 .PHONY: validate validate-sno-trial validate-sno-trial-toolchain validate-sno-trial-workload-candidate validate-sno-trial-dependency-runtime-contracts validate-sno-trial-dependency-artifacts validate-sno-trial-dependency-risk validate-sno-trial-dependency-risk-custody validate-sno-trial-dependency-manifests validate-sno-trial-dependency-integrity-policy validate-sno-trial-product-artifacts validate-sno-trial-product-admission validate-sno-trial-operator-inputs validate-sno-trial-resource-exposure test observe-sno-trial-readiness verify-sno-trial-readiness observe-sno-trial-network-hygiene verify-sno-trial-network-hygiene observe-sno-trial-dns-delegation verify-sno-trial-dns-delegation observe-sno-trial-operator-path verify-sno-trial-operator-path observe-sno-trial-cluster verify-sno-trial-cluster observe-sno-trial-resource-exposure verify-sno-trial-resource-exposure observe-sno-trial-operator-inputs verify-sno-trial-operator-inputs observe-sno-trial-product-dry-run verify-sno-trial-product-dry-run create-sno-trial-render-admission verify-sno-trial-render-admission materialize-sno-trial-install-config inspect-sno-trial-toolchain verify-sno-trial-toolchain replay-sno-trial-product-artifacts verify-sno-trial-product-artifacts plan-sno-trial-product-admission-environment apply-sno-trial-product-admission-environment verify-sno-trial-product-admission-environment verify-sno-trial-product-admission verify-platform-contract-source verify-dependency-sources verify-risk-collection verify-prerequisite-observation verify-operator-control-plane-readiness verify-lab-service-publication verify-lab-service-publication-replay terraform-fmt terraform-validate
 .PHONY: observe-sno-trial-dependency-inputs verify-sno-trial-dependency-inputs materialize-sno-trial-dependency-manifests verify-sno-trial-dependency-materialization observe-sno-trial-dependency-integrity verify-sno-trial-dependency-integrity validate-sno-trial-dependency-dry-run-contract observe-sno-trial-dependency-dry-run verify-sno-trial-dependency-dry-run
 .PHONY: plan-reference-lab-environment apply-reference-lab-environment verify-reference-lab-environment
+.PHONY: validate-production-model-artifact-candidate
 
 validate:
 	$(PYTHON) scripts/validate_repository.py
@@ -25,6 +26,7 @@ validate:
 	$(PYTHON) scripts/validate_reference_lab_contract_intake.py
 	$(PYTHON) scripts/validate_dependency_bom.py
 	$(PYTHON) scripts/validate_dependency_admission.py
+	$(PYTHON) scripts/validate_production_model_artifact_candidate.py
 	$(PYTHON) scripts/validate_dependency_supply_chain.py
 	$(PYTHON) scripts/validate_dependency_risk_intake.py
 	$(PYTHON) scripts/validate_dependency_risk_execution.py
@@ -81,6 +83,9 @@ validate-sno-trial-operator-inputs:
 
 validate-sno-trial-resource-exposure:
 	$(PYTHON) scripts/sno_trial_resource_exposure.py validate-rate-card
+
+validate-production-model-artifact-candidate:
+	$(PYTHON) scripts/validate_production_model_artifact_candidate.py
 
 observe-sno-trial-readiness:
 	test -n "$(PROJECT_ID)"
