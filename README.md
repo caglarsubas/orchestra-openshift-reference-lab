@@ -38,10 +38,11 @@ review helper, a separately federated saved-plan-only apply lane with signed
 self-attested receipts, a separately federated read-only provider-refresh
 observation lane with create-only signed reports, a payload-free GitHub
 environment/current-run approval verifier, a strict aggregate verifier for all
-six protected environments and the complete read-only platform-release GitHub
-App installation, an exact-main immutable GHCR publication lane for the two
-lab-owned services with pinned embedded SBOM/provenance and keyless signatures,
-a separately executed read-only publication replay, and digest-bound
+six protected environments, a plan-bound secret-name-only protection bootstrap
+for each of those environments, and the complete read-only platform-release
+GitHub App installation, an exact-main immutable GHCR publication lane for the
+two lab-owned services with pinned embedded SBOM/provenance and keyless
+signatures, a separately executed read-only publication replay, and digest-bound
 published-but-unadmitted receiver and synthetic tenant-kit inventories. It does
 not contain a kubeconfig, provider
 identity, OpenShift pull secret, live prerequisite observation, independent

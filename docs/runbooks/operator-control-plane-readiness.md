@@ -22,6 +22,73 @@ most 60 minutes, requires independent review, and always records
 `provisioningReady=false`, `campaignEvidence=false`, and
 `referenceProfileVerified=false`.
 
+## Configure the six protected environments
+
+The six environment shells are not sufficient. Each exact contract requires
+one non-owner `User` reviewer, self-review prevention, only the `main`
+deployment branch, and only its workflow-declared environment Secret names.
+The bootstrap reads names only; it never reads, creates, rotates, or deletes
+Secret values. The supported contract names are:
+
+- `foundation-plan`
+- `foundation-apply`
+- `foundation-observation`
+- `dependency-risk-preflight`
+- `dependency-risk-collection`
+- `dependency-risk-custody-verification`
+
+First add the intended reviewer as a repository collaborator with at least read
+access. Use a short-lived repository-administration token from a mode-`0600`
+file under ignored `restricted/` storage. Create a separate, payload-free plan
+for each contract:
+
+```bash
+contract='foundation-plan'
+
+make plan-reference-lab-environment \
+  CONTRACT="$contract" \
+  TOKEN_FILE=restricted/github-environment-admin-token \
+  REVIEWER_LOGIN='<non-owner-reviewer>' \
+  OUTPUT="restricted/${contract}-environment-plan.json"
+```
+
+The planner rejects the repository owner, a missing collaborator, unknown or
+malformed environment Secret names, repository identity drift, unsupported
+contracts, and non-private or non-`main` repository state before mutation. It
+hashes the reviewer identity and binds the operator-readiness policy, exact
+authority-owned environment contract, and a digest of the allowed Secret-name
+inventory. The output is create-only and mode `0600`.
+
+Review the status, current and desired state digests, controls, and operations.
+Apply only the exact reviewed digest, using the same contract and reviewer:
+
+```bash
+make apply-reference-lab-environment \
+  CONTRACT="$contract" \
+  TOKEN_FILE=restricted/github-environment-admin-token \
+  REVIEWER_LOGIN='<non-owner-reviewer>' \
+  PLAN="restricted/${contract}-environment-plan.json" \
+  EXPECTED_PLAN_DIGEST='sha256:<reviewed-plan-digest>'
+
+make verify-reference-lab-environment \
+  CONTRACT="$contract" \
+  TOKEN_FILE=restricted/github-environment-admin-token
+```
+
+Apply recomputes the full plan immediately before mutation. A changed reviewer
+permission, environment, branch policy, Secret-name inventory, contract, or
+plan digest stops the operation. It configures only the required-reviewer rule,
+self-review prevention, and exact `main` branch policy; Secret values remain a
+separate operator responsibility. It cannot manage Secret values, OIDC, cloud
+IAM, registry access, deployments, or repository settings. Repeat the reviewed
+sequence independently for all six contracts.
+
+GitHub makes required reviewers for private repositories plan-dependent. If an
+environment update reports
+`github_environment_required_reviewers_unavailable`, stop. Do not weaken the
+environment, make the repository public, substitute the owner, or dispatch an
+unreviewed workflow.
+
 ## Configure the GitHub App
 
 Create the GitHub App with these exact properties:
@@ -95,6 +162,11 @@ the source revision. Only then may the relevant facts be projected into
 
 ## Failure handling
 
+- Do not run an environment apply until the non-owner reviewer is an active
+  repository collaborator and the plan digest has been independently reviewed.
+- Treat a partially completed six-environment rollout as not ready. Re-plan
+  each remaining or changed environment and require all six to verify before
+  collecting the aggregate observation.
 - Do not narrow the App installation token passed to this verifier. The
   verifier itself creates the token without repository filters and revokes it.
 - Do not add a second repository or write permission to make a workflow pass.

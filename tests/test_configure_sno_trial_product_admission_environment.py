@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import stat
 import tempfile
 import unittest
@@ -11,6 +12,8 @@ from typing import Any
 from scripts.configure_sno_trial_product_admission_environment import (
     GithubApiError,
     PLAN_CONTROLS,
+    REFERENCE_LAB_ENVIRONMENT_SECRETS,
+    REFERENCE_LAB_PLAN_KIND,
     apply_plan,
     build_plan,
     payload_digest,
@@ -19,11 +22,19 @@ from scripts.configure_sno_trial_product_admission_environment import (
     verify_environment,
     write_plan,
 )
+from scripts.github_environment_contract import (
+    ENVIRONMENT_CONTRACTS,
+    load_expected_environment,
+)
 
 
 class FakeGithub:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        environment_name: str = "sno-trial-product-artifact-admission",
+    ) -> None:
         self.token = "fixture-admin-token-1234567890"
+        self.environment_name = environment_name
         self.repository = {
             "id": 1307302690,
             "full_name": "caglarsubas/orchestra-openshift-reference-lab",
@@ -53,7 +64,7 @@ class FakeGithub:
     def ready(self) -> None:
         self.environment = {
             "id": 987654,
-            "name": "sno-trial-product-artifact-admission",
+            "name": self.environment_name,
             "deployment_branch_policy": {
                 "protected_branches": False,
                 "custom_branch_policies": True,
@@ -72,6 +83,18 @@ class FakeGithub:
                 },
                 {"id": 2, "type": "branch_policy"},
             ],
+        }
+        self.branches = [{"id": 499, "name": "main", "type": "branch"}]
+
+    def branch_only(self) -> None:
+        self.environment = {
+            "id": 987654,
+            "name": self.environment_name,
+            "deployment_branch_policy": {
+                "protected_branches": False,
+                "custom_branch_policies": True,
+            },
+            "protection_rules": [{"id": 2, "type": "branch_policy"}],
         }
         self.branches = [{"id": 499, "name": "main", "type": "branch"}]
 
@@ -94,7 +117,7 @@ class FakeGithub:
             return copy.deepcopy(self.reviewer)
         if method == "GET" and "/collaborators/" in path:
             return copy.deepcopy(self.permission)
-        if "/environments/sno-trial-product-artifact-admission" not in path:
+        if f"/environments/{self.environment_name}" not in path:
             raise AssertionError(f"unexpected path: {path}")
 
         if method == "GET" and path.endswith("/secrets?per_page=100"):
@@ -123,7 +146,7 @@ class FakeGithub:
             assert body is not None
             self.environment = {
                 "id": 987654,
-                "name": "sno-trial-product-artifact-admission",
+                "name": self.environment_name,
                 "deployment_branch_policy": copy.deepcopy(
                     body["deployment_branch_policy"]
                 ),
@@ -258,6 +281,89 @@ class ProductAdmissionEnvironmentBootstrapTests(unittest.TestCase):
             self.build()
         self.assertEqual(self.github.mutations, [])
 
+    def test_reference_contract_allows_only_declared_secret_names(self) -> None:
+        contract = "dependency-risk-preflight"
+        expected = load_expected_environment(contract)
+        github = FakeGithub(expected["environment"])
+        github.branch_only()
+        github.secrets = [
+            {"name": name}
+            for name in sorted(REFERENCE_LAB_ENVIRONMENT_SECRETS[contract])
+        ]
+        plan = build_plan(
+            self.token_path,
+            "reviewer-fixture",
+            contract=contract,
+            request=github,
+        )
+        self.assertEqual(plan["status"], "DRIFTED")
+        github.secrets.append({"name": "UNDECLARED_FIXTURE"})
+        with self.assertRaisesRegex(ValueError, "secrets_forbidden"):
+            build_plan(
+                self.token_path,
+                "reviewer-fixture",
+                contract=contract,
+                request=github,
+            )
+        self.assertEqual(github.mutations, [])
+
+    def test_reference_plan_stales_when_declared_secret_inventory_changes(
+        self,
+    ) -> None:
+        contract = "dependency-risk-preflight"
+        expected = load_expected_environment(contract)
+        github = FakeGithub(expected["environment"])
+        github.branch_only()
+        plan = build_plan(
+            self.token_path,
+            "reviewer-fixture",
+            contract=contract,
+            request=github,
+        )
+        path = self.directory / "reference-secret-inventory-plan.json"
+        write_plan(path, plan)
+        github.secrets = [
+            {
+                "name": sorted(
+                    REFERENCE_LAB_ENVIRONMENT_SECRETS[contract]
+                )[0]
+            }
+        ]
+
+        with self.assertRaisesRegex(ValueError, "plan_stale"):
+            apply_plan(
+                self.token_path,
+                path,
+                "reviewer-fixture",
+                plan["planDigest"],
+                contract=contract,
+                request=github,
+            )
+        self.assertEqual(github.mutations, [])
+
+    def test_declared_secret_names_match_each_workflow(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        workflow_names = {
+            "foundation-plan": "foundation-plan.yml",
+            "foundation-apply": "foundation-apply.yml",
+            "foundation-observation": "foundation-observation.yml",
+            "dependency-risk-preflight": "dependency-risk-preflight.yml",
+            "dependency-risk-collection": "dependency-risk-collection.yml",
+            "dependency-risk-custody-verification": (
+                "dependency-risk-custody-verification.yml"
+            ),
+        }
+        for contract, filename in workflow_names.items():
+            content = (root / ".github" / "workflows" / filename).read_text(
+                encoding="utf-8"
+            )
+            observed = set(re.findall(r"secrets\.([A-Z0-9_]+)", content))
+            self.assertEqual(
+                observed,
+                REFERENCE_LAB_ENVIRONMENT_SECRETS[contract],
+                msg=contract,
+            )
+
     def test_missing_environment_apply_creates_exact_protection(self) -> None:
         plan = self.build()
         path = self.directory / "plan.json"
@@ -357,6 +463,97 @@ class ProductAdmissionEnvironmentBootstrapTests(unittest.TestCase):
             [method for method, _, _ in self.github.mutations],
             ["PUT"],
         )
+
+    def test_all_reference_lab_contracts_are_exact_and_digest_bound(self) -> None:
+        policy_digests: set[str] = set()
+        for contract in ENVIRONMENT_CONTRACTS:
+            expected = load_expected_environment(contract)
+            github = FakeGithub(expected["environment"])
+            plan = build_plan(
+                self.token_path,
+                "reviewer-fixture",
+                contract=contract,
+                request=github,
+            )
+            self.assertEqual(plan["kind"], REFERENCE_LAB_PLAN_KIND)
+            self.assertEqual(plan["environment"], expected["environment"])
+            self.assertEqual(plan["status"], "MISSING")
+            self.assertEqual(
+                plan["operations"],
+                [
+                    "upsert-protected-environment",
+                    "create-main-branch-policy",
+                    "verify-exact-contract",
+                ],
+            )
+            self.assertEqual(validate_plan(plan, contract=contract), plan)
+            self.assertNotIn("reviewer-fixture", json.dumps(plan))
+            policy_digests.add(plan["policyDigest"])
+        self.assertEqual(len(policy_digests), len(ENVIRONMENT_CONTRACTS))
+
+    def test_branch_only_reference_environment_requires_review_protection(
+        self,
+    ) -> None:
+        contract = "dependency-risk-collection"
+        expected = load_expected_environment(contract)
+        github = FakeGithub(expected["environment"])
+        github.branch_only()
+        plan = build_plan(
+            self.token_path,
+            "reviewer-fixture",
+            contract=contract,
+            request=github,
+        )
+        self.assertEqual(plan["status"], "DRIFTED")
+        self.assertEqual(
+            plan["operations"],
+            [
+                "upsert-protected-environment",
+                "replace-branch-policies-with-main",
+                "verify-exact-contract",
+            ],
+        )
+        self.assertEqual(github.mutations, [])
+
+    def test_reference_contract_apply_and_wrong_contract_replay(self) -> None:
+        contract = "foundation-plan"
+        expected = load_expected_environment(contract)
+        github = FakeGithub(expected["environment"])
+        plan = build_plan(
+            self.token_path,
+            "reviewer-fixture",
+            contract=contract,
+            request=github,
+        )
+        path = self.directory / "reference-plan.json"
+        write_plan(path, plan)
+        with self.assertRaisesRegex(ValueError, "github_environment_plan_invalid"):
+            apply_plan(
+                self.token_path,
+                path,
+                "reviewer-fixture",
+                plan["planDigest"],
+                contract="foundation-apply",
+                request=github,
+            )
+        self.assertEqual(github.mutations, [])
+
+        evidence = apply_plan(
+            self.token_path,
+            path,
+            "reviewer-fixture",
+            plan["planDigest"],
+            contract=contract,
+            request=github,
+        )
+        self.assertEqual(evidence["reviewerCount"], 1)
+        self.assertTrue(evidence["preventSelfReview"])
+        self.assertEqual(evidence["environmentSecretCount"], 0)
+        self.assertEqual(
+            evidence["environmentSecretNamesDigest"],
+            payload_digest([]),
+        )
+        self.assertEqual([branch["name"] for branch in github.branches], ["main"])
 
 
 if __name__ == "__main__":
