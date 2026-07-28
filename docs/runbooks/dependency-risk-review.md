@@ -149,6 +149,7 @@ After a successful standalone preflight, dispatch the full lane from exact
 revision="$(git rev-parse origin/main)"
 gh workflow run dependency-risk-collection.yml \
   --ref main \
+  -f collection_scope='production-dependencies' \
   -f expected_main_sha="$revision" \
   -f kms_key_version='<reviewed-version>' \
   -f expected_signing_public_key_digest='sha256:<reviewed-pem-digest>' \

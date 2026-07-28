@@ -187,6 +187,63 @@ does not satisfy upstream review or mirror/signature gates, and does not
 authorize deployment. Keeping this selection independent of runtime contracts
 prevents a circular digest chain.
 
+The Valkey and llama.cpp index subjects currently have no discoverable Cosign
+signature. Do not treat that absence as approval. Validate the dedicated
+fail-closed policy and empty exception intake with:
+
+```bash
+make validate-sno-trial-dependency-risk
+```
+
+The policy is deliberately separate from the production dependency-risk
+inventory. It binds exactly these two SNO container subjects plus the
+revision-, digest-, size-, and licence-pinned Qwen model. Critical, high, or
+unknown vulnerability findings block review. Container licence and risk
+decisions must be explicit, the model licence requires an independent review,
+and each unsigned-container exception needs distinct `security-reviewer` and
+`service-owner` identities. The requestor and signed-runner collector cannot
+approve.
+
+After the protected `reference-lab-dependency-risk-collection` environment,
+short-lived WIF identity, KMS key version, restricted bucket, and read-only
+GitHub App package access are independently verified, dispatch the SNO scope
+from exact `main`:
+
+```bash
+revision="$(git rev-parse origin/main)"
+gh workflow run dependency-risk-collection.yml \
+  --ref main \
+  -f collection_scope='sno-trial-dependencies' \
+  -f expected_main_sha="$revision" \
+  -f kms_key_version='<reviewed-version>' \
+  -f expected_signing_public_key_digest='sha256:<reviewed-pem-digest>' \
+  -f reason='Collect SNO Valkey llama.cpp and Qwen risk evidence'
+```
+
+The workflow runs only inside the pinned signed certification image. It
+requires Cosign to return the specific no-signature condition for both locked
+indexes, scans the platform manifests with Trivy and Syft, checks model
+metadata before downloading, verifies all 491,400,032 bytes, deletes the model
+bytes, KMS-signs the collection statement, and creates restricted GCS objects
+without overwrite authority. Do not upload raw output as a normal Actions
+artifact.
+
+Use the payload-free `risk-evidence.json` from restricted custody as the input
+to human review. A populated intake can be checked without granting authority:
+
+```bash
+python3 scripts/sno_trial_dependency_risk.py validate-exceptions \
+  --risk-evidence restricted/<collection>/risk-evidence.json \
+  --intake restricted/<review>/sno-signature-exceptions.json \
+  --at '<current-UTC-timestamp>'
+```
+
+An approved exception is limited to 720 hours and still reports
+`sourceAdmissionAuthorized=false`. Reissue the immutable artifact set in a
+separate reviewed change before any later mirror decision. Destination mirror
+proof, lab signature, OpenShift dry-run, live connectivity, and every
+deployment/certification gate remain independent blockers.
+
 The selected Valkey and CPU backend artifacts now have an inactive, renderable
 manifest candidate:
 

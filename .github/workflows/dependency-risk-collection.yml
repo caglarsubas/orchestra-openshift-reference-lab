@@ -3,6 +3,14 @@ name: dependency-risk-collection
 on:
   workflow_dispatch:
     inputs:
+      collection_scope:
+        description: Exact dependency inventory to collect
+        required: true
+        default: production-dependencies
+        type: choice
+        options:
+          - production-dependencies
+          - sno-trial-dependencies
       expected_main_sha:
         description: Exact 40-character main revision reviewed for this collection
         required: true
@@ -41,6 +49,7 @@ jobs:
       - name: Require reviewed identity and bounded inputs
         env:
           EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          COLLECTION_SCOPE: ${{ inputs.collection_scope }}
           KMS_KEY_VERSION: ${{ inputs.kms_key_version }}
           EXPECTED_SIGNING_PUBLIC_KEY_DIGEST: ${{ inputs.expected_signing_public_key_digest }}
           COLLECTION_REASON: ${{ inputs.reason }}
@@ -56,6 +65,7 @@ jobs:
           set -euo pipefail
           [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
           [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$COLLECTION_SCOPE" == "production-dependencies" || "$COLLECTION_SCOPE" == "sno-trial-dependencies" ]]
           [[ "$KMS_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
           [[ "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
           [[ ${#COLLECTION_REASON} -ge 12 && ${#COLLECTION_REASON} -le 500 ]]
@@ -79,10 +89,16 @@ jobs:
           python-version: "3.12"
 
       - name: Validate collection authority and evidence contracts
+        env:
+          COLLECTION_SCOPE: ${{ inputs.collection_scope }}
         run: |
           python3 scripts/validate_repository.py
-          python3 scripts/validate_dependency_risk_collection_execution.py
-          python3 scripts/validate_dependency_risk_intake.py
+          if [[ "$COLLECTION_SCOPE" == "production-dependencies" ]]; then
+            python3 scripts/validate_dependency_risk_collection_execution.py
+            python3 scripts/validate_dependency_risk_intake.py
+          else
+            python3 scripts/sno_trial_dependency_risk.py validate-policy
+          fi
           python3 scripts/operator_control_plane_readiness.py validate-policy
 
       - name: Verify independent environment protection for this run
@@ -168,6 +184,7 @@ jobs:
 
       - name: Run preflight, collect, verify, and publish restricted raw custody
         env:
+          COLLECTION_SCOPE: ${{ inputs.collection_scope }}
           KMS_KEY_VERSION: ${{ inputs.kms_key_version }}
           EXPECTED_SIGNING_PUBLIC_KEY_DIGEST: ${{ inputs.expected_signing_public_key_digest }}
           COLLECTION_REASON: ${{ inputs.reason }}
@@ -194,6 +211,81 @@ jobs:
             '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,environmentApprovalDigest:$environmentApprovalDigest,githubAppInstallationDigest:$githubAppInstallationDigest,reasonDigest:$reasonDigest}' \
             | sha256sum | cut -d' ' -f1)"
           DOCKER_CONFIG="$RUNNER_TEMP/docker" docker pull "$runner" >/dev/null
+
+          if [[ "$COLLECTION_SCOPE" == "sno-trial-dependencies" ]]; then
+            evidence_id="orchestra-sno-trial-dependency-risk-evidence-collection.$GITHUB_RUN_ID.$GITHUB_RUN_ATTEMPT"
+            collection_dir="restricted/sno-dependency-risk-collection-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+            common_args=(
+              --rm
+              --platform linux/amd64
+              --entrypoint /bin/bash
+              --user "$(id -u):$(id -g)"
+              --read-only
+              --cap-drop ALL
+              --security-opt no-new-privileges
+              --pids-limit 512
+              --tmpfs "/tmp:rw,noexec,nosuid,size=4g"
+              --env HOME=/tmp/orchestra-home
+              --env CLOUDSDK_CONFIG=/tmp/gcloud
+              --env GOOGLE_APPLICATION_CREDENTIALS=/run/orchestra-auth/gcp-wif.json
+              --env DOCKER_CONFIG=/run/orchestra-auth/docker
+              --env ORCHESTRA_CERTIFICATION_RUNNER_IMAGE="$runner"
+              --volume "$GCP_CREDENTIALS_FILE:/run/orchestra-auth/gcp-wif.json:ro"
+              --volume "$RUNNER_TEMP/docker:/run/orchestra-auth/docker:ro"
+              --volume "$GITHUB_WORKSPACE:/workspace:ro"
+              --volume "$GITHUB_WORKSPACE/restricted:/workspace/restricted:rw"
+              --workdir /workspace
+              "$runner"
+            )
+            docker run "${common_args[@]}" \
+              scripts/collect_sno_trial_dependency_risk_evidence.sh \
+                --output-dir "restricted/sno-dependency-risk-preflight-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" \
+                --evidence-id "$evidence_id" \
+                --actor-identity-digest "$actor_identity_digest" \
+                --platform-release-dir restricted/platform-release-rc10 \
+                --signing-key "$signing_key" \
+                --expected-signing-public-key-digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" \
+                --preflight-only \
+              | tee "$RUNNER_TEMP/sno-dependency-risk-preflight.log"
+            grep -F "collectionStarted=false" "$RUNNER_TEMP/sno-dependency-risk-preflight.log" >/dev/null
+
+            docker run "${common_args[@]}" \
+              scripts/collect_sno_trial_dependency_risk_evidence.sh \
+                --output-dir "$collection_dir" \
+                --evidence-id "$evidence_id" \
+                --actor-identity-digest "$actor_identity_digest" \
+                --platform-release-dir restricted/platform-release-rc10 \
+                --signing-key "$signing_key" \
+                --expected-signing-public-key-digest "$EXPECTED_SIGNING_PUBLIC_KEY_DIGEST" \
+              | tee "$RUNNER_TEMP/sno-dependency-risk-collection.log"
+            grep -F "sourceAdmission=false activation=false deployment=false" \
+              "$RUNNER_TEMP/sno-dependency-risk-collection.log" >/dev/null
+
+            profile_id="$(jq -er '.profileId' config/sno-trial.lock.json)"
+            prefix="sno-dependency-risk/v1/$profile_id/$evidence_id"
+            docker run "${common_args[@]}" -c '
+              set -Eeuo pipefail
+              collection_dir="$1"
+              bucket="$2"
+              prefix="$3"
+              archive="/tmp/sno-dependency-risk-raw.tar.gz"
+              tar -C "$collection_dir" -czf "$archive" .
+              gcloud storage cp --if-generation-match=0 \
+                "$archive" "gs://$bucket/$prefix/raw.tar.gz"
+              gcloud storage cp --if-generation-match=0 \
+                "$collection_dir/risk-evidence.json" \
+                "gs://$bucket/$prefix/risk-evidence.json"
+              gcloud storage cp --if-generation-match=0 \
+                "$collection_dir/collection-statement.json" \
+                "gs://$bucket/$prefix/collection-statement.json"
+              gcloud storage cp --if-generation-match=0 \
+                "$collection_dir/collection-statement.sigstore.json" \
+                "gs://$bucket/$prefix/collection-statement.sigstore.json"
+            ' -- "$collection_dir" "$RAW_EVIDENCE_BUCKET" "$prefix"
+            printf 'sno_dependency_risk_custody_created prefix=gs://%s/%s sourceAdmission=false activation=false deployment=false\n' \
+              "$RAW_EVIDENCE_BUCKET" "$prefix"
+            exit 0
+          fi
 
           docker run --rm --platform linux/amd64 \
             --entrypoint /bin/bash \
@@ -289,5 +381,7 @@ jobs:
             "$RUNNER_TEMP/dependency-risk-preflight.log" \
             "$RUNNER_TEMP/dependency-risk-collection.log" \
             "$RUNNER_TEMP/dependency-risk-publish.log" \
+            "$RUNNER_TEMP/sno-dependency-risk-preflight.log" \
+            "$RUNNER_TEMP/sno-dependency-risk-collection.log" \
             "$GITHUB_WORKSPACE/restricted"
           find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

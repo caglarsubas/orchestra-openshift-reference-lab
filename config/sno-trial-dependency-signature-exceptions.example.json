@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-dependency-signature-exceptions.v1",
+  "intakeId": "orchestra-sno-trial-dependency-signature-exceptions-empty",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "executionMode": "live",
+  "bindings": {
+    "artifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
+    "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
+    "riskPolicyDigest": "sha256:e3a5e149a34d36ad4d3f187ffde43a299b5da4bfbf17236d52b10ca6cdaa69aa"
+  },
+  "subjects": [
+    {
+      "id": "model-backend-image",
+      "indexSubject": "ghcr.io/ggml-org/llama.cpp@sha256:a576442ad3649c0b5ea74e20ad29a17c121117f32607cfe59ff27cc38066f874",
+      "platformSubject": "ghcr.io/ggml-org/llama.cpp@sha256:7a670b0633a2b33d915ca958fc1e4977334924590c9bd5ffc9d4813dd168d77b",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionStatementDigest": null,
+        "collectionSignatureBundleDigest": null,
+        "runnerImageDigest": null,
+        "runnerToolchainDigest": null,
+        "signatureProbeDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+        "LICENSE_REVIEW_MISSING",
+        "RISK_REVIEW_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING"
+      ]
+    },
+    {
+      "id": "valkey-image",
+      "indexSubject": "docker.io/valkey/valkey@sha256:8e8d64b405ce18f41b8e5ee20aa4687a8ed0022d1298f2ce31cdcf3a76e09411",
+      "platformSubject": "docker.io/valkey/valkey@sha256:64f6e8025b9a798061c8c79e73a7a79dbc8cca437e6af682e9f7605ff334615d",
+      "evidence": {
+        "riskEvidenceDigest": null,
+        "collectionStatementDigest": null,
+        "collectionSignatureBundleDigest": null,
+        "runnerImageDigest": null,
+        "runnerToolchainDigest": null,
+        "signatureProbeDigest": null,
+        "sbomDigest": null,
+        "vulnerabilityReportDigest": null,
+        "licenseInventoryDigest": null,
+        "machineReviewDigest": null,
+        "licenseReviewDigest": null,
+        "riskReviewDigest": null,
+        "compensatingControlsDigest": null
+      },
+      "request": {
+        "status": "evidence-required",
+        "exceptionId": null,
+        "requestedAt": null,
+        "requestorIdentityDigest": null,
+        "candidateDigest": null
+      },
+      "approvals": [],
+      "decision": {
+        "status": "required-not-approved",
+        "approvedAt": null,
+        "expiresAt": null,
+        "approvalDigest": null
+      },
+      "sourceAdmissionState": "blocked",
+      "reasonCodes": [
+        "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+        "LICENSE_REVIEW_MISSING",
+        "RISK_REVIEW_MISSING",
+        "INDEPENDENT_REVIEWS_MISSING"
+      ]
+    }
+  ],
+  "claims": {
+    "riskEvidenceBundles": 0,
+    "reviewReadySubjects": 0,
+    "approvedExceptions": 0,
+    "allExceptionsApproved": false,
+    "sourceAdmissionAuthorized": false,
+    "mirrorAuthorization": false,
+    "activationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false
+  },
+  "admission": {
+    "status": "blocked",
+    "requiredExceptionCount": 2,
+    "reviewReadyCount": 0,
+    "approvedExceptionCount": 0,
+    "reasonCodes": [
+      "SIGNED_RUNNER_RISK_EVIDENCE_MISSING",
+      "LICENSE_REVIEWS_MISSING",
+      "RISK_REVIEWS_MISSING",
+      "MODEL_LICENSE_REVIEW_MISSING",
+      "TWO_PERSON_APPROVALS_MISSING",
+      "ARTIFACT_SET_REISSUE_REQUIRED",
+      "MIRRORING_NOT_AUTHORIZED",
+      "ACTIVATION_NOT_AUTHORIZED"
+    ]
+  }
+}

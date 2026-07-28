@@ -107,6 +107,26 @@ class DependencyRiskCollectionExecutionTests(unittest.TestCase):
         )
         self.assertIn(command, ci)
 
+    def test_collection_workflow_keeps_production_default_and_scoped_sno_lane(
+        self,
+    ) -> None:
+        workflow = (
+            ROOT / ".github" / "workflows" / "dependency-risk-collection.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("default: production-dependencies", workflow)
+        self.assertEqual(
+            workflow.count("scripts/collect_dependency_risk_evidence.sh"),
+            2,
+        )
+        self.assertEqual(
+            workflow.count(
+                "scripts/collect_sno_trial_dependency_risk_evidence.sh"
+            ),
+            2,
+        )
+        self.assertEqual(workflow.count("--preflight-only"), 2)
+        self.assertGreaterEqual(workflow.count("--if-generation-match=0"), 4)
+
     def test_raw_custody_schema_is_strict_at_every_object_boundary(self) -> None:
         schema = load_json(
             ROOT / "schemas" / "dependency-risk-raw-custody-statement-v1.schema.json"
