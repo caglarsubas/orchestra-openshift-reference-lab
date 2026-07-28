@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.sno-trial-dependency-risk-policy.v1",
+  "policyId": "orchestra-sno-trial-unsigned-dependency-risk-v1",
+  "profileId": "orchestra-ocp-sno-trial-amd64-v1",
+  "targetClass": "engineering-trial",
+  "executionMode": "live",
+  "bindings": {
+    "artifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
+    "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe"
+  },
+  "scope": {
+    "platform": "linux/amd64",
+    "signatureObservation": "no-cosign-signature-at-locked-index",
+    "containerIds": [
+      "model-backend-image",
+      "valkey-image"
+    ],
+    "modelArtifactIds": [
+      "orchestra-reference-cpu-model"
+    ]
+  },
+  "collectionPolicy": {
+    "executionClass": "signed-certification-runner",
+    "runnerImage": "ghcr.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:0009128ccbb53b9e376f74e7a6110ab6d2316be392be825d938705b88488f061",
+    "runnerToolchainDigest": "sha256:7dc16baeb7c7a5dcfb0fb360f748b190d0e042f1bd9cf5843e1b75e3546a9593",
+    "collectorScriptDigest": "sha256:9e22d50f496763bd247ed59b2c8a082b6c175b45b9545c4edec5a3c2bd7f27c6",
+    "maximumCollectionDurationHours": 6,
+    "maximumEvidenceAgeHours": 72,
+    "rawArtifactsRestricted": true,
+    "collectionStatementSignatureRequired": true,
+    "externalScannerConfigAllowed": false,
+    "databaseUpdatesDuringScanAllowed": false,
+    "requiredToolVersions": {
+      "cosign": "3.1.1",
+      "syft": "1.48.0",
+      "trivy": "0.72.0"
+    }
+  },
+  "vulnerabilityPolicy": {
+    "blockingSeverities": [
+      "CRITICAL",
+      "HIGH",
+      "UNKNOWN"
+    ],
+    "recognizedSeverities": [
+      "CRITICAL",
+      "HIGH",
+      "MEDIUM",
+      "LOW",
+      "UNKNOWN"
+    ],
+    "ignoreFileAllowed": false,
+    "ignoreUnfixedAllowed": false,
+    "severityFilterAllowed": false,
+    "databaseDigestsRequired": true
+  },
+  "licensePolicy": {
+    "format": "SPDX-2.3",
+    "packageInventoryRequired": true,
+    "humanReviewRequired": true,
+    "automatedApprovalAllowed": false,
+    "unknownLicenseRequiresExplicitDecision": true
+  },
+  "modelArtifactPolicy": {
+    "immutableRevisionRequired": true,
+    "sha256VerificationRequired": true,
+    "contentLengthVerificationRequired": true,
+    "licenseReviewRequired": true,
+    "runtimeDownloadAllowed": false,
+    "maximumAllowedBytes": 4294967296
+  },
+  "exceptionPolicy": {
+    "maximumLifetimeHours": 720,
+    "minimumReviewers": 2,
+    "requiredReviewerRoles": [
+      "security-reviewer",
+      "service-owner"
+    ],
+    "distinctReviewerIdentities": true,
+    "requestorMayReview": false,
+    "collectorMayReview": false,
+    "approvalBindsCandidateDigest": true,
+    "expiryBlocksArtifactSetReissue": true
+  },
+  "compensatingControls": [
+    {
+      "id": "exact-index-and-platform-digests",
+      "requiredBefore": "review"
+    },
+    {
+      "id": "signed-runner-vulnerability-and-license-evidence",
+      "requiredBefore": "review"
+    },
+    {
+      "id": "immutable-model-revision-digest-size-and-license",
+      "requiredBefore": "review"
+    },
+    {
+      "id": "private-mirror-by-digest",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "lab-kms-signature",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "restricted-runtime-default-deny-and-allowlisted-egress",
+      "requiredBefore": "activation"
+    },
+    {
+      "id": "continuous-rescan-and-expiry-enforcement",
+      "requiredBefore": "activation"
+    }
+  ],
+  "claims": {
+    "riskEvidenceBundles": 0,
+    "exceptionsApproved": 0,
+    "sourceAdmissionAuthorized": false,
+    "mirrorAuthorization": false,
+    "activationAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false
+  }
+}

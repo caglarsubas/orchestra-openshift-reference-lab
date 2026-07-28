@@ -57,6 +57,10 @@ jobs:
       - name: Validate immutable SNO dependency artifact set
         run: python3 scripts/validate_sno_trial_dependency_artifacts.py
 
+      - name: Validate SNO unsigned dependency risk and exception lane
+        run: >-
+          python3 scripts/sno_trial_dependency_risk.py validate-policy
+
       - name: Validate inactive SNO dependency manifest candidate
         run: python3 scripts/validate_sno_trial_dependency_manifests.py
 

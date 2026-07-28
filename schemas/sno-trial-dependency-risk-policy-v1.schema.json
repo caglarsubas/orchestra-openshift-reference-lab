@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/sno-trial-dependency-risk-policy-v1.schema.json",
+  "title": "Orchestra SNO trial dependency risk policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "policyId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "scope",
+    "collectionPolicy",
+    "vulnerabilityPolicy",
+    "licensePolicy",
+    "modelArtifactPolicy",
+    "exceptionPolicy",
+    "compensatingControls",
+    "claims"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-dependency-risk-policy.v1"},
+    "policyId": {"const": "orchestra-sno-trial-unsigned-dependency-risk-v1"},
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "live"},
+    "bindings": {"$ref": "#/$defs/baseBindings"},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["platform", "signatureObservation", "containerIds", "modelArtifactIds"],
+      "properties": {
+        "platform": {"const": "linux/amd64"},
+        "signatureObservation": {"const": "no-cosign-signature-at-locked-index"},
+        "containerIds": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "model-backend-image"},
+            {"const": "valkey-image"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "modelArtifactIds": {
+          "type": "array",
+          "prefixItems": [{"const": "orchestra-reference-cpu-model"}],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        }
+      }
+    },
+    "collectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executionClass",
+        "runnerImage",
+        "runnerToolchainDigest",
+        "collectorScriptDigest",
+        "maximumCollectionDurationHours",
+        "maximumEvidenceAgeHours",
+        "rawArtifactsRestricted",
+        "collectionStatementSignatureRequired",
+        "externalScannerConfigAllowed",
+        "databaseUpdatesDuringScanAllowed",
+        "requiredToolVersions"
+      ],
+      "properties": {
+        "executionClass": {"const": "signed-certification-runner"},
+        "runnerImage": {"$ref": "#/$defs/runnerImage"},
+        "runnerToolchainDigest": {"$ref": "#/$defs/digest"},
+        "collectorScriptDigest": {"$ref": "#/$defs/digest"},
+        "maximumCollectionDurationHours": {"const": 6},
+        "maximumEvidenceAgeHours": {"const": 72},
+        "rawArtifactsRestricted": {"const": true},
+        "collectionStatementSignatureRequired": {"const": true},
+        "externalScannerConfigAllowed": {"const": false},
+        "databaseUpdatesDuringScanAllowed": {"const": false},
+        "requiredToolVersions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cosign", "syft", "trivy"],
+          "properties": {
+            "cosign": {"const": "3.1.1"},
+            "syft": {"const": "1.48.0"},
+            "trivy": {"const": "0.72.0"}
+          }
+        }
+      }
+    },
+    "vulnerabilityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blockingSeverities",
+        "recognizedSeverities",
+        "ignoreFileAllowed",
+        "ignoreUnfixedAllowed",
+        "severityFilterAllowed",
+        "databaseDigestsRequired"
+      ],
+      "properties": {
+        "blockingSeverities": {"$ref": "#/$defs/blockingSeverities"},
+        "recognizedSeverities": {"$ref": "#/$defs/recognizedSeverities"},
+        "ignoreFileAllowed": {"const": false},
+        "ignoreUnfixedAllowed": {"const": false},
+        "severityFilterAllowed": {"const": false},
+        "databaseDigestsRequired": {"const": true}
+      }
+    },
+    "licensePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "format",
+        "packageInventoryRequired",
+        "humanReviewRequired",
+        "automatedApprovalAllowed",
+        "unknownLicenseRequiresExplicitDecision"
+      ],
+      "properties": {
+        "format": {"const": "SPDX-2.3"},
+        "packageInventoryRequired": {"const": true},
+        "humanReviewRequired": {"const": true},
+        "automatedApprovalAllowed": {"const": false},
+        "unknownLicenseRequiresExplicitDecision": {"const": true}
+      }
+    },
+    "modelArtifactPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "immutableRevisionRequired",
+        "sha256VerificationRequired",
+        "contentLengthVerificationRequired",
+        "licenseReviewRequired",
+        "runtimeDownloadAllowed",
+        "maximumAllowedBytes"
+      ],
+      "properties": {
+        "immutableRevisionRequired": {"const": true},
+        "sha256VerificationRequired": {"const": true},
+        "contentLengthVerificationRequired": {"const": true},
+        "licenseReviewRequired": {"const": true},
+        "runtimeDownloadAllowed": {"const": false},
+        "maximumAllowedBytes": {"const": 4294967296}
+      }
+    },
+    "exceptionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximumLifetimeHours",
+        "minimumReviewers",
+        "requiredReviewerRoles",
+        "distinctReviewerIdentities",
+        "requestorMayReview",
+        "collectorMayReview",
+        "approvalBindsCandidateDigest",
+        "expiryBlocksArtifactSetReissue"
+      ],
+      "properties": {
+        "maximumLifetimeHours": {"const": 720},
+        "minimumReviewers": {"const": 2},
+        "requiredReviewerRoles": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "security-reviewer"},
+            {"const": "service-owner"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "distinctReviewerIdentities": {"const": true},
+        "requestorMayReview": {"const": false},
+        "collectorMayReview": {"const": false},
+        "approvalBindsCandidateDigest": {"const": true},
+        "expiryBlocksArtifactSetReissue": {"const": true}
+      }
+    },
+    "compensatingControls": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {"$ref": "#/$defs/control"}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riskEvidenceBundles",
+        "exceptionsApproved",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "deploymentAuthorized",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "riskEvidenceBundles": {"const": 0},
+        "exceptionsApproved": {"const": 0},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "runnerImage": {
+      "type": "string",
+      "pattern": "^ghcr\\.io/caglarsubas/agent-hook-v2/orchestra-certification-runner-ubi@sha256:[a-f0-9]{64}$"
+    },
+    "baseBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactSetDigest", "releaseSetDigest"],
+      "properties": {
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "requiredBefore"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "requiredBefore": {"enum": ["review", "activation"]}
+      }
+    },
+    "blockingSeverities": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "CRITICAL"},
+        {"const": "HIGH"},
+        {"const": "UNKNOWN"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "recognizedSeverities": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "CRITICAL"},
+        {"const": "HIGH"},
+        {"const": "MEDIUM"},
+        {"const": "LOW"},
+        {"const": "UNKNOWN"}
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5
+    }
+  }
+}

@@ -410,7 +410,16 @@ def validate_declared_implementation() -> None:
         fail("dependency_risk_collection_workflow_authority_invalid")
     if workflow.count("scripts/collect_dependency_risk_evidence.sh") != 2:
         fail("dependency_risk_collection_workflow_invocation_invalid")
-    if workflow.count("--preflight-only") != 1:
+    if (
+        workflow.count(
+            "scripts/collect_sno_trial_dependency_risk_evidence.sh"
+        )
+        != 2
+        or workflow.count("--preflight-only") != 2
+        or "default: production-dependencies" not in workflow
+        or "sno-trial-dependencies" not in workflow
+        or workflow.count("--if-generation-match=0") < 4
+    ):
         fail("dependency_risk_collection_workflow_preflight_invalid")
     if workflow.count("scripts/publish_dependency_risk_collection.sh") != 1:
         fail("dependency_risk_collection_workflow_publish_invalid")

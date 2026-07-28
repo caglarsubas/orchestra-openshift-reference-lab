@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/sno-trial-dependency-signature-exceptions-v1.schema.json",
+  "title": "Orchestra SNO trial dependency signature exceptions v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "intakeId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "subjects",
+    "claims",
+    "admission"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {"const": "orchestra.openshift.sno-trial-dependency-signature-exceptions.v1"},
+    "intakeId": {
+      "type": "string",
+      "pattern": "^orchestra-sno-trial-dependency-signature-exceptions-[a-z0-9][a-z0-9.-]+$"
+    },
+    "profileId": {"const": "orchestra-ocp-sno-trial-amd64-v1"},
+    "targetClass": {"const": "engineering-trial"},
+    "executionMode": {"const": "live"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "subjects": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/subject"}
+    },
+    "claims": {"$ref": "#/$defs/claims"},
+    "admission": {"$ref": "#/$defs/admission"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "nullableDigest": {
+      "anyOf": [{"$ref": "#/$defs/digest"}, {"type": "null"}]
+    },
+    "nullableTimestamp": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        {"type": "null"}
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifactSetDigest", "releaseSetDigest", "riskPolicyDigest"],
+      "properties": {
+        "artifactSetDigest": {"$ref": "#/$defs/digest"},
+        "releaseSetDigest": {"$ref": "#/$defs/digest"},
+        "riskPolicyDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riskEvidenceDigest",
+        "collectionStatementDigest",
+        "collectionSignatureBundleDigest",
+        "runnerImageDigest",
+        "runnerToolchainDigest",
+        "signatureProbeDigest",
+        "sbomDigest",
+        "vulnerabilityReportDigest",
+        "licenseInventoryDigest",
+        "machineReviewDigest",
+        "licenseReviewDigest",
+        "riskReviewDigest",
+        "compensatingControlsDigest"
+      ],
+      "properties": {
+        "riskEvidenceDigest": {"$ref": "#/$defs/nullableDigest"},
+        "collectionStatementDigest": {"$ref": "#/$defs/nullableDigest"},
+        "collectionSignatureBundleDigest": {"$ref": "#/$defs/nullableDigest"},
+        "runnerImageDigest": {"$ref": "#/$defs/nullableDigest"},
+        "runnerToolchainDigest": {"$ref": "#/$defs/nullableDigest"},
+        "signatureProbeDigest": {"$ref": "#/$defs/nullableDigest"},
+        "sbomDigest": {"$ref": "#/$defs/nullableDigest"},
+        "vulnerabilityReportDigest": {"$ref": "#/$defs/nullableDigest"},
+        "licenseInventoryDigest": {"$ref": "#/$defs/nullableDigest"},
+        "machineReviewDigest": {"$ref": "#/$defs/nullableDigest"},
+        "licenseReviewDigest": {"$ref": "#/$defs/nullableDigest"},
+        "riskReviewDigest": {"$ref": "#/$defs/nullableDigest"},
+        "compensatingControlsDigest": {"$ref": "#/$defs/nullableDigest"}
+      }
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "exceptionId",
+        "requestedAt",
+        "requestorIdentityDigest",
+        "candidateDigest"
+      ],
+      "properties": {
+        "status": {"enum": ["evidence-required", "review-pending", "approved"]},
+        "exceptionId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^orchestra-sno-trial-dependency-signature-exception-[a-z0-9][a-z0-9.-]+$"
+            },
+            {"type": "null"}
+          ]
+        },
+        "requestedAt": {"$ref": "#/$defs/nullableTimestamp"},
+        "requestorIdentityDigest": {"$ref": "#/$defs/nullableDigest"},
+        "candidateDigest": {"$ref": "#/$defs/nullableDigest"}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "reviewerIdentityDigest",
+        "decision",
+        "decidedAt",
+        "candidateDigest",
+        "signatureBundleDigest"
+      ],
+      "properties": {
+        "role": {"enum": ["security-reviewer", "service-owner"]},
+        "reviewerIdentityDigest": {"$ref": "#/$defs/digest"},
+        "decision": {"const": "approve"},
+        "decidedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "Z$"
+        },
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "signatureBundleDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "approvedAt", "expiresAt", "approvalDigest"],
+      "properties": {
+        "status": {"enum": ["required-not-approved", "approved"]},
+        "approvedAt": {"$ref": "#/$defs/nullableTimestamp"},
+        "expiresAt": {"$ref": "#/$defs/nullableTimestamp"},
+        "approvalDigest": {"$ref": "#/$defs/nullableDigest"}
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "indexSubject",
+        "platformSubject",
+        "evidence",
+        "request",
+        "approvals",
+        "decision",
+        "sourceAdmissionState",
+        "reasonCodes"
+      ],
+      "properties": {
+        "id": {"enum": ["model-backend-image", "valkey-image"]},
+        "indexSubject": {
+          "type": "string",
+          "pattern": "^[^\\s@]+@sha256:[a-f0-9]{64}$"
+        },
+        "platformSubject": {
+          "type": "string",
+          "pattern": "^[^\\s@]+@sha256:[a-f0-9]{64}$"
+        },
+        "evidence": {"$ref": "#/$defs/evidence"},
+        "request": {"$ref": "#/$defs/request"},
+        "approvals": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/approval"}
+        },
+        "decision": {"$ref": "#/$defs/decision"},
+        "sourceAdmissionState": {
+          "enum": ["blocked", "exception-approved-pending-artifact-set-reissue"]
+        },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riskEvidenceBundles",
+        "reviewReadySubjects",
+        "approvedExceptions",
+        "allExceptionsApproved",
+        "sourceAdmissionAuthorized",
+        "mirrorAuthorization",
+        "activationAuthorized",
+        "deploymentAuthorized",
+        "campaignEvidence",
+        "referenceProfileVerified"
+      ],
+      "properties": {
+        "riskEvidenceBundles": {"type": "integer", "minimum": 0, "maximum": 1},
+        "reviewReadySubjects": {"type": "integer", "minimum": 0, "maximum": 2},
+        "approvedExceptions": {"type": "integer", "minimum": 0, "maximum": 2},
+        "allExceptionsApproved": {"type": "boolean"},
+        "sourceAdmissionAuthorized": {"const": false},
+        "mirrorAuthorization": {"const": false},
+        "activationAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false}
+      }
+    },
+    "admission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "requiredExceptionCount",
+        "reviewReadyCount",
+        "approvedExceptionCount",
+        "reasonCodes"
+      ],
+      "properties": {
+        "status": {"const": "blocked"},
+        "requiredExceptionCount": {"const": 2},
+        "reviewReadyCount": {"type": "integer", "minimum": 0, "maximum": 2},
+        "approvedExceptionCount": {"type": "integer", "minimum": 0, "maximum": 2},
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

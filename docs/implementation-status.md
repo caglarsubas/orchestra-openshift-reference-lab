@@ -84,6 +84,9 @@ any certification campaign slot.
 | Read-only three-plane registry replay | Yes | Yes | No | Yes | Not eligible |
 | Independent replay admission contract | Yes | Yes | No | No | Not eligible |
 | Inactive Valkey/model-backend dependency manifest candidate | Yes | Yes | No | No | Not eligible |
+| SNO-only unsigned dependency risk and two-person exception contracts | Yes | Yes | No | No | Not eligible |
+| SNO signed-runner Trivy/Syft/Cosign/model collection workflow | Yes | Yes | No | No | Not eligible |
+| Live SNO dependency risk evidence and reviewed exceptions | No | N/A | No | No | Not eligible |
 | Payload-free six-input observer and private manifest materializer | Yes | Yes | No | No | Not eligible |
 | Payload-free model/TLS integrity observer and strict policy | Yes | Yes | No | No | Not eligible |
 | Strict dependency server dry-run and object-state observer | Yes | Yes | No | No | Not eligible |
@@ -303,6 +306,24 @@ validates their references against the July 27 renders, but no live read-only
 input report exists. Live capacity and server-side API acceptance were
 observed separately, but the tight margin and non-persistence proof do not
 authorize deployment.
+
+A dedicated SNO-only risk policy now binds the two unsigned container indexes,
+their linux/amd64 manifests, the immutable artifact set, the signed
+certification runner, its exact Trivy/Syft/Cosign toolchain, and the collector
+script digest. The protected collection workflow has a separate
+`sno-trial-dependencies` scope. It requires the existing reviewed exact-main
+environment, short-lived collection identity, KMS signing key, and read-only
+package access. It records only a specific Cosign `no-signature-found` result,
+scans the platform manifests, verifies the Qwen revision/digest/size before
+discarding its bytes, KMS-signs the collection statement, and writes raw
+evidence create-only to restricted custody. The payload-free builder and
+strict schemas reject critical/high/unknown findings, stale evidence,
+self-review, duplicate reviewers, missing explicit licence/risk decisions,
+overlong exceptions, digest drift, and authority escalation. The checked-in
+exception intake is empty. No live collection or human approval has occurred;
+even two valid exceptions leave source admission blocked until the artifact
+set is reissued and never authorize mirroring, activation, deployment, or
+campaign evidence.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
