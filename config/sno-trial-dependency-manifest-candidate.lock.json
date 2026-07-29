@@ -16,11 +16,11 @@
   },
   "architecture": "linux/amd64",
   "bindings": {
-    "dependencyArtifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
-    "runtimeContractSetDigest": "sha256:8dc40a772864d03240784a0d73559edfba52cad4df65b48cc636522c10cae777",
-    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
+    "dependencyArtifactSetDigest": "sha256:b59db076514f87b1251d069e5637badc21940aaf9cb729f49ab17f0058b4a46e",
+    "runtimeContractSetDigest": "sha256:927aede7b9994cc2f7dca69ca5cf29d7e096d0bcd6b32b938d431b91c9f712b6",
+    "workloadCandidateDigest": "sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81"
   },
-  "candidateDigest": "sha256:1af48913dfc27d16095b6024d7db59432102c9802db7950a77fc1b166deca1e9",
+  "candidateDigest": "sha256:469823412c063f67a8b0e30bb8b6b8be3a0cbec50e9755b409efd06174a5f531",
   "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.3",
   "claims": {
     "campaignEvidence": false,

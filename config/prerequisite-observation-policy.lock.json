@@ -4,7 +4,7 @@
   "policyId": "orchestra-reference-lab-prerequisite-observation-v1",
   "profileId": "orchestra-ocp-4.20-amd64-v1",
   "bindings": {
-    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "topologyDigest": "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe"
   },
   "observationPolicy": {
@@ -237,9 +237,9 @@
   "dns": {
     "managedZoneName": "orchestra-ocp-lab-public",
     "managedZoneProjectPlane": "services-evidence",
-    "dnsName": "ocp-lab.prometa.ai.",
+    "dnsName": "ocp-lab.planeon.ai.",
     "visibility": "public",
-    "clusterDnsName": "orchestra.ocp-lab.prometa.ai.",
+    "clusterDnsName": "orchestra.ocp-lab.planeon.ai.",
     "privateZoneAuthority": "openshift-installer",
     "servicesPeeringZoneName": "orchestra-services-to-ocp-private"
   },

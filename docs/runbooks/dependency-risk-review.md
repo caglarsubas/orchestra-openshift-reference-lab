@@ -6,18 +6,18 @@ authorize mirroring, activate a dependency, or create campaign evidence.
 
 The locked policy is
 `config/dependency-risk-policy.lock.json`, digest
-`sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4`.
+`sha256:5a48b2e16ace3e14ff01b6801c45d97a34cc0e12d56635f2a903b9e5ea726b2a`.
 The checked-in exception intake is deliberately empty, digest
-`sha256:2231cf7c2f2dce5c1b35f402cdd193ce4268e1726f7ab3b27f3fd23b7bb9b70f`.
+`sha256:f2457b0e7f9adb772494e2f14757fd15269fe34dbb5bac7e986c000a28f0ff1e`.
 The preflight authority is locked separately in
 `config/dependency-risk-execution.lock.json`, digest
-`sha256:746304a45ba15385d629ee3ef5c7618e36980524ca4f73e024007e958925b679`.
+`sha256:324b683e473bd474fdb2f48e48bb4737a1cbd681f762203ba7e0410553ee2f99`.
 The full-collection and restricted raw-custody authority is locked in
 `config/dependency-risk-collection-execution.lock.json`, digest
-`sha256:120cb99523e13116473548ee6e34e1b0fd7f2fdce9ea98b2d22861697ab1c4b0`.
+`sha256:e56bfde30b5772723a2ee82a79dbed2a1bc1f9a1d90fb18846e0ae7906792446`.
 The independent raw-custody verification authority is locked in
 `config/dependency-risk-custody-verification.lock.json`, digest
-`sha256:294e544928d032046a4b8a9cec85b067f9ce5b36982597f56029d6f349151eaf`.
+`sha256:dc52a9210f0eb0bbfb60b61c5d57ed0ef8ed23aa3638b11760547de90b9cc976`.
 
 ## Separation of duties
 

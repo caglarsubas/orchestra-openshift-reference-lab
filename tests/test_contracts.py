@@ -29,7 +29,7 @@ class ContractTests(unittest.TestCase):
         validate_lock(self.lock)
         self.assertEqual(
             canonical_digest(self.lock),
-            "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+            "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
         )
 
     def test_reference_claim_starts_false(self) -> None:

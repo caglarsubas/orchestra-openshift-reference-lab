@@ -6,7 +6,7 @@ signature admission. A success in one state never implies the next.
 
 The current immutable source observation is
 `config/dependency-source-verification.lock.json`, digest
-`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+`sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8`.
 It was produced on a developer workstation with Cosign `v3.1.1`; it is not a
 certification-runner attestation or campaign report.
 
@@ -81,7 +81,7 @@ exception contract always keeps `sourceAdmissionAuthorized` and
 ## Mirror receipts
 
 `config/dependency-mirror-intake.example.json`, digest
-`sha256:fe357261b272cd8fb4d6917e55453b613967fe5557616550c49591d035a5fc21`,
+`sha256:9ee380a9a86a2ea6ceb2767891845fe0693e6f4632029c5bcfae360c64e43060`,
 is an intentionally empty live-intake shape. It contains all eleven subjects
 but no repository binding, destination digest, object generation, actor
 identity, receipt, lab signature, pull proof, or approval.

@@ -22,10 +22,10 @@ RELEASE_SET_PATH = ROOT / "config" / "cross-plane-release-set.lock.json"
 COLLECTOR_PATH = ROOT / "scripts" / "collect_prerequisite_observation.py"
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 TOPOLOGY_DIGEST = (
-    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+    "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:7180d1007ead2bdc4ca3511235366e7c2e54425012f3a3db1b375f2785948b5e"
+    "sha256:e5a454a6bbdff84b184ea56ee5b67cb35898f6736e0c9045a2dc4cfb8dcb7561"
 )
 OBSERVATION_ID = re.compile(r"^orchestra-prerequisite-observation-[a-z0-9][a-z0-9.-]+$")
 REASON_CODE = re.compile(r"^[A-Z][A-Z0-9_]+$")
@@ -373,9 +373,9 @@ def validate_policy(value: dict[str, Any], release_set: dict[str, Any]) -> str:
     if value["dns"] != {
         "managedZoneName": "orchestra-ocp-lab-public",
         "managedZoneProjectPlane": "services-evidence",
-        "dnsName": "ocp-lab.prometa.ai.",
+        "dnsName": "ocp-lab.planeon.ai.",
         "visibility": "public",
-        "clusterDnsName": "orchestra.ocp-lab.prometa.ai.",
+        "clusterDnsName": "orchestra.ocp-lab.planeon.ai.",
         "privateZoneAuthority": "openshift-installer",
         "servicesPeeringZoneName": "orchestra-services-to-ocp-private",
     }:

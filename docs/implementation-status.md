@@ -3,6 +3,15 @@
 States are recorded independently. `declared` or `CI-validated` never implies
 `applied`, `deployed`, `rehearsed`, `soaked`, or `verified`.
 
+The active production reference topology now binds
+`ocp-lab.planeon.ai.` and topology digest
+`sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5`.
+The dependent source contracts, installer template, and inactive GitOps
+applications were rebound and CI-validated together. This is a source
+migration only: no production Planeon DNS zone, target project, foundation
+apply, OpenShift cluster, product deployment, campaign evidence, or
+certification result is claimed.
+
 | Capability | Declared | CI-validated | Applied | Live-tested | Campaign evidence |
 |---|---:|---:|---:|---:|---:|
 | Exact topology and claim lock | Yes | Yes | No | No | No |
@@ -350,20 +359,23 @@ and never authorize mirroring, activation, deployment, or campaign evidence.
 
 The independent replay-admission policy, strict output schema, and protected
 workflow are source- and CI-validated. Policy
-`orchestra-sno-trial-product-admission-2026-07-28.5` binds the fresh exact-main
-replay with `replayState=current`. A separate source-only environment
-bootstrap now validates a non-owner collaborator, emits a payload-free
-create-only plan, requires the reviewed plan digest at apply time, reconciles
-only the required-reviewer and exact-`main` branch protections, rejects
-environment Secrets, and verifies the result. It has not been applied because
-no eligible non-owner reviewer is attached to the repository; private-repo
+`orchestra-sno-trial-product-admission-2026-07-28.5` retains the latest
+exact-main replay metadata, but the Planeon topology migration rebound its
+candidate and artifact-set lineage. The policy therefore records
+`replayState=refresh-required`. A separate source-only environment bootstrap
+validates a non-owner collaborator, emits a payload-free create-only plan,
+requires the reviewed plan digest at apply time, reconciles only the
+required-reviewer and exact-`main` branch protections, rejects environment
+Secrets, and verifies the result. It has not been applied because no eligible
+non-owner reviewer is attached to the repository; private-repo
 required-reviewer support also remains an external GitHub-plan gate. No
-admission record exists. Even a valid future admission removes only the
-replay-review reason and leaves all deployment/provider blockers and every
-certifying claim false.
+admission record exists. A new exact-main replay and later valid admission
+would remove only the replay-review reason and leave all deployment/provider
+blockers and every certifying claim false.
 
-The production `orchestra-ocp-4.20-amd64-v1` topology, claim lock, evidence
-policy, prerequisite gates, and active GitOps overlays remain unchanged.
+The production `orchestra-ocp-4.20-amd64-v1` topology now uses the Planeon
+domain as described at the top of this document. Claim boundaries remain
+unchanged, and the inactive GitOps applications remain blocked.
 
 The platform-owned certification intake now pins the exact policy, strict
 schema bundle, and fixture bytes from platform release

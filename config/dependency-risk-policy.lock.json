@@ -3,9 +3,9 @@
   "profileId": "orchestra-ocp-4.20-amd64-v1",
   "policyId": "orchestra-unsigned-source-risk-policy-v1",
   "bindings": {
-    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
-    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
-    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+    "topologyDigest": "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
+    "dependencyAdmissionDigest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
+    "sourceVerificationDigest": "sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe"
   },
   "scope": {

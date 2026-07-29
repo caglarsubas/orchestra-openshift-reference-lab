@@ -1,8 +1,8 @@
 {
   "bindings": {
-    "artifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
+    "artifactSetDigest": "sha256:b59db076514f87b1251d069e5637badc21940aaf9cb729f49ab17f0058b4a46e",
     "artifactSetId": "orchestra-sno-trial-dependency-artifacts-2026-07-28.2",
-    "candidateDigest": "sha256:1af48913dfc27d16095b6024d7db59432102c9802db7950a77fc1b166deca1e9",
+    "candidateDigest": "sha256:469823412c063f67a8b0e30bb8b6b8be3a0cbec50e9755b409efd06174a5f531",
     "candidateId": "orchestra-sno-trial-dependency-manifests-2026-07-28.3",
     "manifestSetDigest": "sha256:e5255df5ccebaa1fb25347be194770a92a080dca9ef23c94b082cf1ac9bff728"
   },
@@ -80,7 +80,7 @@
     "mountPath": "/models/qwen2.5-0.5b-instruct-q4_k_m.gguf",
     "sizeBytes": 491400032
   },
-  "policyDigest": "sha256:32fe0b2fc980263a4f1dabecc9be382f8472588ed6acf73b6ad185324249fae5",
+  "policyDigest": "sha256:1a5b9554f7c95fa5014ecf0b4ded7a12b6f82fb207b6c09ca7545b680189178e",
   "policyId": "orchestra-sno-trial-dependency-integrity-2026-07-28.2",
   "profileId": "orchestra-ocp-sno-trial-amd64-v1",
   "schemaVersion": 1,

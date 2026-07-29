@@ -7,8 +7,8 @@
     "annotations": {
       "orchestra.prometa.ai/release-set-digest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
       "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
-      "orchestra.prometa.ai/dependency-admission-digest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
-      "orchestra.prometa.ai/dependency-source-verification-digest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+      "orchestra.prometa.ai/dependency-admission-digest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
+      "orchestra.prometa.ai/dependency-source-verification-digest": "sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8",
       "orchestra.prometa.ai/source-revision": "87f7a64e963842e3350504e305b569f1dea2ed5b",
       "orchestra.prometa.ai/source-chart-digest": "sha256:20b39c55eb0ebe6a71369be98fb84782476f8b2c30266c393cca7d67347a6cde"
     }
@@ -16,7 +16,7 @@
   "spec": {
     "project": "orchestra-reference-lab",
     "source": {
-      "repoURL": "harbor.services.ocp-lab.prometa.ai/orchestra/charts",
+      "repoURL": "harbor.services.ocp-lab.planeon.ai/orchestra/charts",
       "chart": "orchestra-inference-engine",
       "targetRevision": "0.1.2",
       "helm": {
@@ -33,7 +33,7 @@
           },
           "fullnameOverride": "orchestra-model-plane",
           "image": {
-            "repository": "harbor.services.ocp-lab.prometa.ai/orchestra/model/inference-engine-ubi",
+            "repository": "harbor.services.ocp-lab.planeon.ai/orchestra/model/inference-engine-ubi",
             "tag": "",
             "digest": "sha256:55d7b099ef7400c0ef62d40be1eb3865726ac45f5258a7cc177c4173af8b2bfb",
             "pullPolicy": "IfNotPresent",
@@ -100,13 +100,13 @@
           "observation": {
             "enabled": true,
             "version": 2,
-            "endpoint": "https://platform.apps.ocp-lab.prometa.ai/api/model-routing-observations",
+            "endpoint": "https://platform.apps.ocp-lab.planeon.ai/api/model-routing-observations",
             "apiKeySecretName": "orchestra-model-observation",
             "apiKeySecretKey": "api-key"
           },
           "otel": {
             "enabled": true,
-            "endpoint": "https://otel.services.ocp-lab.prometa.ai:4317",
+            "endpoint": "https://otel.services.ocp-lab.planeon.ai:4317",
             "serviceName": "orchestra-model-plane"
           },
           "persistence": {

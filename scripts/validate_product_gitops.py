@@ -26,12 +26,12 @@ except ModuleNotFoundError:
 
 
 PRODUCT_ROOT = ROOT / "gitops" / "products" / "reference-lab"
-MIRROR_CHART_REPOSITORY = "harbor.services.ocp-lab.prometa.ai/orchestra/charts"
+MIRROR_CHART_REPOSITORY = "harbor.services.ocp-lab.planeon.ai/orchestra/charts"
 DEPENDENCY_BOM_DIGEST = (
     "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
 )
 DEPENDENCY_ADMISSION_DIGEST = (
-    "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
+    "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219"
 )
 DEPENDENCY_SOURCE_VERIFICATION_DIGEST = EXPECTED_SOURCE_VERIFICATION_DIGEST
 APPLICATION_CONTRACTS = {
@@ -43,7 +43,7 @@ APPLICATION_CONTRACTS = {
         "chartVersion": "0.3.0-rc.10",
         "chartRole": "helm-chart",
         "imageRole": "platform-image-ubi9",
-        "imageRepository": "harbor.services.ocp-lab.prometa.ai/orchestra/platform/prometa-ubi",
+        "imageRepository": "harbor.services.ocp-lab.planeon.ai/orchestra/platform/prometa-ubi",
     },
     "runtimeHost": {
         "file": "runtime-application.json",
@@ -53,7 +53,7 @@ APPLICATION_CONTRACTS = {
         "chartVersion": "0.3.4",
         "chartRole": "helm-chart",
         "imageRole": "runtime-host-image-ubi9",
-        "imageRepository": "harbor.services.ocp-lab.prometa.ai/orchestra/runtime/prometa-runtime-host-ubi9",
+        "imageRepository": "harbor.services.ocp-lab.planeon.ai/orchestra/runtime/prometa-runtime-host-ubi9",
     },
     "modelPlane": {
         "file": "model-application.json",
@@ -63,7 +63,7 @@ APPLICATION_CONTRACTS = {
         "chartVersion": "0.1.2",
         "chartRole": "helm-chart",
         "imageRole": "inference-engine-image-ubi9",
-        "imageRepository": "harbor.services.ocp-lab.prometa.ai/orchestra/model/inference-engine-ubi",
+        "imageRepository": "harbor.services.ocp-lab.planeon.ai/orchestra/model/inference-engine-ubi",
     },
 }
 EXPECTED_RENDERED_COUNTS = {

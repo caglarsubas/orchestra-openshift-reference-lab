@@ -32,7 +32,7 @@ DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 IMMUTABLE_REF = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
 REVISION = re.compile(r"^[a-f0-9]{40}$")
 EXPECTED_CANDIDATE_DIGEST = (
-    "sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc"
+    "sha256:ea41c8c923f55030b8cade53096c4e8cf14d4bb1957aab53f0f57fb2141d69da"
 )
 EXPECTED_CONTAINER = {
     "id": "llama-cpp-cpu-server",

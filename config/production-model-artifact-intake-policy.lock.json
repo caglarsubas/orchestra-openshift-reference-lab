@@ -22,7 +22,7 @@
     }
   ],
   "bindings": {
-    "candidateDigest": "sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc",
+    "candidateDigest": "sha256:ea41c8c923f55030b8cade53096c4e8cf14d4bb1957aab53f0f57fb2141d69da",
     "candidateId": "orchestra-production-model-artifacts-2026-07-28.1",
     "candidateSchemaDigest": "sha256:55f15091cab9d0941aa43fa7d45a926638e09ce295945242a3ae5ce4446d6582",
     "observationSchemaDigest": "sha256:7ffa31330ed4014d08d54c296c6b7881712d1c0fa11113209dffa437009fce50"
@@ -72,7 +72,7 @@
     "symlinksAllowed": false
   },
   "kind": "orchestra.openshift.production-model-artifact-intake-policy.v1",
-  "policyDigest": "sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7",
+  "policyDigest": "sha256:7b529c7eddfee66a5a3886c82d86b2e02d76907bdc53863d2d6ff12b9792f603",
   "policyId": "orchestra-production-model-artifact-intake-2026-07-28.1",
   "profileId": "orchestra-ocp-4.20-amd64-v1",
   "reviewBoundary": {

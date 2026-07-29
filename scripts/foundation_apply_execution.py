@@ -46,10 +46,10 @@ APPLY_WORKFLOW = ROOT / ".github" / "workflows" / "foundation-apply.yml"
 
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 TOPOLOGY_DIGEST = (
-    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+    "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5"
 )
 EXPECTED_AUTHORITY_DIGEST = (
-    "sha256:04a0b003d99e45bb4ad3976002e4819ece5ec2abeb00a30963907b4fb6a809b6"
+    "sha256:3e8e2164761a9917c83e933cdda4c1f61707c306b7bed919ce699e0b28a795d8"
 )
 REPOSITORY = "caglarsubas/orchestra-openshift-reference-lab"
 REPOSITORY_ID = "1307302690"

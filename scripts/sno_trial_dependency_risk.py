@@ -39,10 +39,10 @@ COLLECTOR_SCRIPT_PATH = (
     ROOT / "scripts" / "collect_sno_trial_dependency_risk_evidence.sh"
 )
 EXPECTED_POLICY_DIGEST = (
-    "sha256:e3a5e149a34d36ad4d3f187ffde43a299b5da4bfbf17236d52b10ca6cdaa69aa"
+    "sha256:26197828ab8ba6675e86b50afafccdfa2d2f6e1958781c656879b38987f37610"
 )
 EXPECTED_EXCEPTION_TEMPLATE_DIGEST = (
-    "sha256:9a6273de24871d092347d641f5687edcfa2f75680fe2d376a932df03b8fa9e98"
+    "sha256:ce17d36a92b810df0fbae8e7a7d87c5e2270f1970ddaed9ac773a871af2254b5"
 )
 PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 TARGET_CLASS = "engineering-trial"

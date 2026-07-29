@@ -22,9 +22,9 @@ Changing the dependency catalog therefore requires a reviewed product-overlay
 update and cannot silently reuse a prior deployment declaration.
 
 The Applications and AppProject also bind dependency admission
-`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+`sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219`.
 They additionally bind source-verification observation
-`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+`sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8`.
 That observation is partial and non-campaign: three subjects verified and
 eight still need exceptions, while signed-runner replay remains outstanding.
 The AppProject has an enforced continuous deny window with manual sync

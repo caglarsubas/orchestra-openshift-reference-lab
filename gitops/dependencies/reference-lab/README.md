@@ -20,13 +20,13 @@ verified.
 The source-resolved dependency admission candidate is
 [`config/dependency-admission.lock.json`](../../../config/dependency-admission.lock.json),
 digest
-`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+`sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219`.
 It binds eleven exact source image indexes and linux/amd64 manifests plus six
 service contracts. All upstream verification, mirror, lab-signature, live
 binding, dry-run, and approval fields remain blocked.
 
 The project also binds the bounded source-verification observation digest
-`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+`sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8`.
 Three exact subjects verified cryptographically, while eight require reviewed
 exceptions. The observation is not signed-runner evidence and does not remove
 the deny window. The mirror-intake template remains completely empty.
@@ -36,7 +36,7 @@ The separate
 projects the five fully inventoried chart/image sets into offline
 values and records six blocked service-resource plans. Its controlling digest
 is
-`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
+`sha256:62c01f5574ee0b065f6b8a67d09c32a7cf9c076497f347746e0b4830f3a8cf22`.
 It is not part of this Kustomization, contains no Application, and has no
 destination reference. Its existence does not remove this project's deny
 window.

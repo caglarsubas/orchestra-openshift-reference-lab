@@ -319,7 +319,7 @@ that complete lineage and no longer carries a workload-candidate binding
 blocker. All three remain blocked on upstream review, Secret/TLS,
 storage-class, mirror, dry-run, and live-connectivity evidence. The candidate
 digest is
-`sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4`;
+`sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81`;
 all production, HA, campaign, certification, and SLA claims remain false.
 
 The remaining source artifacts are now selected in
@@ -437,7 +437,7 @@ SNO values are also bound for read-only registry replay. Every artifact binds
 its first successful publication attempt. Runtime `v0.18.7` also binds the
 supported Cosign v3 publisher used by the independent replay. The artifact-set
 digest is
-`sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1`.
+`sha256:956dbf7a493fe94cd62f38af216b62ffe44c502a4dff77cbae866539b97339b1`.
 The replay uses two separate environment credentials: a classic token limited
 to package-read access across the locked GHCR namespaces and a fine-grained
 token limited to Actions-read plus required metadata on the private platform
@@ -456,8 +456,10 @@ rebound set from revision `3a3793bdc955c747e01aaf01afbfd000a1d58c36`;
 artifact `8677385356` contains payload-free report digest
 `sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`
 and expires on 2026-08-11. Admission policy
-`orchestra-sno-trial-product-admission-2026-07-28.5` binds only that replay
-with `replayState=current`. Its protected environment now has a source-only
+`orchestra-sno-trial-product-admission-2026-07-28.5` retains that replay as
+historical evidence. The Planeon topology migration rebound the candidate and
+artifact-set lineage after the run, so the policy now records
+`replayState=refresh-required`. Its protected environment has a source-only
 plan/apply/verify bootstrap that rejects owner reviewers, absent collaborator
 access, changed plan state, environment Secrets, and non-`main` branch-policy
 drift. It has not been applied: an eligible non-owner collaborator and
@@ -476,7 +478,7 @@ dependency, while keeping activation blocked until image-level mirror intake,
 Secret references, and unresolved provider decisions are closed.
 
 The dependency admission digest is
-`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+`sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219`.
 It locks eleven exact source image indexes and linux/amd64 manifests, the
 Barman Cloud release manifest, and service contracts for PostgreSQL,
 ClickHouse/Keeper, JetStream, Vault, and External Secrets. Every source
@@ -485,7 +487,7 @@ dry run, and approval remains blocked. Source resolution is not mirror
 admission.
 
 The inert production model-artifact candidate digest is
-`sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc`.
+`sha256:ea41c8c923f55030b8cade53096c4e8cf14d4bb1957aab53f0f57fb2141d69da`.
 It source-locks a linux/amd64 llama.cpp CPU server, a Qwen chat GGUF, and a
 Nomic embedding GGUF, with two chat replicas and one embedding replica behind
 internal HTTPS, API-key files, operator-provided TLS, and pre-staged read-only
@@ -498,7 +500,7 @@ candidate emits no manifest and is not referenced by active GitOps; a new BOM
 and admission revision is required before deployment review.
 
 The production model source-intake policy digest is
-`sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7`.
+`sha256:7b529c7eddfee66a5a3886c82d86b2e02d76907bdc53863d2d6ff12b9792f603`.
 Its local inspector accepts only non-writable regular files beneath ignored
 `restricted/`, rejects size drift before opening or reading, uses
 descriptor-relative `O_NOFOLLOW` opens for every ancestor and the leaf, checks
@@ -509,17 +511,17 @@ custody, licence approval, source admission, mirroring, deployment, or campaign
 evidence. No such live observation is checked in or claimed here.
 
 The bounded source-verification digest is
-`sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89`.
+`sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8`.
 It records exact keyless verification for three subjects and explicit
 signature absence for eight subjects during a seven-day developer-workstation
 observation. The latter require reviewed exceptions, and all eleven require a
 signed certification-runner replay before source admission. Its empty mirror
 intake digest is
-`sha256:fe357261b272cd8fb4d6917e55453b613967fe5557616550c49591d035a5fc21`.
+`sha256:9ee380a9a86a2ea6ceb2767891845fe0693e6f4632029c5bcfae360c64e43060`.
 No destination, receipt, lab signature, pull proof, or approval is populated.
 
 The unsigned-source risk-policy digest is
-`sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4`.
+`sha256:5a48b2e16ace3e14ff01b6801c45d97a34cc0e12d56635f2a903b9e5ea726b2a`.
 It requires the release-set-bound signed runner, exact Trivy and Syft versions,
 frozen vulnerability databases, Cloud KMS detached collection evidence, and
 SPDX inventory. Its preflight-only lane verifies the exact release, runner,
@@ -529,14 +531,14 @@ artifact and grants no authorization. The policy blocks critical, high, and
 unknown-severity findings, requires human licence and risk review, and enforces
 two independent approval roles with a maximum 30-day exception lifetime. The
 empty signature-exception intake digest is
-`sha256:2231cf7c2f2dce5c1b35f402cdd193ce4268e1726f7ab3b27f3fd23b7bb9b70f`.
+`sha256:f2457b0e7f9adb772494e2f14757fd15269fe34dbb5bac7e986c000a28f0ff1e`.
 It contains all eight unsigned subjects but zero evidence bundles and zero
 approvals. Even a fully approved exception set cannot authorize source
 admission or mirroring without the separate signed-runner source replay and
 admission aggregate.
 
 The dependency-risk preflight authority digest is
-`sha256:746304a45ba15385d629ee3ef5c7618e36980524ca4f73e024007e958925b679`.
+`sha256:324b683e473bd474fdb2f48e48bb4737a1cbd681f762203ba7e0410553ee2f99`.
 It declares a separate exact-main GitHub WIF provider, a collector service
 account with no project, evidence-bucket, or artifact-mirror role, and a
 dedicated `EC_SIGN_P256_SHA256` Cloud KMS key whose only collector grant is
@@ -548,7 +550,7 @@ identity, KMS round trip, preflight, collection, admission, mirror, activation,
 campaign, or verification state is claimed.
 
 The dependency-risk collection authority digest is
-`sha256:120cb99523e13116473548ee6e34e1b0fd7f2fdce9ea98b2d22861697ab1c4b0`.
+`sha256:e56bfde30b5772723a2ee82a79dbed2a1bc1f9a1d90fb18846e0ae7906792446`.
 It declares a second exact-main WIF provider and protected environment for the
 full collection, plus a distinct `orchestra-risk-collector` identity. That
 identity receives only key-level `roles/cloudkms.signerVerifier` and
@@ -564,7 +566,7 @@ publication, independent custody verification, source admission, activation,
 campaign evidence, or reference-profile verification is claimed.
 
 The independent dependency-risk custody-verification authority digest is
-`sha256:294e544928d032046a4b8a9cec85b067f9ce5b36982597f56029d6f349151eaf`.
+`sha256:dc52a9210f0eb0bbfb60b61c5d57ed0ef8ed23aa3638b11760547de90b9cc976`.
 It declares a third exact-main WIF provider and protected environment, a
 distinct `orchestra-custody-verifier` identity, and prefix-scoped managed-folder
 roles. The verifier can list and read only `dependency-risk/`, create but not
@@ -656,7 +658,7 @@ signer, collector, and custody verifier cannot cross-assume one another merely
 because they share a workload identity pool.
 
 The source-only dependency GitOps candidate digest is
-`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
+`sha256:62c01f5574ee0b065f6b8a67d09c32a7cf9c076497f347746e0b4830f3a8cf22`.
 It projects five exact chart/image contracts into offline values for
 CloudNativePG, the ClickHouse operator, JetStream, Vault, and External Secrets,
 plus six blocked service-resource plans. CI derives the chart and image

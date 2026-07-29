@@ -23,13 +23,13 @@
   "architecture": "linux/amd64",
   "bindings": {
     "artifactReleaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
-    "dependencyArtifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
-    "dependencySourceDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "dependencyArtifactSetDigest": "sha256:b59db076514f87b1251d069e5637badc21940aaf9cb729f49ab17f0058b4a46e",
+    "dependencySourceDigest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
     "labServicesDigest": "sha256:bcb33ebb8ff8d539780ed4fdfb728196744832491e5aa61ad714613d968a290e",
     "toolchainLockDigest": "sha256:c9ace01bc3d0c6e0dd9f404b2781ed70c8f82e01ced3bff431eca316649e0c9d",
     "trialProfileDigest": "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a"
   },
-  "candidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4",
+  "candidateDigest": "sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81",
   "candidateId": "orchestra-sno-trial-workload-candidate-2026-07-28.2",
   "claims": {
     "campaignEvidence": false,
