@@ -13,10 +13,10 @@
   },
   "architecture": "linux/amd64",
   "bindings": {
-    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
-    "dependencyArtifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
-    "operatorInputContractDigest": "sha256:6e29d2320b618dc8bb42c8ac30d37beae18f8f0ebd5ab97cc1f121c969be4ed6",
-    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4",
+    "dependencyAdmissionDigest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
+    "dependencyArtifactSetDigest": "sha256:b59db076514f87b1251d069e5637badc21940aaf9cb729f49ab17f0058b4a46e",
+    "operatorInputContractDigest": "sha256:e98788368f1fd519b27ff3d692e87927c04508942d0fe6d9bfeec0eee4cca618",
+    "workloadCandidateDigest": "sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81",
     "workloadCandidateId": "orchestra-sno-trial-workload-candidate-2026-07-28.2"
   },
   "claims": {
@@ -29,7 +29,7 @@
     "referenceProfileVerified": false,
     "rpoRtoVerified": false
   },
-  "contractSetDigest": "sha256:8dc40a772864d03240784a0d73559edfba52cad4df65b48cc636522c10cae777",
+  "contractSetDigest": "sha256:927aede7b9994cc2f7dca69ca5cf29d7e096d0bcd6b32b938d431b91c9f712b6",
   "contractSetId": "orchestra-sno-trial-dependency-runtime-2026-07-28.2",
   "contracts": [
     {

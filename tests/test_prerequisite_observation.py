@@ -246,7 +246,7 @@ class PrerequisiteObservationTests(unittest.TestCase):
             ]:
                 output = {
                     "name": "orchestra-ocp-lab-public",
-                    "dnsName": "ocp-lab.prometa.ai.",
+                    "dnsName": "ocp-lab.planeon.ai.",
                     "visibility": "public",
                     "nameServers": [
                         "ns1.fixture.example.",

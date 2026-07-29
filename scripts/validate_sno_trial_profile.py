@@ -36,7 +36,7 @@ ALLOWED_TRIAL_CONFIG_NAMES = {
     "sno-trial-workload-candidate.lock.json",
 }
 EXPECTED_PRODUCTION_DIGEST = (
-    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+    "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5"
 )
 EXPECTED_TRIAL_DIGEST = (
     "sha256:9a7dbdac36417b10ce15b74de4558502fc09cf1740153c5817b89df4c0ba738a"

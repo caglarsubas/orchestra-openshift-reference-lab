@@ -43,7 +43,7 @@ flowchart LR
   REGISTRAR["External DNS operator"] -->|"Delegates the generated NS set"| PUBLIC_DNS
   IAP --> OCP
   OCP <-->|"Private VPC peering and explicit firewall"| GKE
-  DNS_PEER -->|"Resolve orchestra.ocp-lab.prometa.ai via target VPC"| PRIVATE_DNS
+  DNS_PEER -->|"Resolve orchestra.ocp-lab.planeon.ai via target VPC"| PRIVATE_DNS
   SECURITY -->|"OIDC JWKS and synthetic identities"| GATEWAY
   SECURITY -->|"Private Vault API with TLS and bounded auth"| ESO
   RUNTIME -->|"Model and read-only MCP only"| SYNTHETIC
@@ -82,7 +82,7 @@ flowchart LR
 11. External Secrets is an OpenShift controller. It consumes the private Vault
     service in GKE through explicit peering, TLS, and a bounded Kubernetes auth
     role; services-plane Argo CD never installs it into GKE.
-12. The services project owns the public `ocp-lab.prometa.ai.` zone only for
+12. The services project owns the public `ocp-lab.planeon.ai.` zone only for
     explicit delegation and domain-control proof. The OpenShift installer owns
     private cluster records in the target VPC; services-plane consumers reach
     those records through one-way Cloud DNS peering and cannot mutate them.

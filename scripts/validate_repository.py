@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 ACTION_PIN = re.compile(r"^\s*-?\s*uses:\s*[^@\s]+@[a-f0-9]{40}(?:\s+#.*)?$")
 EXPECTED_TOPOLOGY_DIGEST = (
-    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+    "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5"
 )
 MAX_PREREQUISITE_AGE = timedelta(days=30)
 EXPECTED_GATES = {
@@ -194,7 +194,7 @@ def validate_lock(value: dict[str, Any]) -> None:
         "cloud": "gcp",
         "region": "europe-west1",
         "zones": ["europe-west1-b", "europe-west1-c", "europe-west1-d"],
-        "dnsZone": "ocp-lab.prometa.ai",
+        "dnsZone": "ocp-lab.planeon.ai",
     }:
         fail("lab_lock_location_invalid")
     openshift = value["openshift"]

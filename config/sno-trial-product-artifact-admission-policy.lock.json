@@ -1,6 +1,7 @@
 {
   "activation": {
     "remainingReasonCodes": [
+      "product-artifact-replay-refresh-required",
       "destination-mirror-verification-missing",
       "live-cluster-pull-verification-missing",
       "operator-secret-and-ca-inputs-missing",
@@ -10,7 +11,7 @@
     "state": "blocked"
   },
   "bindings": {
-    "artifactSetDigest": "sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1",
+    "artifactSetDigest": "sha256:956dbf7a493fe94cd62f38af216b62ffe44c502a4dff77cbae866539b97339b1",
     "artifactSetId": "orchestra-sno-trial-products-2026-07-28.5",
     "profileId": "orchestra-ocp-sno-trial-amd64-v1",
     "replay": {
@@ -23,7 +24,7 @@
       "verifierRunAttempt": 1,
       "verifierRunId": 30331064883
     },
-    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
+    "workloadCandidateDigest": "sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81"
   },
   "claims": {
     "campaignEvidence": false,
@@ -54,12 +55,12 @@
     "workflowRef": "caglarsubas/orchestra-openshift-reference-lab/.github/workflows/sno-trial-product-artifact-admission.yml@refs/heads/main"
   },
   "kind": "orchestra.openshift.sno-trial-product-artifact-admission-policy.v1",
-  "policyDigest": "sha256:190c755b6d22069a18010c84344254c2f1ce685a24ad5df941f72520780d826e",
+  "policyDigest": "sha256:b67b2602470d05d832a64ab57475868c6bd0e0a70a50f40da47b5ee5ee548b84",
   "policyId": "orchestra-sno-trial-product-admission-2026-07-28.5",
   "review": {
     "maximumAdmissionAgeSeconds": 2592000,
     "maximumReplayAgeSeconds": 1209600,
-    "replayState": "current",
+    "replayState": "refresh-required",
     "requiredChecks": [
       "replay-report-schema-and-digest",
       "three-plane-publication-lineage",

@@ -4,10 +4,10 @@
   "authorityId": "orchestra-dependency-risk-preflight-v1",
   "profileId": "orchestra-ocp-4.20-amd64-v1",
   "bindings": {
-    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "topologyDigest": "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
-    "sourceVerificationDigest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
-    "riskPolicyDigest": "sha256:b7ea9ab33854715e24eae2cb90fdc8ca8c8058df55f9b038f5856cb4a5c513c4",
+    "sourceVerificationDigest": "sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8",
+    "riskPolicyDigest": "sha256:5a48b2e16ace3e14ff01b6801c45d97a34cc0e12d56635f2a903b9e5ea726b2a",
     "collectorScriptDigest": "sha256:a474328d9cfab9340c67ff1179f947144134ef7cee501894a2f0f14782d8f415"
   },
   "kms": {

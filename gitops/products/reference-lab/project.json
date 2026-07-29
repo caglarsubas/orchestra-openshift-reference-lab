@@ -7,15 +7,15 @@
     "annotations": {
       "orchestra.prometa.ai/release-set-digest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
       "orchestra.prometa.ai/dependency-bom-digest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
-      "orchestra.prometa.ai/dependency-admission-digest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
-      "orchestra.prometa.ai/dependency-source-verification-digest": "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89",
+      "orchestra.prometa.ai/dependency-admission-digest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
+      "orchestra.prometa.ai/dependency-source-verification-digest": "sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8",
       "orchestra.prometa.ai/activation": "blocked-until-live-prerequisites-and-mirror-intake-pass"
     }
   },
   "spec": {
     "description": "Digest-bound Orchestra vendor reference-lab product planes",
     "sourceRepos": [
-      "harbor.services.ocp-lab.prometa.ai/orchestra/charts"
+      "harbor.services.ocp-lab.planeon.ai/orchestra/charts"
     ],
     "destinations": [
       {

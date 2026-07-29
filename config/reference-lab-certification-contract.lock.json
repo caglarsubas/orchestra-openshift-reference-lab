@@ -12,7 +12,7 @@
   "bindings": {
     "profileId": "orchestra-ocp-4.20-amd64-v1",
     "platformProfileDigest": "sha256:6ff6819336b882180565a0a07049e8251faae0ab58e7ed4cef838700956b1d80",
-    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "topologyDigest": "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
     "releaseSetId": "orchestra-reference-lab-2026-07-22-rc10-runtime0183-model0110",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "dependencyBomId": "orchestra-dependencies-2026-07-21.1",
@@ -30,15 +30,15 @@
       "id": "contract-schema-bundle",
       "sourcePath": "prometa-platform/deploy/helm/prometa/ci/reference-lab-contract-schemas.v2.json",
       "vendoredPath": "contracts/platform/reference-lab-contract-schemas.v2.json",
-      "rawDigest": "sha256:3a4b9187fd9472f74fbec9339ea035db6e0d901bfd766b0538901d5827ba2405",
-      "canonicalDigest": "sha256:3a4b9187fd9472f74fbec9339ea035db6e0d901bfd766b0538901d5827ba2405"
+      "rawDigest": "sha256:757fb4887c5e41218be1207bd6f7d6825db0fbcd140f337cacb1889786d55b94",
+      "canonicalDigest": "sha256:757fb4887c5e41218be1207bd6f7d6825db0fbcd140f337cacb1889786d55b94"
     },
     {
       "id": "fixture-campaign",
       "sourcePath": "prometa-platform/deploy/helm/prometa/ci/reference-lab-campaign.example.json",
       "vendoredPath": "contracts/platform/reference-lab-campaign.fixture.json",
-      "rawDigest": "sha256:243825f78356c4754c9815ec5311bb802251043561c09c947628e51d903166f2",
-      "canonicalDigest": "sha256:243825f78356c4754c9815ec5311bb802251043561c09c947628e51d903166f2"
+      "rawDigest": "sha256:bd02d5eaa3d59327d246c9032c3fd8027127d4d462329d987d2c634efa981966",
+      "canonicalDigest": "sha256:bd02d5eaa3d59327d246c9032c3fd8027127d4d462329d987d2c634efa981966"
     }
   ],
   "semantics": {

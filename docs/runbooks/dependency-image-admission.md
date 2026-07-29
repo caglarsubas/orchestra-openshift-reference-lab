@@ -10,7 +10,7 @@ receipt contract are maintained in
 
 The immutable input is
 `config/dependency-admission.lock.json`, digest
-`sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def`.
+`sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219`.
 It deliberately contains no destination references, mirror digests, lab
 signatures, live identities, or approval claims.
 
@@ -68,7 +68,7 @@ out of Git.
 
 The source-only candidate is bound by
 `config/dependency-gitops-candidate.lock.json`, digest
-`sha256:6f7a051f0dcf3c46ecbde68efb5e21369d42035ec72cca2f334c652c37600790`.
+`sha256:62c01f5574ee0b065f6b8a67d09c32a7cf9c076497f347746e0b4830f3a8cf22`.
 It covers only the five chart packages whose operator/service images are fully
 inventoried:
 

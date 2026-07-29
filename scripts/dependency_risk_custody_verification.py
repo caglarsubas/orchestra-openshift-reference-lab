@@ -75,13 +75,13 @@ BOOTSTRAP_TERRAFORM_PATH = ROOT / "infra" / "terraform" / "bootstrap" / "main.tf
 FOUNDATION_TERRAFORM_PATH = ROOT / "infra" / "terraform" / "foundation" / "main.tf"
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 TOPOLOGY_DIGEST = (
-    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+    "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5"
 )
 RAW_CUSTODY_SCHEMA_DIGEST = (
     "sha256:984fc129f63c9f333097df25d226fb33250d68948438e5958536cc1de0a72fd5"
 )
 EXPECTED_AUTHORITY_DIGEST = (
-    "sha256:294e544928d032046a4b8a9cec85b067f9ce5b36982597f56029d6f349151eaf"
+    "sha256:dc52a9210f0eb0bbfb60b61c5d57ed0ef8ed23aa3638b11760547de90b9cc976"
 )
 REPOSITORY = "caglarsubas/orchestra-openshift-reference-lab"
 REPOSITORY_ID = "1307302690"

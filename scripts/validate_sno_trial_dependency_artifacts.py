@@ -24,7 +24,7 @@ PROFILE_ID = "orchestra-ocp-sno-trial-amd64-v1"
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")
 IMMUTABLE_REF = re.compile(r"^[^\s@]+@sha256:[a-f0-9]{64}$")
 EXPECTED_ARTIFACT_SET_DIGEST = (
-    "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0"
+    "sha256:b59db076514f87b1251d069e5637badc21940aaf9cb729f49ab17f0058b4a46e"
 )
 EXPECTED_CONTAINERS = {
     "valkey-image": {

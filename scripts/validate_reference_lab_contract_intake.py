@@ -25,7 +25,7 @@ except ModuleNotFoundError:
 
 INTAKE_PATH = ROOT / "config" / "reference-lab-certification-contract.lock.json"
 EXPECTED_INTAKE_DIGEST = (
-    "sha256:5558b86882b7984cf4fe567473cf6332326e1c6a8b6d725850eb0be10bbd8994"
+    "sha256:bd2485b6cbcc35402bf8ed73929a13986ac44c132abac1d8d39e7745550fe6f5"
 )
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 POLICY_ID = "orchestra-reference-lab-live-v2"

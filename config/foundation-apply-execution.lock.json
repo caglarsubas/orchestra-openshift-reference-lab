@@ -4,9 +4,9 @@
   "authorityId": "orchestra-reference-lab-foundation-apply-v1",
   "profileId": "orchestra-ocp-4.20-amd64-v1",
   "bindings": {
-    "topologyDigest": "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0",
+    "topologyDigest": "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
-    "prerequisitePolicyDigest": "sha256:7180d1007ead2bdc4ca3511235366e7c2e54425012f3a3db1b375f2785948b5e",
+    "prerequisitePolicyDigest": "sha256:e5a454a6bbdff84b184ea56ee5b67cb35898f6736e0c9045a2dc4cfb8dcb7561",
     "foundationPlanSummarySchemaDigest": "sha256:5d7e71266e8248d5fea4e3d08cd1898bbfe877f2d222310196bdfffa5e4a04b1",
     "planPackageSchemaDigest": "sha256:17cf726b78c3d33442a36af5be5431624472d8c2449fb8d3a0a6d998d21e7841",
     "applyReceiptSchemaDigest": "sha256:0956c85510168f670490a4d9357a80435226d04815df071186318a4999cffd72",

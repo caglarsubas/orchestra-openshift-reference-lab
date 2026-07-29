@@ -51,7 +51,7 @@ except ModuleNotFoundError:
 
 LOCK_PATH = ROOT / "config" / "sno-trial-operator-inputs.lock.json"
 EXPECTED_CONTRACT_DIGEST = (
-    "sha256:6e29d2320b618dc8bb42c8ac30d37beae18f8f0ebd5ab97cc1f121c969be4ed6"
+    "sha256:e98788368f1fd519b27ff3d692e87927c04508942d0fe6d9bfeec0eee4cca618"
 )
 REPORT_KIND = "orchestra.openshift.sno-trial-operator-inputs.v1"
 SNAPSHOT_KIND = "orchestra.openshift.sno-trial-operator-inputs-snapshot.v1"

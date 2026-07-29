@@ -240,7 +240,7 @@
               "type": "string"
             },
             "dnsZone": {
-              "const": "ocp-lab.prometa.ai"
+              "const": "ocp-lab.planeon.ai"
             },
             "ingress": {
               "const": "private"

@@ -215,18 +215,19 @@ class SnoTrialProductArtifactAdmissionTests(unittest.TestCase):
     def test_policy_is_digest_bound_and_non_authorizing(self) -> None:
         validate_policy(self.policy, self.lock, self.candidate)
         self.assertEqual(
-            self.policy["review"]["replayState"], "current"
+            self.policy["review"]["replayState"], "refresh-required"
         )
         self.assertEqual(
             self.policy["activation"]["remainingReasonCodes"],
-            DEPLOYMENT_REASONS,
+            REMAINING_REASONS,
         )
-        validate_replay_binding(
-            self.report,
-            self.policy,
-            self.lock,
-            self.candidate,
-        )
+        with self.assertRaisesRegex(ValueError, "replay_refresh_required"):
+            validate_replay_binding(
+                self.report,
+                self.policy,
+                self.lock,
+                self.candidate,
+            )
         validate_replay_binding(
             self.report,
             self.current_policy,

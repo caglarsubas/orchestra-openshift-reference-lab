@@ -14,10 +14,10 @@
     "state": "blocked"
   },
   "architecture": "linux/amd64",
-  "artifactSetDigest": "sha256:689f22defe0a11bedf96f6e6980ed4131dba1a646151793ca4bba624d07e0ee0",
+  "artifactSetDigest": "sha256:b59db076514f87b1251d069e5637badc21940aaf9cb729f49ab17f0058b4a46e",
   "artifactSetId": "orchestra-sno-trial-dependency-artifacts-2026-07-28.2",
   "bindings": {
-    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "dependencyAdmissionDigest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
     "dependencyBomDigest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc"
   },
   "claims": {

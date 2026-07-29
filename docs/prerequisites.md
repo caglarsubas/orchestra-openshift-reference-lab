@@ -18,7 +18,7 @@ verified gates, `provisioningReady: false`, and `campaignEvidence: false`.
 | GCP billing/quotas | Approved quotas for six OCP nodes, GKE, PD, LB, DNS, KMS, and probes |
 | Target project | Distinct active project, billing, labels, and required APIs |
 | Services/evidence project | Distinct active project, billing, labels, and required APIs |
-| DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.prometa.ai.` |
+| DNS | Exact public delegation for services-project zone `orchestra-ocp-lab-public` at `ocp-lab.planeon.ai.` |
 | WIF and operator GitHub controls | Machine-verified independent GitHub environment protection plus exact private repository/owner IDs, separate plan/apply workflow restrictions, exact planner/packager/executor bindings, no user-managed key, all six protected environments, and the exact read-only platform-release GitHub App installation; the post-apply observer verifies its additional WIF/IAM boundary separately |
 | Runner | Published signed UBI9 linux/amd64 image and toolchain digest |
 | Release set | Canonical cross-plane release set including runner subject |
@@ -43,7 +43,7 @@ as independent verification of its own outputs.
 
 The locked policy is
 `config/prerequisite-observation-policy.lock.json`; its canonical digest is
-`sha256:7180d1007ead2bdc4ca3511235366e7c2e54425012f3a3db1b375f2785948b5e`.
+`sha256:e5a454a6bbdff84b184ea56ee5b67cb35898f6736e0c9045a2dc4cfb8dcb7561`.
 It requires a maximum 30-minute read-only collection window and expires an
 observation after 24 hours.
 

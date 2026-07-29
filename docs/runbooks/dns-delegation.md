@@ -3,14 +3,14 @@
 This procedure establishes three separate authorities without treating one as
 proof of another:
 
-1. Terraform creates the public `ocp-lab.prometa.ai.` managed zone in the
+1. Terraform creates the public `ocp-lab.planeon.ai.` managed zone in the
    services/evidence project. It proves the intended zone exists, not that the
    parent domain delegates to it.
 2. An external DNS operator publishes the zone's generated NS set at the
-   `prometa.ai` parent. That change is outside Terraform and requires
+   `planeon.ai` parent. That change is outside Terraform and requires
    independent review.
 3. The OpenShift installer creates the private
-   `orchestra.ocp-lab.prometa.ai.` authority and records in the target VPC.
+   `orchestra.ocp-lab.planeon.ai.` authority and records in the target VPC.
    The services project contains only a peering zone that queries the target
    VPC's resolution order.
 
@@ -39,14 +39,14 @@ proof of another:
 1. A DNS operator who did not apply Terraform compares the generated NS set in
    `artifacts/dns-contract.json` with a fresh Cloud DNS read from the
    services/evidence project.
-2. The operator delegates `ocp-lab.prometa.ai.` at the `prometa.ai` parent to
+2. The operator delegates `ocp-lab.planeon.ai.` at the `planeon.ai` parent to
    exactly that NS set. Record only actor, authorization, change, and resulting
    evidence digests; do not store registrar credentials.
 3. A second observer waits for authoritative propagation and verifies the
    complete set from outside both lab VPCs:
 
    ```bash
-   dig +short NS ocp-lab.prometa.ai. | sort
+   dig +short NS ocp-lab.planeon.ai. | sort
    gcloud dns managed-zones describe orchestra-ocp-lab-public \
      --project='<services-evidence-project>' --format=json
    ```
@@ -65,7 +65,7 @@ proof of another:
 2. Verify that the installer, not foundation Terraform, created the private
    cluster zone in the target project and attached it only to the target VPC.
 3. From the target VPC, resolve `api`, `api-int`, and an admitted application
-   route under `orchestra.ocp-lab.prometa.ai.` and confirm private answers.
+   route under `orchestra.ocp-lab.planeon.ai.` and confirm private answers.
 4. From the services VPC, repeat the same lookups. Cloud DNS must select
    `orchestra-services-to-ocp-private` and resolve through the target VPC.
 5. From an external resolver, confirm those private names return no private

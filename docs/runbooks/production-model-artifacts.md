@@ -8,7 +8,7 @@ campaign evidence.
 
 The immutable candidate is
 `config/production-model-artifact-candidate.lock.json`, digest
-`sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc`.
+`sha256:ea41c8c923f55030b8cade53096c4e8cf14d4bb1957aab53f0f57fb2141d69da`.
 It binds its strict schema, the current dependency BOM, the current dependency
 admission contract, and the cross-plane release set. The current BOM remains
 unchanged and continues to mark `model-backend` and `embedding-model` as
@@ -16,7 +16,7 @@ unchanged and continues to mark `model-backend` and `embedding-model` as
 
 The source-file inspection policy is
 `config/production-model-artifact-intake-policy.lock.json`, digest
-`sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7`.
+`sha256:7b529c7eddfee66a5a3886c82d86b2e02d76907bdc53863d2d6ff12b9792f603`.
 It is bound to the candidate and its strict payload-free observation schema.
 
 ## Locked source candidate
@@ -123,7 +123,7 @@ even if its declared identifiers match.
 
 The next boundary is now source-declared by
 `config/production-model-artifact-custody-policy.lock.json`, digest
-`sha256:ca2fc2092f0b1fdb652a465f8d1502804ee26ca3274edc130d312577edcad22a`.
+`sha256:f0847395a1fac2473d8498b1d9752352d115571ba87eb7f07df1a77d785e6458`.
 Validate it with:
 
 ```bash
@@ -163,7 +163,7 @@ of those live surfaces exists merely because this contract is checked in.
 
 The executable cloud authority is
 `config/production-model-artifact-custody-execution.lock.json`, digest
-`sha256:a82f4a7a4b315749eaa3226781d8a97fc3b6d1648e6088f1f76041525f7bffa6`.
+`sha256:00b5ca9160fac51ae40e0ec6b985a350d58c2171486abeaf1854f646f24fc98c`.
 Validate its policy, file bindings, Terraform resources, IAM scope, and
 non-live claims with:
 

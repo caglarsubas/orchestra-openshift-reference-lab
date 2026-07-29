@@ -17,16 +17,16 @@ MIRROR_INTAKE = ROOT / "config" / "dependency-mirror-intake.example.json"
 ADMISSION = ROOT / "config" / "dependency-admission.lock.json"
 TOPOLOGY = ROOT / "config" / "lab.lock.json"
 TOPOLOGY_DIGEST = (
-    "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
+    "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5"
 )
 ADMISSION_DIGEST = (
-    "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def"
+    "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219"
 )
 EXPECTED_SOURCE_VERIFICATION_DIGEST = (
-    "sha256:cbfaa95d09e7a9ca1812028ba13f21c40846c3c91b32424d1e834eab6ab69f89"
+    "sha256:75539cd9e8b0fce8e556b7d3cd8a7437d2e6f26525e96639085feff431478ed8"
 )
 EXPECTED_MIRROR_INTAKE_DIGEST = (
-    "sha256:fe357261b272cd8fb4d6917e55453b613967fe5557616550c49591d035a5fc21"
+    "sha256:9ee380a9a86a2ea6ceb2767891845fe0693e6f4632029c5bcfae360c64e43060"
 )
 ISSUER = "https://token.actions.githubusercontent.com"
 SIGNED_SUBJECTS = {
@@ -368,7 +368,7 @@ def validate_mirror_intake(
             "ready": False,
         },
         "harbor": {
-            "registry": "harbor.services.ocp-lab.prometa.ai",
+            "registry": "harbor.services.ocp-lab.planeon.ai",
             "repository": None,
             "registryIdentityDigest": None,
             "tlsPolicyDigest": None,

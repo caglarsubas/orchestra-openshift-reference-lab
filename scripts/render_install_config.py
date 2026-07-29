@@ -10,6 +10,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,7 @@ PLACEHOLDER = re.compile(r"\$\{([A-Z0-9_]+)\}")
 GCP_NAME = re.compile(r"^[a-z][a-z0-9-]{4,61}[a-z0-9]$")
 
 
-def fail(message: str) -> "NoReturn":
+def fail(message: str) -> NoReturn:
     raise ValueError(message)
 
 
@@ -65,7 +66,7 @@ def render(template: str, values: dict[str, str]) -> str:
     if remaining != SECRET_PLACEHOLDERS:
         fail("install_rendered_placeholders_invalid")
     required_fragments = (
-        "baseDomain: ocp-lab.prometa.ai",
+        "baseDomain: ocp-lab.planeon.ai",
         "replicas: 3",
         "diskSizeGB: 256",
         "diskType: pd-ssd",

@@ -510,11 +510,14 @@ schema is
 run `30331064883`, artifact ID `8677385356`, and report digest
 `sha256:0375a3a3ebeec71ee556457edb98874d7929f550c910a3266431e3d00564e844`.
 The replay binds workload candidate
-`sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4`
+`sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81`
 and artifact set
-`sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1`.
-Its replay state is `current`. Admission remains a separate protected action
-and does not grant deployment authority.
+`sha256:956dbf7a493fe94cd62f38af216b62ffe44c502a4dff77cbae866539b97339b1`.
+Those are the current source bindings, but the dated replay report was
+produced before the Planeon topology rebind. Its replay state is therefore
+`refresh-required`; a new exact-main replay is required before admission can
+be reviewed. Admission remains a separate protected action and does not grant
+deployment authority.
 
 Before dispatching `SNO trial product artifact admission`, configure the
 `sno-trial-product-artifact-admission` GitHub environment with:

@@ -18,14 +18,14 @@
   },
   "architecture": "linux/amd64",
   "bindings": {
-    "dependencyAdmissionDigest": "sha256:fc1f22817a5959e18d3f4493f199bda61b30cea441929ee321b531402e846def",
+    "dependencyAdmissionDigest": "sha256:73282faf172793398120509087930691e362f2290d4b60cc7f13ef4f99bf4219",
     "dependencyBomDigest": "sha256:fabec47064381d067ca759ba99c47470cc66628ecaacd2e0521f50bb29aad5dc",
     "dependencyBomId": "orchestra-dependencies-2026-07-21.1",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "releaseSetId": "orchestra-reference-lab-2026-07-22-rc10-runtime0183-model0110",
     "schemaDigest": "sha256:55f15091cab9d0941aa43fa7d45a926638e09ce295945242a3ae5ce4446d6582"
   },
-  "candidateDigest": "sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc",
+  "candidateDigest": "sha256:ea41c8c923f55030b8cade53096c4e8cf14d4bb1957aab53f0f57fb2141d69da",
   "candidateId": "orchestra-production-model-artifacts-2026-07-28.1",
   "claims": {
     "campaignEvidence": false,

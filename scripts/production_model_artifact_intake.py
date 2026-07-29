@@ -47,7 +47,7 @@ POLICY_ID = "orchestra-production-model-artifact-intake-2026-07-28.1"
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 MAX_REPORT_BYTES = 65536
 EXPECTED_POLICY_DIGEST = (
-    "sha256:625372044bb5db2271f2c545a2420e95af6a4dd867f9c5775f73903fb7317ca7"
+    "sha256:7b529c7eddfee66a5a3886c82d86b2e02d76907bdc53863d2d6ff12b9792f603"
 )
 OBSERVATION_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{7,127}$")
 DIGEST = re.compile(r"^sha256:[a-f0-9]{64}$")

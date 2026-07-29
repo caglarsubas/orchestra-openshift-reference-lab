@@ -10,7 +10,7 @@
     ],
     "state": "blocked"
   },
-  "artifactSetDigest": "sha256:a4ab4d584c629a86a5c9887d3e3e595231075f94ca9d6cf54da96685462fd2e1",
+  "artifactSetDigest": "sha256:956dbf7a493fe94cd62f38af216b62ffe44c502a4dff77cbae866539b97339b1",
   "artifactSetId": "orchestra-sno-trial-products-2026-07-28.5",
   "artifacts": [
     {
@@ -168,7 +168,7 @@
     }
   ],
   "bindings": {
-    "workloadCandidateDigest": "sha256:09a2b47d362f05891e01034a2c44078212c32fc098a8bba261b35f2b9a9d99d4"
+    "workloadCandidateDigest": "sha256:03427f83b8131b515e93733524d4f31a857ccba411ab0ca9144f9eda19073f81"
   },
   "claims": {
     "campaignEvidence": false,

@@ -96,7 +96,7 @@
       "preemptible": false
     },
     "digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-    "dnsZone": "ocp-lab.prometa.ai",
+    "dnsZone": "ocp-lab.planeon.ai",
     "ingress": "private",
     "networkMode": "private-allowlisted",
     "probeRunners": [
