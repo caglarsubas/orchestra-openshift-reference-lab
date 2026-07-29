@@ -10,6 +10,12 @@ from scripts.production_model_artifact_custody_execution import (
     FOUNDATION_OUTPUTS_PATH,
     FOUNDATION_TERRAFORM_PATH,
     FOUNDATION_VARIABLES_PATH,
+    LIVE_BUILDER_PATH,
+    RUNNER_BOOTSTRAP_PATH,
+    RUNNER_LOCK_PATH,
+    UPLOAD_RECEIPT_SCHEMA_PATH,
+    UPLOAD_SCRIPT_PATH,
+    VERIFICATION_SCRIPT_PATH,
     UPLOADER_ID,
     VERIFIER_ID,
     WORKFLOW_PATH,
@@ -49,6 +55,13 @@ class ProductionModelArtifactCustodyExecutionTests(unittest.TestCase):
             "foundationTerraformDigest": blob_digest(FOUNDATION_TERRAFORM_PATH),
             "foundationVariablesDigest": blob_digest(FOUNDATION_VARIABLES_PATH),
             "foundationOutputsDigest": blob_digest(FOUNDATION_OUTPUTS_PATH),
+            "uploadReceiptSchemaDigest": blob_digest(UPLOAD_RECEIPT_SCHEMA_PATH),
+            "liveBuilderDigest": blob_digest(LIVE_BUILDER_PATH),
+            "uploadScriptDigest": blob_digest(UPLOAD_SCRIPT_PATH),
+            "verificationScriptDigest": blob_digest(VERIFICATION_SCRIPT_PATH),
+            "workflowDigest": blob_digest(WORKFLOW_PATH),
+            "runnerLockDigest": blob_digest(RUNNER_LOCK_PATH),
+            "runnerBootstrapDigest": blob_digest(RUNNER_BOOTSTRAP_PATH),
         }
         for name, digest in expected.items():
             self.assertEqual(self.authority["bindings"][name], digest)
@@ -111,9 +124,9 @@ class ProductionModelArtifactCustodyExecutionTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "federation_invalid"):
                     self.validate(changed)
 
-    def test_source_contract_cannot_claim_apply_or_verification(self) -> None:
+    def test_declared_workflow_cannot_claim_apply_or_verification(self) -> None:
         for key, value in self.authority["claim"].items():
-            if key == "terraformDeclared":
+            if key in {"terraformDeclared", "workflowDeclared"}:
                 self.assertTrue(value)
                 continue
             self.assertFalse(value, key)
@@ -122,24 +135,50 @@ class ProductionModelArtifactCustodyExecutionTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "authority_claim_invalid"):
                 self.validate(changed)
 
-    def test_workflow_remains_a_non_executable_reservation(self) -> None:
-        self.assertFalse(WORKFLOW_PATH.exists())
-        self.assertFalse(self.authority["workflowReservation"]["declared"])
-        self.assertTrue(
-            self.authority["workflowReservation"][
-                "transferBoundaryDecisionRequired"
-            ]
+    def test_workflow_uses_separate_non_artifact_transfer_runners(self) -> None:
+        self.assertTrue(WORKFLOW_PATH.exists())
+        self.assertTrue(self.authority["workflowReservation"]["declared"])
+        self.assertFalse(
+            self.authority["workflowReservation"]["transferBoundaryDecisionRequired"]
         )
         self.assertFalse(
             self.authority["workflowReservation"][
                 "localRestrictedDirectoryReadableByGitHubHostedRunner"
             ]
         )
+        self.assertEqual(
+            self.authority["workflowReservation"]["uploadRunnerLabels"],
+            [
+                "self-hosted",
+                "linux",
+                "x64",
+                "orchestra-model-custody-upload",
+            ],
+        )
+        self.assertTrue(
+            self.authority["workflowReservation"]["uploadRunnerEphemeralRequired"]
+        )
+        self.assertFalse(
+            self.authority["workflowReservation"]["githubArtifactTransferAllowed"]
+        )
+        self.assertEqual(
+            self.authority["workflowReservation"]["uploadRunnerBootstrap"],
+            "scripts/run_ephemeral_production_model_custody_runner.sh",
+        )
+        workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("actions/upload-artifact", workflow)
+        self.assertNotIn("actions/download-artifact", workflow)
+        self.assertNotIn("actions/cache", workflow)
+        runner = RUNNER_BOOTSTRAP_PATH.read_text(encoding="utf-8")
+        self.assertIn("--ephemeral", runner)
+        self.assertIn("--disableupdate", runner)
+        self.assertIn("root_forbidden", runner)
 
     def test_bucket_and_kms_contract_is_retained_and_separated(self) -> None:
         foundation = FOUNDATION_TERRAFORM_PATH.read_text(encoding="utf-8")
         self.assertIn("retention_period = 400 * 24 * 60 * 60", foundation)
         self.assertIn("enable_object_retention     = true", foundation)
+        self.assertIn("default_event_based_hold    = true", foundation)
         self.assertIn('purpose         = "ENCRYPT_DECRYPT"', foundation)
         self.assertIn('purpose  = "ASYMMETRIC_SIGN"', foundation)
         self.assertIn('name            = "production-model-artifacts/"', foundation)
@@ -148,9 +187,7 @@ class ProductionModelArtifactCustodyExecutionTests(unittest.TestCase):
 
     def test_default_validation_ci_docs_and_status_include_authority_gate(self) -> None:
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-        ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(
-            encoding="utf-8"
-        )
+        ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         runbook = (
             ROOT / "docs" / "runbooks" / "production-model-artifacts.md"
         ).read_text(encoding="utf-8")

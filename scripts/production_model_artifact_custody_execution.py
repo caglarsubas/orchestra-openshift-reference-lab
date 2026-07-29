@@ -40,11 +40,7 @@ BOOTSTRAP_TERRAFORM_PATH = (
     ROOT / "infra" / "terraform" / "bootstrap" / "production_model_custody.tf"
 )
 BOOTSTRAP_OUTPUTS_PATH = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "bootstrap"
-    / "production_model_custody_outputs.tf"
+    ROOT / "infra" / "terraform" / "bootstrap" / "production_model_custody_outputs.tf"
 )
 FOUNDATION_TERRAFORM_PATH = (
     ROOT / "infra" / "terraform" / "foundation" / "production_model_custody.tf"
@@ -57,21 +53,24 @@ FOUNDATION_VARIABLES_PATH = (
     / "production_model_custody_variables.tf"
 )
 FOUNDATION_OUTPUTS_PATH = (
-    ROOT
-    / "infra"
-    / "terraform"
-    / "foundation"
-    / "production_model_custody_outputs.tf"
+    ROOT / "infra" / "terraform" / "foundation" / "production_model_custody_outputs.tf"
 )
-WORKFLOW_PATH = (
-    ROOT
-    / ".github"
-    / "workflows"
-    / "production-model-artifact-custody.yml"
+WORKFLOW_PATH = ROOT / ".github" / "workflows" / "production-model-artifact-custody.yml"
+UPLOAD_RECEIPT_SCHEMA_PATH = (
+    ROOT / "schemas" / "production-model-artifact-upload-receipt-v1.schema.json"
+)
+LIVE_BUILDER_PATH = ROOT / "scripts" / "production_model_artifact_custody_live.py"
+UPLOAD_SCRIPT_PATH = ROOT / "scripts" / "upload_production_model_artifact_custody.sh"
+VERIFICATION_SCRIPT_PATH = (
+    ROOT / "scripts" / "verify_and_publish_production_model_artifact_custody.sh"
+)
+RUNNER_LOCK_PATH = ROOT / "config" / "production-model-custody-runner.lock.json"
+RUNNER_BOOTSTRAP_PATH = (
+    ROOT / "scripts" / "run_ephemeral_production_model_custody_runner.sh"
 )
 PROFILE_ID = "orchestra-ocp-4.20-amd64-v1"
 EXPECTED_AUTHORITY_DIGEST = (
-    "sha256:06177cea76457b3ba7bee48521eb02a7ecfbaec93ded4c157099b277e0eb4195"
+    "sha256:a82f4a7a4b315749eaa3226781d8a97fc3b6d1648e6088f1f76041525f7bffa6"
 )
 EXPECTED_TOPOLOGY_DIGEST = (
     "sha256:40cc2969f5cce416a92dc5df47c556932f5e733639c38eef9393c068dffc9bc0"
@@ -155,6 +154,13 @@ def expected_bindings(
         "foundationTerraformDigest": blob_digest(FOUNDATION_TERRAFORM_PATH),
         "foundationVariablesDigest": blob_digest(FOUNDATION_VARIABLES_PATH),
         "foundationOutputsDigest": blob_digest(FOUNDATION_OUTPUTS_PATH),
+        "uploadReceiptSchemaDigest": blob_digest(UPLOAD_RECEIPT_SCHEMA_PATH),
+        "liveBuilderDigest": blob_digest(LIVE_BUILDER_PATH),
+        "uploadScriptDigest": blob_digest(UPLOAD_SCRIPT_PATH),
+        "verificationScriptDigest": blob_digest(VERIFICATION_SCRIPT_PATH),
+        "workflowDigest": blob_digest(WORKFLOW_PATH),
+        "runnerLockDigest": blob_digest(RUNNER_LOCK_PATH),
+        "runnerBootstrapDigest": blob_digest(RUNNER_BOOTSTRAP_PATH),
     }
 
 
@@ -192,9 +198,7 @@ def validate_authority(
         or value["targetClass"] != "vendor-reference-lab"
     ):
         fail("production_model_custody_authority_identity_invalid")
-    if value["bindings"] != expected_bindings(
-        topology, release_set, custody_inputs
-    ):
+    if value["bindings"] != expected_bindings(topology, release_set, custody_inputs):
         fail("production_model_custody_authority_bindings_invalid")
     if value["storage"] != {
         "projectPlane": "services-evidence",
@@ -212,6 +216,7 @@ def validate_authority(
         "retentionDays": 400,
         "retentionLocked": False,
         "eventBasedHoldRequiredPerArtifact": True,
+        "defaultEventBasedHold": True,
         "preventDestroy": True,
     }:
         fail("production_model_custody_authority_storage_invalid")
@@ -281,13 +286,28 @@ def validate_authority(
         fail("production_model_custody_authority_federation_invalid")
     if value["workflowReservation"] != {
         "path": ".github/workflows/production-model-artifact-custody.yml",
-        "declared": False,
+        "declared": True,
         "protectedEnvironmentsConfigured": False,
         "exactMainRevisionRequired": True,
         "currentRunApprovalRequired": True,
         "rerunAllowed": False,
         "localRestrictedDirectoryReadableByGitHubHostedRunner": False,
-        "transferBoundaryDecisionRequired": True,
+        "transferBoundaryDecisionRequired": False,
+        "uploadRunnerLabels": [
+            "self-hosted",
+            "linux",
+            "x64",
+            "orchestra-model-custody-upload",
+        ],
+        "uploadRunnerEphemeralRequired": True,
+        "uploadRunnerLock": "config/production-model-custody-runner.lock.json",
+        "uploadRunnerBootstrap": (
+            "scripts/run_ephemeral_production_model_custody_runner.sh"
+        ),
+        "uploadPrivateInbox": "restricted/production-model-custody-inbox",
+        "verificationRunner": "github-hosted-ubuntu-24.04",
+        "githubArtifactTransferAllowed": False,
+        "githubCacheTransferAllowed": False,
         "artifactDownloadPerformed": False,
         "artifactCopyPerformed": False,
         "signedCustodyRecordPublished": False,
@@ -295,7 +315,7 @@ def validate_authority(
         fail("production_model_custody_authority_workflow_boundary_invalid")
     if value["claim"] != {
         "terraformDeclared": True,
-        "workflowDeclared": False,
+        "workflowDeclared": True,
         "applied": False,
         "storageProvisioned": False,
         "protectedEnvironmentsConfigured": False,
@@ -369,8 +389,25 @@ def validate_declared_implementation(authority: dict[str, Any]) -> None:
         FOUNDATION_OUTPUTS_PATH,
         "production_model_custody_foundation_outputs_missing",
     )
-    if WORKFLOW_PATH.exists() or authority["workflowReservation"]["declared"]:
-        fail("production_model_custody_workflow_unexpected")
+    workflow = _read(
+        WORKFLOW_PATH,
+        "production_model_custody_workflow_missing",
+    )
+    upload_script = _read(
+        UPLOAD_SCRIPT_PATH,
+        "production_model_custody_upload_script_missing",
+    )
+    verification_script = _read(
+        VERIFICATION_SCRIPT_PATH,
+        "production_model_custody_verification_script_missing",
+    )
+    runner_bootstrap = _read(
+        RUNNER_BOOTSTRAP_PATH,
+        "production_model_custody_runner_bootstrap_missing",
+    )
+    runner_lock = load_json(RUNNER_LOCK_PATH)
+    if not WORKFLOW_PATH.exists() or not authority["workflowReservation"]["declared"]:
+        fail("production_model_custody_workflow_missing")
 
     required_bootstrap = (
         'workload_identity_pool_provider_id = "production-model-custody-upload"',
@@ -393,6 +430,7 @@ def validate_declared_implementation(authority: dict[str, Any]) -> None:
         'public_access_prevention    = "enforced"',
         "uniform_bucket_level_access = true",
         "enable_object_retention     = true",
+        "default_event_based_hold    = true",
         "retention_period = 400 * 24 * 60 * 60",
         "prevent_destroy = true",
         'name            = "production-model-artifacts/"',
@@ -404,7 +442,7 @@ def validate_declared_implementation(authority: dict[str, Any]) -> None:
         'role          = "roles/cloudkms.signerVerifier"',
     )
     required_outputs = (
-        "workflow_declared  = false",
+        "workflow_declared  = true",
         "campaign_authority = false",
         "uploader_read_granted",
         "verifier_artifact_write_granted",
@@ -421,11 +459,133 @@ def validate_declared_implementation(authority: dict[str, Any]) -> None:
         for fragment in required_outputs
     ):
         fail("production_model_custody_output_contract_invalid")
+    required_workflow = (
+        "production-model-artifact-custody",
+        "expected_main_sha",
+        "GITHUB_RUN_ATTEMPT",
+        "orchestra-model-custody-upload",
+        "reference-lab-production-model-custody-upload",
+        "reference-lab-production-model-custody-verification",
+        "production-model-custody-upload",
+        "production-model-custody-verification",
+        "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093",
+        "upload_production_model_artifact_custody.sh",
+        "verify_and_publish_production_model_artifact_custody.sh",
+        "artifactCustodyVerified=false",
+        "artifactCustodyVerified=true",
+        "licenseApproved=false",
+        "admissionAuthorized=false",
+    )
+    required_upload = (
+        "--if-generation-match=0",
+        "--encryption-key=",
+        "production-model-artifact-upload-receipt.json",
+        "artifactCustodyVerified=false",
+    )
+    required_verification = (
+        "--if-generation-match=",
+        "--if-metageneration-match=",
+        "object_count_invalid",
+        "control_object_size_invalid",
+        "model_object_size_invalid",
+        "cosign sign-blob",
+        "cosign verify-blob",
+        "production-model-artifact-custody-signature.sigstore.json",
+        "artifactCustodyVerified=true",
+        "licenseApproved=false",
+        "admissionAuthorized=false",
+    )
+    if any(fragment not in workflow for fragment in required_workflow):
+        fail("production_model_custody_workflow_contract_invalid")
+    if any(fragment not in upload_script for fragment in required_upload):
+        fail("production_model_custody_upload_contract_invalid")
+    if any(fragment not in verification_script for fragment in required_verification):
+        fail("production_model_custody_verification_contract_invalid")
+    if runner_lock != {
+        "schemaVersion": 1,
+        "kind": "orchestra.openshift.production-model-custody-runner-lock.v1",
+        "runnerVersion": "2.336.0",
+        "archive": {
+            "filename": "actions-runner-linux-x64-2.336.0.tar.gz",
+            "url": (
+                "https://github.com/actions/runner/releases/download/v2.336.0/"
+                "actions-runner-linux-x64-2.336.0.tar.gz"
+            ),
+            "digest": (
+                "sha256:04cf0be1aff4c3ec3554466c39124ca250e3effd8873bb7e8d68535aa9505d5d"
+            ),
+        },
+        "platform": {
+            "os": "linux",
+            "architecture": "x64",
+            "rootRequired": False,
+            "ephemeral": True,
+            "disableUpdate": True,
+        },
+        "registration": {
+            "repository": REPOSITORY,
+            "labels": ["orchestra-model-custody-upload"],
+            "replaceAllowed": False,
+            "tokenFileRequired": True,
+            "tokenFileMode": "0600",
+        },
+        "workspace": {
+            "workDirectory": "_work",
+            "privateInbox": (
+                "_work/orchestra-openshift-reference-lab/"
+                "orchestra-openshift-reference-lab/restricted/"
+                "production-model-custody-inbox"
+            ),
+            "privateInboxMode": "0700",
+            "modelFileMode": "0600",
+            "cleanupRequired": True,
+        },
+        "controls": {
+            "modelDownloadPerformed": False,
+            "modelBytesStoredInGit": False,
+            "githubArtifactTransferAllowed": False,
+            "githubCacheTransferAllowed": False,
+            "runnerReuseAllowed": False,
+            "sourceOnly": True,
+        },
+        "claims": {
+            "runnerExecuted": False,
+            "artifactCopyPerformed": False,
+            "artifactCustodyVerified": False,
+            "licenseApproved": False,
+            "admissionAuthorized": False,
+            "deploymentAuthorized": False,
+            "campaignEvidence": False,
+            "referenceProfileVerified": False,
+        },
+    }:
+        fail("production_model_custody_runner_lock_invalid")
+    required_runner = (
+        "--ephemeral",
+        "--disableupdate",
+        "orchestra-model-custody-upload",
+        "actions-runner-linux-x64-2.336.0.tar.gz",
+        "root_forbidden",
+        "runner_root_must_not_exist",
+        "registration_token_mode_invalid",
+        "verify_model",
+        'rm -rf "$RUNNER_ROOT"',
+    )
+    if any(fragment not in runner_bootstrap for fragment in required_runner):
+        fail("production_model_custody_runner_bootstrap_invalid")
+    forbidden_workflow = (
+        "actions/upload-artifact",
+        "actions/download-artifact",
+        "actions/cache",
+        "production_model_artifact_custody_live.py download",
+    )
+    if any(fragment in workflow for fragment in forbidden_workflow):
+        fail("production_model_custody_github_transfer_forbidden")
     if (
         'variable "production_model_artifact_bucket_name"' not in foundation_variables
         or 'default     = ""' not in foundation_variables
-        or '"${var.services_project_id}-production-model-artifacts"'
-        not in foundation
+        or '"${var.services_project_id}-production-model-artifacts"' not in foundation
         or "local.production_model_artifact_bucket_name != var.signed_evidence_bucket_name"
         not in foundation
         or "local.production_model_artifact_bucket_name != var.raw_evidence_bucket_name"
@@ -503,7 +663,7 @@ def main() -> int:
     digest = validate_contract_and_implementation()
     print(
         "productionModelCustodyAuthorityValid=true "
-        f"digest={digest} terraformDeclared=true workflowDeclared=false "
+        f"digest={digest} terraformDeclared=true workflowDeclared=true "
         "applied=false artifactCustodyVerified=false licenseApproved=false "
         "admissionAuthorized=false campaignEvidence=false "
         "referenceProfileVerified=false"

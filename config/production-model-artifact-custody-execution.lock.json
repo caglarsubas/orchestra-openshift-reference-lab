@@ -10,10 +10,17 @@
     "candidateDigest": "sha256:cae278d46301c9777265df6b8a093e577472e7ee90ba26ad92eef233c90589dc",
     "custodyPolicyDigest": "sha256:ca2fc2092f0b1fdb652a465f8d1502804ee26ca3274edc130d312577edcad22a",
     "bootstrapTerraformDigest": "sha256:63c1b0ede29b499d75830fa8a919bcad0495f816e99e6504e31f8f5cfbe9cfd4",
-    "bootstrapOutputsDigest": "sha256:6d1bcdf3c1b2b07a0b53ce86a40b3d30bdca0629efb9fea491abdd2d8a9c8746",
-    "foundationTerraformDigest": "sha256:64aa4658796e3c888eb6eb972caf995655d81387fcd13b6f36005dd9f0789f04",
+    "bootstrapOutputsDigest": "sha256:be598a0b4d2b381ba275e86b5f71c22e1654076d29d8645b478476b0f2781e4a",
+    "foundationTerraformDigest": "sha256:3907902bf78bf15146af9b54d364ac12373cb255c5629213f86a79b42f78a05f",
     "foundationVariablesDigest": "sha256:8f416765066e33359a97fdbad50cd5b2fb4a12c50ac31e783f9cb33e3b2e7ec3",
-    "foundationOutputsDigest": "sha256:fa877cfc6f37d79a117c9fe6d0523b610a1a95e0f2bf17bd03d969e6f34794a3"
+    "foundationOutputsDigest": "sha256:fa877cfc6f37d79a117c9fe6d0523b610a1a95e0f2bf17bd03d969e6f34794a3",
+    "uploadReceiptSchemaDigest": "sha256:08045a6f6754f1f2747ccbeb82476266162db52ecbae9166d21cd9761c5bd162",
+    "liveBuilderDigest": "sha256:7e54c23daa68d1a2b05e6f3dda392ff10828bd546e7d1f3e8b979fecd444fe20",
+    "uploadScriptDigest": "sha256:bc89c4ea07a9832140f620c0e2a41c675811ae470125058abdea77c301d26328",
+    "verificationScriptDigest": "sha256:1b94ce53b4c74f3abd8257def90d6c7d914375821b5dc379ff2e4064586d3842",
+    "workflowDigest": "sha256:7e5a6ac231dd84cdcac185ab248bdf65d06716330924890f5b7e095592b50817",
+    "runnerLockDigest": "sha256:58bd086135cfd10d9cbc321736865d7e446cf2d6d92123215a5fa8064bd42130",
+    "runnerBootstrapDigest": "sha256:29e9fffbd632dca5a4e263d2b5f3f0067573dab252c357bce3a4e63aadcf11e6"
   },
   "storage": {
     "projectPlane": "services-evidence",
@@ -31,6 +38,7 @@
     "retentionDays": 400,
     "retentionLocked": false,
     "eventBasedHoldRequiredPerArtifact": true,
+    "defaultEventBasedHold": true,
     "preventDestroy": true
   },
   "kms": {
@@ -94,20 +102,33 @@
   },
   "workflowReservation": {
     "path": ".github/workflows/production-model-artifact-custody.yml",
-    "declared": false,
+    "declared": true,
     "protectedEnvironmentsConfigured": false,
     "exactMainRevisionRequired": true,
     "currentRunApprovalRequired": true,
     "rerunAllowed": false,
     "localRestrictedDirectoryReadableByGitHubHostedRunner": false,
-    "transferBoundaryDecisionRequired": true,
+    "transferBoundaryDecisionRequired": false,
+    "uploadRunnerLabels": [
+      "self-hosted",
+      "linux",
+      "x64",
+      "orchestra-model-custody-upload"
+    ],
+    "uploadRunnerEphemeralRequired": true,
+    "uploadRunnerLock": "config/production-model-custody-runner.lock.json",
+    "uploadRunnerBootstrap": "scripts/run_ephemeral_production_model_custody_runner.sh",
+    "uploadPrivateInbox": "restricted/production-model-custody-inbox",
+    "verificationRunner": "github-hosted-ubuntu-24.04",
+    "githubArtifactTransferAllowed": false,
+    "githubCacheTransferAllowed": false,
     "artifactDownloadPerformed": false,
     "artifactCopyPerformed": false,
     "signedCustodyRecordPublished": false
   },
   "claim": {
     "terraformDeclared": true,
-    "workflowDeclared": false,
+    "workflowDeclared": true,
     "applied": false,
     "storageProvisioned": false,
     "protectedEnvironmentsConfigured": false,

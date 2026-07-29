@@ -15,7 +15,7 @@ def main() -> int:
     digest = validate_contract_and_implementation()
     print(
         "production_model_custody_authority_valid "
-        f"digest={digest} terraformDeclared=true workflowDeclared=false "
+        f"digest={digest} terraformDeclared=true workflowDeclared=true "
         "applied=false artifactCustodyVerified=false licenseApproved=false "
         "admissionAuthorized=false campaignEvidence=false"
     )

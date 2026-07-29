@@ -16,9 +16,10 @@ from typing import Any, NoReturn
 
 try:
     from scripts.github_environment_contract import (
+        ALL_ENVIRONMENT_CONTRACTS,
         API_ROOT,
         API_VERSION,
-        ENVIRONMENT_CONTRACTS,
+        PRODUCTION_MODEL_ENVIRONMENT_CONTRACTS,
         fetch_environment_evidence,
         load_expected_environment,
         payload_digest,
@@ -38,9 +39,10 @@ try:
     )
 except ModuleNotFoundError:
     from github_environment_contract import (
+        ALL_ENVIRONMENT_CONTRACTS,
         API_ROOT,
         API_VERSION,
-        ENVIRONMENT_CONTRACTS,
+        PRODUCTION_MODEL_ENVIRONMENT_CONTRACTS,
         fetch_environment_evidence,
         load_expected_environment,
         payload_digest,
@@ -54,11 +56,9 @@ except ModuleNotFoundError:
 
 
 PLAN_KIND = "orchestra.openshift.sno-trial-product-admission-environment-plan.v1"
-REFERENCE_LAB_PLAN_KIND = (
-    "orchestra.openshift.reference-lab-github-environment-plan.v1"
-)
+REFERENCE_LAB_PLAN_KIND = "orchestra.openshift.reference-lab-github-environment-plan.v1"
 DEFAULT_CONTRACT = "sno-trial-product-admission"
-SUPPORTED_CONTRACTS = (DEFAULT_CONTRACT, *ENVIRONMENT_CONTRACTS)
+SUPPORTED_CONTRACTS = (DEFAULT_CONTRACT, *ALL_ENVIRONMENT_CONTRACTS)
 REFERENCE_LAB_ENVIRONMENT_SECRETS = {
     "foundation-plan": {"LAB_FOUNDATION_PREREQUISITES_JSON"},
     "foundation-apply": set(),
@@ -78,6 +78,8 @@ REFERENCE_LAB_ENVIRONMENT_SECRETS = {
         "DEPENDENCY_RISK_GITHUB_APP_INSTALLATION_ID",
         "DEPENDENCY_RISK_GITHUB_APP_PRIVATE_KEY",
     },
+    "production-model-custody-upload": set(),
+    "production-model-custody-verification": set(),
 }
 PLAN_CONTROLS = {
     "cloudMutationAuthorized": False,
@@ -166,7 +168,10 @@ def load_contract(
         fail("github_environment_contract_invalid")
     if contract != DEFAULT_CONTRACT:
         policy, policy_digest = load_operator_control_plane_policy()
-        if contract not in policy["environmentContracts"]:
+        if (
+            contract not in policy["environmentContracts"]
+            and contract not in PRODUCTION_MODEL_ENVIRONMENT_CONTRACTS
+        ):
             fail("github_environment_contract_invalid")
         expected = load_expected_environment(contract)
         return expected, payload_digest(

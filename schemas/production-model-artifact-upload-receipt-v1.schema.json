@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometa.ai/orchestra/reference-lab/production-model-artifact-upload-receipt-v1.schema.json",
+  "title": "Orchestra production model artifact upload receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "recordId",
+    "profileId",
+    "targetClass",
+    "executionMode",
+    "bindings",
+    "storage",
+    "artifacts",
+    "actor",
+    "timestamps",
+    "controls",
+    "claims",
+    "receiptDigest"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "kind": {
+      "const": "orchestra.openshift.production-model-artifact-upload-receipt.v1"
+    },
+    "recordId": {
+      "type": "string",
+      "pattern": "^production-model-custody-[a-z0-9][a-z0-9._-]{7,127}$"
+    },
+    "profileId": {"const": "orchestra-ocp-4.20-amd64-v1"},
+    "targetClass": {"const": "vendor-reference-lab"},
+    "executionMode": {"const": "live-upload"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "storage": {"$ref": "#/$defs/storage"},
+    "artifacts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/artifact"}
+    },
+    "actor": {"$ref": "#/$defs/actor"},
+    "timestamps": {"$ref": "#/$defs/timestamps"},
+    "controls": {"$ref": "#/$defs/controls"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receiptDigest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateDigest",
+        "sourceObservationId",
+        "sourceObservationDigest",
+        "sourceObservationObservedAt",
+        "custodyPolicyId",
+        "custodyPolicyDigest",
+        "uploadReceiptSchemaDigest"
+      ],
+      "properties": {
+        "candidateId": {
+          "const": "orchestra-production-model-artifacts-2026-07-28.1"
+        },
+        "candidateDigest": {"$ref": "#/$defs/digest"},
+        "sourceObservationId": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"
+        },
+        "sourceObservationDigest": {"$ref": "#/$defs/digest"},
+        "sourceObservationObservedAt": {"$ref": "#/$defs/timestamp"},
+        "custodyPolicyId": {
+          "const": "orchestra-production-model-artifact-custody-2026-07-28.1"
+        },
+        "custodyPolicyDigest": {"$ref": "#/$defs/digest"},
+        "uploadReceiptSchemaDigest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bucket",
+        "prefix",
+        "createOnlyGenerationPrecondition",
+        "completionMarker"
+      ],
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$"
+        },
+        "prefix": {
+          "type": "string",
+          "pattern": "^production-model-artifacts/v1/orchestra-ocp-4\\.20-amd64-v1/production-model-custody-[a-z0-9][a-z0-9._-]{7,127}$"
+        },
+        "createOnlyGenerationPrecondition": {"const": 0},
+        "completionMarker": {
+          "const": "production-model-artifact-upload-receipt.json"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactId",
+        "filename",
+        "expectedDigest",
+        "expectedSizeBytes",
+        "objectName"
+      ],
+      "properties": {
+        "artifactId": {
+          "enum": [
+            "orchestra-reference-chat-model",
+            "orchestra-reference-embedding-model"
+          ]
+        },
+        "filename": {
+          "enum": [
+            "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+            "nomic-embed-text-v1.5.Q4_K_M.gguf"
+          ]
+        },
+        "expectedDigest": {"$ref": "#/$defs/digest"},
+        "expectedSizeBytes": {"type": "integer", "minimum": 1},
+        "objectName": {
+          "type": "string",
+          "pattern": "^production-model-artifacts/v1/orchestra-ocp-4\\.20-amd64-v1/production-model-custody-[a-z0-9][a-z0-9._-]{7,127}/[a-z0-9][a-z0-9._-]{1,127}\\.gguf$"
+        }
+      }
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identityDigest", "serviceAccountId"],
+      "properties": {
+        "identityDigest": {"$ref": "#/$defs/digest"},
+        "serviceAccountId": {
+          "const": "orchestra-model-custody-writer"
+        }
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["copyStartedAt", "copyCompletedAt"],
+      "properties": {
+        "copyStartedAt": {"$ref": "#/$defs/timestamp"},
+        "copyCompletedAt": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceObservationVerified",
+        "createOnlyUpload",
+        "completionMarkerUploadedLast",
+        "modelBytesInReceipt",
+        "secretValuesInReceipt"
+      ],
+      "properties": {
+        "sourceObservationVerified": {"const": true},
+        "createOnlyUpload": {"const": true},
+        "completionMarkerUploadedLast": {"const": true},
+        "modelBytesInReceipt": {"const": false},
+        "secretValuesInReceipt": {"const": false}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactCopyCompleted",
+        "artifactCustodyVerified",
+        "licenseApproved",
+        "sourceAdmissionAuthorized",
+        "dependencyAdmissionAuthorized",
+        "deploymentAuthorized",
+        "campaignEvidence",
+        "referenceProfileVerified",
+        "customerCertified",
+        "redHatCertified",
+        "contractualSla"
+      ],
+      "properties": {
+        "artifactCopyCompleted": {"const": true},
+        "artifactCustodyVerified": {"const": false},
+        "licenseApproved": {"const": false},
+        "sourceAdmissionAuthorized": {"const": false},
+        "dependencyAdmissionAuthorized": {"const": false},
+        "deploymentAuthorized": {"const": false},
+        "campaignEvidence": {"const": false},
+        "referenceProfileVerified": {"const": false},
+        "customerCertified": {"const": false},
+        "redHatCertified": {"const": false},
+        "contractualSla": {"const": false}
+      }
+    }
+  }
+}

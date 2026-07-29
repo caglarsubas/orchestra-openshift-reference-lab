@@ -62,6 +62,7 @@ resource "google_storage_bucket" "production_model_artifacts" {
   public_access_prevention    = "enforced"
   uniform_bucket_level_access = true
   enable_object_retention     = true
+  default_event_based_hold    = true
 
   encryption {
     default_kms_key_name = google_kms_crypto_key.production_model_artifact_custody.id

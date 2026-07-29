@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "orchestra.openshift.production-model-custody-runner-lock.v1",
+  "runnerVersion": "2.336.0",
+  "archive": {
+    "filename": "actions-runner-linux-x64-2.336.0.tar.gz",
+    "url": "https://github.com/actions/runner/releases/download/v2.336.0/actions-runner-linux-x64-2.336.0.tar.gz",
+    "digest": "sha256:04cf0be1aff4c3ec3554466c39124ca250e3effd8873bb7e8d68535aa9505d5d"
+  },
+  "platform": {
+    "os": "linux",
+    "architecture": "x64",
+    "rootRequired": false,
+    "ephemeral": true,
+    "disableUpdate": true
+  },
+  "registration": {
+    "repository": "caglarsubas/orchestra-openshift-reference-lab",
+    "labels": [
+      "orchestra-model-custody-upload"
+    ],
+    "replaceAllowed": false,
+    "tokenFileRequired": true,
+    "tokenFileMode": "0600"
+  },
+  "workspace": {
+    "workDirectory": "_work",
+    "privateInbox": "_work/orchestra-openshift-reference-lab/orchestra-openshift-reference-lab/restricted/production-model-custody-inbox",
+    "privateInboxMode": "0700",
+    "modelFileMode": "0600",
+    "cleanupRequired": true
+  },
+  "controls": {
+    "modelDownloadPerformed": false,
+    "modelBytesStoredInGit": false,
+    "githubArtifactTransferAllowed": false,
+    "githubCacheTransferAllowed": false,
+    "runnerReuseAllowed": false,
+    "sourceOnly": true
+  },
+  "claims": {
+    "runnerExecuted": false,
+    "artifactCopyPerformed": false,
+    "artifactCustodyVerified": false,
+    "licenseApproved": false,
+    "admissionAuthorized": false,
+    "deploymentAuthorized": false,
+    "campaignEvidence": false,
+    "referenceProfileVerified": false
+  }
+}

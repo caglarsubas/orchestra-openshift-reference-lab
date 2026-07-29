@@ -490,21 +490,27 @@ strict payload-free custody and human-review records. Adversarial tests reject
 object substitution, mutable reads, identity reuse, automated approval,
 pre-custody review, and incomplete or rejected two-person review sets. Storage,
 KMS, managed-folder IAM, and two exact-main WIF identities are now separately
-source-declared and CI-tested. They remain unapplied. The future transfer
-workflow and protected environments are deliberately absent until the operator
-selects a reviewed boundary capable of reading local restricted bytes without
-placing them in Git or a generic GitHub artifact. Detached signatures and human
-decisions remain unexecuted. No model bytes were downloaded or copied, the
-frozen BOM and admission contract remain unchanged, and no custody, licence,
+source-declared and CI-tested. The transfer boundary is also source-declared:
+an ephemeral labelled self-hosted upload job sends a fixed ignored private
+inbox directly to create-only, default-held CMEK GCS objects; a distinct
+GitHub-hosted verifier metadata-gates object sizes, generation- and
+metageneration-pins downloads, replays digests, and publishes the detached KMS
+signature last. A strict payload-free upload receipt is the only completion
+marker. The workflow forbids GitHub artifacts and caches for model transfer.
+The cloud resources and two protected environments remain unapplied and
+unconfigured, so detached signatures and human decisions remain unexecuted.
+No model bytes were downloaded or copied by this source increment, the frozen
+BOM and admission contract remain unchanged, and no custody, licence,
 deployment, campaign, or certification claim is made.
 
-The next live increment starts by applying the exact plan-bound required-reviewer
-configuration to all six existing environment shells after an eligible non-owner
-collaborator is added. Bootstrap/foundation application and independent
-verification must then cover all six WIF providers, seven service accounts,
-foundation and dependency-risk KMS versions/public-key digests, managed-folder
-and bucket IAM, all six protected environments, reviewer-group plan access, and
-the GitHub App installation. The aggregate operator-control-plane collector and
+The next live increment starts by applying the exact plan-bound
+required-reviewer configuration to the two model-custody environments and
+revalidating the six existing environment gates. Bootstrap/foundation
+application and independent verification must then cover all eight WIF
+providers, nine service accounts, foundation, dependency-risk, and
+model-custody KMS versions/public-key digests, managed-folder and bucket IAM,
+all eight protected environments, reviewer-group plan access, and the GitHub
+App installation. The aggregate operator-control-plane collector and
 strict one-hour report are source-declared and CI-tested. The App verifier mints
 an unrestricted installation token, rejects a broader repository set or any
 write permission, and requires revocation, but no required-reviewer protection,
