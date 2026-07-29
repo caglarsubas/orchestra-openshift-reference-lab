@@ -5,12 +5,12 @@ from __future__ import annotations
 
 try:
     from scripts.configure_sno_trial_product_admission_environment import (
-        ENVIRONMENT_CONTRACTS,
+        ALL_ENVIRONMENT_CONTRACTS,
         main,
     )
 except ModuleNotFoundError:
     from configure_sno_trial_product_admission_environment import (
-        ENVIRONMENT_CONTRACTS,
+        ALL_ENVIRONMENT_CONTRACTS,
         main,
     )
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     try:
         raise SystemExit(
             main(
-                contract_choices=ENVIRONMENT_CONTRACTS,
+                contract_choices=ALL_ENVIRONMENT_CONTRACTS,
                 contract_required=True,
             )
         )

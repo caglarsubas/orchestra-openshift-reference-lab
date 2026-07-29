@@ -1,0 +1,7 @@
+self-hosted-runner:
+  labels:
+    - orchestra-model-custody-upload
+
+config-variables: null
+
+paths:

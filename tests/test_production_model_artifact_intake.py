@@ -294,7 +294,13 @@ class ProductionModelArtifactIntakeTests(unittest.TestCase):
         report["executionMode"] = "local-file-inspection"
         self.resign(report, "reportDigest")
         with self.assertRaisesRegex(ValueError, "artifact_result_invalid"):
-            validate_report(report, self.policy, self.candidate, self.schema)
+            validate_report(
+                report,
+                self.policy,
+                self.candidate,
+                self.schema,
+                now=observed_at,
+            )
 
     def test_matching_local_report_is_still_non_authorizing(self) -> None:
         now = datetime.now(timezone.utc).replace(microsecond=0)

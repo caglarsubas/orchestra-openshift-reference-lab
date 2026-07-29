@@ -27,6 +27,14 @@ ENVIRONMENT_CONTRACTS = (
     "dependency-risk-collection",
     "dependency-risk-custody-verification",
 )
+PRODUCTION_MODEL_ENVIRONMENT_CONTRACTS = (
+    "production-model-custody-upload",
+    "production-model-custody-verification",
+)
+ALL_ENVIRONMENT_CONTRACTS = (
+    *ENVIRONMENT_CONTRACTS,
+    *PRODUCTION_MODEL_ENVIRONMENT_CONTRACTS,
+)
 
 
 def fail(code: str) -> NoReturn:
@@ -467,6 +475,66 @@ def load_expected_environment(contract: str) -> dict[str, Any]:
         authority, release_set, risk_policy = load_contract()
         validate_authority(authority, release_set, risk_policy)
         return authority["federation"]
+    if contract in {
+        "production-model-custody-upload",
+        "production-model-custody-verification",
+    }:
+        try:
+            from scripts.production_model_artifact_custody_execution import (
+                load_contract,
+                validate_authority,
+            )
+        except ModuleNotFoundError:
+            from production_model_artifact_custody_execution import (
+                load_contract,
+                validate_authority,
+            )
+
+        authority, topology, release_set, custody_inputs = load_contract()
+        validate_authority(authority, topology, release_set, custody_inputs)
+        federation = authority["federation"]
+        upload = contract == "production-model-custody-upload"
+        provider_id = (
+            federation["uploaderProviderId"]
+            if upload
+            else federation["verifierProviderId"]
+        )
+        environment = (
+            federation["uploaderEnvironment"]
+            if upload
+            else federation["verifierEnvironment"]
+        )
+        minimum_reviewers = (
+            federation["uploaderMinimumIndependentReviewers"]
+            if upload
+            else federation["verifierMinimumIndependentReviewers"]
+        )
+        return {
+            "poolId": federation["poolId"],
+            "providerId": provider_id,
+            "issuerUri": "https://token.actions.githubusercontent.com",
+            "repository": federation["repository"],
+            "repositoryId": federation["repositoryId"],
+            "repositoryOwnerId": federation["repositoryOwnerId"],
+            "repositoryVisibility": federation["repositoryVisibility"],
+            "workflowRef": federation["workflowRef"],
+            "environment": environment,
+            "minimumIndependentReviewers": minimum_reviewers,
+            "reviewerType": "User",
+            "preventSelfReview": federation["preventSelfReview"],
+            "deploymentBranch": federation["deploymentBranch"],
+            "attributeCondition": (
+                f"assertion.repository == '{federation['repository']}'"
+                f" && assertion.repository_id == '{federation['repositoryId']}'"
+                " && assertion.repository_owner_id == "
+                f"'{federation['repositoryOwnerId']}'"
+                " && assertion.repository_visibility == 'private'"
+                " && assertion.ref == 'refs/heads/main'"
+                " && assertion.event_name == 'workflow_dispatch'"
+                f" && assertion.workflow_ref == '{federation['workflowRef']}'"
+                f" && assertion.environment == '{environment}'"
+            ),
+        }
     fail("github_environment_contract_invalid")
 
 
@@ -474,7 +542,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("verify", choices=("verify",))
     parser.add_argument(
-        "--contract", choices=ENVIRONMENT_CONTRACTS, default="foundation-plan"
+        "--contract", choices=ALL_ENVIRONMENT_CONTRACTS, default="foundation-plan"
     )
     parser.add_argument("--token-file", type=Path, required=True)
     parser.add_argument("--workflow-run-id", type=int, required=True)

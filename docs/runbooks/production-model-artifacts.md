@@ -159,11 +159,11 @@ signing key, and short-lived identities, then add protected workflow
 environments, signature replay, and an independently reviewed aggregate. None
 of those live surfaces exists merely because this contract is checked in.
 
-## Source-declared cloud authority
+## Executable cloud authority
 
-The bounded cloud authority is
+The executable cloud authority is
 `config/production-model-artifact-custody-execution.lock.json`, digest
-`sha256:06177cea76457b3ba7bee48521eb02a7ecfbaec93ded4c157099b277e0eb4195`.
+`sha256:a82f4a7a4b315749eaa3226781d8a97fc3b6d1648e6088f1f76041525f7bffa6`.
 Validate its policy, file bindings, Terraform resources, IAM scope, and
 non-live claims with:
 
@@ -185,25 +185,89 @@ The foundation module declares a dedicated bucket. It defaults to
 `production_model_artifact_bucket_name` input permits a reviewed globally
 unique override without breaking existing foundation plan/apply callers. The
 bucket uses CMEK, uniform bucket access, enforced public-access prevention,
-versioning, object retention, a 400-day unlocked retention policy, and
-`prevent_destroy`. It is intentionally distinct from raw and signed evidence
-custody. Keeping retention unlocked at this stage avoids an irreversible
-provider action before plan review; every copied model must still receive the
-policy-required event-based hold.
+versioning, object retention, a 400-day unlocked retention policy, a default
+event-based hold, and `prevent_destroy`. It is intentionally distinct from raw
+and signed evidence custody. Keeping retention unlocked at this stage avoids an
+irreversible provider action before plan review; the bucket-level default
+ensures the create-only uploader does not need object-update permission merely
+to place every copied model under hold.
 
-This increment does not contain
-`.github/workflows/production-model-artifact-custody.yml` and does not configure
-its two reserved protected environments. A GitHub-hosted runner cannot read an
-operator's local ignored `restricted/` directory. The later workflow must
-therefore bind an explicitly reviewed transfer surface, such as a controlled
-self-hosted runner or a separately attested source-staging mechanism, before
-any model byte is copied. Generic GitHub Actions artifacts and Git commits are
-not approved transfer surfaces.
+The protected workflow is
+`.github/workflows/production-model-artifact-custody.yml`. Its upload job runs
+only on a fresh Linux/AMD64 self-hosted runner carrying the
+`orchestra-model-custody-upload` label. Before that one-shot runner is
+registered, the operator places the two exact files in the ignored fixed
+workspace path `restricted/production-model-custody-inbox` with mode `0600`
+and the directory with mode `0700`. Checkout runs with `clean: false` solely
+to preserve this private inbox. The job repeats the descriptor-safe source
+inspection, uploads the observation and two models directly to create-only
+CMEK GCS objects, and uploads a strict payload-free receipt last.
 
-The current claim is `terraformDeclared=true`, `workflowDeclared=false`, and
-`applied=false`. Storage provisioning, live identity/KMS verification, custody,
-licence approval, admission, deployment, campaign evidence, and certification
-all remain false.
+The verifier is a fresh GitHub-hosted runner behind a different protected
+environment and WIF provider. It inventories exactly four upload objects,
+enforces control-object and exact model sizes from GCS metadata before any
+value-bearing download, pins both generation and metageneration for every
+read, replays SHA-256, verifies the event-based hold and exact CMEK key
+version, signs the custody record with a dedicated KMS key version, and
+uploads the detached signature last. The workflow contains no GitHub
+artifact, cache, package, or Git transfer path for model bytes.
+
+Both jobs refuse reruns, require the reviewed exact `main` SHA, and verify the
+current run's independent environment approval. The two protected environments
+and cloud resources still need separate live configuration and application.
+The current source claim is `terraformDeclared=true`,
+`workflowDeclared=true`, and `applied=false`. No model byte has been copied by
+checking in this workflow. Storage provisioning, live identity/KMS
+verification, custody, licence approval, admission, deployment, campaign
+evidence, and certification all remain false.
+
+### Configure the two approval gates
+
+Both environments require one eligible non-owner repository collaborator,
+prevent self-review, and allow only exact `main` deployments. Do not substitute
+the repository owner merely to make the workflow runnable. With a short-lived
+repository-administration token in a regular `0600` file, create and review a
+plan separately for each contract:
+
+```bash
+python3 scripts/configure_reference_lab_environment.py plan \
+  --contract production-model-custody-upload \
+  --token-file "$TOKEN_FILE" \
+  --reviewer-login "$NON_OWNER_REVIEWER" \
+  --output "$PWD/restricted/production-model-custody-upload-environment.plan.json"
+
+python3 scripts/configure_reference_lab_environment.py plan \
+  --contract production-model-custody-verification \
+  --token-file "$TOKEN_FILE" \
+  --reviewer-login "$NON_OWNER_REVIEWER" \
+  --output "$PWD/restricted/production-model-custody-verification-environment.plan.json"
+```
+
+Apply only the exact printed plan digest with the matching contract and then
+run the `verify` command. Planning does not mutate the repository. Applying
+environment protection does not provision GCP or authorize a model transfer.
+
+### Start the one-shot upload runner
+
+Use a disposable Linux/AMD64 host and a dedicated non-root user. Obtain a
+short-lived repository runner registration token immediately before the run,
+write only that token to a `0600` file, and invoke:
+
+```bash
+scripts/run_ephemeral_production_model_custody_runner.sh \
+  --runner-root "/var/tmp/orchestra-model-custody-runner-$RUN_ID" \
+  --registration-token-file "$REGISTRATION_TOKEN_FILE" \
+  --chat-model "$CHAT_MODEL" \
+  --embedding-model "$EMBEDDING_MODEL" \
+  --runner-name "orchestra-model-custody-$RUN_ID"
+```
+
+The script downloads only the locked official Actions runner, verifies its
+published SHA-256, validates both operator-obtained model files, stages them in
+the one permitted ignored inbox, registers with `--ephemeral --disableupdate`,
+executes one job, and removes the runner root and registration token on exit.
+The workflow should already be waiting for the
+`orchestra-model-custody-upload` label before this runner starts.
 
 ## Materialize and admit
 

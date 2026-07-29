@@ -1,0 +1,328 @@
+name: production-model-artifact-custody
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_main_sha:
+        description: Exact 40-character main revision reviewed for this custody run
+        required: true
+        type: string
+      record_id:
+        description: New immutable production-model-custody record ID
+        required: true
+        type: string
+      encryption_kms_key_version:
+        description: Exact artifact-encryption KMS key version
+        required: true
+        type: string
+      verification_kms_key_version:
+        description: Exact custody-record signing KMS key version
+        required: true
+        type: string
+      expected_verification_public_key_digest:
+        description: Reviewer-derived SHA-256 digest of the verification public key PEM
+        required: true
+        type: string
+      reason:
+        description: Bounded operator reason for this one-time custody transfer
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: production-model-artifact-custody
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    name: ephemeral private-inbox create-only upload
+    if: github.ref == 'refs/heads/main'
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - orchestra-model-custody-upload
+    timeout-minutes: 120
+    environment: reference-lab-production-model-custody-upload
+    outputs:
+      record_id: ${{ steps.inputs.outputs.record_id }}
+
+    steps:
+      - name: Require exact main, first attempt, and bounded operator inputs
+        id: inputs
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          RECORD_ID: ${{ inputs.record_id }}
+          ENCRYPTION_KEY_VERSION: ${{ inputs.encryption_kms_key_version }}
+          VERIFICATION_KEY_VERSION: ${{ inputs.verification_kms_key_version }}
+          EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_verification_public_key_digest }}
+          CUSTODY_REASON: ${{ inputs.reason }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          MODEL_ARTIFACT_BUCKET: ${{ vars.GCP_PRODUCTION_MODEL_ARTIFACT_BUCKET }}
+          WIF_PROVIDER: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_UPLOAD_WIF_PROVIDER }}
+          UPLOADER_SERVICE_ACCOUNT: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_UPLOAD_SERVICE_ACCOUNT }}
+          REVIEW_GATE_CONFIGURED: ${{ vars.PRODUCTION_MODEL_CUSTODY_UPLOAD_REVIEW_GATE_CONFIGURED }}
+        run: |
+          set -euo pipefail
+          [[ "$RUNNER_ENVIRONMENT" == "self-hosted" ]]
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$EXPECTED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$RECORD_ID" =~ ^production-model-custody-[a-z0-9][a-z0-9._-]{7,127}$ ]]
+          [[ "$ENCRYPTION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$VERIFICATION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ ${#CUSTODY_REASON} -ge 12 && ${#CUSTODY_REASON} -le 500 ]]
+          [[ "$REVIEW_GATE_CONFIGURED" == "true" ]]
+          [[ "$GCP_SERVICES_PROJECT_ID" =~ ^[a-z][a-z0-9-]{4,28}[a-z0-9]$ ]]
+          [[ "$MODEL_ARTIFACT_BUCKET" =~ ^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$ ]]
+          [[ "$WIF_PROVIDER" =~ ^projects/[1-9][0-9]*/locations/global/workloadIdentityPools/orchestra-lab-github/providers/production-model-custody-upload$ ]]
+          [[ "$UPLOADER_SERVICE_ACCOUNT" == "orchestra-model-custody-writer@$GCP_SERVICES_PROJECT_ID.iam.gserviceaccount.com" ]]
+          printf 'record_id=%s\n' "$RECORD_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Check out reviewed main without deleting the private inbox
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: false
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+
+      - name: Validate repository and executable custody boundary
+        run: |
+          python3 scripts/validate_repository.py
+          python3 scripts/validate_production_model_artifact_custody_execution.py
+
+      - name: Verify independent upload-environment approval for this run
+        env:
+          GITHUB_ENVIRONMENT_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$GITHUB_ENVIRONMENT_READ_TOKEN" > "$RUNNER_TEMP/github-token"
+          verification="$(python3 scripts/github_environment_contract.py verify \
+            --contract production-model-custody-upload \
+            --token-file "$RUNNER_TEMP/github-token" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-actor-id "$GITHUB_ACTOR_ID")"
+          printf '%s\n' "$verification"
+          [[ "$verification" =~ digest=(sha256:[a-f0-9]{64}) ]]
+          printf 'ENVIRONMENT_APPROVAL_DIGEST=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+
+      - name: Authenticate as create-only custody uploader
+        id: gcp-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_UPLOAD_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_UPLOAD_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Inspect the fixed private inbox and upload with receipt last
+        env:
+          RECORD_ID: ${{ inputs.record_id }}
+          ENCRYPTION_KEY_VERSION: ${{ inputs.encryption_kms_key_version }}
+          VERIFICATION_KEY_VERSION: ${{ inputs.verification_kms_key_version }}
+          EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_verification_public_key_digest }}
+          CUSTODY_REASON: ${{ inputs.reason }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          MODEL_ARTIFACT_BUCKET: ${{ vars.GCP_PRODUCTION_MODEL_ARTIFACT_BUCKET }}
+        run: |
+          set -euo pipefail
+          umask 077
+          inbox="$GITHUB_WORKSPACE/restricted/production-model-custody-inbox"
+          [[ "$(realpath "$inbox")" == "$GITHUB_WORKSPACE/restricted/production-model-custody-inbox" ]]
+          [[ ! -L "$inbox" && -d "$inbox" ]]
+          [[ "$(stat -c '%a' "$inbox")" == "700" ]]
+          chat="$inbox/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+          embedding="$inbox/nomic-embed-text-v1.5.Q4_K_M.gguf"
+          [[ -f "$chat" && ! -L "$chat" ]]
+          [[ -f "$embedding" && ! -L "$embedding" ]]
+          [[ "$(stat -c '%a' "$chat")" =~ ^[64]00$ ]]
+          [[ "$(stat -c '%a' "$embedding")" =~ ^[64]00$ ]]
+
+          observation_id="production-model-intake-$GITHUB_RUN_ID.$GITHUB_RUN_ATTEMPT"
+          observation="$inbox/production-model-artifact-intake-observation.json"
+          [[ ! -e "$observation" ]]
+          python3 scripts/production_model_artifact_intake.py inspect \
+            --chat-model "$chat" \
+            --embedding-model "$embedding" \
+            --observation-id "$observation_id" \
+            --output "$observation"
+
+          reason_digest="sha256:$(printf '%s' "$CUSTODY_REASON" | sha256sum | cut -d' ' -f1)"
+          uploader_identity_digest="sha256:$(jq -cnS \
+            --arg repositoryId "$GITHUB_REPOSITORY_ID" \
+            --arg workflowRunId "$GITHUB_RUN_ID" \
+            --arg workflowRunAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg actorId "$GITHUB_ACTOR_ID" \
+            --arg sourceRevision "$GITHUB_SHA" \
+            --arg recordId "$RECORD_ID" \
+            --arg encryptionKeyVersion "$ENCRYPTION_KEY_VERSION" \
+            --arg verificationKeyVersion "$VERIFICATION_KEY_VERSION" \
+            --arg verificationPublicKeyDigest "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" \
+            --arg environmentApprovalDigest "$ENVIRONMENT_APPROVAL_DIGEST" \
+            --arg reasonDigest "$reason_digest" \
+            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,recordId:$recordId,encryptionKeyVersion:$encryptionKeyVersion,verificationKeyVersion:$verificationKeyVersion,verificationPublicKeyDigest:$verificationPublicKeyDigest,environmentApprovalDigest:$environmentApprovalDigest,reasonDigest:$reasonDigest}' \
+            | sha256sum | cut -d' ' -f1)"
+          encryption_key="projects/$GCP_SERVICES_PROJECT_ID/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/production-model-artifact-custody/cryptoKeyVersions/$ENCRYPTION_KEY_VERSION"
+
+          scripts/upload_production_model_artifact_custody.sh \
+            --bucket "$MODEL_ARTIFACT_BUCKET" \
+            --record-id "$RECORD_ID" \
+            --source-observation "$observation" \
+            --chat-model "$chat" \
+            --embedding-model "$embedding" \
+            --encryption-key "$encryption_key" \
+            --uploader-identity-digest "$uploader_identity_digest" \
+          | tee "$RUNNER_TEMP/production-model-custody-upload.log"
+          grep -F "artifactCustodyVerified=false" \
+            "$RUNNER_TEMP/production-model-custody-upload.log" >/dev/null
+
+      - name: Remove credentials and private runner workspace inputs
+        if: always()
+        run: |
+          rm -rf \
+            "$RUNNER_TEMP/github-token" \
+            "$RUNNER_TEMP/production-model-custody-upload.log" \
+            "$GITHUB_WORKSPACE/restricted/production-model-custody-inbox"
+          find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete
+
+  verify:
+    name: independent generation-pinned verification and KMS signature
+    needs: upload
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    environment: reference-lab-production-model-custody-verification
+
+    steps:
+      - name: Require exact main, first attempt, and verifier authority
+        env:
+          EXPECTED_MAIN_SHA: ${{ inputs.expected_main_sha }}
+          RECORD_ID: ${{ needs.upload.outputs.record_id }}
+          VERIFICATION_KEY_VERSION: ${{ inputs.verification_kms_key_version }}
+          EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_verification_public_key_digest }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          MODEL_ARTIFACT_BUCKET: ${{ vars.GCP_PRODUCTION_MODEL_ARTIFACT_BUCKET }}
+          WIF_PROVIDER: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_VERIFY_WIF_PROVIDER }}
+          VERIFIER_SERVICE_ACCOUNT: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_VERIFY_SERVICE_ACCOUNT }}
+          REVIEW_GATE_CONFIGURED: ${{ vars.PRODUCTION_MODEL_CUSTODY_VERIFY_REVIEW_GATE_CONFIGURED }}
+        run: |
+          set -euo pipefail
+          [[ "$RUNNER_ENVIRONMENT" == "github-hosted" ]]
+          [[ "$GITHUB_RUN_ATTEMPT" == "1" ]]
+          [[ "$EXPECTED_MAIN_SHA" == "$GITHUB_SHA" ]]
+          [[ "$RECORD_ID" =~ ^production-model-custody-[a-z0-9][a-z0-9._-]{7,127}$ ]]
+          [[ "$VERIFICATION_KEY_VERSION" =~ ^[1-9][0-9]*$ ]]
+          [[ "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ "$REVIEW_GATE_CONFIGURED" == "true" ]]
+          [[ "$WIF_PROVIDER" =~ ^projects/[1-9][0-9]*/locations/global/workloadIdentityPools/orchestra-lab-github/providers/production-model-custody-verify$ ]]
+          [[ "$VERIFIER_SERVICE_ACCOUNT" == "orchestra-model-custody-verify@$GCP_SERVICES_PROJECT_ID.iam.gserviceaccount.com" ]]
+
+      - name: Check out reviewed main revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Validate repository and executable custody boundary
+        run: |
+          python3 scripts/validate_repository.py
+          python3 scripts/validate_production_model_artifact_custody_execution.py
+
+      - name: Verify independent verification-environment approval for this run
+        env:
+          GITHUB_ENVIRONMENT_READ_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          umask 077
+          printf '%s' "$GITHUB_ENVIRONMENT_READ_TOKEN" > "$RUNNER_TEMP/github-token"
+          verification="$(python3 scripts/github_environment_contract.py verify \
+            --contract production-model-custody-verification \
+            --token-file "$RUNNER_TEMP/github-token" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --workflow-actor-id "$GITHUB_ACTOR_ID")"
+          printf '%s\n' "$verification"
+          [[ "$verification" =~ digest=(sha256:[a-f0-9]{64}) ]]
+          printf 'ENVIRONMENT_APPROVAL_DIGEST=%s\n' "${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+
+      - name: Authenticate as independent custody verifier
+        id: gcp-auth
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_VERIFY_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_PRODUCTION_MODEL_CUSTODY_VERIFY_SERVICE_ACCOUNT }}
+          create_credentials_file: true
+          export_environment_variables: true
+
+      - name: Verify immutable objects and publish detached KMS signature last
+        env:
+          RECORD_ID: ${{ needs.upload.outputs.record_id }}
+          VERIFICATION_KEY_VERSION: ${{ inputs.verification_kms_key_version }}
+          EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST: ${{ inputs.expected_verification_public_key_digest }}
+          CUSTODY_REASON: ${{ inputs.reason }}
+          GCP_SERVICES_PROJECT_ID: ${{ vars.GCP_SERVICES_PROJECT_ID }}
+          MODEL_ARTIFACT_BUCKET: ${{ vars.GCP_PRODUCTION_MODEL_ARTIFACT_BUCKET }}
+        run: |
+          set -euo pipefail
+          umask 077
+          reason_digest="sha256:$(printf '%s' "$CUSTODY_REASON" | sha256sum | cut -d' ' -f1)"
+          verifier_identity_digest="sha256:$(jq -cnS \
+            --arg repositoryId "$GITHUB_REPOSITORY_ID" \
+            --arg workflowRunId "$GITHUB_RUN_ID" \
+            --arg workflowRunAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg actorId "$GITHUB_ACTOR_ID" \
+            --arg sourceRevision "$GITHUB_SHA" \
+            --arg recordId "$RECORD_ID" \
+            --arg verificationKeyVersion "$VERIFICATION_KEY_VERSION" \
+            --arg environmentApprovalDigest "$ENVIRONMENT_APPROVAL_DIGEST" \
+            --arg reasonDigest "$reason_digest" \
+            '{repositoryId:$repositoryId,workflowRunId:$workflowRunId,workflowRunAttempt:$workflowRunAttempt,actorId:$actorId,sourceRevision:$sourceRevision,recordId:$recordId,verificationKeyVersion:$verificationKeyVersion,environmentApprovalDigest:$environmentApprovalDigest,reasonDigest:$reasonDigest}' \
+            | sha256sum | cut -d' ' -f1)"
+          signing_key="gcpkms://projects/$GCP_SERVICES_PROJECT_ID/locations/europe-west1/keyRings/orchestra-reference-evidence/cryptoKeys/production-model-artifact-custody-verification-signing/cryptoKeyVersions/$VERIFICATION_KEY_VERSION"
+
+          scripts/verify_and_publish_production_model_artifact_custody.sh \
+            --bucket "$MODEL_ARTIFACT_BUCKET" \
+            --record-id "$RECORD_ID" \
+            --signing-key "$signing_key" \
+            --expected-signing-public-key-digest "$EXPECTED_VERIFICATION_PUBLIC_KEY_DIGEST" \
+            --verifier-identity-digest "$verifier_identity_digest" \
+          | tee "$RUNNER_TEMP/production-model-custody-verification.log"
+          grep -F "artifactCustodyVerified=true" \
+            "$RUNNER_TEMP/production-model-custody-verification.log" >/dev/null
+          grep -F "licenseApproved=false" \
+            "$RUNNER_TEMP/production-model-custody-verification.log" >/dev/null
+          grep -F "admissionAuthorized=false" \
+            "$RUNNER_TEMP/production-model-custody-verification.log" >/dev/null
+
+      - name: Remove credentials, model downloads, and transient logs
+        if: always()
+        run: |
+          rm -rf \
+            "$RUNNER_TEMP/github-token" \
+            "$RUNNER_TEMP/production-model-custody-verification.log" \
+            "$GITHUB_WORKSPACE/restricted"
+          find "$GITHUB_WORKSPACE" -maxdepth 1 -type f -name 'gha-creds-*.json' -delete

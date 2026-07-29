@@ -18,7 +18,7 @@ output "production_model_custody_identity_contract" {
       declared_project_roles     = []
       user_managed_key_declared  = false
     }
-    workflow_declared  = false
+    workflow_declared  = true
     campaign_authority = false
   }
 }
