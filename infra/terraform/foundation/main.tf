@@ -501,7 +501,7 @@ resource "google_container_node_pool" "dependencies" {
   node_config {
     machine_type    = "n2-standard-8"
     disk_type       = "pd-ssd"
-    disk_size_gb    = 200
+    disk_size_gb    = 100 # Fits default regional SSD_TOTAL_GB=500 quota.
     image_type      = "COS_CONTAINERD"
     preemptible     = false
     spot            = false

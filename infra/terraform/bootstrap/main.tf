@@ -524,7 +524,7 @@ resource "google_iam_workload_identity_pool_provider" "dependency_risk_custody_v
   project                            = google_project.services.project_id
   workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
   workload_identity_pool_provider_id = "dependency-risk-custody"
-  display_name                       = "Dependency risk custody verification"
+  display_name                       = "Dep risk custody verification"
   description                        = "Exact-main raw-custody verifier; no raw mutation, mirror, admission, activation, or campaign authority."
 
   attribute_mapping = {
@@ -792,7 +792,7 @@ resource "google_billing_budget" "reference_lab" {
 
   amount {
     specified_amount {
-      currency_code = "USD"
+      currency_code = var.billing_currency_code
       units         = tostring(var.monthly_budget_usd)
     }
   }
