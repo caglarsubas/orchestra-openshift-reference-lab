@@ -1,20 +1,24 @@
 variable "parent_type" {
-  description = "GCP resource parent type for both projects."
+  description = "GCP resource parent type for both projects. Use none for unorganized no-parent projects (lab operator path when Cloud Identity org is unavailable)."
   type        = string
 
   validation {
-    condition     = contains(["organization", "folder"], var.parent_type)
-    error_message = "parent_type must be organization or folder."
+    condition     = contains(["organization", "folder", "none"], var.parent_type)
+    error_message = "parent_type must be organization, folder, or none."
   }
 }
 
 variable "parent_id" {
-  description = "Numeric organization or folder ID."
+  description = "Numeric organization or folder ID. Empty when parent_type is none."
   type        = string
+  default     = ""
 
   validation {
-    condition     = can(regex("^[0-9]+$", var.parent_id))
-    error_message = "parent_id must be numeric."
+    condition = (
+      (var.parent_type == "none" && var.parent_id == "")
+      || (var.parent_type != "none" && can(regex("^[0-9]+$", var.parent_id)))
+    )
+    error_message = "parent_id must be numeric for organization/folder, or empty when parent_type is none."
   }
 }
 
@@ -84,12 +88,23 @@ variable "region" {
 }
 
 variable "monthly_budget_usd" {
-  description = "Reviewed monthly lab budget used for 50/80/100/120 percent alerts."
+  description = "Reviewed monthly lab budget amount (integer) used for 50/80/100/120 percent alerts. Name retained for compatibility; currency is billing_currency_code."
   type        = number
 
   validation {
     condition     = var.monthly_budget_usd >= 1000 && floor(var.monthly_budget_usd) == var.monthly_budget_usd
     error_message = "monthly_budget_usd must be an integer of at least 1000."
+  }
+}
+
+variable "billing_currency_code" {
+  description = "ISO 4217 currency code for the billing account budget amount."
+  type        = string
+  default     = "USD"
+
+  validation {
+    condition     = can(regex("^[A-Z]{3}$", var.billing_currency_code))
+    error_message = "billing_currency_code must be a three-letter ISO currency code."
   }
 }
 

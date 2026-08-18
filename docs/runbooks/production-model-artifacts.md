@@ -163,7 +163,7 @@ of those live surfaces exists merely because this contract is checked in.
 
 The executable cloud authority is
 `config/production-model-artifact-custody-execution.lock.json`, digest
-`sha256:00b5ca9160fac51ae40e0ec6b985a350d58c2171486abeaf1854f646f24fc98c`.
+`sha256:6c40bcd8371270286210534700338adfcf1d0ba966842da2efa1cf490dc1041d`.
 Validate its policy, file bindings, Terraform resources, IAM scope, and
 non-live claims with:
 

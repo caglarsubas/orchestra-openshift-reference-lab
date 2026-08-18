@@ -57,7 +57,7 @@ resource "google_iam_workload_identity_pool_provider" "production_model_custody_
   project                            = google_project.services.project_id
   workload_identity_pool_id          = google_iam_workload_identity_pool.github.workload_identity_pool_id
   workload_identity_pool_provider_id = "production-model-custody-verify"
-  display_name                       = "Production model custody verification"
+  display_name                       = "Model custody verification"
   description                        = "Reserved exact-main generation-pinned verifier and create-only report signer; no workflow or admission authority."
 
   attribute_mapping = {

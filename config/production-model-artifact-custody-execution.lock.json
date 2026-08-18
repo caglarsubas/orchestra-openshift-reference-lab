@@ -9,7 +9,7 @@
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "candidateDigest": "sha256:ea41c8c923f55030b8cade53096c4e8cf14d4bb1957aab53f0f57fb2141d69da",
     "custodyPolicyDigest": "sha256:f0847395a1fac2473d8498b1d9752352d115571ba87eb7f07df1a77d785e6458",
-    "bootstrapTerraformDigest": "sha256:63c1b0ede29b499d75830fa8a919bcad0495f816e99e6504e31f8f5cfbe9cfd4",
+    "bootstrapTerraformDigest": "sha256:c3c4483b7d331fbdbad2a136f98def3be420891a71b67b801a6f9029306e73b5",
     "bootstrapOutputsDigest": "sha256:be598a0b4d2b381ba275e86b5f71c22e1654076d29d8645b478476b0f2781e4a",
     "foundationTerraformDigest": "sha256:3907902bf78bf15146af9b54d364ac12373cb255c5629213f86a79b42f78a05f",
     "foundationVariablesDigest": "sha256:8f416765066e33359a97fdbad50cd5b2fb4a12c50ac31e783f9cb33e3b2e7ec3",
