@@ -7,7 +7,7 @@
     "topologyDigest": "sha256:7c72982c74afd5d5ebdb1c5ea92054b477cd70cc604d7f14a1f4c348ec670fc5",
     "releaseSetDigest": "sha256:4f571fade2a1566a53d797c82561f30292734fcfcc75b23667dc08007ee8b6fe",
     "prerequisitePolicyDigest": "sha256:e5a454a6bbdff84b184ea56ee5b67cb35898f6736e0c9045a2dc4cfb8dcb7561",
-    "foundationApplyAuthorityDigest": "sha256:461b8bbbde7dcf2f4b87512ebfeac53a5d81d39e30d2f3c4c5611ecb8ad3623d",
+    "foundationApplyAuthorityDigest": "sha256:2bcfbe66e76ec47c952d0aa7e76aee89009aa7dee7ff94c8bc74852d8dd4e713",
     "reportSchemaDigest": "sha256:3069b119579d2f96365675bbf0bd7b6af158b70733481af21b887e2f8bc50054",
     "reportModuleDigest": "sha256:9c979c4d7a8f0942e10ba88beb72123b74bf08bb7871abb54c7013936799c1b7",
     "observerAuthorityCollectorDigest": "sha256:50ff624d288e368eb424dd2cf69eaef7fa5e1625469c014aad6420dd6e25d0d8",
@@ -15,8 +15,8 @@
     "bootstrapTerraformDigest": "sha256:7412baa5c6c58b63d35783c59debf7c28b78e9e3218ce47b65d637d6ff6da9ef",
     "bootstrapVariablesDigest": "sha256:3a0d063a5b750d5e224f9bbcb3bfa76160921166bd44ee1711a9c35d1db336a3",
     "bootstrapOutputsDigest": "sha256:139faac68901e36eb38694ae9536f42ca365b847b708c538cdf3f9db9319d1ce",
-    "foundationSourceDigest": "sha256:7ce1bb0c8273d3f0ff65f54e61b1f986172464b4dfae42800a9e2164cf877aaf",
-    "workflowDigest": "sha256:7a354a1a33e55adb33fcc9ab2c065ec5aa1d9b9f4db235f7f8858ef27037a441"
+    "foundationSourceDigest": "sha256:4ebe96f348a665ae6168e86d3a47030d691c38c0ce9cbf3f475b5140104819b5",
+    "workflowDigest": "sha256:e3a18df2c45b6fe7f2c50cbdb6695cbf74bafd64b3624f21c033c7388e99944b"
   },
   "observer": {
     "serviceAccountId": "orchestra-foundation-observer",
