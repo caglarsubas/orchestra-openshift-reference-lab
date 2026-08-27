@@ -462,14 +462,14 @@ resource "google_container_cluster" "dependencies" {
   }
 
   logging_config {
-    enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER"]
+    enable_components = var.reference_lab_active ? ["SYSTEM_COMPONENTS", "WORKLOADS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER"] : ["NONE"]
   }
 
   monitoring_config {
-    enable_components = ["SYSTEM_COMPONENTS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER", "STORAGE", "POD", "DEPLOYMENT", "STATEFULSET", "DAEMONSET", "HPA", "CADVISOR", "KUBELET"]
+    enable_components = var.reference_lab_active ? ["SYSTEM_COMPONENTS", "APISERVER", "SCHEDULER", "CONTROLLER_MANAGER", "STORAGE", "POD", "DEPLOYMENT", "STATEFULSET", "DAEMONSET", "HPA", "CADVISOR", "KUBELET"] : ["NONE"]
 
     managed_prometheus {
-      enabled = true
+      enabled = var.reference_lab_active
     }
   }
 
@@ -486,6 +486,11 @@ resource "google_container_cluster" "dependencies" {
       condition     = var.target_project_id != var.services_project_id
       error_message = "Target and services/evidence projects must be distinct."
     }
+
+    precondition {
+      condition     = !var.certification_mode || var.reference_lab_active
+      error_message = "Certification mode requires an active reference-lab runtime."
+    }
   }
 }
 
@@ -496,7 +501,7 @@ resource "google_container_node_pool" "dependencies" {
   location       = local.region
   cluster        = google_container_cluster.dependencies.name
   node_locations = local.zones
-  node_count     = 1
+  node_count     = var.reference_lab_active ? 1 : 0
 
   node_config {
     machine_type    = "n2-standard-8"
@@ -886,6 +891,7 @@ resource "google_compute_instance" "bastion" {
   can_ip_forward            = false
   deletion_protection       = true
   allow_stopping_for_update = true
+  desired_status            = var.reference_lab_active ? "RUNNING" : "TERMINATED"
   tags                      = ["orchestra-iap-bastion"]
   labels                    = local.platform_labels
 
@@ -957,6 +963,7 @@ resource "google_compute_instance" "probe" {
   can_ip_forward            = false
   deletion_protection       = true
   allow_stopping_for_update = true
+  desired_status            = var.reference_lab_active ? "RUNNING" : "TERMINATED"
   labels                    = merge(local.platform_labels, { probe = each.key })
 
   boot_disk {

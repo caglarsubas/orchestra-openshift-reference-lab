@@ -18,6 +18,7 @@ output "topology" {
     evidence_kms_key         = google_kms_crypto_key.evidence.id
     signed_retention_locked  = var.lock_signed_evidence_bucket
     certification_mode       = var.certification_mode
+    reference_lab_active     = var.reference_lab_active
     external_probe_instances = sort(keys(google_compute_instance.probe))
   }
 }

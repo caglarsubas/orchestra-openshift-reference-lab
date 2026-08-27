@@ -68,9 +68,16 @@
 
 ## Foundation apply
 
-1. Pin immutable bastion/probe OS images and probe container image.
-2. Review every egress CIDR and its business purpose. `0.0.0.0/0` is rejected.
-3. Configure all three independently protected foundation GitHub
+1. Keep the protected-environment variable `GCP_REFERENCE_LAB_ACTIVE=false`
+   between campaigns. In that mode Terraform declares zero dependency-plane
+   GKE workers, stops the bastion and both probes, and disables GKE logging,
+   monitoring, and Managed Prometheus. Set it to `true` only in a named,
+   approved campaign plan; verify the reviewed plan starts those resources and
+   restores telemetry before applying it. Certification mode is rejected while
+   the runtime remains paused.
+2. Pin immutable bastion/probe OS images and probe container image.
+3. Review every egress CIDR and its business purpose. `0.0.0.0/0` is rejected.
+4. Configure all three independently protected foundation GitHub
    environments, then follow
    `docs/runbooks/foundation-plan.md` and
    `docs/runbooks/foundation-apply.md`. The planner remains read-only; the
@@ -78,7 +85,7 @@
    executor applies only that exact package with
    `certification_mode=false` and
    `lock_signed_evidence_bucket=false`.
-4. Treat the signed apply receipt as self-attested execution custody. Run
+5. Treat the signed apply receipt as self-attested execution custody. Run
    `docs/runbooks/foundation-observation.md` to verify the deployed observer
    boundary, prior signatures, stable state generation, receipt/state match,
    provider refresh, and exact resource identity set. Use later slot-specific
@@ -86,7 +93,7 @@
    flow-log delivery, zonal probe independence, GKE node health, peering,
    public DNS contents, and private DNS behavior; the Terraform observation
    does not replace those live checks.
-5. Verify the separate `dependency-risk-collection-signing` key uses
+6. Verify the separate `dependency-risk-collection-signing` key uses
    `ASYMMETRIC_SIGN` and `EC_SIGN_P256_SHA256`. Confirm the preflight identity
    has only `roles/cloudkms.signerVerifier` on that key and no bucket or mirror
    grant. Confirm the full-collection identity has the same key-level role and
@@ -103,10 +110,10 @@
    admission, or activation grant. Independently bind exact versions and PEM
    digests for both keys before following all three protected procedures in
    `docs/runbooks/dependency-risk-review.md`.
-6. Exercise backup/export access before considering the retention lock.
-7. In a separately approved change, set certification mode and the exact lock
+7. Exercise backup/export access before considering the retention lock.
+8. In a separately approved change, set certification mode and the exact lock
    acknowledgement. Confirm the 400-day lock is irreversible before apply.
-8. Follow `docs/runbooks/dns-delegation.md` to establish and independently
+9. Follow `docs/runbooks/dns-delegation.md` to establish and independently
    verify the exact public DNS delegation. Require `--readiness-stage
    openshift-install` before rendering or executing the OpenShift installer.
 

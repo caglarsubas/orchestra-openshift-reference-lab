@@ -24,6 +24,12 @@ variable "certification_mode" {
   default     = false
 }
 
+variable "reference_lab_active" {
+  description = "Run the cost-bearing GKE workers, bastion, probes, and telemetry. Keep false between approved reference-lab campaigns."
+  type        = bool
+  default     = false
+}
+
 variable "lock_signed_evidence_bucket" {
   description = "Irreversibly lock the 400-day retention policy."
   type        = bool
