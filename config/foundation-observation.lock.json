@@ -15,7 +15,7 @@
     "bootstrapTerraformDigest": "sha256:7412baa5c6c58b63d35783c59debf7c28b78e9e3218ce47b65d637d6ff6da9ef",
     "bootstrapVariablesDigest": "sha256:3a0d063a5b750d5e224f9bbcb3bfa76160921166bd44ee1711a9c35d1db336a3",
     "bootstrapOutputsDigest": "sha256:139faac68901e36eb38694ae9536f42ca365b847b708c538cdf3f9db9319d1ce",
-    "foundationSourceDigest": "sha256:4ebe96f348a665ae6168e86d3a47030d691c38c0ce9cbf3f475b5140104819b5",
+    "foundationSourceDigest": "sha256:b080af9b5e68ecf272c27c46bfa2e6efa67b657e9f5c3f9be950408a42955173",
     "workflowDigest": "sha256:e3a18df2c45b6fe7f2c50cbdb6695cbf74bafd64b3624f21c033c7388e99944b"
   },
   "observer": {
