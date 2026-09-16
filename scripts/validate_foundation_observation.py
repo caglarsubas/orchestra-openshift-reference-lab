@@ -7,6 +7,16 @@ except ModuleNotFoundError:
     from foundation_observation import validate_contract_and_implementation
 
 
+REPIN_HINT = (
+    "The authority binds digests over the bootstrap and foundation Terraform\n"
+    "sources, the observer script and the observation workflow. If one of\n"
+    "those files changed on purpose (a provider bump rewriting versions.tf,\n"
+    "for example), re-pin the bindings and review the resulting diff:\n"
+    "    python3 scripts/refresh_foundation_observation_digest.py check\n"
+    "    python3 scripts/refresh_foundation_observation_digest.py refresh"
+)
+
+
 def main() -> int:
     digest = validate_contract_and_implementation()
     print(
@@ -25,4 +35,6 @@ if __name__ == "__main__":
         raise SystemExit(main())
     except (OSError, ValueError) as error:
         print(error)
+        if str(error).startswith("foundation_observation_authority_"):
+            print(REPIN_HINT)
         raise SystemExit(1)

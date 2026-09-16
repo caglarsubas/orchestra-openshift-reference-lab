@@ -161,3 +161,35 @@ slots.
   missing, then regenerate every bound authority digest.
 - A successful report is a foundation readiness input only. It must not be
   copied into any of the 18 certification slots.
+
+## Re-pinning bound source digests
+
+`config/foundation-observation.lock.json` pins a digest over every file the
+authority depends on, including `foundationSourceDigest` across
+`infra/terraform/foundation/*.tf`. Editing any bound file — including a
+Dependabot bump that only rewrites `versions.tf` — makes
+`validate_foundation_observation` fail with
+`foundation_observation_authority_identity_invalid` until the bindings are
+re-pinned.
+
+Re-pinning is a deliberate review step, never an automated one. The bindings
+exist so that a change to the observed Terraform sources cannot pass CI
+without a human confirming the new source tree is the intended one. Do not
+add a job that re-pins automatically.
+
+```bash
+python3 scripts/refresh_foundation_observation_digest.py check
+```
+
+`check` reports each drifted binding and exits non-zero without writing. When
+the underlying change is intended:
+
+```bash
+python3 scripts/refresh_foundation_observation_digest.py refresh
+```
+
+`refresh` rewrites the drifted bindings and the `EXPECTED_AUTHORITY_DIGEST`
+constant in `scripts/foundation_observation.py`. Read the resulting diff and
+confirm every changed digest corresponds to a source change you intended
+before committing it. Commit the re-pin in the same pull request as the source
+change, so the two are reviewed together and `main` never lands red.
