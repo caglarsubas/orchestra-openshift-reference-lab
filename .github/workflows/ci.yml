@@ -301,7 +301,7 @@ jobs:
           -c 'import orchestra_synthetic.gateway, orchestra_synthetic.mcp_surface, orchestra_synthetic.server'
 
       - name: Set up kubectl for deterministic Kustomize rendering
-        uses: azure/setup-kubectl@829323503d1be3d00ca8346e5391ca0b07a9ab0d # v5.1.0
+        uses: azure/setup-kubectl@bda439f5f36b99b262ebdcd3613869bddb064c8e # v5.2.0
 
       - name: Validate GitOps security floor
         run: kubectl kustomize gitops/clusters/reference-lab | python3 scripts/validate_rendered_gitops.py
