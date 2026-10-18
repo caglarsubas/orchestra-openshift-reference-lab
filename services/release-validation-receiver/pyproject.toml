@@ -7,6 +7,7 @@ name = "orchestra-reference-lab-release-receiver"
 version = "0.1.0"
 description = "Durable tenant-owned receiver for Orchestra release-validation recommendations"
 requires-python = ">=3.12"
+license = "Apache-2.0"
 dependencies = [
   "cryptography==50.0.0",
   "gunicorn==26.0.0",
